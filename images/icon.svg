@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- 업다운 게임 로고 원본. 바탕은 꽉 찬 정사각형이며, 둥근 모서리는 쓰는 쪽(CSS, 기기)에서 처리한다. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2d3c60"/>
+      <stop offset="1" stop-color="#161f38"/>
+    </linearGradient>
+    <linearGradient id="up" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f2705f"/>
+      <stop offset="1" stop-color="#c63f34"/>
+    </linearGradient>
+    <linearGradient id="down" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6aa0ff"/>
+      <stop offset="1" stop-color="#3b74ea"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <g stroke-width="24" stroke-linejoin="round">
+    <path d="M256 82 389 230H123z" fill="url(#up)" stroke="url(#up)"/>
+    <path d="M256 430 389 282H123z" fill="url(#down)" stroke="url(#down)"/>
+  </g>
+</svg>
