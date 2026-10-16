@@ -29,9 +29,11 @@
 | `--sage-50` / `--sage-100` | `#ebf7f1` / `#cdeddb` | 쉬움 면 / 테두리 |
 | `--steel-50` / `--steel-100` | `#e8f0ff` / `#cbddfb` | 보통·범위·DOWN 면 / 테두리 |
 | `--brick-50` / `--brick-100` | `#feefeb` / `#f9cdc5` | 어려움·남은 기회·UP 면 / 테두리 |
+| `--plum-50` / `--plum-100` | `#f6edfb` / `#e4cdf2` | 최상위 면 / 테두리 |
 | `--night-sage` / `--night-sage-line` | `#192d27` / `#264c3b` | 다크 모드 세이지 면 / 테두리 |
 | `--night-steel` / `--night-steel-line` | `#152139` / `#1f3763` | 다크 모드 스틸 면 / 테두리 |
 | `--night-brick` / `--night-brick-line` | `#2f1d1e` / `#562a26` | 다크 모드 브릭 면 / 테두리 |
+| `--night-plum` / `--night-plum-line` | `#271c33` / `#45305e` | 다크 모드 플럼 면 / 테두리 |
 | `--night-gold-line` | `#5b4d19` | 다크 모드 트로피 원 테두리 |
 | `--gray-0` | `#ffffff` | 라이트 모드 대표색·선택 칩·빨간 버튼 위 글자 |
 | `--gray-900` / `--gray-600` / `--gray-200` | `#1f232b` / `#5e6572` / `#dde3ec` | 본문 글자 / 보조 글자·아이콘 / 꺼진 별·빈 하트 |
@@ -49,6 +51,7 @@
 | `--surface-sage` / `--line-sage` | `sage-50` / `sage-100` | `night-sage` / `night-sage-line` | 쉬움 카드 |
 | `--surface-steel` / `--line-steel` | `steel-50` / `steel-100` | `night-steel` / `night-steel-line` | 보통 카드, 범위 카드, DOWN 기록 줄 |
 | `--surface-brick` / `--line-brick` | `brick-50` / `brick-100` | `night-brick` / `night-brick-line` | 어려움 카드, 남은 기회 카드, UP 기록 줄 |
+| `--surface-plum` / `--line-plum` | `plum-50` / `plum-100` | `night-plum` / `night-plum-line` | 최상위 카드 |
 | `--heart` | `rose-600` | `rose-300` | 하트 |
 | `--star` / `--star-off` | `gold-600` / `gray-200` | `gold-300` / `night-600` | 켜진 별·트로피·반짝이 / 꺼진 별·빈 하트 |
 | `--line-gold` | `gold-100` | `night-gold-line` | 정답 트로피 원 테두리 |
@@ -59,7 +62,7 @@
 | 그림자 | `--shadow-brand`·`--shadow-danger`·`--shadow-selected`·`--shadow-dialog` | | 로고, 지우기 버튼, 선택 칩, 팝업 |
 | 다크 그림자 | `--shadow-box`·`--shadow-button` (검정) | | 다크 모드 카드·버튼 그림자 (라이트는 계절 톤) |
 
-난이도·범위·기회·기록의 색 면(`--surface-sage/steel/brick`, `--line-*`)은 색 계열은 그대로 두고, 스킨의 카드색(`--surface`)과 선색(`--line`)을 35% 섞어(`color-mix`) 계절 톤에 어울리게 합니다. `color-mix`를 모르는 브라우저는 섞지 않은 원래 색을 씁니다.
+난이도·범위·기회·기록의 색 면(`--surface-sage/steel/brick/plum`, `--line-*`)은 색 계열은 그대로 두고, 스킨의 카드색(`--surface`)과 선색(`--line`)을 35% 섞어(`color-mix`) 계절 톤에 어울리게 합니다. `color-mix`를 모르는 브라우저는 섞지 않은 원래 색을 씁니다.
 
 ## 계절 톤
 
@@ -81,7 +84,8 @@
 
 | 역할 | 토큰 | 값 |
 | --- | --- | --- |
-| 카드·팝업 | `--surface-alt`, `--dialog-line`, `--chip-bg`, `--chip-line`, `--field-bg` | 같은 계절 색 |
+| 카드·팝업 | `--surface-alt`, `--dialog-line` | 같은 계절 색 |
+| 별칭 (`:root` 한 곳에서 정의) | `--chip-bg`·`--field-bg` / `--chip-line` / `--pill-icon` | `--surface` / `--dialog-line` / `--icon-accent` |
 | 입력 | `--action` / `--action-line` / `--text-on-action` | `--primary` / 라이트 `--selected`·다크 `--primary` / `--text-on-primary` (확인 버튼, 다이얼 채움·손잡이) |
 | 입력 | `--field-focus` | `--focus`와 같음 (다이얼 키보드 포커스) |
 | 상단 버튼 | `--pill-bg` / `--pill-bg-hover` / `--pill-line` / `--pill-icon` | 라이트: 카드색 60% / 카드색 / 진한 계절색 16% / 강조색. 다크: 대표색 8% / 16% / 18% / 강조색 |

@@ -173,5 +173,5 @@
     reset();
   }
 
-  global.UpDownSkins = { SKINS: SKINS, seasonOf: seasonOf, apply: apply };
+  global.UpDownSkins = { SKINS: SKINS, apply: apply };
 })(window);

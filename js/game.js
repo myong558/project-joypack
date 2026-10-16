@@ -4,9 +4,10 @@
 
   const DIFFICULTIES = {
     // 화면에 보이는 난이도 이름은 js/i18n.js 의 difficulty.<키> 에 있다.
-    easy: { min: 1, max: 50, maxTries: 7 },
-    normal: { min: 1, max: 100, maxTries: 6 },
-    hard: { min: 1, max: 100, maxTries: 5 },
+    easy: { min: 1, max: 50, maxTries: 6 },
+    normal: { min: 1, max: 100, maxTries: 5 },
+    hard: { min: 1, max: 100, maxTries: 4 },
+    extreme: { min: 1, max: 150, maxTries: 3 },
   };
 
   // 이분 탐색이 n번째로 찍는 숫자가 뽑힐 비율(앞에서부터 1번째, 2번째, ...). 목록보다 늦게 찍히는 숫자는 1.
@@ -15,7 +16,7 @@
   // 범위의 처음·마지막 숫자(1~100 이면 1 과 100)가 뽑힐 비율. 끝 숫자부터 찍어 보는 경우도 쉽게 맞히지 않게 한다.
   const EDGE_WEIGHT = 0.2;
   // 다이얼을 움직이지 않고 확인만 누르면 매번 남은 범위의 최솟값을 찍어 min, min+1, ... 순서로 기회 수만큼 찍게 된다.
-  // 이 숫자들(1~100, 기회 6번이면 1~6)이 뽑힐 비율을 크게 낮춰 생각 없이 눌러서는 거의 맞히지 못하게 한다.
+  // 이 숫자들(1~100, 기회 5번이면 1~5)이 뽑힐 비율을 크게 낮춰 생각 없이 눌러서는 거의 맞히지 못하게 한다.
   const CLICK_RUN_WEIGHT = 0.05;
 
   // 각 숫자가 이분 탐색 몇 번째에 찍히는지 구한다. 가운데가 둘일 때 작은 쪽을 찍는 경우와

@@ -267,11 +267,9 @@
 
       <section class="settings-group">
         <h3 data-i18n="settings.records"></h3>
-        <div class="chip-row reset-row">
+        <!-- 난이도별 칩은 app.js 가 js/game.js 의 난이도 목록으로 덧붙인다. -->
+        <div id="reset-row" class="chip-row reset-row">
           <button type="button" class="chip" data-reset="all" data-i18n="settings.resetAll"></button>
-          <button type="button" class="chip" data-reset="easy" data-i18n="difficulty.easy"></button>
-          <button type="button" class="chip" data-reset="normal" data-i18n="difficulty.normal"></button>
-          <button type="button" class="chip" data-reset="hard" data-i18n="difficulty.hard"></button>
         </div>
       </section>
 

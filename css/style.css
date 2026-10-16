@@ -30,6 +30,8 @@
   --steel-100: #cbddfb;
   --brick-50: #feefeb;
   --brick-100: #f9cdc5;
+  --plum-50: #f6edfb;
+  --plum-100: #e4cdf2;
   --navy-700: #24304f;
   --gray-0: #ffffff;
   --gray-200: #dde3ec;
@@ -44,6 +46,8 @@
   --night-steel-line: #1f3763;
   --night-brick: #2f1d1e;
   --night-brick-line: #562a26;
+  --night-plum: #271c33;
+  --night-plum-line: #45305e;
   --night-gold-line: #5b4d19;
 
   /* 역할 토큰 (라이트, 스킨과 무관) */
@@ -53,6 +57,8 @@
   --line-steel: var(--steel-100);
   --surface-brick: var(--brick-50);
   --line-brick: var(--brick-100);
+  --surface-plum: var(--plum-50);
+  --line-plum: var(--plum-100);
   --line-gold: var(--gold-100);
   --text: var(--gray-900);
   --text-muted: var(--gray-600);
@@ -76,6 +82,15 @@
   --shadow-dialog: rgb(15 18 25 / 0.2);
   color-scheme: light;
 
+  /* 계절 스킨 톤의 별칭: 모든 스킨에서 같은 역할 색을 따른다(값은 아래 계절 스킨 블록). */
+  --chip-bg: var(--surface);
+  --chip-line: var(--dialog-line);
+  --field-bg: var(--surface);
+  --pill-icon: var(--icon-accent);
+  --action: var(--primary);
+  --field-focus: var(--focus);
+  --text-on-action: var(--text-on-primary);
+
   /* 세로 간격 기준값: 화면 높이에 비례 (568px 13px · 640px 16px · 844px 24px, 최대 40px) */
   --space: clamp(8px, 4.2vh - 11px, 40px);
   /* 화면 좌우 여백. 팝업 최대 너비도 이 값으로 계산한다. */
@@ -96,6 +111,8 @@
   --line-steel: var(--night-steel-line);
   --surface-brick: var(--night-brick);
   --line-brick: var(--night-brick-line);
+  --surface-plum: var(--night-plum);
+  --line-plum: var(--night-plum-line);
   --line-gold: var(--night-gold-line);
   --text: var(--night-50);
   --text-muted: var(--night-400);
@@ -181,19 +198,12 @@ html[data-skin='spring'] {
   --line: #f0d6de;
   --dialog-bg: #fff6f8;
   --dialog-line: #f3d9e1;
-  --chip-bg: #fffafb;
-  --chip-line: #f3d9e1;
-  --field-bg: #fffafb;
   --primary: #b02a82;
   --focus: #bf3590;
   --icon-accent: #bf3590;
-  --pill-icon: #bf3590;
   --selected: #7a2160;
-  --action: #b02a82;
   --action-line: #7a2160;
-  --text-on-action: var(--text-on-primary);
   --field-line: #eda6d1;
-  --field-focus: #bf3590;
   --range-track: #f8d3e9;
   --shadow-primary: 0 1px 2px rgb(214 92 168 / 0.2), 0 4px 14px rgb(214 92 168 / 0.3);
   --shadow-action: 0 1px 2px rgb(214 92 168 / 0.25), 0 4px 14px rgb(214 92 168 / 0.3);
@@ -215,19 +225,12 @@ html[data-theme='dark'][data-skin='spring'] {
   --line: #3d2c35;
   --dialog-bg: #2a1d24;
   --dialog-line: #3d2c35;
-  --chip-bg: #261c21;
-  --chip-line: #3d2c35;
-  --field-bg: #261c21;
   --primary: #f19ad2;
   --focus: #f6b6df;
   --icon-accent: #f19ad2;
-  --pill-icon: #f19ad2;
   --selected: #763a66;
-  --action: #f19ad2;
   --action-line: #f19ad2;
-  --text-on-action: var(--text-on-primary);
   --field-line: #57304d;
-  --field-focus: #f6b6df;
   --range-track: #57304d;
   --shadow-primary: 0 1px 2px rgb(241 154 210 / 0.2), 0 4px 14px rgb(241 154 210 / 0.3);
   --shadow-action: 0 1px 2px rgb(241 154 210 / 0.25), 0 4px 14px rgb(241 154 210 / 0.3);
@@ -247,19 +250,12 @@ html[data-skin='summer'] {
   --line: #c4e6d4;
   --dialog-bg: #f2fbf6;
   --dialog-line: #c9e8d7;
-  --chip-bg: #f8fffb;
-  --chip-line: #c9e8d7;
-  --field-bg: #f8fffb;
   --primary: #0b7a5c;
   --focus: #0d8a68;
   --icon-accent: #0d8a68;
-  --pill-icon: #0d8a68;
   --selected: #0a5440;
-  --action: #0b7a5c;
   --action-line: #0a5440;
-  --text-on-action: var(--text-on-primary);
   --field-line: #7fd3ad;
-  --field-focus: #0d8a68;
   --range-track: #c9ecdb;
   --shadow-primary: 0 1px 2px rgb(11 122 92 / 0.2), 0 4px 14px rgb(11 122 92 / 0.3);
   --shadow-action: 0 1px 2px rgb(11 122 92 / 0.25), 0 4px 14px rgb(11 122 92 / 0.3);
@@ -281,19 +277,12 @@ html[data-theme='dark'][data-skin='summer'] {
   --line: #243d31;
   --dialog-bg: #14261e;
   --dialog-line: #243d31;
-  --chip-bg: #15241d;
-  --chip-line: #243d31;
-  --field-bg: #15241d;
   --primary: #5fd6a8;
   --focus: #8fe6c4;
   --icon-accent: #5fd6a8;
-  --pill-icon: #5fd6a8;
   --selected: #1d5a44;
-  --action: #5fd6a8;
   --action-line: #5fd6a8;
-  --text-on-action: var(--text-on-primary);
   --field-line: #1f4d3c;
-  --field-focus: #8fe6c4;
   --range-track: #1f4d3c;
   --shadow-primary: 0 1px 2px rgb(95 214 168 / 0.2), 0 4px 14px rgb(95 214 168 / 0.3);
   --shadow-action: 0 1px 2px rgb(95 214 168 / 0.25), 0 4px 14px rgb(95 214 168 / 0.3);
@@ -313,19 +302,12 @@ html[data-skin='autumn'] {
   --line: #ecd8bf;
   --dialog-bg: #fff8ee;
   --dialog-line: #efdcc2;
-  --chip-bg: #fffbf5;
-  --chip-line: #efdcc2;
-  --field-bg: #fffbf5;
   --primary: #b04a12;
   --focus: #c2561a;
   --icon-accent: #c2561a;
-  --pill-icon: #c2561a;
   --selected: #6b3517;
-  --action: #b04a12;
   --action-line: #6b3517;
-  --text-on-action: var(--text-on-primary);
   --field-line: #f5a650;
-  --field-focus: #c2561a;
   --range-track: #fadcb6;
   --shadow-primary: 0 1px 2px rgb(224 112 31 / 0.2), 0 4px 14px rgb(224 112 31 / 0.3);
   --shadow-action: 0 1px 2px rgb(224 112 31 / 0.25), 0 4px 14px rgb(224 112 31 / 0.3);
@@ -347,19 +329,12 @@ html[data-theme='dark'][data-skin='autumn'] {
   --line: #3f3123;
   --dialog-bg: #2a2018;
   --dialog-line: #3f3123;
-  --chip-bg: #271f17;
-  --chip-line: #3f3123;
-  --field-bg: #271f17;
   --primary: #f5a560;
   --focus: #f6ad5e;
   --icon-accent: #f5a560;
-  --pill-icon: #f5a560;
   --selected: #7a4a24;
-  --action: #f5a560;
   --action-line: #f5a560;
-  --text-on-action: var(--text-on-primary);
   --field-line: #5a3d1e;
-  --field-focus: #f6ad5e;
   --range-track: #5a3d1e;
   --shadow-primary: 0 1px 2px rgb(245 165 96 / 0.2), 0 4px 14px rgb(245 165 96 / 0.3);
   --shadow-action: 0 1px 2px rgb(245 165 96 / 0.25), 0 4px 14px rgb(245 165 96 / 0.3);
@@ -379,19 +354,12 @@ html[data-skin='winter'] {
   --line: #d5e0ee;
   --dialog-bg: #f6f9fd;
   --dialog-line: #d8e2ef;
-  --chip-bg: #fbfdff;
-  --chip-line: #d8e2ef;
-  --field-bg: #fbfdff;
   --primary: #5b49ae;
   --focus: #6352bf;
   --icon-accent: #6352bf;
-  --pill-icon: #6352bf;
   --selected: #352c72;
-  --action: #5b49ae;
   --action-line: #352c72;
-  --text-on-action: var(--text-on-primary);
   --field-line: #c0b6ee;
-  --field-focus: #6352bf;
   --range-track: #e3dff7;
   --shadow-primary: 0 1px 2px rgb(120 104 214 / 0.2), 0 4px 14px rgb(120 104 214 / 0.3);
   --shadow-action: 0 1px 2px rgb(120 104 214 / 0.25), 0 4px 14px rgb(120 104 214 / 0.3);
@@ -413,19 +381,12 @@ html[data-theme='dark'][data-skin='winter'] {
   --line: #2a3445;
   --dialog-bg: #1a2230;
   --dialog-line: #2a3445;
-  --chip-bg: #19202b;
-  --chip-line: #2a3445;
-  --field-bg: #19202b;
   --primary: #bbaff6;
   --focus: #d0c8fa;
   --icon-accent: #bbaff6;
-  --pill-icon: #bbaff6;
   --selected: #4a3f8a;
-  --action: #bbaff6;
   --action-line: #bbaff6;
-  --text-on-action: var(--text-on-primary);
   --field-line: #373066;
-  --field-focus: #d0c8fa;
   --range-track: #373066;
   --shadow-primary: 0 1px 2px rgb(187 175 246 / 0.2), 0 4px 14px rgb(187 175 246 / 0.3);
   --shadow-action: 0 1px 2px rgb(187 175 246 / 0.25), 0 4px 14px rgb(187 175 246 / 0.3);
@@ -448,6 +409,8 @@ html[data-theme='dark'][data-skin='winter'] {
     --line-steel: color-mix(in srgb, var(--steel-100) 65%, var(--line));
     --surface-brick: color-mix(in srgb, var(--brick-50) 65%, var(--surface));
     --line-brick: color-mix(in srgb, var(--brick-100) 65%, var(--line));
+    --surface-plum: color-mix(in srgb, var(--plum-50) 65%, var(--surface));
+    --line-plum: color-mix(in srgb, var(--plum-100) 65%, var(--line));
   }
 
   html[data-theme='dark'][data-skin] {
@@ -457,6 +420,8 @@ html[data-theme='dark'][data-skin='winter'] {
     --line-steel: color-mix(in srgb, var(--night-steel-line) 65%, var(--line));
     --surface-brick: color-mix(in srgb, var(--night-brick) 65%, var(--surface));
     --line-brick: color-mix(in srgb, var(--night-brick-line) 65%, var(--line));
+    --surface-plum: color-mix(in srgb, var(--night-plum) 65%, var(--surface));
+    --line-plum: color-mix(in srgb, var(--night-plum-line) 65%, var(--line));
   }
 }
 
@@ -663,7 +628,7 @@ button:focus-visible {
 .difficulty-list {
   display: flex;
   flex-direction: column;
-  gap: calc(var(--space) * 0.75);
+  gap: calc(var(--space) * 0.4);
   margin-top: auto;
 }
 
@@ -671,7 +636,7 @@ button:focus-visible {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 2px 12px;
-  padding: var(--space) 24px;
+  padding: calc(var(--space) * 0.45) 18px;
   text-align: left;
   border: 1px solid;
   box-shadow: var(--shadow-button);
@@ -693,6 +658,11 @@ button:focus-visible {
   border-color: var(--line-brick);
 }
 
+.difficulty-extreme {
+  background: var(--surface-plum);
+  border-color: var(--line-plum);
+}
+
 .difficulty:hover {
   border-color: var(--primary);
 }
@@ -705,7 +675,7 @@ button:focus-visible {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 700;
 }
 
@@ -721,10 +691,10 @@ button:focus-visible {
 }
 
 /* 시작 화면 난이도 카드의 별은 크게. Jua 한글은 글자 모양이 줄 상자 가운데보다 조금 위에 그려져
-   (24px 기준 약 1.5px), 별을 그만큼 올려 난이도 이름과 눈으로 보이는 가운데를 맞춘다. */
+   (19px 기준 약 1.2px), 별을 그만큼 올려 난이도 이름과 눈으로 보이는 가운데를 맞춘다. */
 .difficulty .difficulty-stars {
   gap: 2px;
-  font-size: 1.4rem;
+  font-size: 1.1rem;
   transform: translateY(-0.065em);
 }
 
@@ -929,7 +899,7 @@ button:focus-visible {
 
 /* 새 기록은 아래에서 살짝 떠오르며 나타난다. */
 .history li.enter {
-  animation: history-in 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: fade-in 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .history li {
@@ -1099,7 +1069,7 @@ button:focus-visible {
   stroke-width: 6;
 }
 
-/* 확인 버튼: 입력 영역(다이얼·확인 버튼)은 --action 색. 기본은 금색이고, 계절 스킨에서는 스킨 대표색을 따른다. */
+/* 확인 버튼: 입력 영역(다이얼·확인 버튼)은 --action 색(계절 스킨의 대표색). */
 .dial-submit {
   position: absolute;
   left: 50%;
@@ -1408,7 +1378,7 @@ h1.lost {
 /* 첫 실행 인트로(약 1.1초):
    1) 로고·제목이 아래에서 0.7초 동안 올라온다.
    2) 거의 멈출 즈음 로고의 빨강 삼각형은 위로, 파랑 삼각형은 아래로 한 번 튀어 "업·다운"을 보여준다.
-   3) 같은 때(0.45초)부터 상단 버튼이 나타나고, 난이도 카드는 쉬움 → 보통 → 어려움 순서로 0.07초씩 늦게 떠오른다.
+   3) 같은 때(0.45초)부터 상단 버튼이 나타나고, 난이도 카드는 쉬움 → 보통 → 어려움 → 최상위 순서로 0.07초씩 늦게 떠오른다.
    4) 카드가 자리 잡으면 켜진 별이 하나씩 톡 켜진다.
    끝나면 app.js 가 .intro 를 지워, 시작 화면으로 돌아올 때는 다시 재생하지 않는다. */
 .intro #screen-start {
@@ -1444,6 +1414,10 @@ h1.lost {
   --enter: 0.59s;
 }
 
+.intro .difficulty:nth-child(4) {
+  --enter: 0.66s;
+}
+
 .intro .difficulty-stars .on {
   --star-delay: 0s;
   animation: star-on 0.25s ease-out calc(var(--enter) + 0.15s + var(--star-delay)) both;
@@ -1455,6 +1429,10 @@ h1.lost {
 
 .intro .difficulty-stars .on:nth-child(3) {
   --star-delay: 0.12s;
+}
+
+.intro .difficulty-stars .on:nth-child(4) {
+  --star-delay: 0.18s;
 }
 
 /* 로고 삼각형: 삼각형 크기 기준으로 살짝 튀었다 돌아온다(viewBox 512 기준 40 = 로고 높이의 약 8%). */
@@ -1541,13 +1519,6 @@ h1.lost {
   width: 100%;
   height: 100%;
   pointer-events: none;
-}
-
-@keyframes history-in {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
 }
 
 @keyframes trophy-in {

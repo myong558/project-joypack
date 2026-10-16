@@ -134,7 +134,7 @@
     });
   }
 
-  // 난이도를 별 개수로 보여준다 (쉬움 1개 ~ 어려움 3개).
+  // 난이도를 별 개수로 보여준다 (쉬움 1개 ~ 최상위 4개).
   function difficultyStars(key) {
     const keys = Object.keys(UpDown.DIFFICULTIES);
     const level = keys.indexOf(key);
@@ -528,6 +528,14 @@
   });
   $('confirm-cancel').addEventListener('click', () => $('confirm').close('cancel'));
   $('confirm-ok').addEventListener('click', () => $('confirm').close('ok'));
+  Object.keys(UpDown.DIFFICULTIES).forEach((key) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'chip';
+    button.dataset.reset = key;
+    button.dataset.i18n = 'difficulty.' + key;
+    $('reset-row').appendChild(button);
+  });
   document.querySelectorAll('[data-reset]').forEach((button) => {
     button.addEventListener('click', () => resetRecord(button.dataset.reset));
   });
