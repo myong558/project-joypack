@@ -148,10 +148,25 @@
   display: none !important;
 }
 
+/* 페이지 자체는 움직이지 않는다: 모바일에서 문서 스크롤이 생기면 주소창이 접히며 화면 높이가 바뀌고,
+   위에서 끌어내리면 새로 고침이 된다. 화면을 몸체(body)에 고정하고 넘침 동작을 끈다. */
 html,
 body {
   margin: 0;
   height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+html {
+  background-color: var(--bg); /* 시스템 바 뒤나 주소창이 움직이는 틈에도 배경색이 보이게 한다 */
+  -webkit-text-size-adjust: 100%; /* 안드로이드 글자 자동 확대(font boosting)로 높이가 넘치지 않게 한다 */
+  text-size-adjust: 100%;
+}
+
+body {
+  position: fixed;
+  inset: 0;
 }
 
 /* 계절 스킨(js/skins.js): 화면 위쪽에 계절 색을 아주 옅게 깔고, 그 위에 움직이는 입자 캔버스를 둔다. */
@@ -488,8 +503,7 @@ button:focus-visible {
 .app {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  height: 100dvh;
+  height: 100%; /* 고정된 body 를 채운다 = 지금 보이는 화면 높이 */
   max-width: 768px;
   margin: 0 auto;
   padding: calc(var(--space) + env(safe-area-inset-top)) var(--gutter) calc(var(--space) + env(safe-area-inset-bottom));
@@ -503,6 +517,7 @@ button:focus-visible {
   gap: var(--space);
   min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: var(--space) var(--gutter);
   margin: calc(var(--space) * -1) calc(var(--gutter) * -1);
 }
@@ -1207,6 +1222,7 @@ h1.lost {
   width: min(375px, calc(100% - var(--gutter) * 2));
   max-width: none;
   max-height: calc(100% - var(--gutter) * 2);
+  overscroll-behavior: contain;
   padding: 0;
   background: var(--dialog-bg);
   color: var(--text);
@@ -1227,7 +1243,7 @@ h1.lost {
   display: flex;
   flex-direction: column;
   gap: calc(var(--space) * 1.25);
-  padding: 20px;
+  padding: clamp(12px, 3dvh, 20px) 20px; /* 낮은 화면에서는 위아래 여백을 줄여 팝업이 화면 안에 들어오게 한다 */
 }
 
 .settings-header {
@@ -1239,12 +1255,12 @@ h1.lost {
 /* 1뎁스(팝업 제목)는 2뎁스(항목 제목, 18px 회색)와 확실히 구분되게 크게 */
 .settings h2 {
   margin: 0;
-  font-size: 2rem;
+  font-size: min(2rem, 5.5dvh);
   line-height: 1.25;
 }
 
 .settings h3 {
-  margin: 0 0 8px;
+  margin: 0 0 clamp(4px, 1dvh, 8px);
   color: var(--text-muted);
   font-size: inherit;
   font-weight: 400;
@@ -1287,7 +1303,7 @@ h1.lost {
   justify-content: center;
   align-items: center;
   gap: 6px;
-  padding: 10px 12px;
+  padding: clamp(6px, 1.5dvh, 10px) 12px;
   background: var(--chip-bg);
   border: 1px solid var(--chip-line);
   box-shadow: var(--shadow-button);
@@ -1331,7 +1347,7 @@ h1.lost {
   min-width: 0;
   flex-direction: column;
   gap: 2px;
-  padding: 8px 6px;
+  padding: clamp(4px, 1.2dvh, 8px) 6px;
   text-align: center;
   line-height: 1.25;
   word-break: keep-all;
