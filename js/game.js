@@ -7,7 +7,7 @@
     easy: { min: 1, max: 50, maxTries: 6 },
     normal: { min: 1, max: 100, maxTries: 5 },
     hard: { min: 1, max: 100, maxTries: 4 },
-    extreme: { min: 1, max: 150, maxTries: 3 },
+    extreme: { min: 1, max: 200, maxTries: 3 },
   };
 
   // min~max 의 모든 숫자가 같은 확률로 나온다.
