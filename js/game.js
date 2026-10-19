@@ -10,55 +10,16 @@
     extreme: { min: 1, max: 150, maxTries: 3 },
   };
 
-  // 이분 탐색이 n번째로 찍는 숫자가 뽑힐 비율(앞에서부터 1번째, 2번째, ...). 목록보다 늦게 찍히는 숫자는 1.
-  // 중간값부터 반씩 찍는 방법이 일찍 맞히지 못하도록, 일찍 찍히는 숫자일수록 정답으로 덜 나오게 한다.
-  const SEARCH_WEIGHTS = [0.2, 0.4, 0.6, 0.8];
-  // 범위의 처음·마지막 숫자(1~100 이면 1 과 100)가 뽑힐 비율. 끝 숫자부터 찍어 보는 경우도 쉽게 맞히지 않게 한다.
-  const EDGE_WEIGHT = 0.2;
-  // 다이얼을 움직이지 않고 확인만 누르면 매번 남은 범위의 최솟값을 찍어 min, min+1, ... 순서로 기회 수만큼 찍게 된다.
-  // 이 숫자들(1~100, 기회 5번이면 1~5)이 뽑힐 비율을 크게 낮춰 생각 없이 눌러서는 거의 맞히지 못하게 한다.
-  const CLICK_RUN_WEIGHT = 0.05;
-
-  // 각 숫자가 이분 탐색 몇 번째에 찍히는지 구한다. 가운데가 둘일 때 작은 쪽을 찍는 경우와
-  // 큰 쪽을 찍는 경우(1~100 이면 50 과 51)를 모두 따져 더 이른 쪽을 쓴다.
-  function searchDepths(min, max) {
-    const depths = {};
-    function visit(low, high, depth, roundUp) {
-      if (low > high) return;
-      const mid = roundUp ? Math.ceil((low + high) / 2) : Math.floor((low + high) / 2);
-      depths[mid] = Math.min(depths[mid] || Infinity, depth);
-      visit(low, mid - 1, depth + 1, roundUp);
-      visit(mid + 1, high, depth + 1, roundUp);
-    }
-    visit(min, max, 1, false);
-    visit(min, max, 1, true);
-    return depths;
-  }
-
-  // 이분 탐색에 늦게 찍히는 숫자일수록 무게가 큰 가중 추첨. random() 한 번으로 정답 하나를 고른다.
-  function pickAnswer(min, max, maxTries, rand) {
-    const depths = searchDepths(min, max);
-    const weights = [];
-    let total = 0;
-    for (let n = min; n <= max; n++) {
-      let w = n === min || n === max ? EDGE_WEIGHT : SEARCH_WEIGHTS[depths[n] - 1] || 1;
-      if (n < min + maxTries) w = Math.min(w, CLICK_RUN_WEIGHT);
-      weights.push(w);
-      total += w;
-    }
-    let target = rand() * total;
-    for (let i = 0; i < weights.length; i++) {
-      target -= weights[i];
-      if (target < 0) return min + i;
-    }
-    return max;
+  // min~max 의 모든 숫자가 같은 확률로 나온다.
+  function pickAnswer(min, max, rand) {
+    return min + Math.floor(rand() * (max - min + 1));
   }
 
   // random 은 테스트에서 정답을 고정하기 위한 것으로, 0 이상 1 미만의 수를 돌려주는 함수다.
   function createGame(difficulty, random) {
     const config = DIFFICULTIES[difficulty];
     if (!config) throw new Error('알 수 없는 난이도: ' + difficulty);
-    const answer = pickAnswer(config.min, config.max, config.maxTries, random || Math.random);
+    const answer = pickAnswer(config.min, config.max, random || Math.random);
     return {
       difficulty: difficulty,
       answer: answer,
