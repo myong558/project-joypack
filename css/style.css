@@ -1264,6 +1264,12 @@ h1.lost {
 }
 
 /* ── 설정·확인 팝업 ───────────────────── */
+.app-version {
+  margin: 0;
+  color: var(--text-muted);
+  text-align: center;
+}
+
 /* 너비 = 화면 - 좌우 여백, 최대 375px. max-width:none 은 브라우저 기본 제한(100% - 6px - 2em) 해제 */
 .settings {
   width: min(375px, calc(100% - var(--gutter) * 2));

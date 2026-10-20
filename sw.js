@@ -1,6 +1,6 @@
 // 서비스 워커는 자기 위치 아래만 관리할 수 있어서, js/ 로 옮기지 않고 루트에 둔다.
 // 파일을 고쳐 배포할 때마다 이 버전을 올려야 사용자에게 새 파일이 전달된다.
-const CACHE_NAME = 'updown-v132';
+const CACHE_NAME = 'updown-v133';
 
 // GitHub Pages 하위 경로에서도 동작하도록 모두 상대 경로로 쓴다.
 const ASSETS = [
@@ -24,8 +24,9 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches
       .open(CACHE_NAME)
-      // 브라우저 HTTP 캐시에 남은 옛 파일을 담지 않도록 항상 새로 받는다.
-      .then((cache) => cache.addAll(ASSETS.map((url) => new Request(url, { cache: 'reload' }))))
+      // 브라우저 HTTP 캐시와 GitHub Pages CDN 에 남은 옛 파일을 담지 않도록 버전 쿼리를 붙여 항상 새로 받는다.
+      // 쿼리가 붙은 주소로 저장되지만 fetch 의 caches.match 가 ignoreSearch 라 원래 주소로 찾아진다.
+      .then((cache) => cache.addAll(ASSETS.map((url) => new Request(url + '?v=' + CACHE_NAME, { cache: 'reload' }))))
       .then(() => self.skipWaiting())
   );
 });

@@ -729,6 +729,21 @@
   function openSettings() {
     renderSettings();
     $('settings').showModal();
+    showVersion();
+  }
+
+  // 서비스 워커 캐시 이름(updown-v숫자)이 곧 버전이다. 캐시를 못 쓰는 환경(file:// 등)이면 숨긴다.
+  function showVersion() {
+    if (!window.caches) return;
+    caches
+      .keys()
+      .then((names) => {
+        const name = names.filter((n) => n.indexOf('updown-') === 0).pop();
+        if (!name) return;
+        $('app-version').textContent = t('settings.version', { version: name.replace('updown-', '') });
+        $('app-version').hidden = false;
+      })
+      .catch(() => {});
   }
 
   // 되돌릴 수 없는 동작 전에 띄우는 확인 팝업. "지우기"를 누르면 true, 취소·Esc·바깥 클릭은 false 로 끝난다.
