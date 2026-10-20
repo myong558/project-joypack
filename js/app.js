@@ -334,8 +334,6 @@
   // 결과 카드 이미지(PNG)와 게임 링크를 기기 공유 창으로 보낸다.
   // 공유 창이 없거나 이미지를 못 보내는 브라우저(주로 PC)는 이미지를 저장하고 문구·링크를 클립보드에 복사한다.
   const CARD_SIZE = 1080;
-  // false 면 결과 이미지 없이 게임 주소만 공유한다(메신저 링크 미리보기 확인용). true 로 바꾸면 이미지 → 링크 2단계 공유로 돌아간다.
-  const SHARE_IMAGE = false;
   let shareCard = null; // { game, key, promise }: 같은 판·같은 모양이면 그린 이미지를 다시 쓴다.
   let toastTimer = 0;
 
@@ -393,7 +391,8 @@
     });
   }
 
-  // 결과 카드(1080×1080): 로고·제목, 난이도, 결과, 정답, 시도 기록, 게임 주소. 색은 지금 스킨·테마를 따른다.
+  // 결과 카드(1080×1080): 로고·제목, 난이도, 결과, 정답, 시도 기록. 색은 지금 스킨·테마를 따른다.
+  // 게임 주소는 이미지에 쓰지 않고 [링크 보내기]로 눌리는 링크를 따로 보낸다.
   async function drawShareCard() {
     try {
       await document.fonts.load('80px Jua');
@@ -427,6 +426,8 @@
     ctx.strokeStyle = color('--line');
     ctx.stroke();
 
+    // 내용을 카드 세로 가운데에 오게 내린다. 실패하면 성공 문장이 없어 더 내린다.
+    ctx.translate(0, won ? 36 : 60);
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'left';
     ctx.font = font(52);
@@ -491,10 +492,6 @@
       ctx.fill();
     });
 
-    ctx.font = font(36);
-    ctx.fillStyle = color('--text-muted');
-    ctx.fillText(gameUrl().replace(/^https?:\/\//, '').replace(/\/$/, ''), center, 964, maxWidth);
-
     return new Promise((resolve, reject) => {
       canvas.toBlob((blob) => {
         if (blob) resolve(new File([blob], 'updown-result.png', { type: 'image/png' }));
@@ -545,24 +542,6 @@
     const button = $('share');
     button.disabled = true;
     try {
-      if (!SHARE_IMAGE) {
-        const url = gameUrl();
-        if (navigator.share) {
-          try {
-            await navigator.share({ url: url });
-            return;
-          } catch (e) {
-            if (e.name === 'AbortError') return; // 사용자가 공유 창을 닫았다.
-          }
-        }
-        let copied = false;
-        try {
-          await navigator.clipboard.writeText(url);
-          copied = true;
-        } catch (e) {}
-        showToast(t(copied ? 'share.linkCopied' : 'share.failed'));
-        return;
-      }
       // 게임 링크는 문구 끝 줄에 넣는다. 문구 안의 주소는 메신저가 바로 눌리는 링크로 바꿔 준다.
       const message = shareText() + '\n' + gameUrl();
       if (linkPending && navigator.share) {
@@ -705,7 +684,7 @@
     setTimeout(() => screens.result.classList.remove('locked'), 600);
     $('retry').focus();
     if (game.status === 'won') confetti(newBest);
-    if (SHARE_IMAGE) prepareShareCard().catch(() => {});
+    prepareShareCard().catch(() => {});
   }
 
   function changeLang(lang) {
