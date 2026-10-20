@@ -334,6 +334,8 @@
   // 결과 카드 이미지(PNG)와 게임 링크를 기기 공유 창으로 보낸다.
   // 공유 창이 없거나 이미지를 못 보내는 브라우저(주로 PC)는 이미지를 저장하고 문구·링크를 클립보드에 복사한다.
   const CARD_SIZE = 1080;
+  // false 면 결과 이미지 없이 게임 주소만 공유한다(메신저 링크 미리보기 확인용). true 로 바꾸면 이미지 → 링크 2단계 공유로 돌아간다.
+  const SHARE_IMAGE = false;
   let shareCard = null; // { game, key, promise }: 같은 판·같은 모양이면 그린 이미지를 다시 쓴다.
   let toastTimer = 0;
 
@@ -543,6 +545,24 @@
     const button = $('share');
     button.disabled = true;
     try {
+      if (!SHARE_IMAGE) {
+        const url = gameUrl();
+        if (navigator.share) {
+          try {
+            await navigator.share({ url: url });
+            return;
+          } catch (e) {
+            if (e.name === 'AbortError') return; // 사용자가 공유 창을 닫았다.
+          }
+        }
+        let copied = false;
+        try {
+          await navigator.clipboard.writeText(url);
+          copied = true;
+        } catch (e) {}
+        showToast(t(copied ? 'share.linkCopied' : 'share.failed'));
+        return;
+      }
       // 게임 링크는 문구 끝 줄에 넣는다. 문구 안의 주소는 메신저가 바로 눌리는 링크로 바꿔 준다.
       const message = shareText() + '\n' + gameUrl();
       if (linkPending && navigator.share) {
@@ -685,7 +705,7 @@
     setTimeout(() => screens.result.classList.remove('locked'), 600);
     $('retry').focus();
     if (game.status === 'won') confetti(newBest);
-    prepareShareCard().catch(() => {});
+    if (SHARE_IMAGE) prepareShareCard().catch(() => {});
   }
 
   function changeLang(lang) {
