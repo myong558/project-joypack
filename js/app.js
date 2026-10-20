@@ -518,28 +518,37 @@
     setTimeout(() => URL.revokeObjectURL(link.href), 1000);
   }
 
-  function showToast(message) {
+  function showToast(message, duration) {
     const toast = $('toast');
     toast.textContent = message;
     toast.classList.add('show');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), duration || 2600);
   }
 
   async function shareResult() {
     const button = $('share');
     button.disabled = true;
     try {
-      // 게임 링크는 url 항목 대신 문구 끝 줄에 넣는다. 이미지와 함께 보내면 url 항목을 버리는 앱(카카오톡 등)이 많고,
-      // 문구 안의 주소는 메신저가 바로 눌리는 링크로 바꿔 준다. 받는 쪽에는 이미지 → 문구·링크 순서로 보인다.
+      // 게임 링크는 문구 끝 줄에 넣는다. 문구 안의 주소는 메신저가 바로 눌리는 링크로 바꿔 준다.
       const message = shareText() + '\n' + gameUrl();
       let file = null;
       try {
         file = await prepareShareCard();
       } catch (e) {}
+      // 이미지와 문구를 함께 보내면 문구를 버리고 이미지만 받는 앱(카카오톡 등)이 많다.
+      // 그래서 공유 창을 열기 전에 문구·링크를 클립보드에 복사해 두고, 이미지를 보낸 뒤 붙여 넣도록 안내한다.
+      // (클립보드 복사는 버튼 누름의 사용자 동작을 소모하지 않아 바로 뒤에 공유 창을 열 수 있다.)
+      let copied = false;
+      try {
+        await navigator.clipboard.writeText(message);
+        copied = true;
+      } catch (e) {}
       if (navigator.share) {
         const data = { title: t('app.title'), text: message };
         if (file && navigator.canShare && navigator.canShare({ files: [file] })) data.files = [file];
+        // 공유 창이 아래에서 올라와도 보이도록 알림은 화면 위쪽에 길게 띄운다.
+        if (data.files && copied) showToast(t('share.pasteLink'), 6000);
         try {
           await navigator.share(data);
           return;
@@ -548,11 +557,6 @@
         }
       }
       if (file) saveFile(file);
-      let copied = false;
-      try {
-        await navigator.clipboard.writeText(message);
-        copied = true;
-      } catch (e) {}
       showToast(t(file ? (copied ? 'share.copied' : 'share.saved') : copied ? 'share.linkCopied' : 'share.failed'));
     } finally {
       button.disabled = false;

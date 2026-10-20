@@ -1231,12 +1231,12 @@ h1.lost {
   white-space: nowrap;
 }
 
-/* 공유 결과 알림(app.js 의 showToast). 버튼 위에 잠깐 떴다가 사라진다. */
+/* 공유 알림(app.js 의 showToast). 아래에서 올라오는 공유 창에 가리지 않도록 화면 위쪽(상단 버튼 아래)에 잠깐 뜬다. */
 .toast {
   position: fixed;
   left: var(--gutter);
   right: var(--gutter);
-  bottom: calc(var(--space) * 2.5 + 8px + env(safe-area-inset-bottom));
+  top: calc(var(--space) + env(safe-area-inset-top) + 56px);
   z-index: 10;
   width: fit-content;
   margin: 0 auto;
@@ -1247,7 +1247,7 @@ h1.lost {
   text-align: center;
   box-shadow: var(--shadow-button);
   opacity: 0;
-  transform: translateY(12px);
+  transform: translateY(-12px);
   transition: opacity 0.2s, transform 0.2s;
   pointer-events: none;
 }
