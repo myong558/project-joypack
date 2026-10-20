@@ -422,8 +422,11 @@
       </form>
 
       <div id="ranking-tabs" class="chip-row ranking-tabs"></div>
-      <ol id="ranking-list" class="ranking-list"></ol>
-      <p id="ranking-status" class="ranking-status" role="status"></p>
+      <!-- 목록이 비면(불러오는 중·기록 없음·실패) 안내 문구는 목록 칸 가운데에 겹쳐 보인다. -->
+      <div class="ranking-board">
+        <ol id="ranking-list" class="ranking-list"></ol>
+        <p id="ranking-status" class="ranking-status" role="status"></p>
+      </div>
     </div>
   </dialog>
 
