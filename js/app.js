@@ -15,6 +15,7 @@
   let screen = 'start';
   let game = null;
   let newBest = false;
+  let updateReady = false; // 새 버전 서비스 워커가 화면을 넘겨받았다. 홈으로 갈 때 새로 고친다.
   let pick = null; // 다이얼로 고른 숫자. null 이면 다음 렌더링 때 범위 최솟값(왼쪽 끝)에서 시작한다.
   let best = loadBest();
 
@@ -565,6 +566,10 @@
   }
 
   function goToStart() {
+    if (updateReady) {
+      location.reload(); // 게임 중에 받아 둔 새 버전을 홈으로 갈 때 적용한다.
+      return;
+    }
     renderStart();
     show('start');
   }
@@ -796,9 +801,26 @@
   setTimeout(endIntro, 1400);
 
   // 서비스 워커는 HTTPS 와 localhost 에서만 등록된다. file:// 로 열면 게임만 동작한다.
+  // sw.js 는 캐시 우선이라, 새 버전을 배포해도 이번 화면은 옛 파일로 열린다. 새 서비스 워커가 화면을 넘겨받으면(controllerchange)
+  // 한 번 새로 고쳐 바로 새 버전을 보여 준다. 게임 중이면 판을 날리지 않도록 홈으로 갈 때까지 미룬다.
+  // 처음 설치(원래 담당 워커가 없음)는 파일이 같으므로 새로 고치지 않는다.
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    const hadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!hadController || updateReady) return;
+      updateReady = true;
+      if (screen === 'start') location.reload();
+    });
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js').catch(() => {});
+      navigator.serviceWorker
+        .register('sw.js')
+        .then((registration) => {
+          // 설치한 앱은 백그라운드에 오래 남아 있으므로 다시 화면에 나올 때도 새 버전을 확인한다.
+          document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') registration.update().catch(() => {});
+          });
+        })
+        .catch(() => {});
     });
   }
 })();
