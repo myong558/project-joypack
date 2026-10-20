@@ -27,7 +27,7 @@
 - 정답이면 색종이가 터지고, 최고 기록을 깨면 양쪽 아래에서도 쏘아 올려 더 크게 터집니다(동작 줄이기 설정이면 생략).
 - 결과 화면 **공유하기**: 결과 카드 이미지(1080×1080 PNG: 로고, 난이도·범위, 정답·실패, 정답 숫자, 시도 기록 UP/DOWN)와 "몇 번 만에 성공" 문구를 기기 공유 창으로 보냅니다. 게임 링크는 문구 끝 줄에 넣어 바로 누를 수 있는 링크로 보입니다. 이미지와 결과 글·링크는 공유하기 한 번에 함께 보냅니다(링크 미리보기는 `index.html` 의 og 태그). 받는 앱에 따라 이미지와 함께 온 글을 버리기도 합니다(카카오톡 등). 카드 색은 지금 스킨·컬러 모드를 따릅니다. 공유 창이 없거나 이미지를 못 보내는 브라우저(주로 PC)는 이미지를 저장하고 문구·링크를 클립보드에 복사합니다.
 - 효과음·진동: 다이얼 눈금, UP/DOWN 힌트, 정답, 실패마다 소리와 진동이 납니다. 소리는 파일 없이 Web Audio 로 합성하고, 진동은 지원하는 기기(주로 안드로이드)에서만 됩니다. 설정에서 각각 켜고 끌 수 있고 기본은 켬입니다(`js/fx.js`).
-- 공유 랭킹: 난이도별 TOP 10(시도 횟수가 적을수록 위, 같으면 같은 순위·먼저 등록한 기록이 위). 정답을 맞히면 오른쪽 위 버튼이 **랭킹 등록**으로 바뀌고, 누르면 영문 이니셜(최대 5자)로 등록합니다. 한 판에 한 번만 등록되며 시작 화면의 **랭킹** 버튼으로 언제든 볼 수 있습니다. 기록은 Firebase Firestore 에 저장합니다(`js/ranking.js`, 아래 [랭킹 서버](#랭킹-서버-firebase-firestore)).
+- 공유 랭킹: 난이도별 TOP 10. 시도 횟수가 적을수록 위, 같으면 빨리 맞힌(판 시작부터 정답까지 걸린 시간) 기록이 위, 그것도 같으면 먼저 등록한 기록이 위입니다. 정답을 맞힌 판이 TOP 10 에 들 때만(10명이 안 찼거나 10위보다 앞설 때) 오른쪽 위 버튼이 **랭킹 등록**으로 바뀌고, 누르면 맞힌 난이도 탭에 고정된 채 영문 이니셜(최대 5자)로 등록합니다. 한 판에 한 번만 등록되며 시작 화면의 **랭킹** 버튼으로 언제든 볼 수 있습니다. 기록은 Firebase Firestore 에 저장합니다(`js/ranking.js`, 아래 [랭킹 서버](#랭킹-서버-firebase-firestore)).
 - 난이도별 최고 기록(가장 적은 시도 횟수) 저장
 - 한국어 / 영어 — 처음에는 브라우저 언어를 따르고, 시작 화면 왼쪽 위 버튼으로 전환
 - 게임 중 왼쪽 위 **홈** 버튼으로 시작 화면 이동
@@ -78,7 +78,7 @@ GitHub Pages 는 파일만 내주는 서버라 기록을 받을 수 없어서, �
      match /databases/{db}/documents {
        match /games/updown/scores/{id} {
          allow read: if true;
-         allow create: if request.resource.data.keys().hasOnly(['initials', 'difficulty', 'tries', 'createdAt'])
+         allow create: if request.resource.data.keys().hasOnly(['initials', 'difficulty', 'tries', 'time', 'createdAt'])
            && request.resource.data.initials is string
            && request.resource.data.initials.matches('^[A-Z]{1,5}
 
@@ -107,6 +107,9 @@ project-updown/
            && request.resource.data.tries is int
            && request.resource.data.tries >= 1
            && request.resource.data.tries <= 6
+           && request.resource.data.time is int
+           && request.resource.data.time >= 0
+           && request.resource.data.time <= 86400000
            && request.resource.data.createdAt == request.time;
          allow update, delete: if false;
        }
@@ -114,7 +117,7 @@ project-updown/
    }
    ```
 
-3. **복합 색인**: Firestore Database → 색인 → 복합 → 색인 만들기. 컬렉션 ID `scores`, 쿼리 범위 **컬렉션**, 필드 `difficulty` 오름차순 · `tries` 오름차순 · `createdAt` 오름차순. 색인이 없으면 랭킹을 불러오지 못합니다(만드는 데 몇 분 걸림).
+3. **복합 색인**: Firestore Database → 색인 → 복합 → 색인 만들기. 컬렉션 ID `scores`, 쿼리 범위 **컬렉션**, 필드 `difficulty` 오름차순 · `tries` 오름차순 · `time` 오름차순 · `createdAt` 오름차순. 색인이 없으면 랭킹을 불러오지 못합니다(만드는 데 몇 분 걸림).
 4. **기록 지우기**: 콘솔 → Firestore Database → 데이터 → `games` → `updown` → `scores` 에서 문서를 지웁니다.
 
 무료 한도는 하루 읽기 5만·쓰기 2만 번이고(프로젝트를 같이 쓰는 게임이 나눠 씀), 랭킹 한 번 열 때 읽기 최대 10번입니다. 한도를 넘으면 그날만 랭킹이 멈춥니다. 서버 없이 받는 기록이라 형식 검사는 하지만 마음먹고 조작하는 것까지 막지는 못합니다.

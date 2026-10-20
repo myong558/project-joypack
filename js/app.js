@@ -591,7 +591,8 @@
   // 정답을 맞히면 그 기록(난이도·시도 횟수)을 등록 대기로 두고, 랭킹 팝업 맨 위에 이니셜 등록 칸을 띄운다.
   // 한 판에 한 번만 등록할 수 있다. 마지막으로 쓴 이니셜은 기억해 다음 등록 때 채워 둔다.
   const INITIALS_KEY = 'updown.initials';
-  let rankingEntry = null; // { difficulty, tries } 등록 대기 기록
+  let rankingEntry = null; // { difficulty, tries, time } 등록 대기 기록. TOP 10 에 들 때만 생긴다(checkRanking).
+  let gameStartedAt = 0; // 걸린 시간(동률일 때 순위) 재기: 판 시작 시각
   let rankingTab = 'easy';
   let rankingMine = null; // 방금 등록한 기록 ID (목록에서 강조)
   let rankingRequest = 0;
@@ -619,6 +620,7 @@
       $('ranking-prompt').textContent = t('ranking.prompt', {
         level: t('difficulty.' + rankingEntry.difficulty),
         tries: rankingEntry.tries,
+        time: duration(rankingEntry.time),
       });
       if (!$('ranking-initials').value) {
         try {
@@ -634,6 +636,8 @@
       button.className = 'chip';
       button.textContent = t('difficulty.' + key);
       button.setAttribute('aria-pressed', String(key === rankingTab));
+      // 등록 중에는 맞힌 난이도 탭에 고정한다(다른 난이도 기록으로 착각해 등록하지 않게).
+      button.disabled = !!rankingEntry && key !== rankingEntry.difficulty;
       button.addEventListener('click', () => {
         rankingTab = key;
         renderRanking();
@@ -643,13 +647,31 @@
     });
   }
 
+  // 걸린 시간(ms) → "12.3초", 1분 이상이면 "1분 05초"
+  function duration(ms) {
+    const total = ms / 1000;
+    const min = Math.floor(total / 60);
+    return t('ranking.time', { min: min, sec: min ? String(Math.floor(total % 60)).padStart(2, '0') : total.toFixed(1) });
+  }
+
+  // 정답을 맞힌 판이 TOP 10 에 들 수 있는지 서버 랭킹으로 확인하고, 들면 [랭킹 등록] 버튼을 띄운다.
+  // 확인하는 사이 새 판을 시작했으면 버린다. 불러오지 못하면(오프라인) 등록도 할 수 없어 띄우지 않는다.
+  async function checkRanking(entry, forGame) {
+    try {
+      const rows = await UpDownRanking.top(entry.difficulty);
+      if (game !== forGame || !UpDownRanking.qualifies(rows, entry)) return;
+      rankingEntry = entry;
+      renderRankingButton();
+    } catch (e) {}
+  }
+
   function renderRankingList(rows) {
     const list = $('ranking-list');
     list.textContent = '';
     let rank = 0;
     rows.forEach((row, i) => {
-      // 시도 횟수가 같으면 같은 순위(1, 1, 3 …)
-      if (i === 0 || row.tries !== rows[i - 1].tries) rank = i + 1;
+      // 시도 횟수와 걸린 시간이 모두 같을 때만 같은 순위(1, 1, 3 …)
+      if (i === 0 || row.tries !== rows[i - 1].tries || row.time !== rows[i - 1].time) rank = i + 1;
       const li = document.createElement('li');
       if (row.id === rankingMine) li.className = 'mine';
       const place = document.createElement('span');
@@ -660,7 +682,7 @@
       name.textContent = row.initials;
       const score = document.createElement('span');
       score.className = 'ranking-tries';
-      score.textContent = t('ranking.tries', { tries: row.tries });
+      score.textContent = t('ranking.score', { tries: row.tries, time: duration(row.time) });
       li.append(place, name, score);
       list.appendChild(li);
     });
@@ -698,6 +720,7 @@
         initials: initials,
         difficulty: rankingEntry.difficulty,
         tries: rankingEntry.tries,
+        time: rankingEntry.time,
       });
       try {
         localStorage.setItem(INITIALS_KEY, initials);
@@ -789,6 +812,7 @@
     rankingEntry = null; // 등록하지 않고 새 판을 시작하면 이전 기록 등록은 사라진다.
     renderRankingButton();
     game = UpDown.createGame(difficulty);
+    gameStartedAt = Date.now();
     pick = null;
     renderPlay(false);
     show('play');
@@ -824,9 +848,10 @@
     setTimeout(() => screens.result.classList.remove('locked'), 600);
     $('retry').focus();
     if (game.status === 'won') confetti(newBest);
-    rankingEntry = game.status === 'won' ? { difficulty: game.difficulty, tries: tries } : null;
+    rankingEntry = null;
     rankingMine = null;
     renderRankingButton();
+    if (game.status === 'won') checkRanking({ difficulty: game.difficulty, tries: tries, time: Date.now() - gameStartedAt }, game);
     UpDownFx.play(game.status === 'won' ? 'won' : 'lost');
     prepareShareCard().catch(() => {});
   }
