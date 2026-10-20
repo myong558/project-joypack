@@ -15,6 +15,7 @@
   let screen = 'start';
   let game = null;
   let newBest = false;
+  let linkPending = false; // 결과 이미지를 보냈고 링크 보내기가 남았다(setLinkPending).
   let updateReady = false; // 새 버전 서비스 워커가 화면을 넘겨받았다. 홈으로 갈 때 새로 고친다.
   let pick = null; // 다이얼로 고른 숫자. null 이면 다음 렌더링 때 범위 최솟값(왼쪽 끝)에서 시작한다.
   let best = loadBest();
@@ -326,6 +327,7 @@
     $('result-detail').textContent = won ? t('result.wonDetail', { tries: game.guesses.length }) : '';
     $('result-detail').hidden = !won;
     $('result-best').hidden = !newBest;
+    setLinkPending(linkPending); // 언어를 바꾸면 버튼 문구도 다시 쓴다.
   }
 
   // ── 공유하기 ──
@@ -526,37 +528,55 @@
     toastTimer = setTimeout(() => toast.classList.remove('show'), duration || 2600);
   }
 
+  // 공유 버튼은 두 단계다: [공유하기] 이미지(+문구) → [링크 보내기] 문구·링크.
+  // 이미지와 문구를 함께 보내면 문구를 버리고 이미지만 받는 앱(카카오톡 등)이 많아서, 이미지를 보낸 뒤 링크를 따로 한 번 더 보낸다.
+  // 공유 창은 누를 때마다 한 번만 열 수 있어 두 번을 이어서 열 수 없다.
+  function setLinkPending(pending) {
+    linkPending = pending;
+    const button = $('share');
+    button.classList.toggle('pending', pending);
+    button.querySelector('use').setAttribute('href', pending ? '#i-link' : '#i-share');
+    button.querySelector('span').textContent = t(pending ? 'result.shareLink' : 'result.share');
+  }
+
   async function shareResult() {
     const button = $('share');
     button.disabled = true;
     try {
       // 게임 링크는 문구 끝 줄에 넣는다. 문구 안의 주소는 메신저가 바로 눌리는 링크로 바꿔 준다.
       const message = shareText() + '\n' + gameUrl();
+      if (linkPending && navigator.share) {
+        try {
+          await navigator.share({ text: message });
+          setLinkPending(false);
+        } catch (e) {}
+        return;
+      }
       let file = null;
       try {
         file = await prepareShareCard();
       } catch (e) {}
-      // 이미지와 문구를 함께 보내면 문구를 버리고 이미지만 받는 앱(카카오톡 등)이 많다.
-      // 그래서 공유 창을 열기 전에 문구·링크를 클립보드에 복사해 두고, 이미지를 보낸 뒤 붙여 넣도록 안내한다.
-      // (클립보드 복사는 버튼 누름의 사용자 동작을 소모하지 않아 바로 뒤에 공유 창을 열 수 있다.)
-      let copied = false;
-      try {
-        await navigator.clipboard.writeText(message);
-        copied = true;
-      } catch (e) {}
       if (navigator.share) {
-        const data = { title: t('app.title'), text: message };
-        if (file && navigator.canShare && navigator.canShare({ files: [file] })) data.files = [file];
-        // 공유 창이 아래에서 올라와도 보이도록 알림은 화면 위쪽에 길게 띄운다.
-        if (data.files && copied) showToast(t('share.pasteLink'), 6000);
+        const withImage = !!file && !!navigator.canShare && navigator.canShare({ files: [file] });
+        const data = withImage ? { files: [file], text: message } : { title: t('app.title'), text: message };
         try {
           await navigator.share(data);
+          if (withImage) {
+            setLinkPending(true);
+            showToast(t('share.sendLink'), 6000);
+          }
           return;
         } catch (e) {
           if (e.name === 'AbortError') return; // 사용자가 공유 창을 닫았다.
         }
       }
+      // 공유 창이 없거나 실패하면(주로 PC) 이미지를 저장하고 문구·링크를 클립보드에 복사한다.
       if (file) saveFile(file);
+      let copied = false;
+      try {
+        await navigator.clipboard.writeText(message);
+        copied = true;
+      } catch (e) {}
       showToast(t(file ? (copied ? 'share.copied' : 'share.saved') : copied ? 'share.linkCopied' : 'share.failed'));
     } finally {
       button.disabled = false;
@@ -651,6 +671,7 @@
   }
 
   function finishGame() {
+    linkPending = false;
     const tries = game.guesses.length;
     newBest = game.status === 'won' && (!best[game.difficulty] || tries < best[game.difficulty]);
     if (newBest) {
