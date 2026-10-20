@@ -91,15 +91,17 @@
   --field-focus: var(--focus);
   --text-on-action: var(--text-on-primary);
 
+  /* 화면 높이의 1%. PC 화면 확대(--pc-zoom) 때는 확대 배수로 나눠, 높이 비례 크기가 확대로 화면을 넘지 않게 한다. */
+  --vh: 1vh;
   /* 세로 간격 기준값: 화면 높이에 비례 (568px 13px · 640px 16px · 844px 24px, 최대 40px) */
-  --space: clamp(8px, 4.2vh - 11px, 40px);
+  --space: clamp(8px, 4.2 * var(--vh) - 11px, 40px);
   /* 화면 좌우 여백. 팝업 최대 너비도 이 값으로 계산한다. */
   --gutter: 16px;
 }
 
 @supports (height: 1dvh) {
   :root {
-    --space: clamp(8px, 4.2dvh - 11px, 40px);
+    --vh: 1dvh;
   }
 }
 
@@ -620,7 +622,7 @@ button:focus-visible {
 
 .logo {
   flex: none;
-  width: min(80px, 12dvh);
+  width: min(80px, 12 * var(--vh));
   height: auto;
   aspect-ratio: 1;
   overflow: hidden;
@@ -844,7 +846,7 @@ button:focus-visible {
   margin: 0;
   color: var(--text-muted);
   font-size: 5rem;
-  font-size: min(5rem, 9dvh - 8px);
+  font-size: min(5rem, 9 * var(--vh) - 8px);
   line-height: 1.1;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -857,7 +859,7 @@ button:focus-visible {
   gap: 0.15em;
   margin: 0;
   line-height: 1.2;
-  font-size: min(2.2rem, 5dvh);
+  font-size: min(2.2rem, 5 * var(--vh));
   font-weight: 800;
 }
 
@@ -1000,7 +1002,7 @@ button:focus-visible {
   border: 2px solid var(--field-line);
   box-shadow: var(--shadow-box);
   border-radius: 14px;
-  font-size: min(2rem, 4.6dvh);
+  font-size: min(2rem, 4.6 * var(--vh));
   font-weight: 700;
   text-align: center;
   font-variant-numeric: tabular-nums;
@@ -1035,7 +1037,7 @@ button:focus-visible {
    높이가 모자라면 비율을 지킨 채 가운데로 줄어든다.
    확인 버튼은 원호 안쪽 아래 가운데에 놓이고, 크기는 컨테이너 단위(cq*)로 그려진 원호에 맞춘다. */
 .dial {
-  --dial-gap: clamp(0px, min((100dvh - 640px) / 4, (100vw - 340px) / 2), 32px);
+  --dial-gap: clamp(0px, min((100 * var(--vh) - 640px) / 4, (100vw - 340px) / 2), 32px);
   position: relative;
   flex: 0 1 auto;
   width: min(100% - 2 * var(--dial-gap), 480px);
@@ -1114,8 +1116,8 @@ button:focus-visible {
 }
 
 .result-icon {
-  width: min(112px, 16dvh);
-  height: min(112px, 16dvh);
+  width: min(112px, 16 * var(--vh));
+  height: min(112px, 16 * var(--vh));
   padding: 16px;
   border-radius: 50%;
 }
@@ -1132,9 +1134,9 @@ button:focus-visible {
 
 /* 실패: 어질어질한 얼굴이 좌우로 비틀거리다 멈춘다. */
 .result-art.lost .result-icon {
-  width: min(224px, 32dvh); /* 정답 트로피의 2배 */
-  height: min(224px, 32dvh);
-  padding: min(28px, 4dvh);
+  width: min(224px, 32 * var(--vh)); /* 정답 트로피의 2배 */
+  height: min(224px, 32 * var(--vh));
+  padding: min(28px, 4 * var(--vh));
   color: var(--icon);
   background: var(--surface-alt);
   /* 반투명 원: 뒤의 계절 배경(입자)이 비쳐 보인다. color-mix 를 모르는 브라우저는 위의 불투명 색을 쓴다. */
@@ -1179,7 +1181,7 @@ h1.lost {
 .answer {
   margin: 0;
   font-size: 4rem;
-  font-size: min(4rem, 12dvh);
+  font-size: min(4rem, 12 * var(--vh));
   line-height: 1.1;
   font-weight: 800;
   text-align: center;
@@ -1216,6 +1218,45 @@ h1.lost {
   pointer-events: none;
 }
 
+/* 공유하기·홈으로: 한 줄에 반씩. 버튼을 하나 더 두어도 결과 화면 높이가 늘지 않는다. */
+.action-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: calc(var(--space) * 0.625);
+}
+
+.action-row > button {
+  min-width: 0;
+  padding-inline: 12px;
+  white-space: nowrap;
+}
+
+/* 공유 결과 알림(app.js 의 showToast). 버튼 위에 잠깐 떴다가 사라진다. */
+.toast {
+  position: fixed;
+  left: var(--gutter);
+  right: var(--gutter);
+  bottom: calc(var(--space) * 2.5 + 8px + env(safe-area-inset-bottom));
+  z-index: 10;
+  width: fit-content;
+  margin: 0 auto;
+  padding: 12px 20px;
+  border-radius: 999px;
+  background: var(--text);
+  color: var(--bg);
+  text-align: center;
+  box-shadow: var(--shadow-button);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: none;
+}
+
 /* ── 설정·확인 팝업 ───────────────────── */
 /* 너비 = 화면 - 좌우 여백, 최대 375px. max-width:none 은 브라우저 기본 제한(100% - 6px - 2em) 해제 */
 .settings {
@@ -1243,7 +1284,7 @@ h1.lost {
   display: flex;
   flex-direction: column;
   gap: calc(var(--space) * 1.25);
-  padding: clamp(12px, 3dvh, 20px) 20px; /* 낮은 화면에서는 위아래 여백을 줄여 팝업이 화면 안에 들어오게 한다 */
+  padding: clamp(12px, 3 * var(--vh), 20px) 20px; /* 낮은 화면에서는 위아래 여백을 줄여 팝업이 화면 안에 들어오게 한다 */
 }
 
 .settings-header {
@@ -1255,12 +1296,12 @@ h1.lost {
 /* 1뎁스(팝업 제목)는 2뎁스(항목 제목, 18px 회색)와 확실히 구분되게 크게 */
 .settings h2 {
   margin: 0;
-  font-size: min(2rem, 5.5dvh);
+  font-size: min(2rem, 5.5 * var(--vh));
   line-height: 1.25;
 }
 
 .settings h3 {
-  margin: 0 0 clamp(4px, 1dvh, 8px);
+  margin: 0 0 clamp(4px, var(--vh), 8px);
   color: var(--text-muted);
   font-size: inherit;
   font-weight: 400;
@@ -1303,7 +1344,7 @@ h1.lost {
   justify-content: center;
   align-items: center;
   gap: 6px;
-  padding: clamp(6px, 1.5dvh, 10px) 12px;
+  padding: clamp(6px, 1.5 * var(--vh), 10px) 12px;
   background: var(--chip-bg);
   border: 1px solid var(--chip-line);
   box-shadow: var(--shadow-button);
@@ -1347,7 +1388,7 @@ h1.lost {
   min-width: 0;
   flex-direction: column;
   gap: 2px;
-  padding: clamp(4px, 1.2dvh, 8px) 6px;
+  padding: clamp(4px, 1.2 * var(--vh), 8px) 6px;
   text-align: center;
   line-height: 1.25;
   word-break: keep-all;
@@ -1613,6 +1654,90 @@ h1.lost {
 }
 
 /* 움직임 줄이기: 크기 변화·애니메이션 없이 어두워지는 눌림 효과만 남긴다 */
+/* ── PC 화면 ──────────────────────────── */
+/* 가로가 넉넉한 화면(PC 브라우저)은 휴대폰처럼 한 줄로 길게 늘이지 않고 나눠 놓는다.
+   시작: 난이도 카드 2×2 / 게임: 왼쪽에 상태·힌트·기록, 오른쪽에 숫자 고르기 / 결과: 버튼 폭을 줄여 가운데. */
+@media (min-width: 900px) and (min-height: 560px) {
+  :root {
+    --vh: calc(1dvh / var(--pc-zoom, 1));
+  }
+
+  /* 화면 전체를 --pc-zoom 배로 키운다(index.html 이 화면 높이에 맞춰 계산해 위아래를 채운다). 높이 100%·max-height 같은 % 값은 키워지지 않아 화면을 넘지 않는다. */
+  .app {
+    max-width: 1080px;
+    padding-inline: 32px;
+    zoom: var(--pc-zoom, 1);
+  }
+
+  .settings {
+    zoom: var(--pc-zoom, 1);
+  }
+
+  .logo {
+    width: min(112px, 14 * var(--vh));
+  }
+
+  #screen-start h1 {
+    font-size: 2.6rem;
+  }
+
+  /* 로고·제목과 카드를 화면 가운데에 함께 모은다. */
+  .difficulty-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: calc(var(--space) * 1.5);
+    margin-bottom: auto;
+  }
+
+  .difficulty {
+    padding: calc(var(--space) * 0.6) 22px;
+  }
+
+  #screen-play {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-areas:
+      'status status'
+      'history hint'
+      'history form';
+    align-content: center;
+    column-gap: 48px;
+    margin-block: auto;
+  }
+
+  #screen-play .status {
+    grid-area: status;
+  }
+
+  #screen-play .hint-box {
+    grid-area: hint;
+    align-self: end;
+  }
+
+  #screen-play .history {
+    grid-area: history;
+  }
+
+  /* 오른쪽 칸: 힌트 아래에 숫자 상자와 다이얼을 크게 놓는다. */
+  #screen-play .guess-form {
+    grid-area: form;
+    justify-content: flex-start;
+    gap: calc(var(--space) * 0.75 + 8px);
+  }
+
+  .dial {
+    --dial-gap: 0px;
+    width: min(100%, 520px);
+  }
+
+  .actions {
+    width: min(440px, 100%);
+    margin-inline: auto;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   button {
     transition: none;

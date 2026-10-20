@@ -95,7 +95,7 @@
     applyTheme();
   }
 
-  // 계절 스킨. 'auto'(기본)면 기기 날짜의 계절을 쓴다.
+  // 계절 스킨. 'auto'(기본)면 날마다 무작위 스킨을 쓴다(js/skins.js 의 dailySkin).
   let skinPreference = loadSkinPreference();
 
   function loadSkinPreference() {
@@ -261,6 +261,8 @@
     canvas.width = width * ratio;
     canvas.height = height * ratio;
     ctx.scale(ratio, ratio);
+    // PC 화면 확대 배수만큼 종이 크기·속도·중력을 키운다(배경 입자와 같은 기준).
+    const scale = UpDownSkins.screenScale();
 
     // 색은 현재 테마의 역할 토큰을 그대로 쓴다.
     const style = getComputedStyle(document.documentElement);
@@ -269,10 +271,10 @@
     function burst(x, y, count, angle, spread, speed) {
       for (let i = 0; i < count; i++) {
         const a = angle + (Math.random() - 0.5) * spread;
-        const v = speed * (0.5 + Math.random() * 0.7);
+        const v = speed * scale * (0.5 + Math.random() * 0.7);
         pieces.push({
           x: x, y: y, vx: Math.cos(a) * v, vy: Math.sin(a) * v,
-          size: 6 + Math.random() * 6, rot: Math.random() * Math.PI * 2, spin: (Math.random() - 0.5) * 0.4,
+          size: (6 + Math.random() * 6) * scale, rot: Math.random() * Math.PI * 2, spin: (Math.random() - 0.5) * 0.4,
           color: colors[i % colors.length],
         });
       }
@@ -292,11 +294,11 @@
       let alive = 0;
       pieces.forEach((p) => {
         p.vx *= Math.pow(0.985, step);
-        p.vy = p.vy * Math.pow(0.985, step) + 0.32 * step;
+        p.vy = p.vy * Math.pow(0.985, step) + 0.32 * scale * step;
         p.x += p.vx * step;
         p.y += p.vy * step;
         p.rot += p.spin * step;
-        if (p.y > height + 20) return;
+        if (p.y > height + 20 * scale) return;
         alive++;
         ctx.save();
         ctx.translate(p.x, p.y);
@@ -323,6 +325,236 @@
     $('result-detail').textContent = won ? t('result.wonDetail', { tries: game.guesses.length }) : '';
     $('result-detail').hidden = !won;
     $('result-best').hidden = !newBest;
+  }
+
+  // ── 공유하기 ──
+  // 결과 카드 이미지(PNG)와 게임 링크를 기기 공유 창으로 보낸다.
+  // 공유 창이 없거나 이미지를 못 보내는 브라우저(주로 PC)는 이미지를 저장하고 문구·링크를 클립보드에 복사한다.
+  const CARD_SIZE = 1080;
+  let shareCard = null; // { game, key, promise }: 같은 판·같은 모양이면 그린 이미지를 다시 쓴다.
+  let toastTimer = 0;
+
+  // 게임 주소: 쿼리·해시와 파일 이름(index.html)을 뺀 폴더 주소.
+  function gameUrl() {
+    return new URL('./', location.href).href;
+  }
+
+  function shareText() {
+    const config = UpDown.DIFFICULTIES[game.difficulty];
+    const params = { level: t('difficulty.' + game.difficulty), min: config.min, max: config.max, tries: game.guesses.length };
+    return t(game.status === 'won' ? 'share.wonText' : 'share.lostText', params);
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  // images/icon.svg 와 같은 로고: 남색 바탕 + 위 빨간 삼각형 + 아래 파란 삼각형.
+  function drawLogo(ctx, x, y, size) {
+    const s = size / 512;
+    // 삼각형 색: 위(밝음) → 아래(진함) 세로 그라데이션
+    const gradient = (y0, y1, from, to) => {
+      const g = ctx.createLinearGradient(0, y + y0 * s, 0, y + y1 * s);
+      g.addColorStop(0, from);
+      g.addColorStop(1, to);
+      return g;
+    };
+    roundRect(ctx, x, y, size, size, size * 0.24);
+    const bg = ctx.createLinearGradient(x, y, x + size, y + size);
+    bg.addColorStop(0, '#2d3c60');
+    bg.addColorStop(1, '#161f38');
+    ctx.fillStyle = bg;
+    ctx.fill();
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = 24 * s;
+    [
+      [82, 230, '#f2705f', '#c63f34'],
+      [430, 282, '#6aa0ff', '#3b74ea'],
+    ].forEach(([tip, base, from, to]) => {
+      ctx.beginPath();
+      ctx.moveTo(x + 256 * s, y + tip * s);
+      ctx.lineTo(x + 389 * s, y + base * s);
+      ctx.lineTo(x + 123 * s, y + base * s);
+      ctx.closePath();
+      ctx.fillStyle = ctx.strokeStyle = gradient(Math.min(tip, base), Math.max(tip, base), from, to);
+      ctx.fill();
+      ctx.stroke();
+    });
+  }
+
+  // 결과 카드(1080×1080): 로고·제목, 난이도, 결과, 정답, 시도 기록, 게임 주소. 색은 지금 스킨·테마를 따른다.
+  async function drawShareCard() {
+    try {
+      await document.fonts.load('80px Jua');
+    } catch (e) {}
+    const css = getComputedStyle(document.documentElement);
+    const color = (name) => css.getPropertyValue(name).trim();
+    const font = (size) => size + "px Jua, 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif";
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = CARD_SIZE;
+    const ctx = canvas.getContext('2d');
+    const center = CARD_SIZE / 2;
+    const maxWidth = 880;
+    const won = game.status === 'won';
+    const config = UpDown.DIFFICULTIES[game.difficulty];
+
+    // 배경: 스킨 배경색 위에 화면처럼 위쪽만 강조색을 옅게 깐다.
+    ctx.fillStyle = color('--bg');
+    ctx.fillRect(0, 0, CARD_SIZE, CARD_SIZE);
+    const band = ctx.createLinearGradient(0, 0, 0, CARD_SIZE * 0.6);
+    band.addColorStop(0, color('--primary'));
+    band.addColorStop(1, color('--bg'));
+    ctx.globalAlpha = 0.14;
+    ctx.fillStyle = band;
+    ctx.fillRect(0, 0, CARD_SIZE, CARD_SIZE);
+    ctx.globalAlpha = 1;
+
+    roundRect(ctx, 60, 60, CARD_SIZE - 120, CARD_SIZE - 120, 56);
+    ctx.fillStyle = color('--surface');
+    ctx.fill();
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = color('--line');
+    ctx.stroke();
+
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'left';
+    ctx.font = font(52);
+    const title = t('app.title');
+    const logoSize = 88;
+    const headerX = center - (logoSize + 24 + ctx.measureText(title).width) / 2;
+    drawLogo(ctx, headerX, 116, logoSize);
+    ctx.fillStyle = color('--text');
+    ctx.fillText(title, headerX + logoSize + 24, 162);
+
+    ctx.textAlign = 'center';
+    ctx.font = font(40);
+    const level = t('difficulty.' + game.difficulty) + ' · ' + config.min + ' ~ ' + config.max;
+    const chipWidth = ctx.measureText(level).width + 64;
+    roundRect(ctx, center - chipWidth / 2, 240, chipWidth, 72, 36);
+    ctx.fillStyle = color('--surface-alt');
+    ctx.fill();
+    ctx.fillStyle = color('--text-muted');
+    ctx.fillText(level, center, 278);
+
+    ctx.font = font(96);
+    ctx.fillStyle = color(won ? '--success' : '--danger');
+    ctx.fillText(t(won ? 'result.won' : 'result.lost'), center, 404, maxWidth);
+    ctx.font = font(220);
+    ctx.fillStyle = color('--text');
+    ctx.fillText(String(game.answer), center, 574);
+    if (won) {
+      ctx.font = font(52);
+      ctx.fillStyle = color('--text-muted');
+      ctx.fillText(t('result.wonDetail', { tries: game.guesses.length }), center, 716, maxWidth);
+    }
+
+    // 시도 기록: 추측한 숫자마다 UP(빨강 ▲)·DOWN(파랑 ▼)·정답(초록 ●) 칸.
+    const cellWidth = 124;
+    const cellGap = 16;
+    const rowY = won ? 788 : 740; // 실패하면 성공 문장 자리가 비어 기록을 조금 올린다.
+    const rowX = center - (game.guesses.length * (cellWidth + cellGap) - cellGap) / 2;
+    game.guesses.forEach((g, i) => {
+      const x = rowX + i * (cellWidth + cellGap);
+      const mid = x + cellWidth / 2;
+      const tone = color(g.result === 'UP' ? '--up' : g.result === 'DOWN' ? '--down' : '--success');
+      roundRect(ctx, x, rowY, cellWidth, 104, 24);
+      ctx.fillStyle = color('--surface-alt');
+      ctx.fill();
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = tone;
+      ctx.stroke();
+      ctx.fillStyle = tone;
+      ctx.font = font(44);
+      ctx.fillText(String(g.value), mid, rowY + 36);
+      ctx.beginPath();
+      if (g.result === 'CORRECT') {
+        ctx.arc(mid, rowY + 76, 9, 0, Math.PI * 2);
+      } else {
+        const tip = rowY + (g.result === 'UP' ? 67 : 85);
+        const base = rowY + (g.result === 'UP' ? 85 : 67);
+        ctx.moveTo(mid, tip);
+        ctx.lineTo(mid + 12, base);
+        ctx.lineTo(mid - 12, base);
+        ctx.closePath();
+      }
+      ctx.fill();
+    });
+
+    ctx.font = font(36);
+    ctx.fillStyle = color('--text-muted');
+    ctx.fillText(gameUrl().replace(/^https?:\/\//, '').replace(/\/$/, ''), center, 964, maxWidth);
+
+    return new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (blob) resolve(new File([blob], 'updown-result.png', { type: 'image/png' }));
+        else reject(new Error('toBlob'));
+      }, 'image/png');
+    });
+  }
+
+  // 결과 화면이 뜨면 미리 그려 둔다. 공유 창은 버튼을 누른 직후에만 열 수 있어서, 누른 뒤 그리면 늦을 수 있다.
+  // 스킨·테마·언어를 바꾸면 다시 그린다.
+  function prepareShareCard() {
+    const root = document.documentElement;
+    const key = [root.dataset.theme, root.dataset.skin, UpDownI18n.getLang()].join('|');
+    if (!shareCard || shareCard.game !== game || shareCard.key !== key) {
+      shareCard = { game: game, key: key, promise: drawShareCard() };
+    }
+    return shareCard.promise;
+  }
+
+  function saveFile(file) {
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(file);
+    link.download = file.name;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+  }
+
+  function showToast(message) {
+    const toast = $('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+  }
+
+  async function shareResult() {
+    const button = $('share');
+    button.disabled = true;
+    try {
+      const url = gameUrl();
+      const text = shareText();
+      let file = null;
+      try {
+        file = await prepareShareCard();
+      } catch (e) {}
+      if (navigator.share) {
+        const data = { title: t('app.title'), text: text, url: url };
+        if (file && navigator.canShare && navigator.canShare({ files: [file] })) data.files = [file];
+        try {
+          await navigator.share(data);
+          return;
+        } catch (e) {
+          if (e.name === 'AbortError') return; // 사용자가 공유 창을 닫았다.
+        }
+      }
+      if (file) saveFile(file);
+      let copied = false;
+      try {
+        await navigator.clipboard.writeText(text + '\n' + url);
+        copied = true;
+      } catch (e) {}
+      showToast(t(file ? (copied ? 'share.copied' : 'share.saved') : copied ? 'share.linkCopied' : 'share.failed'));
+    } finally {
+      button.disabled = false;
+    }
   }
 
   function renderScreen() {
@@ -422,6 +654,7 @@
     setTimeout(() => screens.result.classList.remove('locked'), 600);
     $('retry').focus();
     if (game.status === 'won') confetti(newBest);
+    prepareShareCard().catch(() => {});
   }
 
   function changeLang(lang) {
@@ -516,6 +749,7 @@
   $('home').addEventListener('click', goToStart);
   $('retry').addEventListener('click', () => startGame(game.difficulty));
   $('go-home').addEventListener('click', goToStart);
+  $('share').addEventListener('click', shareResult);
   $('lang-toggle').addEventListener('click', toggleLang);
 
   $('settings-open').addEventListener('click', openSettings);
