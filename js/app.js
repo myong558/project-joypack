@@ -618,7 +618,9 @@
 
   // 고른 숫자를 좁혀진 범위 안으로 맞추고 다이얼(손잡이·채움)과 위 숫자 상자를 갱신한다.
   function setPick(value) {
+    const prev = pick;
     pick = Math.min(game.high, Math.max(game.low, value));
+    if (prev !== null && prev !== pick) UpDownFx.play('tick');
     // 숫자가 하나만 남으면 가운데에 둔다.
     const ratio = game.high === game.low ? 0.5 : (pick - game.low) / (game.high - game.low);
     const angle = DIAL_START - (DIAL_START - DIAL_END) * ratio;
@@ -666,6 +668,7 @@
       finishGame();
       return;
     }
+    UpDownFx.play(game.guesses[game.guesses.length - 1].result === 'UP' ? 'up' : 'down');
     renderPlay(true);
     $('dial').focus();
   }
@@ -684,6 +687,7 @@
     setTimeout(() => screens.result.classList.remove('locked'), 600);
     $('retry').focus();
     if (game.status === 'won') confetti(newBest);
+    UpDownFx.play(game.status === 'won' ? 'won' : 'lost');
     prepareShareCard().catch(() => {});
   }
 
@@ -711,6 +715,17 @@
     document.querySelectorAll('[data-skin-option]').forEach((button) => {
       button.setAttribute('aria-pressed', String(button.dataset.skinOption === skinPreference));
     });
+
+    [
+      ['sound', 'fx-sound', 'settings.sound'],
+      ['vibrate', 'fx-vibrate', 'settings.vibrate'],
+    ].forEach(([kind, id, key]) => {
+      const on = UpDownFx.isOn(kind);
+      $(id).setAttribute('aria-pressed', String(on));
+      $(id).setAttribute('aria-label', t(key, { on: on }));
+      $(id).title = t(key, { on: on });
+    });
+    $('fx-vibrate').hidden = !UpDownFx.canVibrate;
 
     const langList = $('settings-lang');
     langList.textContent = '';
@@ -800,6 +815,17 @@
   $('settings-open').addEventListener('click', openSettings);
   $('settings-close').addEventListener('click', () => $('settings').close());
   $('share-game').addEventListener('click', shareGameLink);
+  // 효과음·진동 칩: 누를 때마다 켬/끔. 켜면 바로 맛보기로 한 번 울린다.
+  [
+    ['sound', 'fx-sound'],
+    ['vibrate', 'fx-vibrate'],
+  ].forEach(([kind, id]) => {
+    $(id).addEventListener('click', () => {
+      UpDownFx.set(kind, !UpDownFx.isOn(kind));
+      renderSettings();
+      if (UpDownFx.isOn(kind)) UpDownFx.play('up');
+    });
+  });
   // 대화상자 바깥(배경)을 누르면 닫는다. 내용은 .settings-body 안에 있어 배경 클릭만 대화상자 자체에 닿는다.
   ['settings', 'confirm'].forEach((id) => {
     $(id).addEventListener('click', (event) => {

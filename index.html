@@ -10,7 +10,11 @@
   <meta property="og:title" content="업다운 게임">
   <meta property="og:description" content="서버 없이 즐기는 숫자 맞추기 업다운 게임">
   <meta property="og:url" content="https://myong558.github.io/project-updown/">
-  <meta property="og:image" content="https://myong558.github.io/project-updown/images/icon-512.png">
+  <meta property="og:image" content="https://myong558.github.io/project-updown/images/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="업다운 게임 — 숫자를 맞혀 보세요! UP? DOWN?">
+  <meta name="twitter:card" content="summary_large_image">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="업다운">
   <title>업다운 게임</title>
@@ -166,6 +170,18 @@
       <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
         <circle cx="12" cy="12" r="9"/>
         <path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9s1.3-6.3 3.8-9z"/>
+      </g>
+    </symbol>
+    <symbol id="i-sound" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/>
+        <path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>
+      </g>
+    </symbol>
+    <symbol id="i-vibrate" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="8" y="3.5" width="8" height="17" rx="2"/>
+        <path d="M4.5 8.5v7M19.5 8.5v7M2 10.5v3M22 10.5v3"/>
       </g>
     </symbol>
     <symbol id="i-share" viewBox="0 0 24 24">
@@ -356,10 +372,27 @@
         </div>
       </section>
 
-      <section class="settings-group">
-        <h3 data-i18n="settings.language"></h3>
-        <div id="settings-lang" class="chip-row"></div>
-      </section>
+      <!-- 언어와 효과음·진동은 팝업 높이를 늘리지 않도록 한 줄에 나란히 둔다. -->
+      <div class="settings-pair">
+        <section class="settings-group">
+          <h3 data-i18n="settings.language"></h3>
+          <div id="settings-lang" class="chip-row"></div>
+        </section>
+
+        <!-- 효과음·진동 켜기/끄기(js/fx.js). 아이콘 칩이 채워지면 켬, 빗금이 그어지면 끔.
+             진동을 지원하지 않는 기기(아이폰 등)는 진동 칩을 숨긴다. -->
+        <section class="settings-group">
+          <h3 data-i18n="settings.fx"></h3>
+          <div class="chip-row fx-row">
+            <button id="fx-sound" type="button" class="chip">
+              <svg class="icon" aria-hidden="true"><use href="#i-sound"></use></svg>
+            </button>
+            <button id="fx-vibrate" type="button" class="chip">
+              <svg class="icon" aria-hidden="true"><use href="#i-vibrate"></use></svg>
+            </button>
+          </div>
+        </section>
+      </div>
 
       <!-- 지금 쓰는 버전(sw.js 의 CACHE_NAME). 새 버전이 반영됐는지 확인할 때 본다. -->
       <p id="app-version" class="app-version" hidden></p>
@@ -383,6 +416,7 @@
   <script src="js/game.js"></script>
   <script src="js/i18n.js"></script>
   <script src="js/skins.js"></script>
+  <script src="js/fx.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
