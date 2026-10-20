@@ -1,6 +1,6 @@
 // 서비스 워커는 자기 위치 아래만 관리할 수 있어서, js/ 로 옮기지 않고 루트에 둔다.
 // 파일을 고쳐 배포할 때마다 이 버전을 올려야 사용자에게 새 파일이 전달된다.
-const CACHE_NAME = 'updown-v144';
+const CACHE_NAME = 'updown-v145';
 
 // GitHub Pages 하위 경로에서도 동작하도록 모두 상대 경로로 쓴다.
 const ASSETS = [
@@ -12,6 +12,7 @@ const ASSETS = [
   'js/i18n.js',
   'js/skins.js',
   'js/fx.js',
+  'js/ranking.js',
   'js/app.js',
   'fonts/jua-subset.woff2',
   'images/icon.svg',

@@ -27,6 +27,7 @@
 - 정답이면 색종이가 터지고, 최고 기록을 깨면 양쪽 아래에서도 쏘아 올려 더 크게 터집니다(동작 줄이기 설정이면 생략).
 - 결과 화면 **공유하기**: 결과 카드 이미지(1080×1080 PNG: 로고, 난이도·범위, 정답·실패, 정답 숫자, 시도 기록 UP/DOWN)와 "몇 번 만에 성공" 문구를 기기 공유 창으로 보냅니다. 게임 링크는 문구 끝 줄에 넣어 바로 누를 수 있는 링크로 보입니다. 이미지와 결과 글·링크는 공유하기 한 번에 함께 보냅니다(링크 미리보기는 `index.html` 의 og 태그). 받는 앱에 따라 이미지와 함께 온 글을 버리기도 합니다(카카오톡 등). 카드 색은 지금 스킨·컬러 모드를 따릅니다. 공유 창이 없거나 이미지를 못 보내는 브라우저(주로 PC)는 이미지를 저장하고 문구·링크를 클립보드에 복사합니다.
 - 효과음·진동: 다이얼 눈금, UP/DOWN 힌트, 정답, 실패마다 소리와 진동이 납니다. 소리는 파일 없이 Web Audio 로 합성하고, 진동은 지원하는 기기(주로 안드로이드)에서만 됩니다. 설정에서 각각 켜고 끌 수 있고 기본은 켬입니다(`js/fx.js`).
+- 공유 랭킹: 난이도별 TOP 10(시도 횟수가 적을수록 위, 같으면 같은 순위·먼저 등록한 기록이 위). 정답을 맞히면 오른쪽 위 버튼이 **랭킹 등록**으로 바뀌고, 누르면 영문 이니셜(최대 5자)로 등록합니다. 한 판에 한 번만 등록되며 시작 화면의 **랭킹** 버튼으로 언제든 볼 수 있습니다. 기록은 Firebase Firestore 에 저장합니다(`js/ranking.js`, 아래 [랭킹 서버](#랭킹-서버-firebase-firestore)).
 - 난이도별 최고 기록(가장 적은 시도 횟수) 저장
 - 한국어 / 영어 — 처음에는 브라우저 언어를 따르고, 시작 화면 왼쪽 위 버튼으로 전환
 - 게임 중 왼쪽 위 **홈** 버튼으로 시작 화면 이동
@@ -63,6 +64,60 @@
 
 - `sw.js` 맨 위의 `CACHE_NAME` 버전을 올립니다(`updown-v1` → `updown-v2`). 서비스 워커가 캐시 우선으로 파일을 내주기 때문에, 올리지 않으면 이미 방문한 사용자는 옛 파일을 계속 봅니다. 버전을 올리면 다음에 열 때 새 버전을 받아 화면을 한 번 새로 고칩니다(게임 중이면 홈으로 갈 때). 설치한 앱은 다시 화면에 나올 때도 새 버전을 확인합니다.
 - 화면 문구(`index.html`, `js/`)에 새 글자를 넣었다면 `pnpm font`로 웹폰트를 다시 만듭니다. 웹폰트(Jua)는 용량을 줄이려고 화면에 쓰는 글자만 담고 있어, 그러지 않으면 새 글자만 기본 글꼴로 보입니다.
+
+## 랭킹 서버 (Firebase Firestore)
+
+GitHub Pages 는 파일만 내주는 서버라 기록을 받을 수 없어서, 랭킹만 Firebase Firestore(무료 Spark 플랜)에 저장합니다. 여러 게임이 Firebase 프로젝트 하나(`joypack-c6bd2`)를 같이 쓰고, 게임마다 `games/<게임ID>/scores` 아래에 기록합니다. 이 게임의 게임 ID 는 `updown` 입니다. 게임은 SDK 없이 Firestore REST API 를 `fetch` 로 부릅니다(`js/ranking.js` 의 `FIREBASE`). 웹 앱 설정 값(apiKey)은 원래 공개되는 값이고, 저장소는 아래 보안 규칙이 지킵니다.
+
+1. **데이터베이스**: Firebase 콘솔 → Firestore Database → 데이터베이스 만들기(위치 `asia-northeast3 (서울)`, 프로덕션 모드).
+2. **보안 규칙**: Firestore Database → 규칙 에 아래 블록을 넣고 게시합니다. 누구나 읽기·등록만 할 수 있고 고치기·지우기는 막습니다. 게임을 추가할 때는 같은 모양의 블록을 하나 더 넣습니다.
+
+   ```
+   rules_version = '2';
+   service cloud.firestore {
+     match /databases/{db}/documents {
+       match /games/updown/scores/{id} {
+         allow read: if true;
+         allow create: if request.resource.data.keys().hasOnly(['initials', 'difficulty', 'tries', 'createdAt'])
+           && request.resource.data.initials is string
+           && request.resource.data.initials.matches('^[A-Z]{1,5}
+
+```
+project-updown/
+├── index.html              화면 구조, 아이콘 스프라이트
+├── manifest.webmanifest    앱 이름, 아이콘, 실행 방식
+├── sw.js                   서비스 워커 (파일 캐시, 오프라인 응답)
+├── css/style.css           스타일 (색 토큰 포함)
+├── js/
+│   ├── game.js             게임 규칙 (DOM 을 쓰지 않는 순수 로직)
+│   ├── i18n.js             화면 문구(한국어·영어)와 언어 설정
+│   ├── skins.js            계절 스킨 움직이는 배경(캔버스)
+│   ├── fx.js               효과음(Web Audio 합성)·진동, 켜기/끄기 저장
+│   ├── ranking.js          공유 랭킹(Firebase Firestore REST): TOP 10 읽기·기록 등록
+│   └── app.js              화면 렌더링, 이벤트, 기록·설정 저장, 서비스 워커 등록
+├── images/                 앱 아이콘 (SVG 원본 + SVG 미지원 환경용 PNG 사본), 링크 미리보기 이미지 og-image.png(1200×630)
+├── fonts/                  웹폰트 Jua 서브셋과 라이선스(SIL OFL 1.1)
+├── scripts/build-font.mjs  웹폰트 서브셋 생성 (`pnpm font`)
+└── docs/COLORS.md          색상 레퍼런스 (팔레트, 역할 토큰, 대비 기준)
+```
+
+`index.html`, `manifest.webmanifest`, `sw.js`는 루트에 있어야 합니다. 서비스 워커는 자기 폴더 아래만 관리할 수 있어서 `js/`로 옮기면 오프라인 기능이 동작하지 않습니다.
+)
+           && request.resource.data.difficulty in ['easy', 'normal', 'hard', 'extreme']
+           && request.resource.data.tries is int
+           && request.resource.data.tries >= 1
+           && request.resource.data.tries <= 6
+           && request.resource.data.createdAt == request.time;
+         allow update, delete: if false;
+       }
+     }
+   }
+   ```
+
+3. **복합 색인**: Firestore Database → 색인 → 복합 → 색인 만들기. 컬렉션 ID `scores`, 쿼리 범위 **컬렉션**, 필드 `difficulty` 오름차순 · `tries` 오름차순 · `createdAt` 오름차순. 색인이 없으면 랭킹을 불러오지 못합니다(만드는 데 몇 분 걸림).
+4. **기록 지우기**: 콘솔 → Firestore Database → 데이터 → `games` → `updown` → `scores` 에서 문서를 지웁니다.
+
+무료 한도는 하루 읽기 5만·쓰기 2만 번이고(프로젝트를 같이 쓰는 게임이 나눠 씀), 랭킹 한 번 열 때 읽기 최대 10번입니다. 한도를 넘으면 그날만 랭킹이 멈춥니다. 서버 없이 받는 기록이라 형식 검사는 하지만 마음먹고 조작하는 것까지 막지는 못합니다.
 
 ## 파일 구성
 

@@ -24,6 +24,7 @@
   --gold-100: #ffeaa4;
   --gold-300: #ffcf3e;
   --gold-600: #e3a600;
+  --bronze-300: #e7a977;
   --sage-50: #ebf7f1;
   --sage-100: #cdeddb;
   --steel-50: #e8f0ff;
@@ -548,8 +549,24 @@ button:focus-visible {
   z-index: 1;
 }
 
+#ranking-open,
 #settings-open {
   margin-left: auto;
+}
+
+#ranking-open:not([hidden]) + #settings-open {
+  margin-left: 8px;
+}
+
+/* 정답을 맞혀 랭킹 등록이 남았을 때: 대표색으로 채워 눈에 띄게 */
+#ranking-open.pending {
+  background: var(--action);
+  color: var(--text-on-action);
+  border-color: var(--action);
+}
+
+#ranking-open.pending .icon {
+  color: inherit;
 }
 
 .pill-button {
@@ -1449,6 +1466,136 @@ h1.lost {
   border-radius: 1px;
   background: currentColor;
   transform: rotate(45deg);
+}
+
+/* ── 랭킹 팝업 ───────────────────────── */
+.ranking .settings-body {
+  gap: calc(var(--space) * 0.75);
+}
+
+.ranking-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ranking-prompt {
+  margin: 0;
+  color: var(--success);
+  font-weight: 700;
+}
+
+.ranking-entry {
+  display: flex;
+  gap: 8px;
+}
+
+.ranking-input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 14px;
+  background: var(--field-bg);
+  color: var(--text);
+  border: 2px solid var(--field-line);
+  border-radius: 12px;
+  font: inherit;
+  font-size: 1.25rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.ranking-input:focus {
+  outline: none;
+  border-color: var(--field-focus);
+}
+
+.ranking-input::placeholder {
+  color: var(--text-muted);
+  font-size: 1.125rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.ranking-entry .primary {
+  flex: none;
+  padding-block: 10px;
+}
+
+.ranking-tabs .chip {
+  padding-inline: 4px;
+  white-space: nowrap;
+}
+
+.ranking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ranking-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 12px;
+  background: var(--well-bg);
+  border: 1px solid var(--well-line);
+  border-radius: 10px;
+}
+
+.ranking-list li.mine {
+  border-color: var(--action-line);
+  box-shadow: 0 0 0 1px var(--action-line);
+}
+
+.ranking-place {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 1~3위: 금·은·동 원 */
+.ranking-place.top1 {
+  background: var(--gold-300);
+  color: var(--gray-900);
+}
+
+.ranking-place.top2 {
+  background: var(--gray-200);
+  color: var(--gray-900);
+}
+
+.ranking-place.top3 {
+  background: var(--bronze-300);
+  color: var(--gray-900);
+}
+
+.ranking-name {
+  flex: 1;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+}
+
+.ranking-tries {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.ranking-status {
+  margin: 0;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.ranking-status:empty {
+  display: none;
 }
 
 .confirm {

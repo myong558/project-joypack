@@ -194,7 +194,7 @@
 
   <!-- 문구는 js/i18n.js 에 있고, data-i18n* 속성의 키로 채워진다. -->
   <main class="app intro">
-    <!-- 설정 버튼은 모든 화면 오른쪽 위에 보인다.
+    <!-- 설정 버튼은 모든 화면 오른쪽 위에 보인다. 그 왼쪽 랭킹 버튼은 시작·결과 화면에만 보인다.
          왼쪽 위는 시작 화면이면 언어 전환, 게임 화면이면 홈 버튼이다. -->
     <div class="topbar">
       <button id="home" type="button" class="pill-button" hidden>
@@ -204,6 +204,10 @@
       <button id="lang-toggle" type="button" class="pill-button" data-i18n-aria-label="lang.switchLabel">
         <svg class="icon" aria-hidden="true"><use href="#i-globe"></use></svg>
         <span data-i18n="lang.switch"></span>
+      </button>
+      <button id="ranking-open" type="button" class="pill-button" aria-haspopup="dialog">
+        <svg class="icon" aria-hidden="true"><use href="#i-trophy"></use></svg>
+        <span></span>
       </button>
       <button id="settings-open" type="button" class="pill-button" aria-haspopup="dialog">
         <svg class="icon" aria-hidden="true"><use href="#i-gear"></use></svg>
@@ -399,6 +403,30 @@
     </div>
   </dialog>
 
+  <!-- 공유 랭킹(js/ranking.js): 난이도별 TOP 10. 정답을 맞힌 직후에는 맨 위에 이니셜 등록 칸이 나온다. -->
+  <dialog id="ranking" class="settings ranking" aria-labelledby="ranking-title">
+    <div class="settings-body">
+      <div class="settings-header">
+        <h2 id="ranking-title" data-i18n="ranking.title"></h2>
+        <button id="ranking-close" type="button" class="icon-button" data-i18n-aria-label="settings.close">
+          <svg class="icon" aria-hidden="true"><use href="#i-close"></use></svg>
+        </button>
+      </div>
+
+      <form id="ranking-form" class="ranking-form" hidden>
+        <p id="ranking-prompt" class="ranking-prompt"></p>
+        <div class="ranking-entry">
+          <input id="ranking-initials" class="ranking-input" type="text" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="latin" enterkeyhint="done" data-i18n-placeholder="ranking.initials" data-i18n-aria-label="ranking.initials" required>
+          <button id="ranking-submit" type="submit" class="primary" data-i18n="ranking.submit"></button>
+        </div>
+      </form>
+
+      <div id="ranking-tabs" class="chip-row ranking-tabs"></div>
+      <ol id="ranking-list" class="ranking-list"></ol>
+      <p id="ranking-status" class="ranking-status" role="status"></p>
+    </div>
+  </dialog>
+
   <!-- 기록 리셋 확인 팝업. 설정 창 위에 한 겹 더 뜬다. 처음 포커스는 안전한 "취소"에 있다. -->
   <dialog id="confirm" class="settings confirm" aria-describedby="confirm-message">
     <div class="settings-body">
@@ -417,6 +445,7 @@
   <script src="js/i18n.js"></script>
   <script src="js/skins.js"></script>
   <script src="js/fx.js"></script>
+  <script src="js/ranking.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

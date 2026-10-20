@@ -53,6 +53,7 @@
     // 왼쪽 위: 시작 화면은 언어 전환, 게임 화면은 홈. 오른쪽 위 설정 버튼은 항상 보인다.
     $('lang-toggle').hidden = name !== 'start';
     $('home').hidden = name !== 'play';
+    $('ranking-open').hidden = name === 'play';
     if (name !== 'start') endIntro();
   }
 
@@ -132,6 +133,9 @@
     });
     document.querySelectorAll('[data-i18n-aria-label]').forEach((el) => {
       el.setAttribute('aria-label', t(el.dataset.i18nAriaLabel));
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => {
+      el.placeholder = t(el.dataset.i18nPlaceholder);
     });
   }
 
@@ -583,6 +587,137 @@
     setTimeout(() => (label.textContent = t('settings.shareGame')), 2000);
   }
 
+  // ── 공유 랭킹(js/ranking.js) ──
+  // 정답을 맞히면 그 기록(난이도·시도 횟수)을 등록 대기로 두고, 랭킹 팝업 맨 위에 이니셜 등록 칸을 띄운다.
+  // 한 판에 한 번만 등록할 수 있다. 마지막으로 쓴 이니셜은 기억해 다음 등록 때 채워 둔다.
+  const INITIALS_KEY = 'updown.initials';
+  let rankingEntry = null; // { difficulty, tries } 등록 대기 기록
+  let rankingTab = 'easy';
+  let rankingMine = null; // 방금 등록한 기록 ID (목록에서 강조)
+  let rankingRequest = 0;
+
+  function renderRankingButton() {
+    const button = $('ranking-open');
+    button.classList.toggle('pending', !!rankingEntry);
+    button.querySelector('span').textContent = t(rankingEntry ? 'ranking.register' : 'ranking.open');
+  }
+
+  function openRanking() {
+    if (rankingEntry) rankingTab = rankingEntry.difficulty;
+    else if (game) rankingTab = game.difficulty;
+    $('ranking-status').textContent = '';
+    renderRanking();
+    $('ranking').showModal();
+    if (rankingEntry) $('ranking-initials').focus();
+    loadRanking();
+  }
+
+  function renderRanking() {
+    const form = $('ranking-form');
+    form.hidden = !rankingEntry;
+    if (rankingEntry) {
+      $('ranking-prompt').textContent = t('ranking.prompt', {
+        level: t('difficulty.' + rankingEntry.difficulty),
+        tries: rankingEntry.tries,
+      });
+      if (!$('ranking-initials').value) {
+        try {
+          $('ranking-initials').value = localStorage.getItem(INITIALS_KEY) || '';
+        } catch (e) {}
+      }
+    }
+    const tabs = $('ranking-tabs');
+    tabs.textContent = '';
+    Object.keys(UpDown.DIFFICULTIES).forEach((key) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'chip';
+      button.textContent = t('difficulty.' + key);
+      button.setAttribute('aria-pressed', String(key === rankingTab));
+      button.addEventListener('click', () => {
+        rankingTab = key;
+        renderRanking();
+        loadRanking();
+      });
+      tabs.appendChild(button);
+    });
+  }
+
+  function renderRankingList(rows) {
+    const list = $('ranking-list');
+    list.textContent = '';
+    let rank = 0;
+    rows.forEach((row, i) => {
+      // 시도 횟수가 같으면 같은 순위(1, 1, 3 …)
+      if (i === 0 || row.tries !== rows[i - 1].tries) rank = i + 1;
+      const li = document.createElement('li');
+      if (row.id === rankingMine) li.className = 'mine';
+      const place = document.createElement('span');
+      place.className = 'ranking-place' + (rank <= 3 ? ' top' + rank : '');
+      place.textContent = rank;
+      const name = document.createElement('span');
+      name.className = 'ranking-name';
+      name.textContent = row.initials;
+      const score = document.createElement('span');
+      score.className = 'ranking-tries';
+      score.textContent = t('ranking.tries', { tries: row.tries });
+      li.append(place, name, score);
+      list.appendChild(li);
+    });
+    return rows.findIndex((row) => row.id === rankingMine);
+  }
+
+  async function loadRanking() {
+    const request = ++rankingRequest; // 탭을 빠르게 바꾸면 마지막 요청 결과만 그린다.
+    const status = $('ranking-status');
+    status.textContent = t('ranking.loading');
+    try {
+      const rows = await UpDownRanking.top(rankingTab);
+      if (request !== rankingRequest) return null;
+      const mine = renderRankingList(rows);
+      status.textContent = rows.length ? '' : t('ranking.empty');
+      return mine;
+    } catch (e) {
+      if (request !== rankingRequest) return null;
+      $('ranking-list').textContent = '';
+      status.textContent = t('ranking.failed');
+      return null;
+    }
+  }
+
+  async function submitRanking(event) {
+    event.preventDefault();
+    const input = $('ranking-initials');
+    const initials = UpDownRanking.cleanInitials(input.value);
+    input.value = initials;
+    if (!initials || !rankingEntry) return;
+    const button = $('ranking-submit');
+    button.disabled = true;
+    try {
+      rankingMine = await UpDownRanking.submit({
+        initials: initials,
+        difficulty: rankingEntry.difficulty,
+        tries: rankingEntry.tries,
+      });
+      try {
+        localStorage.setItem(INITIALS_KEY, initials);
+      } catch (e) {}
+      rankingTab = rankingEntry.difficulty;
+      rankingEntry = null;
+      renderRankingButton();
+      renderRanking();
+      const index = await loadRanking();
+      if (index !== null) {
+        const place = index >= 0 ? Number($('ranking-list').children[index].firstChild.textContent) : 0;
+        $('ranking-status').textContent = t('ranking.done', { rank: place });
+      }
+    } catch (e) {
+      $('ranking-status').textContent = t('ranking.submitFailed');
+    } finally {
+      button.disabled = false;
+    }
+  }
+
   function renderScreen() {
     if (screen === 'play') renderPlay(false);
     else if (screen === 'result') renderResult();
@@ -651,6 +786,8 @@
   }
 
   function startGame(difficulty) {
+    rankingEntry = null; // 등록하지 않고 새 판을 시작하면 이전 기록 등록은 사라진다.
+    renderRankingButton();
     game = UpDown.createGame(difficulty);
     pick = null;
     renderPlay(false);
@@ -687,6 +824,9 @@
     setTimeout(() => screens.result.classList.remove('locked'), 600);
     $('retry').focus();
     if (game.status === 'won') confetti(newBest);
+    rankingEntry = game.status === 'won' ? { difficulty: game.difficulty, tries: tries } : null;
+    rankingMine = null;
+    renderRankingButton();
     UpDownFx.play(game.status === 'won' ? 'won' : 'lost');
     prepareShareCard().catch(() => {});
   }
@@ -695,6 +835,7 @@
     UpDownI18n.setLang(lang);
     renderStaticTexts();
     renderScreen();
+    renderRankingButton();
     if ($('settings').open) renderSettings();
   }
 
@@ -813,6 +954,14 @@
   $('lang-toggle').addEventListener('click', toggleLang);
 
   $('settings-open').addEventListener('click', openSettings);
+  $('ranking-open').addEventListener('click', openRanking);
+  $('ranking-close').addEventListener('click', () => $('ranking').close());
+  $('ranking-form').addEventListener('submit', submitRanking);
+  // 영문만, 대문자로, 5자까지(붙여 넣기 포함)
+  $('ranking-initials').addEventListener('input', (event) => {
+    const clean = UpDownRanking.cleanInitials(event.target.value);
+    if (clean !== event.target.value) event.target.value = clean;
+  });
   $('settings-close').addEventListener('click', () => $('settings').close());
   $('share-game').addEventListener('click', shareGameLink);
   // 효과음·진동 칩: 누를 때마다 켬/끔. 켜면 바로 맛보기로 한 번 울린다.
@@ -827,7 +976,7 @@
     });
   });
   // 대화상자 바깥(배경)을 누르면 닫는다. 내용은 .settings-body 안에 있어 배경 클릭만 대화상자 자체에 닿는다.
-  ['settings', 'confirm'].forEach((id) => {
+  ['settings', 'confirm', 'ranking'].forEach((id) => {
     $(id).addEventListener('click', (event) => {
       if (event.target === $(id)) $(id).close();
     });
@@ -862,6 +1011,7 @@
   document.addEventListener('touchstart', () => {}, { passive: true });
 
   renderStaticTexts();
+  renderRankingButton();
   goToStart();
   // 인트로(css 의 .intro, 약 1.1초)가 끝난 뒤 클래스를 지운다. 여러 요소가 시차를 두고 움직여서 animationend 대신 타이머를 쓴다.
   setTimeout(endIntro, 1400);
