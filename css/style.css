@@ -91,6 +91,10 @@
   --field-focus: var(--focus);
   --text-on-action: var(--text-on-primary);
 
+  /* 카카오톡 공유 버튼(카카오 브랜드 색, 라이트·다크 공통) */
+  --kakao-bg: #fee500;
+  --kakao-text: #191919;
+
   /* 화면 높이의 1%. PC 화면 확대(--pc-zoom) 때는 확대 배수로 나눠, 높이 비례 크기가 확대로 화면을 넘지 않게 한다. */
   --vh: 1vh;
   /* 세로 간격 기준값: 화면 높이에 비례 (568px 13px · 640px 16px · 844px 24px, 최대 40px) */
@@ -576,6 +580,7 @@ button:focus-visible {
 /* ── 공통 버튼 ────────────────────────── */
 .primary,
 .secondary,
+.kakao,
 .danger-button {
   display: flex;
   justify-content: center;
@@ -586,8 +591,17 @@ button:focus-visible {
 }
 
 .primary,
-.secondary {
+.secondary,
+.kakao {
   font-weight: 700;
+}
+
+/* 카카오톡 공유 버튼: 카카오 공식 노랑 바탕 + 검정 글자(카카오 디자인 가이드). 스킨·테마와 관계없이 같다. */
+.kakao {
+  background: var(--kakao-bg);
+  color: var(--kakao-text);
+  border: 1px solid var(--kakao-bg);
+  box-shadow: var(--shadow-button);
 }
 
 .primary {
@@ -1229,12 +1243,6 @@ h1.lost {
   min-width: 0;
   padding-inline: 12px;
   white-space: nowrap;
-}
-
-/* 이미지를 보낸 뒤 [링크 보내기] 차례: 대표색 테두리로 다음에 누를 버튼임을 알린다. */
-#share.pending {
-  border-color: var(--action-line);
-  box-shadow: 0 0 0 1px var(--action-line), var(--shadow-button);
 }
 
 /* 공유 알림(app.js 의 showToast). 아래에서 올라오는 공유 창에 가리지 않도록 화면 위쪽(상단 버튼 아래)에 잠깐 뜬다. */
