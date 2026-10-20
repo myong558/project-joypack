@@ -1237,12 +1237,6 @@ h1.lost {
   white-space: nowrap;
 }
 
-/* 이미지를 보낸 뒤 [링크 보내기] 차례: 대표색 테두리로 다음에 누를 버튼임을 알린다. */
-#share.pending {
-  border-color: var(--action-line);
-  box-shadow: 0 0 0 1px var(--action-line), var(--shadow-button);
-}
-
 /* 공유 알림(app.js 의 showToast). 아래에서 올라오는 공유 창에 가리지 않도록 화면 위쪽(상단 버튼 아래)에 잠깐 뜬다. */
 .toast {
   position: fixed;
@@ -1270,6 +1264,14 @@ h1.lost {
 }
 
 /* ── 설정·확인 팝업 ───────────────────── */
+/* 게임 링크 공유: 설정 제목 오른쪽, 닫기 버튼 앞 */
+.share-game {
+  margin-left: auto;
+  margin-right: 16px;
+  white-space: nowrap;
+  font-weight: 700;
+}
+
 .app-version {
   margin: 0;
   color: var(--text-muted);
