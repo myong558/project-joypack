@@ -15,6 +15,7 @@
   let screen = 'start';
   let game = null;
   let newBest = false;
+  let linkPending = false; // 결과 이미지를 보냈고 링크 보내기가 남았다(setLinkPending).
   let updateReady = false; // 새 버전 서비스 워커가 화면을 넘겨받았다. 홈으로 갈 때 새로 고친다.
   let pick = null; // 다이얼로 고른 숫자. null 이면 다음 렌더링 때 범위 최솟값(왼쪽 끝)에서 시작한다.
   let best = loadBest();
@@ -326,6 +327,7 @@
     $('result-detail').textContent = won ? t('result.wonDetail', { tries: game.guesses.length }) : '';
     $('result-detail').hidden = !won;
     $('result-best').hidden = !newBest;
+    setLinkPending(linkPending); // 언어를 바꾸면 버튼 문구도 다시 쓴다.
   }
 
   // ── 공유하기 ──
@@ -525,23 +527,50 @@
     toastTimer = setTimeout(() => toast.classList.remove('show'), duration || 2600);
   }
 
-  // [공유하기]: 결과 이미지와 문구·게임 링크를 한 번에 기기 공유 창으로 보낸다.
-  // 받는 앱에 따라 이미지와 함께 온 글을 버리기도 한다(카카오톡 등).
+  // 공유는 두 번 보낸다: 결과 이미지 → 결과 글·게임 링크(한 덩어리).
+  // 이미지와 글을 함께 보내면 글을 버리고 이미지만 받는 앱(카카오톡 등)이 있어, 링크는 따로 한 번 더 보낸다.
+  // [공유하기] 한 번으로 이미지 공유가 끝나면 바로 글·링크 공유 창을 이어서 연다. 브라우저가 버튼 누름 없이
+  // 공유 창 여는 것을 막으면(NotAllowedError) 버튼을 [링크 보내기]로 바꿔 한 번 더 누르게 한다.
+  function setLinkPending(pending) {
+    linkPending = pending;
+    const button = $('share');
+    button.classList.toggle('pending', pending);
+    button.querySelector('use').setAttribute('href', pending ? '#i-link' : '#i-share');
+    button.querySelector('span').textContent = t(pending ? 'result.shareLink' : 'result.share');
+  }
+
   async function shareResult() {
     const button = $('share');
     button.disabled = true;
     try {
       // 게임 링크는 문구 끝 줄에 넣는다. 문구 안의 주소는 메신저가 바로 눌리는 링크로 바꿔 준다.
       const message = shareText() + '\n' + gameUrl();
+      if (linkPending && navigator.share) {
+        try {
+          await navigator.share({ text: message });
+          setLinkPending(false);
+        } catch (e) {}
+        return;
+      }
       let file = null;
       try {
         file = await prepareShareCard();
       } catch (e) {}
       if (navigator.share) {
         const withImage = !!file && !!navigator.canShare && navigator.canShare({ files: [file] });
-        const data = withImage ? { files: [file], text: message } : { title: t('app.title'), text: message };
+        const data = withImage ? { files: [file] } : { title: t('app.title'), text: message };
         try {
           await navigator.share(data);
+          if (withImage) {
+            try {
+              await navigator.share({ text: message });
+            } catch (e) {
+              if (e.name !== 'AbortError') {
+                setLinkPending(true);
+                showToast(t('share.sendLink'), 6000);
+              }
+            }
+          }
           return;
         } catch (e) {
           if (e.name === 'AbortError') return; // 사용자가 공유 창을 닫았다.
@@ -648,6 +677,7 @@
   }
 
   function finishGame() {
+    linkPending = false;
     const tries = game.guesses.length;
     newBest = game.status === 'won' && (!best[game.difficulty] || tries < best[game.difficulty]);
     if (newBest) {
