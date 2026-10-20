@@ -90,11 +90,6 @@
   --action: var(--primary);
   --field-focus: var(--focus);
   --text-on-action: var(--text-on-primary);
-
-  /* 카카오톡 공유 버튼(카카오 브랜드 색, 라이트·다크 공통) */
-  --kakao-bg: #fee500;
-  --kakao-text: #191919;
-
   /* 화면 높이의 1%. PC 화면 확대(--pc-zoom) 때는 확대 배수로 나눠, 높이 비례 크기가 확대로 화면을 넘지 않게 한다. */
   --vh: 1vh;
   /* 세로 간격 기준값: 화면 높이에 비례 (568px 13px · 640px 16px · 844px 24px, 최대 40px) */
@@ -580,7 +575,6 @@ button:focus-visible {
 /* ── 공통 버튼 ────────────────────────── */
 .primary,
 .secondary,
-.kakao,
 .danger-button {
   display: flex;
   justify-content: center;
@@ -591,17 +585,8 @@ button:focus-visible {
 }
 
 .primary,
-.secondary,
-.kakao {
+.secondary {
   font-weight: 700;
-}
-
-/* 카카오톡 공유 버튼: 카카오 공식 노랑 바탕 + 검정 글자(카카오 디자인 가이드). 스킨·테마와 관계없이 같다. */
-.kakao {
-  background: var(--kakao-bg);
-  color: var(--kakao-text);
-  border: 1px solid var(--kakao-bg);
-  box-shadow: var(--shadow-button);
 }
 
 .primary {
@@ -1105,8 +1090,8 @@ button:focus-visible {
   position: absolute;
   left: 50%;
   bottom: 2cqh; /* 버튼 아래 변을 다이얼 영역 맨 아래 가까이(원호 양 끝보다 조금 아래) 둔다 */
-  width: min(32cqw, 91cqh); /* 원호 폭(높이 × 300/105)의 32% */
-  padding: min(calc(var(--space) * 0.6), 5cqh) 0;
+  width: min(42cqw, 120cqh); /* 원호 폭(높이 × 300/105)의 42% */
+  padding: min(calc(var(--space) * 0.9 + 4px), 10cqh) 0;
   transform: translateX(-50%);
   background: var(--action);
   color: var(--text-on-action);
@@ -1115,6 +1100,13 @@ button:focus-visible {
   border-radius: 12px;
   font-size: clamp(1.125rem, 15cqh, 1.4rem); /* 다이얼 크기에 따라 18px ~ 1.4rem */
   font-weight: 700;
+}
+
+/* 누르는 영역을 보이는 버튼보다 사방 10px 넓힌다. 살짝 빗나가 다이얼(숫자)이 바뀌는 일을 줄인다. */
+.dial-submit::before {
+  content: '';
+  position: absolute;
+  inset: -10px;
 }
 
 .dial-submit:not(:disabled):active {

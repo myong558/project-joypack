@@ -525,8 +525,8 @@
     toastTimer = setTimeout(() => toast.classList.remove('show'), duration || 2600);
   }
 
-  // [공유하기]: 결과 이미지와 문구·링크를 한 번에 기기 공유 창으로 보낸다.
-  // 카카오톡은 기기 공유로 받으면 글(링크)을 버리므로 [카카오톡으로 공유](shareKakao)를 따로 둔다.
+  // [공유하기]: 결과 이미지와 문구·게임 링크를 한 번에 기기 공유 창으로 보낸다.
+  // 받는 앱에 따라 이미지와 함께 온 글을 버리기도 한다(카카오톡 등).
   async function shareResult() {
     const button = $('share');
     button.disabled = true;
@@ -555,72 +555,6 @@
         copied = true;
       } catch (e) {}
       showToast(t(file ? (copied ? 'share.copied' : 'share.saved') : copied ? 'share.linkCopied' : 'share.failed'));
-    } finally {
-      button.disabled = false;
-    }
-  }
-
-  // ── 카카오톡 공유(카카오 JavaScript SDK) ──
-  // 기기 공유로 카카오톡에 이미지와 글을 함께 보내면 글(링크)이 버려진다. 카카오 공유는 결과 이미지와
-  // "나도 도전하기" 링크 버튼을 한 메시지(피드)로 보낸다.
-  // 키: developers.kakao.com 에서 앱을 만들고 [앱 키]의 JavaScript 키를 넣는다.
-  // [플랫폼 > Web] 에 사이트 도메인(https://myong558.github.io, 로컬 시험은 http://localhost:3000)을 등록해야 한다.
-  // 키가 비어 있으면 버튼을 숨기고 SDK 도 불러오지 않는다.
-  const KAKAO_JS_KEY = '2885e417a3550567e1558da2829327a7';
-  const KAKAO_SDK_URL = 'https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js';
-  let kakaoReady = null;
-
-  function loadKakao() {
-    if (!kakaoReady) {
-      kakaoReady = new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = KAKAO_SDK_URL;
-        script.crossOrigin = 'anonymous';
-        script.onload = () => {
-          if (!window.Kakao.isInitialized()) window.Kakao.init(KAKAO_JS_KEY);
-          resolve(window.Kakao);
-        };
-        script.onerror = () => {
-          kakaoReady = null; // 오프라인 등으로 실패하면 다음에 다시 시도한다.
-          reject(new Error('kakao sdk'));
-        };
-        document.head.appendChild(script);
-      });
-    }
-    return kakaoReady;
-  }
-
-  async function shareKakao() {
-    const button = $('share-kakao');
-    button.disabled = true;
-    try {
-      const [Kakao, file] = await Promise.all([loadKakao(), prepareShareCard()]);
-      // 피드 이미지는 공개 주소여야 해서 결과 이미지를 카카오 서버에 올리고 받은 주소를 쓴다.
-      // 올리기가 실패하면 게임 아이콘으로라도 이미지 + 링크 메시지를 보낸다.
-      let imageUrl = new URL('images/icon-512.png', gameUrl()).href;
-      let imageSize = 512;
-      try {
-        const upload = await Kakao.Share.uploadImage({ file: [file] });
-        imageUrl = upload.infos.original.url;
-        imageSize = CARD_SIZE;
-      } catch (e) {}
-      const url = gameUrl();
-      const link = { mobileWebUrl: url, webUrl: url };
-      Kakao.Share.sendDefault({
-        objectType: 'feed',
-        content: {
-          title: t('app.title'),
-          // 문구 아래에 게임 주소도 글자로 보여 준다. 누르는 링크는 이미지와 [나도 도전하기] 버튼이다.
-          description: shareText() + '\n' + url,
-          imageUrl: imageUrl,
-          imageWidth: imageSize,
-          imageHeight: imageSize,
-          link: link,
-        },
-        buttons: [{ title: t('share.kakaoButton'), link: link }],
-      });
-    } catch (e) {
-      showToast(t('share.failed'));
     } finally {
       button.disabled = false;
     }
@@ -728,7 +662,6 @@
     $('retry').focus();
     if (game.status === 'won') confetti(newBest);
     prepareShareCard().catch(() => {});
-    if (KAKAO_JS_KEY) loadKakao().catch(() => {});
   }
 
   function changeLang(lang) {
@@ -839,8 +772,6 @@
   $('retry').addEventListener('click', () => startGame(game.difficulty));
   $('go-home').addEventListener('click', goToStart);
   $('share').addEventListener('click', shareResult);
-  $('share-kakao').addEventListener('click', shareKakao);
-  $('share-kakao').hidden = !KAKAO_JS_KEY;
   $('lang-toggle').addEventListener('click', toggleLang);
 
   $('settings-open').addEventListener('click', openSettings);
