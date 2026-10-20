@@ -529,14 +529,15 @@
     const button = $('share');
     button.disabled = true;
     try {
-      const url = gameUrl();
-      const text = shareText();
+      // 게임 링크는 url 항목 대신 문구 끝 줄에 넣는다. 이미지와 함께 보내면 url 항목을 버리는 앱(카카오톡 등)이 많고,
+      // 문구 안의 주소는 메신저가 바로 눌리는 링크로 바꿔 준다. 받는 쪽에는 이미지 → 문구·링크 순서로 보인다.
+      const message = shareText() + '\n' + gameUrl();
       let file = null;
       try {
         file = await prepareShareCard();
       } catch (e) {}
       if (navigator.share) {
-        const data = { title: t('app.title'), text: text, url: url };
+        const data = { title: t('app.title'), text: message };
         if (file && navigator.canShare && navigator.canShare({ files: [file] })) data.files = [file];
         try {
           await navigator.share(data);
@@ -548,7 +549,7 @@
       if (file) saveFile(file);
       let copied = false;
       try {
-        await navigator.clipboard.writeText(text + '\n' + url);
+        await navigator.clipboard.writeText(message);
         copied = true;
       } catch (e) {}
       showToast(t(file ? (copied ? 'share.copied' : 'share.saved') : copied ? 'share.linkCopied' : 'share.failed'));
