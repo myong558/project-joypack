@@ -585,6 +585,17 @@ button:focus-visible {
   color: var(--pill-icon);
 }
 
+/* 조이팩 게임 목록으로: 아이콘만 둔 동그란 버튼, 옆 언어 버튼과 간격 */
+#hub-link {
+  margin-right: 6px;
+  padding: 4px 8px;
+  text-decoration: none;
+}
+
+#hub-link[hidden] {
+  display: none;
+}
+
 .pill-button:hover {
   background: var(--pill-bg-hover);
 }

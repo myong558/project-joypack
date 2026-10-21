@@ -408,3 +408,6 @@ function showResult(result: GameResult, missionId: MissionId, mode: Mode, date: 
 }
 
 showStart(undefined, undefined, true);
+
+// 조이팩 서비스 워커(사이트에 하나)를 등록하고, 이 게임 파일 전체를 캐시하라고 알린다(처음 열 때 캐시, 이후에는 바뀐 파일만)
+window.addEventListener('load', () => void Joypack.registerSW({ root: '../../', game: 'hammer' }));

@@ -42,6 +42,7 @@
       'share.linkCopied': '링크를 복사했어요',
       'share.failed': '공유하지 못했어요',
       'nav.home': '홈',
+      'nav.hub': '조이팩 게임 목록',
       'ranking.open': '랭킹',
       'ranking.register': '랭킹 등록',
       'ranking.title': '랭킹 TOP 10',
@@ -119,6 +120,7 @@
       'share.linkCopied': 'Link copied',
       'share.failed': "Couldn't share",
       'nav.home': 'Home',
+      'nav.hub': 'Joypack games',
       'ranking.open': 'Ranking',
       'ranking.register': 'Join ranking',
       'ranking.title': 'Top 10',
@@ -170,7 +172,7 @@
   // 저장된 선택이 없으면 브라우저 언어를 따른다.
   function detectLang() {
     try {
-      const saved = localStorage.getItem(LANG_KEY);
+      const saved = Joypack.get('lang', LANG_KEY);
       if (MESSAGES[saved]) return saved;
     } catch (e) {}
     const browser = (navigator.language || '').slice(0, 2).toLowerCase();
@@ -191,9 +193,7 @@
   function setLang(next) {
     if (!MESSAGES[next]) return;
     lang = next;
-    try {
-      localStorage.setItem(LANG_KEY, next);
-    } catch (e) {}
+    Joypack.set('lang', next, LANG_KEY);
   }
 
   global.UpDownI18n = { LANGS: Object.keys(MESSAGES), NAMES: NAMES, t: t, getLang: getLang, setLang: setLang };

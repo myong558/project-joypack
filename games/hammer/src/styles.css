@@ -4123,6 +4123,18 @@ body {
   right: calc(0.6em + 2.3em + 0.5em);
 }
 
+/* 좌상단: 조이팩 게임 목록 버튼, 그 오른쪽에 언어 버튼 */
+.corner.hub-btn {
+  display: grid;
+  place-items: center;
+  color: inherit;
+  text-decoration: none;
+}
+
+.start .corner.lang-btn {
+  left: calc(0.6em + 2.3em + 0.5em);
+}
+
 .rank-btn:hover {
   transform: none;
 }

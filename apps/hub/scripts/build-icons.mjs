@@ -1,0 +1,38 @@
+// public/logo.svg 로 앱 아이콘(PNG)과 링크 미리보기 이미지(og-image.png)를 만든다. 로고를 바꾸면 `pnpm --filter hub icons`.
+// 만든 PNG 는 저장소에 커밋한다(CI 에서는 다시 만들지 않음).
+import { readFile } from 'node:fs/promises';
+import sharp from 'sharp';
+
+const logo = await readFile('public/logo.svg');
+const png = (size) => sharp(logo, { density: 384 }).resize(size, size).png();
+
+await png(192).toFile('public/pwa-192x192.png');
+await png(512).toFile('public/pwa-512x512.png');
+
+// 아이폰 홈 화면·마스커블 아이콘은 모서리를 기기가 자르므로 꽉 찬 사각 배경에 로고를 안쪽(안전 영역)으로 넣는다
+async function padded(size, inner, file) {
+  const mark = await sharp(logo, { density: 384 }).resize(inner, inner).png().toBuffer();
+  await sharp({ create: { width: size, height: size, channels: 4, background: '#6c47ff' } })
+    .composite([{ input: mark, gravity: 'center' }])
+    .png()
+    .toFile(file);
+}
+await padded(512, 400, 'public/maskable-icon-512x512.png');
+await padded(180, 164, 'public/apple-touch-icon-180x180.png');
+
+// 링크 미리보기 1200×630
+const markup = `
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630">
+  <defs>
+    <radialGradient id="g" cx="85%" cy="0%" r="90%"><stop offset="0" stop-color="#d9ceff"/><stop offset="1" stop-color="#f5f2ff"/></radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#g)"/>
+  <text x="560" y="300" font-family="Jua, 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif" font-size="150" font-weight="700" fill="#1f1a33">조이팩</text>
+  <text x="566" y="390" font-family="Jua, 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif" font-size="46" fill="#6b6585">하나씩 늘어나는 미니 게임 모음</text>
+</svg>`;
+const mark = await sharp(logo, { density: 384 }).resize(360, 360).png().toBuffer();
+await sharp(Buffer.from(markup))
+  .composite([{ input: mark, left: 140, top: 135 }])
+  .png()
+  .toFile('public/og-image.png');
+console.log('아이콘·og-image 생성 완료');

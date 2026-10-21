@@ -1,5 +1,5 @@
 // 웹폰트(Jua)를 화면에 쓰이는 글자만 남긴 woff2 로 만든다.
-// 화면 문구(index.html, js/)를 바꾼 뒤에는 `pnpm font` 를 다시 실행하고 sw.js 의 캐시 버전을 올린다.
+// 화면 문구(index.html, js/)를 바꾼 뒤에는 `pnpm font` 를 다시 실행한다(캐시는 조이팩 빌드가 파일 해시로 알아서 갱신).
 import { readFile, writeFile, mkdir, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { dirname } from 'node:path';
@@ -8,7 +8,7 @@ import subsetFont from 'subset-font';
 const SOURCE_URL = 'https://github.com/google/fonts/raw/main/ofl/jua/Jua-Regular.ttf';
 const SOURCE_CACHE = 'node_modules/.cache/fonts/Jua-Regular.ttf';
 const JS_FILES = (await readdir('js')).filter((name) => name.endsWith('.js')).map((name) => 'js/' + name);
-const TEXT_FILES = ['index.html', 'manifest.webmanifest', ...JS_FILES];
+const TEXT_FILES = ['index.html', ...JS_FILES];
 const OUTPUT = 'fonts/jua-subset.woff2';
 
 async function loadSource() {

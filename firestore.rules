@@ -1,0 +1,38 @@
+// 조이팩 Firestore 보안 규칙 원본 (Firebase 프로젝트 joypack-c6bd2)
+// 고친 뒤 Firebase 콘솔 → Firestore Database → 규칙 에 그대로 붙여 넣고 게시한다.
+// 게임마다 games/<게임ID>/ 아래만 열어 두고, 나머지 경로는 모두 막힌다(규칙이 없는 경로는 거부).
+//
+// 주의: 두더지잡기(hammer) 블록은 그 게임 README 의 규칙 설명(문서 이름 classic·daily-날짜만, 필드는 entries 10개 이하만,
+// 삭제 금지)으로 다시 쓴 것이다. 처음 이 파일을 게시하기 전에 콘솔에 게시된 규칙과 대조하고, 다르면 콘솔 쪽을 이 파일에 옮긴다.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{db}/documents {
+
+    // 업다운: 기록 1건 = 문서 1개. 누구나 읽기·등록만, 고치기·지우기 금지
+    match /games/updown/scores/{id} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['initials', 'difficulty', 'tries', 'time', 'createdAt'])
+        && request.resource.data.initials is string
+        && request.resource.data.initials.matches('^[A-Z]{1,5}$')
+        && request.resource.data.difficulty in ['easy', 'normal', 'hard', 'extreme']
+        && request.resource.data.tries is int
+        && request.resource.data.tries >= 1
+        && request.resource.data.tries <= 6
+        && request.resource.data.time is int
+        && request.resource.data.time >= 0
+        && request.resource.data.time <= 86400000
+        && request.resource.data.createdAt == request.time;
+      allow update, delete: if false;
+    }
+
+    // 두더지잡기: 순위표 1개 = 문서 1개({ entries: [...] }, 1~10위). 등록은 트랜잭션으로 문서 전체를 다시 쓴다
+    match /games/hammer/rankings/{board} {
+      allow read: if true;
+      allow create, update: if (board == 'classic' || board.matches('^daily-[0-9]{4}-[0-9]{2}-[0-9]{2}$'))
+        && request.resource.data.keys().hasOnly(['entries'])
+        && request.resource.data.entries is list
+        && request.resource.data.entries.size() <= 10;
+      allow delete: if false;
+    }
+  }
+}

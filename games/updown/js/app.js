@@ -1,4 +1,4 @@
-// 화면 이벤트 처리, 렌더링, 최고 기록 저장, 서비스 워커 등록.
+// 화면 이벤트 처리, 렌더링, 최고 기록 저장, 서비스 워커 등록(조이팩 공통 서비스 워커).
 // 언어를 바꾸면 현재 화면을 상태에서 다시 그리므로, 화면 문구는 모두 render* 함수에서 채운다.
 (function () {
   'use strict';
@@ -50,7 +50,8 @@
     Object.keys(screens).forEach((key) => {
       screens[key].hidden = key !== name;
     });
-    // 왼쪽 위: 시작 화면은 언어 전환, 게임 화면은 홈. 오른쪽 위 설정 버튼은 항상 보인다.
+    // 왼쪽 위: 시작 화면은 조이팩 게임 목록·언어 전환, 게임 화면은 홈. 오른쪽 위 설정 버튼은 항상 보인다.
+    $('hub-link').hidden = name !== 'start';
     $('lang-toggle').hidden = name !== 'start';
     $('home').hidden = name !== 'play';
     $('ranking-open').hidden = name === 'play';
@@ -68,10 +69,8 @@
   let themePreference = loadThemePreference();
 
   function loadThemePreference() {
-    try {
-      const saved = localStorage.getItem(THEME_KEY);
-      if (saved === 'system' || saved === 'light' || saved === 'dark') return saved;
-    } catch (e) {}
+    const saved = Joypack.get('theme', THEME_KEY);
+    if (saved === 'system' || saved === 'light' || saved === 'dark') return saved;
     return 'system';
   }
 
@@ -91,9 +90,7 @@
 
   function setTheme(preference) {
     themePreference = preference;
-    try {
-      localStorage.setItem(THEME_KEY, preference);
-    } catch (e) {}
+    Joypack.set('theme', preference, THEME_KEY);
     applyTheme();
   }
 
@@ -625,9 +622,7 @@
         time: duration(rankingEntry.time),
       });
       if (!$('ranking-initials').value) {
-        try {
-          $('ranking-initials').value = localStorage.getItem(INITIALS_KEY) || '';
-        } catch (e) {}
+        $('ranking-initials').value = Joypack.get('initials', INITIALS_KEY) || '';
       }
     }
     const tabs = $('ranking-tabs');
@@ -731,9 +726,7 @@
       tries: entry.tries,
       time: entry.time,
     });
-    try {
-      localStorage.setItem(INITIALS_KEY, initials);
-    } catch (e) {}
+    Joypack.set('initials', initials, INITIALS_KEY);
     rankingTab = entry.difficulty;
     rankingEntry = null;
     renderRankingButton();
@@ -758,9 +751,7 @@
       $('result-rank-prompt').textContent = t('ranking.cardPrompt', { rank: rankingEntry.expected });
       const input = $('result-rank-initials');
       if (!input.value) {
-        try {
-          input.value = localStorage.getItem(INITIALS_KEY) || '';
-        } catch (e) {}
+        input.value = Joypack.get('initials', INITIALS_KEY) || '';
       }
     }
     if (animate) {
@@ -1119,10 +1110,10 @@
   // 인트로(css 의 .intro, 약 1.1초)가 끝난 뒤 클래스를 지운다. 여러 요소가 시차를 두고 움직여서 animationend 대신 타이머를 쓴다.
   setTimeout(endIntro, 1400);
 
-  // 서비스 워커는 HTTPS 와 localhost 에서만 등록된다. file:// 로 열면 게임만 동작한다.
-  // sw.js 는 캐시 우선이라, 새 버전을 배포해도 이번 화면은 옛 파일로 열린다. 새 서비스 워커가 화면을 넘겨받으면(controllerchange)
-  // 한 번 새로 고쳐 바로 새 버전을 보여 준다. 게임 중이면 판을 날리지 않도록 홈으로 갈 때까지 미룬다.
-  // 처음 설치(원래 담당 워커가 없음)는 파일이 같으므로 새로 고치지 않는다.
+  // 서비스 워커는 조이팩 사이트에 하나(../../sw.js)다. HTTPS 와 localhost 에서만 등록되고, file:// 로 열면 게임만 동작한다.
+  // 등록하면서 이 게임 파일 전체를 캐시하라고 알린다(처음 열 때 캐시, 이후에는 바뀐 파일만).
+  // 새 서비스 워커가 화면을 넘겨받으면(controllerchange) 한 번 새로 고쳐 바로 새 버전을 보여 준다.
+  // 게임 중이면 판을 날리지 않도록 홈으로 갈 때까지 미룬다. 처음 설치(원래 담당 워커가 없음)는 새로 고치지 않는다.
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {
     const hadController = !!navigator.serviceWorker.controller;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
@@ -1131,15 +1122,7 @@
       if (screen === 'start') location.reload();
     });
     window.addEventListener('load', () => {
-      navigator.serviceWorker
-        .register('sw.js')
-        .then((registration) => {
-          // 설치한 앱은 백그라운드에 오래 남아 있으므로 다시 화면에 나올 때도 새 버전을 확인한다.
-          document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible') registration.update().catch(() => {});
-          });
-        })
-        .catch(() => {});
+      Joypack.registerSW({ root: '../../', game: 'updown' });
     });
   }
 })();

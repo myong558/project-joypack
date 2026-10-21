@@ -32,6 +32,7 @@ const ko = {
   'dex.exploded': '지금까지 {n}번 터뜨렸어요',
 
   'lang.label': '언어 선택',
+  'nav.hub': '조이팩 게임 목록',
   'settings.title': '설정',
   'settings.open': '설정 열기',
   'settings.feedback': '소리·진동',
@@ -190,6 +191,7 @@ const en: Record<MessageKey, string> = {
   'dex.exploded': '{n} set off so far',
 
   'lang.label': 'Choose language',
+  'nav.hub': 'Joypack games',
   'settings.title': 'Settings',
   'settings.open': 'Open settings',
   'settings.feedback': 'Sound & vibration',

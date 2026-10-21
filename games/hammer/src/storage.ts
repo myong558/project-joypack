@@ -1,3 +1,4 @@
+import '@joypack/shared';
 import { emptyStats } from './game/engine';
 import { MOLE_ORDER } from './game/moles';
 import type { MoleKind } from './game/types';
@@ -62,10 +63,28 @@ export function loadSave(): SaveData {
     if (!LANGS.includes(data.lang)) data.lang = base.lang;
     if (!THEMES.includes(data.theme)) data.theme = base.theme;
     if (!SKIN_SETTINGS.includes(data.skin)) data.skin = base.skin;
-    return data;
+    return withShared(data);
   } catch {
-    return base;
+    return withShared(base);
   }
+}
+
+/**
+ * 조이팩 공통 설정(허브에서 고른 값)이 있으면 이 게임 저장 값보다 앞선다.
+ * 흔들림(shake)은 진동과 화면 흔들림을 같이 켜고 끄므로 공통 설정의 진동에 맞춘다. 스킨은 게임마다 달라 공통으로 두지 않는다
+ */
+function withShared(data: SaveData): SaveData {
+  const theme = Joypack.get('theme') as Theme | null;
+  if (theme && THEMES.includes(theme)) data.theme = theme;
+  const lang = Joypack.get('lang') as Lang | null;
+  if (lang && LANGS.includes(lang)) data.lang = lang;
+  const sound = Joypack.get('sound');
+  if (sound) data.sound = sound !== 'off';
+  const vibrate = Joypack.get('vibrate');
+  if (vibrate) data.shake = vibrate !== 'off';
+  const initials = cleanName(Joypack.get('initials') ?? '');
+  if (initials) data.playerName = initials;
+  return data;
 }
 
 export function writeSave(data: SaveData): void {
@@ -74,4 +93,10 @@ export function writeSave(data: SaveData): void {
   } catch {
     // 저장 실패는 무시한다(시크릿 창, 용량 초과 등)
   }
+  // 이 게임에서 바꾼 공통 설정은 다른 게임·허브도 따르도록 조이팩 공통 키에도 쓴다
+  Joypack.set('theme', data.theme);
+  Joypack.set('lang', data.lang);
+  Joypack.set('sound', data.sound ? 'on' : 'off');
+  Joypack.set('vibrate', data.shake ? 'on' : 'off');
+  if (data.playerName) Joypack.set('initials', data.playerName);
 }

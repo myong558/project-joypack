@@ -9,16 +9,17 @@
   <meta property="og:type" content="website">
   <meta property="og:title" content="업다운 게임">
   <meta property="og:description" content="서버 없이 즐기는 숫자 맞추기 업다운 게임">
-  <meta property="og:url" content="https://myong558.github.io/project-updown/">
-  <meta property="og:image" content="https://myong558.github.io/project-updown/images/og-image.png">
+  <meta property="og:url" content="https://myong558.github.io/project-joypack/games/updown/">
+  <meta property="og:image" content="https://myong558.github.io/project-joypack/games/updown/images/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="업다운 게임 — 숫자를 맞혀 보세요! UP? DOWN?">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="업다운">
+  <meta name="apple-mobile-web-app-title" content="조이팩">
   <title>업다운 게임</title>
-  <link rel="manifest" href="manifest.webmanifest">
+  <!-- 앱 설치는 조이팩 하나로 한다(manifest·서비스 워커는 사이트 루트에 있음). -->
+  <link rel="manifest" href="../../manifest.webmanifest">
   <!-- 탭 아이콘은 SVG 를 쓰고, SVG 탭 아이콘을 지원하지 않는 브라우저(구형 Safari 등)는 PNG 를 쓴다. -->
   <link rel="icon" type="image/png" sizes="192x192" href="images/icon-192.png">
   <link rel="icon" type="image/svg+xml" href="images/icon.svg">
@@ -34,7 +35,8 @@
       var themePref = 'system';
       var skin = null;
       try {
-        themePref = localStorage.getItem('updown.theme') || 'system';
+        // 공통 설정(joypack.theme)을 먼저, 없으면 예전 키(updown.theme)를 본다. Joypack.get 과 같은 규칙.
+        themePref = localStorage.getItem('joypack.theme') || localStorage.getItem('updown.theme') || 'system';
         skin = localStorage.getItem('updown.skin');
       } catch (e) {}
       if (themePref === 'dark' || (themePref === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -146,6 +148,14 @@
         <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
       </g>
     </symbol>
+    <symbol id="i-apps" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+        <rect x="4" y="4" width="6.5" height="6.5" rx="1.8"/>
+        <rect x="13.5" y="4" width="6.5" height="6.5" rx="1.8"/>
+        <rect x="4" y="13.5" width="6.5" height="6.5" rx="1.8"/>
+        <rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.8"/>
+      </g>
+    </symbol>
     <symbol id="i-home" viewBox="0 0 24 24">
       <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M3 11l9-7 9 7"/>
@@ -197,6 +207,9 @@
     <!-- 설정 버튼은 모든 화면 오른쪽 위에 보인다. 그 왼쪽 랭킹 버튼은 시작·결과 화면에만 보인다.
          왼쪽 위는 시작 화면이면 언어 전환, 게임 화면이면 홈 버튼이다. -->
     <div class="topbar">
+      <a id="hub-link" class="pill-button" href="../../" data-i18n-aria-label="nav.hub">
+        <svg class="icon" aria-hidden="true"><use href="#i-apps"></use></svg>
+      </a>
       <button id="home" type="button" class="pill-button" hidden>
         <svg class="icon" aria-hidden="true"><use href="#i-home"></use></svg>
         <span data-i18n="nav.home"></span>
@@ -457,6 +470,8 @@
     </div>
   </dialog>
 
+  <!-- 조이팩 공통 모듈(공통 설정·서비스 워커). 다른 스크립트보다 먼저 불러온다. -->
+  <script src="../../shared/joypack.js"></script>
   <script src="js/game.js"></script>
   <script src="js/i18n.js"></script>
   <script src="js/skins.js"></script>

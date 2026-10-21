@@ -12,6 +12,10 @@ const ui = (body: string) =>
   `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${body}</svg>`;
 
 export const ICONS = {
+  /** 조이팩 게임 목록으로 */
+  apps: ui(
+    '<rect class="fill" x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect class="fill" x="13.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/>',
+  ),
   globe: ui(
     '<circle class="fill" cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
   ),

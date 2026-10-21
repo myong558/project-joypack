@@ -1,0 +1,38 @@
+[
+  {
+    "id": "updown",
+    "name": { "ko": "업다운", "en": "Up Down" },
+    "desc": { "ko": "UP · DOWN 힌트로 숨은 숫자 맞히기", "en": "Find the hidden number with UP/DOWN hints" },
+    "path": "games/updown/",
+    "icon": "games/updown/images/icon.svg",
+    "color": "#0f66ff",
+    "status": "live",
+    "ranking": {
+      "path": "games/updown/scores",
+      "default": "normal",
+      "boards": [
+        { "id": "easy", "name": { "ko": "쉬움", "en": "Easy" } },
+        { "id": "normal", "name": { "ko": "보통", "en": "Normal" } },
+        { "id": "hard", "name": { "ko": "어려움", "en": "Hard" } },
+        { "id": "extreme", "name": { "ko": "최상위", "en": "Extreme" } }
+      ]
+    }
+  },
+  {
+    "id": "hammer",
+    "name": { "ko": "두더지잡기", "en": "Whack-a-Mole" },
+    "desc": { "ko": "30초 동안 튀어나오는 두더지 잡기", "en": "Whack as many moles as you can in 30 seconds" },
+    "path": "games/hammer/",
+    "icon": "games/hammer/public/favicon.svg",
+    "color": "#ff7a3d",
+    "status": "live",
+    "ranking": {
+      "path": "games/hammer/rankings",
+      "default": "classic",
+      "boards": [
+        { "id": "classic", "name": { "ko": "클래식", "en": "Classic" } },
+        { "id": "daily", "name": { "ko": "오늘의 챌린지", "en": "Daily" } }
+      ]
+    }
+  }
+]

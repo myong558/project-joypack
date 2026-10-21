@@ -1,0 +1,21 @@
+{
+  "name": "hub",
+  "private": true,
+  "version": "1.0.0",
+  "description": "조이팩 첫 화면: 게임 목록, 공통 설정, 전체 랭킹",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "icons": "node scripts/build-icons.mjs",
+    "font": "node --use-system-ca scripts/build-font.mjs"
+  },
+  "dependencies": {
+    "@joypack/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "sharp": "^0.34.4",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4"
+  }
+}

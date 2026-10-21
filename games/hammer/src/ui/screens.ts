@@ -132,6 +132,7 @@ export function startScreen(opts: StartOptions): HTMLElement {
   const pendingIn = (m: Mode) => pendingScore(save.rankings, save.pending, m, opts.today) > 0;
   const el = html(`
     <main class="screen start">
+      <a class="corner left icon-btn hub-btn" href="../../" aria-label="${t('nav.hub')}" title="${t('nav.hub')}">${ICONS.apps}</a>
       <button class="corner left lang-btn" data-lang="${otherLang}" aria-label="${t('lang.label')}: ${LANG_LABEL[lang]} → ${LANG_LABEL[otherLang]}">
         ${ICONS.globe}<span>${LANG_LABEL[otherLang]}</span>
       </button>
