@@ -1,0 +1,4 @@
+# 브라우저용 Firebase에는 필요 없는 설치 스크립트라 실행하지 않는다(CI에서 승인 대기로 설치가 멈추지 않게)
+allowBuilds:
+  '@firebase/util': false
+  protobufjs: false
