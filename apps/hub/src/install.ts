@@ -15,7 +15,8 @@ export type InstallState = 'standalone' | 'installed' | 'ready' | 'ios' | 'manua
 let deferred: BeforeInstallPromptEvent | null = null;
 let installedNow = false;
 const listeners = new Set<() => void>();
-const notify = () => listeners.forEach((fn) => fn());
+// 사본을 돈다. 듣는 쪽이 다시 그리면서 새로 등록하면 Set 순회에 끼어들어 끝없이 도는 것을 막는다
+const notify = () => [...listeners].forEach((fn) => fn());
 
 window.addEventListener('beforeinstallprompt', (e) => {
   // 브라우저가 알아서 띄우는 작은 설치 안내 대신, 설정의 버튼으로 띄운다
