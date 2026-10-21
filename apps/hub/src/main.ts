@@ -57,16 +57,36 @@ function smallLogo(size: number): string {
 // 로고 둘레로 터지는 반짝이(첫 화면 진입 연출). --a 방향으로 날아가며 사라진다
 const BURST = `<span class="burst" aria-hidden="true">${Array.from({ length: 10 }, (_, i) => `<i style="--a:${i * 36}deg;--d:${i % 3}"></i>`).join('')}</span>`;
 
-// 배경에 떠다니는 장난감 조각(동그라미·별·세모·고리·네모). 화면 뒤에 한 번만 깔고 다시 그리지 않는다
+// 배경에 떠다니는 조각: 로고 부품(십자 버튼·동그란 버튼·웃는 입·볼)이 중심이고, 오늘 톤 색의 장난감 조각(별·고리·동그라미·세모·네모)을 사이사이 섞는다.
+// 화면 뒤에 한 번만 깔고 다시 그리지 않는다
+const DECO_PART = {
+  pad: '<rect x="2" y="8.5" width="20" height="7" rx="2.4"/><rect x="8.5" y="2" width="7" height="20" rx="2.4"/>',
+  btn: '<circle cx="12" cy="12" r="9"/>',
+  smile: '<path d="M4 8.5Q12 21 20 8.5"/>',
+  cheek: '<circle cx="12" cy="12" r="7"/>',
+  star: '<path d="M12 1.5 14.9 9.1 22.5 12 14.9 14.9 12 22.5 9.1 14.9 1.5 12 9.1 9.1z"/>',
+  ring: '<circle cx="12" cy="12" r="8.5"/>',
+  dot: '<circle cx="12" cy="12" r="11"/>',
+  tri: '<path d="M12 2 23 22H1z"/>',
+  square: '<rect x="2" y="2" width="20" height="20" rx="6"/>',
+};
+// [조각, 가로 %, 세로 %, 크기 px, 깊이 0 먼 층 · 1 중간 · 2 가까운 층]
+// 먼 층은 작고 흐리고 느리게, 가까운 층은 크고 또렷하고 크게 움직여 깊이가 느껴지게 한다
 const DECO_SHAPES = [
-  ['dot', 8, 14, 0],
-  ['ring', 84, 10, 1],
-  ['star', 90, 46, 2],
-  ['tri', 6, 52, 3],
-  ['square', 76, 78, 4],
-  ['dot', 22, 88, 5],
-  ['star', 48, 4, 6],
-  ['ring', 14, 30, 7],
+  ['pad', 8, 14, 46, 2],
+  ['ring', 84, 9, 40, 1],
+  ['btn', 88, 30, 18, 0],
+  ['smile', 90, 50, 44, 2],
+  ['tri', 5, 44, 20, 0],
+  ['cheek', 7, 60, 28, 1],
+  ['pad', 76, 78, 38, 1],
+  ['dot', 92, 92, 36, 2],
+  ['btn', 22, 88, 34, 2],
+  ['star', 48, 4, 22, 0],
+  ['cheek', 62, 18, 16, 0],
+  ['smile', 16, 30, 24, 0],
+  ['square', 40, 94, 26, 1],
+  ['pad', 56, 62, 20, 0],
 ] as const;
 
 function mountDeco(): void {
@@ -74,8 +94,35 @@ function mountDeco(): void {
   const deco = document.createElement('div');
   deco.className = 'bg-deco';
   deco.setAttribute('aria-hidden', 'true');
-  deco.innerHTML = DECO_SHAPES.map(([shape, x, y, i]) => `<i class="${shape}" style="left:${x}%;top:${y}%;--i:${i}"></i>`).join('');
+  deco.innerHTML = DECO_SHAPES.map(
+    ([part, x, y, size, depth], i) =>
+      `<i class="${part}" data-depth="${depth}" style="left:${x}%;top:${y}%;--i:${i};--s:${size}px"><svg viewBox="0 0 24 24">${DECO_PART[part]}</svg></i>`,
+  ).join('');
   document.body.prepend(deco);
+  // 시차: 손가락·마우스 위치와 스크롤에 따라 층마다 다르게 밀린다(가까운 층일수록 많이). 움직임 줄이기면 하지 않는다
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  let px = 0;
+  let py = 0;
+  let frame = 0;
+  const apply = () => {
+    frame = 0;
+    deco.style.setProperty('--px', px.toFixed(3));
+    deco.style.setProperty('--py', py.toFixed(3));
+    deco.style.setProperty('--sy', String(Math.min(scrollY, 2000)));
+  };
+  const queue = () => {
+    if (!frame) frame = requestAnimationFrame(apply);
+  };
+  addEventListener(
+    'pointermove',
+    (e) => {
+      px = e.clientX / innerWidth - 0.5;
+      py = e.clientY / innerHeight - 0.5;
+      queue();
+    },
+    { passive: true },
+  );
+  addEventListener('scroll', queue, { passive: true });
 }
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
