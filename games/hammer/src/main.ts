@@ -7,7 +7,7 @@ import { nextGoal } from './game/scoring';
 import type { MissionId } from './game/missions';
 import type { GameEvent, GameResult, MoleKind } from './game/types';
 import { setLang, t } from './i18n';
-import { sendText, shareResult, shareText } from './share';
+import { shareResult } from './share';
 import { fetchBoard, submitEntry } from './online';
 import { boardEntries, clearPending, keepPending, placeOf, type RankEntry } from './ranking';
 import { emptyRecords, loadSave, writeSave } from './storage';
@@ -402,8 +402,7 @@ function showResult(result: GameResult, missionId: MissionId, mode: Mode, date: 
       missionId,
       onRetry: () => play(mode),
       onHome: () => showStart(),
-      onShare: (image) => shareResult(shareText(result, { date, daily }), image),
-      onShareText: () => sendText(shareText(result, { date, daily })),
+      onShare: shareResult,
       ranking: rankingView(date),
     }),
   );

@@ -1,54 +1,9 @@
-import { MOLES, MOLE_ORDER } from './game/moles';
-import type { GameResult } from './game/types';
+import type { ShareOutcome } from '@joypack/shared';
 import { t } from './i18n';
 
-export function shareText(result: GameResult, opts: { date: Date; daily: boolean }): string {
-  const { stats } = result;
-  const date = `${opts.date.getMonth() + 1}/${opts.date.getDate()}`;
-  const stars = result.stars.map((s) => (s ? '⭐' : '☆')).join('');
-  const kills = MOLE_ORDER.filter((k) => k !== 'bomb' && stats.kills[k] > 0).map((k) =>
-    k === 'king' ? MOLES.king.emoji : `${MOLES[k].emoji}×${stats.kills[k]}`,
-  );
-  if (stats.bombs > 0) kills.push(`${MOLES.bomb.emoji}×${stats.bombs}`);
-
-  return [
-    `${t('app.title')} 🔨 ${date}${opts.daily ? t('share.daily') : ''}`,
-    `${stars}  ${t('share.score', { g: result.grade, n: result.score })}`,
-    kills.join(' ') || t('share.empty'),
-    `${t('share.combo', { n: stats.maxCombo })}${stats.maxCombo >= 15 ? ' 🔥' : ''}`,
-  ].join('\n');
-}
-
-export async function copyText(text: string): Promise<boolean> {
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    const area = document.createElement('textarea');
-    area.value = text;
-    area.style.position = 'fixed';
-    area.style.opacity = '0';
-    document.body.append(area);
-    area.select();
-    const ok = document.execCommand('copy');
-    area.remove();
-    return ok;
-  }
-}
-
-/** 공유하는 게임 주소: 조이팩 배포 주소 + 공유 표시(?from=share). 받은 사람이 열면 조이팩 앱 설치 안내가 뜬다 */
-export function gameLink(): string {
-  return Joypack.shareUrl('hammer');
-}
-
-/** 설정의 "내 기록 공유": 최고 기록·오늘의 챌린지·도감 */
-export function recordsText(save: { best: number; dailyBest: number; dex: number; dexTotal: number }): string {
-  return [
-    `${t('app.title')} 🔨 ${t('records.title')}`,
-    t('records.best', { n: save.best.toLocaleString() }) + (save.dailyBest > 0 ? ` · ${t('records.daily', { n: save.dailyBest.toLocaleString() })}` : ''),
-    t('records.dex', { n: save.dex, total: save.dexTotal }),
-    t('records.challenge'),
-  ].join('\n');
+/** 결과 화면 "기록 공유하기": 결과 캡처 이미지 + 조이팩 설치 주소를 한 번에 보낸다(모든 게임 같은 방식, Joypack.shareResult) */
+export function shareResult(image: Blob | null): Promise<ShareOutcome> {
+  return Joypack.shareResult({ gameId: 'hammer', image, title: t('app.title'), installText: t('share.install') });
 }
 
 /**
@@ -86,59 +41,4 @@ export async function captureResult(el: HTMLElement): Promise<Blob | null> {
   }
 }
 
-export type ShareOutcome = 'sharedImage' | 'shared' | 'cancelled' | 'copied' | 'copiedSaved' | 'failed';
-
-/**
- * 두 번에 나눠 보낸다: 먼저 결과 이미지만 보내고, 결과 글과 게임 링크는 이어서 sendText로 한 번 더 보낸다("결과 글 보내기" 버튼).
- * 카카오톡 등은 이미지와 글을 같이 받으면 글을 버리기 때문이다. 공유 시트를 열기 전에 결과 글·링크를 클립보드에도 넣어 둔다.
- * 파일 공유를 못 하는 브라우저는 결과 글·링크만 공유하고, 공유 시트가 없으면 글·링크를 복사하고 이미지를 내려받는다.
- */
-export async function shareResult(text: string, image: Blob | null): Promise<ShareOutcome> {
-  const message = `${text}\n${gameLink()}`;
-  const file = image && new File([image], 'joypack-hammer-result.png', { type: 'image/png' });
-
-  try {
-    if (file && navigator.canShare?.({ files: [file] })) {
-      await copyText(message);
-      await navigator.share({ files: [file] });
-      return 'sharedImage';
-    }
-    if (navigator.share) {
-      await navigator.share({ title: t('app.title'), text: message });
-      return 'shared';
-    }
-  } catch (e) {
-    if (e instanceof DOMException && e.name === 'AbortError') return 'cancelled';
-    // 공유 시트가 실패하면 복사로 넘어간다
-  }
-
-  const copied = await copyText(message);
-  if (image) {
-    download(image, 'joypack-hammer-result.png');
-    return copied ? 'copiedSaved' : 'failed';
-  }
-  return copied ? 'copied' : 'failed';
-}
-
-/** 결과 글과 게임 링크를 한 덩어리 글로 보낸다(결과 이미지를 보낸 뒤 이어서, 또는 설정의 내 기록 공유) */
-export async function sendText(text: string): Promise<ShareOutcome> {
-  // 링크를 글 안에 넣어 한 덩어리로 보낸다. url을 따로 주면 iOS에서 앱에 따라 글이나 링크 하나가 빠진다
-  const message = `${text}\n${gameLink()}`;
-  try {
-    if (navigator.share) {
-      await navigator.share({ title: t('app.title'), text: message });
-      return 'shared';
-    }
-  } catch (e) {
-    if (e instanceof DOMException && e.name === 'AbortError') return 'cancelled';
-  }
-  return (await copyText(message)) ? 'copied' : 'failed';
-}
-
-function download(blob: Blob, name: string): void {
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = name;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-}
+export type { ShareOutcome };

@@ -1,4 +1,5 @@
 import '@joypack/shared';
+import type { SharedSetting } from '@joypack/shared';
 import { emptyStats } from './game/engine';
 import { MOLE_ORDER } from './game/moles';
 import type { MoleKind } from './game/types';
@@ -77,11 +78,16 @@ export function loadSave(): SaveData {
   }
 }
 
+const SHARED: SharedSetting[] = ['theme', 'lang', 'sound', 'vibrate', 'initials'];
+/** 이 게임이 마지막으로 읽거나 쓴 공통 설정 값. 저장할 때 이것과 달라진(이 게임에서 바꾼) 값만 공통 키에 쓴다 */
+const synced: Partial<Record<SharedSetting, string | null>> = {};
+
 /**
  * 조이팩 공통 설정(허브에서 고른 값)이 있으면 이 게임 저장 값보다 앞선다.
  * 스킨은 게임마다 달라 공통으로 두지 않는다
  */
 function withShared(data: SaveData): SaveData {
+  for (const name of SHARED) synced[name] = Joypack.get(name);
   const theme = Joypack.get('theme') as Theme | null;
   if (theme && THEMES.includes(theme)) data.theme = theme;
   const lang = Joypack.get('lang') as Lang | null;
@@ -101,10 +107,19 @@ export function writeSave(data: SaveData): void {
   } catch {
     // 저장 실패는 무시한다(시크릿 창, 용량 초과 등)
   }
-  // 이 게임에서 바꾼 공통 설정은 다른 게임·허브도 따르도록 조이팩 공통 키에도 쓴다
-  Joypack.set('theme', data.theme);
-  Joypack.set('lang', data.lang);
-  Joypack.set('sound', data.sound ? 'on' : 'off');
-  Joypack.set('vibrate', data.vibrate ? 'on' : 'off');
-  if (data.playerName) Joypack.set('initials', data.playerName);
+  // 이 게임에서 바꾼 공통 설정만 조이팩 공통 키에 써서 다른 게임·허브도 따르게 한다(업다운과 같은 방식).
+  // 판이 끝날 때처럼 설정과 상관없는 저장에서는 쓰지 않으므로, 다른 화면에서 바꾼 값을 예전 값으로 덮어쓰지 않는다.
+  // 공통 키가 아직 없으면(처음 열었을 때) 이 게임 값을 한 번 써 둔다.
+  const values: Record<SharedSetting, string> = {
+    theme: data.theme,
+    lang: data.lang,
+    sound: data.sound ? 'on' : 'off',
+    vibrate: data.vibrate ? 'on' : 'off',
+    initials: data.playerName,
+  };
+  for (const name of SHARED) {
+    if (!values[name] || values[name] === synced[name]) continue;
+    Joypack.set(name, values[name]);
+    synced[name] = values[name];
+  }
 }

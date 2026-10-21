@@ -16,15 +16,54 @@
   const DOCS = 'projects/' + FIREBASE.projectId + '/databases/(default)/documents';
   const API = 'https://firestore.googleapis.com/v1/' + DOCS;
   const PARENT = 'games/' + GAME_ID;
+  // 응답이 이만큼 늦으면 포기한다(느린 망에서 멈춘 것처럼 보이지 않게, 두더지잡기와 같은 8초).
+  const TIMEOUT_MS = 8000;
+  // 마지막으로 받은 난이도별 순위표 { [난이도]: { at, rows } }. 오프라인일 때 보여 주고 TOP 10 판단에 쓴다.
+  const CACHE_KEY = 'updown.rankings';
 
   async function request(path, body) {
-    const res = await fetch(API + path + '?key=' + FIREBASE.apiKey, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) throw new Error('firestore ' + res.status + ' ' + (await res.text()));
-    return res.json();
+    const controller = typeof AbortController === 'function' ? new AbortController() : null;
+    const timer = controller && setTimeout(() => controller.abort(), TIMEOUT_MS);
+    try {
+      const res = await fetch(API + path + '?key=' + FIREBASE.apiKey, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        signal: controller ? controller.signal : undefined,
+      });
+      if (!res.ok) throw new Error('firestore ' + res.status + ' ' + (await res.text()));
+      return await res.json();
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  function readCache() {
+    try {
+      const data = JSON.parse(localStorage.getItem(CACHE_KEY));
+      return data && typeof data === 'object' ? data : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function writeCache(difficulty, rows) {
+    try {
+      const data = readCache();
+      data[difficulty] = { at: Date.now(), rows: rows.map((row) => Object.assign({}, row, { createdAt: row.createdAt.toISOString() })) };
+      localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+    } catch (e) {}
+  }
+
+  // 마지막으로 받은 그 난이도 순위표 { at, rows }. 받은 적이 없거나 저장 값이 깨졌으면 null.
+  function cached(difficulty) {
+    const board = readCache()[difficulty];
+    if (!board || !Array.isArray(board.rows)) return null;
+    const rows = board.rows
+      .filter((row) => row && typeof row.initials === 'string' && Number.isFinite(row.tries) && Number.isFinite(row.time))
+      .map((row) => Object.assign({}, row, { createdAt: new Date(row.createdAt) }))
+      .slice(0, LIMIT);
+    return { at: Number(board.at) || 0, rows: rows };
   }
 
   // 난이도별 TOP 10
@@ -41,7 +80,7 @@
         limit: LIMIT,
       },
     });
-    return rows
+    const result = rows
       .filter((row) => row.document)
       .map((row) => {
         const f = row.document.fields;
@@ -53,6 +92,9 @@
           createdAt: new Date(f.createdAt.timestampValue),
         };
       });
+    // 받은 순위표는 오프라인 대비로 기기에 남긴다(cached).
+    writeCache(difficulty, result);
+    return result;
   }
 
   // 기록 등록. 등록 시각은 서버 시각(REQUEST_TIME)으로 채운다. 만든 문서 ID 를 돌려줘 목록에서 내 기록을 찾게 한다.
@@ -90,5 +132,5 @@
     return String(text).toUpperCase().replace(/[^A-Z]/g, '').slice(0, 5);
   }
 
-  global.UpDownRanking = { LIMIT: LIMIT, top: top, submit: submit, qualifies: qualifies, cleanInitials: cleanInitials };
+  global.UpDownRanking = { LIMIT: LIMIT, top: top, cached: cached, submit: submit, qualifies: qualifies, cleanInitials: cleanInitials };
 })(window);

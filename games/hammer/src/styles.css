@@ -2173,17 +2173,13 @@ button.dex-item:focus-visible {
   transition: none !important;
 }
 
-/* 결과 이미지를 보낸 뒤 게임 링크를 이어서 보내는 버튼 */
-.actions .share-link {
-  grid-column: 1 / -1;
+/* 결과 화면의 기록 공유하기 */
+.actions .share-btn {
   flex-direction: row;
   justify-content: center;
   gap: 0.4em;
 }
 
-.actions .share-link[hidden] {
-  display: none;
-}
 
 /* 결과 이미지에만 들어가는 머리말: 게임 아이콘과 이름 */
 .share-brand {
@@ -2495,17 +2491,6 @@ button.dex-item:focus-visible {
   color: var(--muted);
   text-align: center;
   font-variant-numeric: tabular-nums;
-}
-
-/* 설정의 게임 링크 공유 */
-.share-section .btn {
-  flex-direction: row;
-  justify-content: center;
-  gap: 0.4em;
-}
-
-.share-section .note:empty {
-  display: none;
 }
 
 /* 영어 이름(Snowy Peak 등)이 다섯 칸에 다 들어가지 않으면 칸을 늘리지 않고 다음 줄로 넘긴다 */
@@ -3041,12 +3026,13 @@ small {
   line-height: 1.1;
 }
 
+/* 다시 하기는 한 줄 전체, 그 아래 기록 공유하기(넓게)와 홈(아이콘) */
 .actions {
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: 1fr auto;
 }
 
 .actions .primary {
-  grid-column: auto;
+  grid-column: 1 / -1;
 }
 
 .icon-action {

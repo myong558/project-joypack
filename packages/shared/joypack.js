@@ -107,6 +107,57 @@
     }
   }
 
+  function copyText(text) {
+    const fallback = () => {
+      const area = document.createElement('textarea');
+      area.value = text;
+      area.style.position = 'fixed';
+      area.style.opacity = '0';
+      document.body.append(area);
+      area.select();
+      let ok = false;
+      try {
+        ok = document.execCommand('copy');
+      } catch (e) {}
+      area.remove();
+      return ok;
+    };
+    try {
+      return navigator.clipboard.writeText(text).then(() => true, fallback);
+    } catch (e) {
+      return Promise.resolve(fallback());
+    }
+  }
+
+  // 결과 화면의 "기록 공유하기"(모든 게임 같은 방식).
+  // 결과 캡처 이미지 한 장 + 조이팩 설치 주소 한 줄을 기기 공유 창으로 한 번에 보낸다. 결과 글은 이미지에 다 있으므로 따로 보내지 않는다.
+  // 받는 앱이 이미지와 같이 온 글을 버려도(카카오톡 등) 붙여 넣을 수 있게, 공유 창을 열기 전에 주소 줄을 클립보드에도 넣어 둔다.
+  // 공유 창이 없으면(주로 PC) 이미지를 내려받고 주소 줄을 복사한다.
+  // 결과: 'shared' | 'cancelled' | 'saved'(이미지 저장 + 주소 복사) | 'copied'(주소만 복사) | 'failed'
+  function shareResult(options) {
+    const text = options.installText + ' ' + shareUrl();
+    const image = options.image;
+    const name = 'joypack-' + options.gameId + '-result.png';
+    const file = image && typeof File !== 'undefined' ? new File([image], name, { type: 'image/png' }) : null;
+    const nav = global.navigator;
+    return copyText(text).then((copied) => {
+      const data = file && nav.canShare && nav.canShare({ files: [file] }) ? { files: [file], text: text } : nav.share ? { title: options.title, text: text } : null;
+      const shared = data ? nav.share(data).then(() => 'shared', (e) => (e && e.name === 'AbortError' ? 'cancelled' : null)) : Promise.resolve(null);
+      return shared.then((outcome) => {
+        if (outcome) return outcome;
+        if (image) {
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(image);
+          link.download = name;
+          link.click();
+          setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+          return copied ? 'saved' : 'failed';
+        }
+        return copied ? 'copied' : 'failed';
+      });
+    });
+  }
+
   // 게임 화면 아래 "조이팩 앱으로 설치하기" 띠. 공유 링크로 게임에 바로 들어온 사람에게만, 앱으로 실행 중이 아닐 때만 보인다.
   // 누르면 허브로 가서 설치 안내 카드를 본다. 게임을 시작하려고 화면 다른 곳을 누르면 판을 가리지 않게 사라진다.
   function inviteBar(options) {
@@ -178,6 +229,7 @@
     isGameCached: isGameCached,
     clearGameCache: clearGameCache,
     shareUrl: shareUrl,
+    shareResult: shareResult,
     readInvite: readInvite,
     inviteBar: inviteBar,
   };

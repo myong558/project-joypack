@@ -337,17 +337,6 @@
   let shareCard = null; // { game, key, promise }: 같은 판·같은 모양이면 그린 이미지를 다시 쓴다.
   let toastTimer = 0;
 
-  // 공유하는 게임 주소: 조이팩 배포 주소 + 공유 표시(?from=share). 받은 사람이 열면 조이팩 앱 설치 안내가 뜬다.
-  function gameUrl() {
-    return Joypack.shareUrl('updown');
-  }
-
-  function shareText() {
-    const config = UpDown.DIFFICULTIES[game.difficulty];
-    const params = { level: t('difficulty.' + game.difficulty), min: config.min, max: config.max, tries: game.guesses.length };
-    return t(game.status === 'won' ? 'share.wonText' : 'share.lostText', params);
-  }
-
   function roundRect(ctx, x, y, w, h, r) {
     ctx.beginPath();
     ctx.moveTo(x + r, y);
@@ -494,7 +483,7 @@
 
     return new Promise((resolve, reject) => {
       canvas.toBlob((blob) => {
-        if (blob) resolve(new File([blob], 'updown-result.png', { type: 'image/png' }));
+        if (blob) resolve(new File([blob], 'joypack-updown-result.png', { type: 'image/png' }));
         else reject(new Error('toBlob'));
       }, 'image/png');
     });
@@ -511,14 +500,6 @@
     return shareCard.promise;
   }
 
-  function saveFile(file) {
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(file);
-    link.download = file.name;
-    link.click();
-    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
-  }
-
   function showToast(message, duration) {
     const toast = $('toast');
     toast.textContent = message;
@@ -527,108 +508,124 @@
     toastTimer = setTimeout(() => toast.classList.remove('show'), duration || 2600);
   }
 
-  // [공유하기]: 결과 이미지와 결과 글·게임 링크를 한 번에 기기 공유 창으로 보낸다.
-  // 받는 앱에 따라 이미지와 함께 온 글을 버리기도 한다(카카오톡 등).
+  // [기록 공유하기]: 결과 카드 이미지 + 조이팩 설치 주소를 한 번에 보낸다(모든 게임 같은 방식, Joypack.shareResult).
+  // 결과는 이미지에 다 있으므로 결과 글은 따로 보내지 않는다.
   async function shareResult() {
     const button = $('share');
     button.disabled = true;
     try {
-      // 게임 링크는 문구 끝 줄에 넣는다. 문구 안의 주소는 메신저가 바로 눌리는 링크로 바꿔 준다.
-      const message = shareText() + '\n' + gameUrl();
-      let file = null;
+      let image = null;
       try {
-        file = await prepareShareCard();
+        image = await prepareShareCard();
       } catch (e) {}
-      if (navigator.share) {
-        const withImage = !!file && !!navigator.canShare && navigator.canShare({ files: [file] });
-        const data = withImage ? { files: [file], text: message } : { title: t('app.title'), text: message };
-        try {
-          await navigator.share(data);
-          return;
-        } catch (e) {
-          if (e.name === 'AbortError') return; // 사용자가 공유 창을 닫았다.
-        }
-      }
-      // 공유 창이 없거나 실패하면(주로 PC) 이미지를 저장하고 문구·링크를 클립보드에 복사한다.
-      if (file) saveFile(file);
-      let copied = false;
-      try {
-        await navigator.clipboard.writeText(message);
-        copied = true;
-      } catch (e) {}
-      showToast(t(file ? (copied ? 'share.copied' : 'share.saved') : copied ? 'share.linkCopied' : 'share.failed'));
+      const outcome = await Joypack.shareResult({ gameId: 'updown', image: image, title: t('app.title'), installText: t('share.install') });
+      if (outcome !== 'cancelled') showToast(t('share.' + outcome), 3200);
     } finally {
       button.disabled = false;
     }
   }
 
-  // 설정 팝업의 [기록 공유]: 난이도별 내 최고 기록과 게임 주소를 한 덩어리 글로 보낸다(글만 보내면 카카오톡도 받는다).
-  // 공유 창이 없으면(주로 PC) 글·링크를 복사하고, 팝업이 알림(.toast)을 가리므로 버튼 문구로 잠깐 알린다.
-  function recordsText() {
-    const list = Object.keys(UpDown.DIFFICULTIES)
-      .filter((key) => best[key])
-      .map((key) => t('settings.recordItem', { level: t('difficulty.' + key), tries: best[key] }))
-      .join(' · ');
-    return t('settings.recordsText', { list: list });
-  }
-
-  async function shareRecords() {
-    const button = $('share-records');
-    if (!Object.keys(best).length) return;
-    const message = recordsText() + '\n' + gameUrl();
-    if (navigator.share) {
-      try {
-        await navigator.share({ text: message });
-        return;
-      } catch (e) {
-        if (e.name === 'AbortError') return; // 사용자가 공유 창을 닫았다.
-      }
-    }
-    let copied = false;
-    try {
-      await navigator.clipboard.writeText(message);
-      copied = true;
-    } catch (e) {}
-    const label = button.querySelector('span');
-    label.textContent = t(copied ? 'settings.linkCopied' : 'share.failed');
-    setTimeout(() => (label.textContent = t('settings.shareRecords')), 2000);
-  }
 
   // ── 공유 랭킹(js/ranking.js) ──
-  // 정답을 맞히면 그 기록(난이도·시도 횟수)을 등록 대기로 두고, 랭킹 팝업 맨 위에 이니셜 등록 칸을 띄운다.
-  // 한 판에 한 번만 등록할 수 있다. 마지막으로 쓴 이니셜은 기억해 다음 등록 때 채워 둔다.
+  // 정답을 맞힌 판이 TOP 10 에 들면 결과 화면에 이니셜 등록 칸을 띄우고, 그 기록을 난이도별 "등록 대기"로 기기에 남긴다.
+  // 등록하지 않고 넘어가거나 새로 고쳐도 대기 기록은 남아, 나중에 랭킹 팝업에서 올릴 수 있다(두더지잡기와 같은 방식).
+  // 난이도마다 가장 좋은 대기 기록 하나만 두고, 온라인 순위표에서 10위 밖으로 밀리면 버린다.
+  // 순위표는 마지막으로 받은 것을 기기에 두어(ranking.js) 오프라인이어도 보여 주고 TOP 10 판단에 쓴다.
+  // 마지막으로 쓴 이니셜은 기억해 다음 등록 때 채워 둔다.
   const INITIALS_KEY = 'updown.initials';
-  let rankingEntry = null; // { difficulty, tries, time } 등록 대기 기록. TOP 10 에 들 때만 생긴다(checkRanking).
+  const PENDING_KEY = 'updown.pending';
+  let pending = loadPending(); // { [난이도]: { tries, time } } 등록 대기 기록
+  let resultEntry = null; // 이번 판 기록 { difficulty, tries, time, expected, online }. TOP 10 에 들 때만 생긴다(checkRanking).
   let gameStartedAt = 0; // 걸린 시간(동률일 때 순위) 재기: 판 시작 시각
   let rankingTab = 'easy';
   let rankingMine = null; // 방금 등록한 기록 ID (목록에서 강조)
   let rankingRequest = 0;
   let rankingDone = null; // 이번 판을 등록한 결과 { rank }. 결과 화면 등록 칸이 "N위로 등록했어요"로 바뀐다.
 
+  // 시도 횟수·걸린 시간이 정상인 기록만 남긴다(저장 값이 깨졌거나 예전 형식이어도 쓸 수 있게).
+  function loadPending() {
+    const result = {};
+    try {
+      const raw = JSON.parse(localStorage.getItem(PENDING_KEY)) || {};
+      Object.keys(UpDown.DIFFICULTIES).forEach((key) => {
+        const entry = raw[key];
+        if (entry && Number.isInteger(entry.tries) && entry.tries > 0 && Number.isFinite(entry.time) && entry.time >= 0) {
+          result[key] = { tries: entry.tries, time: entry.time };
+        }
+      });
+    } catch (e) {}
+    return result;
+  }
+
+  function savePending() {
+    try {
+      if (Object.keys(pending).length) localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
+      else localStorage.removeItem(PENDING_KEY);
+    } catch (e) {}
+  }
+
+  // a 가 b 보다 좋은 기록인가: 시도 횟수가 적을수록, 같으면 빨리 맞힐수록
+  function isBetter(a, b) {
+    return a.tries < b.tries || (a.tries === b.tries && a.time < b.time);
+  }
+
+  function sameRecord(a, b) {
+    return !!a && !!b && a.tries === b.tries && a.time === b.time;
+  }
+
+  // 그 난이도의 등록 대기 기록. 마지막으로 받은 순위표에서 10위 밖이면 없는 것으로 본다(순위표를 받은 적이 없으면 일단 보여 준다).
+  function pendingFor(difficulty) {
+    const entry = pending[difficulty];
+    if (!entry) return null;
+    const board = UpDownRanking.cached(difficulty);
+    return !board || UpDownRanking.qualifies(board.rows, entry) ? Object.assign({ difficulty: difficulty }, entry) : null;
+  }
+
+  function hasPending() {
+    return Object.keys(pending).some((key) => !!pendingFor(key));
+  }
+
+  // 새 순위표를 받았을 때: 10위 밖으로 밀린 대기 기록은 지운다. 지웠으면 true.
+  function prunePending(difficulty, rows) {
+    if (!pending[difficulty] || UpDownRanking.qualifies(rows, pending[difficulty])) return false;
+    delete pending[difficulty];
+    savePending();
+    return true;
+  }
+
+  // 순위표에서 그 기록이 설 자리(1부터): 나보다 앞서거나 완전히 같은 기록(먼저 등록한 쪽이 위) 수 + 1
+  function expectedRank(rows, entry) {
+    return rows.filter((row) => !isBetter(entry, row)).length + 1;
+  }
+
   function renderRankingButton() {
     const button = $('ranking-open');
-    button.classList.toggle('pending', !!rankingEntry);
-    button.querySelector('span').textContent = t(rankingEntry ? 'ranking.register' : 'ranking.open');
+    const waiting = hasPending();
+    button.classList.toggle('pending', waiting);
+    button.querySelector('span').textContent = t(waiting ? 'ranking.register' : 'ranking.open');
   }
 
   function openRanking() {
-    if (rankingEntry) rankingTab = rankingEntry.difficulty;
-    else if (game) rankingTab = game.difficulty;
+    const order = Object.keys(UpDown.DIFFICULTIES);
+    if (resultEntry && !rankingDone && pendingFor(resultEntry.difficulty)) rankingTab = resultEntry.difficulty;
+    else if (game && pendingFor(game.difficulty)) rankingTab = game.difficulty;
+    else rankingTab = order.find((key) => pendingFor(key)) || (game ? game.difficulty : rankingTab);
     $('ranking-status').textContent = '';
     renderRanking();
     $('ranking').showModal();
-    if (rankingEntry) $('ranking-initials').focus();
+    if (pendingFor(rankingTab)) $('ranking-initials').focus();
     loadRanking();
   }
 
   function renderRanking() {
     const form = $('ranking-form');
-    form.hidden = !rankingEntry;
-    if (rankingEntry) {
+    const entry = pendingFor(rankingTab);
+    form.hidden = !entry;
+    if (entry) {
       $('ranking-prompt').textContent = t('ranking.prompt', {
-        level: t('difficulty.' + rankingEntry.difficulty),
-        tries: rankingEntry.tries,
-        time: duration(rankingEntry.time),
+        level: t('difficulty.' + entry.difficulty),
+        tries: entry.tries,
+        time: duration(entry.time),
       });
       if (!$('ranking-initials').value) {
         $('ranking-initials').value = Joypack.get('initials', INITIALS_KEY) || '';
@@ -642,8 +639,8 @@
       button.className = 'chip';
       button.textContent = t('difficulty.' + key);
       button.setAttribute('aria-pressed', String(key === rankingTab));
-      // 등록 중에는 맞힌 난이도 탭에 고정한다(다른 난이도 기록으로 착각해 등록하지 않게).
-      button.disabled = !!rankingEntry && key !== rankingEntry.difficulty;
+      // 등록 대기 기록이 있는 난이도는 점으로 표시한다. 등록 칸은 고른 난이도의 대기 기록을 따라간다.
+      button.classList.toggle('has-pending', !!pendingFor(key));
       button.addEventListener('click', () => {
         rankingTab = key;
         renderRanking();
@@ -660,18 +657,28 @@
     return t('ranking.time', { min: min, sec: min ? String(Math.floor(total % 60)).padStart(2, '0') : total.toFixed(1) });
   }
 
-  // 정답을 맞힌 판이 TOP 10 에 들 수 있는지 서버 랭킹으로 확인하고, 들면 [랭킹 등록] 버튼을 띄운다.
-  // 확인하는 사이 새 판을 시작했으면 버린다. 불러오지 못하면(오프라인) 등록도 할 수 없어 띄우지 않는다.
+  // 정답을 맞힌 판이 TOP 10 에 들 수 있는지 확인하고, 들면 등록 대기로 남기고 결과 화면 등록 칸과 [랭킹 등록] 버튼을 띄운다.
+  // 온라인 순위표를 못 받으면(오프라인) 마지막으로 받은 순위표로, 그것도 없으면 일단 든 것으로 본다(등록할 때 서버가 다시 판단).
+  // 확인하는 사이 새 판을 시작했으면 버린다.
   async function checkRanking(entry, forGame) {
+    let rows = null;
+    let online = true;
     try {
-      const rows = await UpDownRanking.top(entry.difficulty);
-      if (game !== forGame || !UpDownRanking.qualifies(rows, entry)) return;
-      // 예상 순위: 나보다 앞서거나 완전히 같은 기록(먼저 등록한 쪽이 위) 수 + 1
-      const ahead = rows.filter((row) => row.tries < entry.tries || (row.tries === entry.tries && row.time <= entry.time));
-      rankingEntry = Object.assign({ expected: ahead.length + 1 }, entry);
-      renderRankingButton();
-      renderResultRank(true);
-    } catch (e) {}
+      rows = await UpDownRanking.top(entry.difficulty);
+    } catch (e) {
+      online = false;
+      const board = UpDownRanking.cached(entry.difficulty);
+      rows = board ? board.rows : [];
+    }
+    if (game !== forGame || !UpDownRanking.qualifies(rows, entry)) return;
+    const record = { tries: entry.tries, time: entry.time };
+    if (!pending[entry.difficulty] || isBetter(record, pending[entry.difficulty])) {
+      pending[entry.difficulty] = record;
+      savePending();
+    }
+    resultEntry = Object.assign({ expected: expectedRank(rows, entry), online: online }, entry);
+    renderRankingButton();
+    renderResultRank(true);
   }
 
   function renderRankingList(rows) {
@@ -698,20 +705,29 @@
     return rows.findIndex((row) => row.id === rankingMine);
   }
 
+  // 순위표를 받아 그린다. 못 받으면 마지막으로 받은 순위표를 "연결이 안 돼요" 안내와 함께 보여 준다.
   async function loadRanking() {
     const request = ++rankingRequest; // 탭을 빠르게 바꾸면 마지막 요청 결과만 그린다.
+    const tab = rankingTab;
     const status = $('ranking-status');
     status.textContent = t('ranking.loading');
     try {
-      const rows = await UpDownRanking.top(rankingTab);
+      const rows = await UpDownRanking.top(tab);
       if (request !== rankingRequest) return null;
+      // 새 순위표에서 10위 밖으로 밀린 대기 기록은 등록 칸·탭 표시·버튼에서 뺀다.
+      // (탭을 다시 그리면 누른 탭의 초점이 사라지므로 바뀐 게 있을 때만 다시 그린다)
+      const pruned = prunePending(tab, rows);
+      if (pruned || $('ranking-form').hidden === !!pendingFor(tab)) renderRanking();
+      renderRankingButton();
       const mine = renderRankingList(rows);
       status.textContent = rows.length ? '' : t('ranking.empty');
       return mine;
     } catch (e) {
       if (request !== rankingRequest) return null;
-      $('ranking-list').textContent = '';
-      status.textContent = t('ranking.failed');
+      const board = UpDownRanking.cached(tab);
+      if (board) renderRankingList(board.rows);
+      else $('ranking-list').textContent = '';
+      status.textContent = t(board ? 'ranking.offline' : 'ranking.failed');
       return null;
     }
   }
@@ -726,9 +742,9 @@
     return 0;
   }
 
-  // 등록 대기 기록을 올리고 순위를 돌려준다. 결과 화면 등록 칸과 랭킹 팝업이 같이 쓴다.
-  async function registerRanking(initials) {
-    const entry = rankingEntry;
+  // 기록(entry: { difficulty, tries, time })을 올리고 순위를 돌려준다. 결과 화면 등록 칸과 랭킹 팝업이 같이 쓴다.
+  // 같은 기록이 등록 대기에 있으면 지우고, 이번 판 기록이면 결과 화면 등록 칸을 "등록했어요"로 바꾼다.
+  async function registerRanking(initials, entry) {
     rankingMine = await UpDownRanking.submit({
       initials: initials,
       difficulty: entry.difficulty,
@@ -737,27 +753,36 @@
     });
     Joypack.set('initials', initials, INITIALS_KEY);
     rankingTab = entry.difficulty;
-    rankingEntry = null;
-    renderRankingButton();
-    let rank = entry.expected;
+    if (sameRecord(pending[entry.difficulty], entry)) {
+      delete pending[entry.difficulty];
+      savePending();
+    }
+    const isThisGame = !!resultEntry && resultEntry.difficulty === entry.difficulty && sameRecord(resultEntry, entry);
+    let rank = isThisGame && resultEntry.online ? resultEntry.expected : 0;
     try {
       rank = rankOf(await UpDownRanking.top(entry.difficulty), rankingMine);
     } catch (e) {} // 순위를 다시 못 읽으면 등록 전에 계산한 예상 순위를 쓴다.
-    rankingDone = { rank: rank };
-    renderResultRank();
+    if (isThisGame) {
+      rankingDone = { rank: rank };
+      renderResultRank();
+    }
+    renderRankingButton();
     return rank;
   }
 
   // 결과 화면 등록 칸. animate 면 펼쳐질 때 한 번 튀어나온다(TOP 10 확인이 끝난 직후).
+  // 이번 판 기록을 팝업에서 등록했거나, 더 좋은 대기 기록에 밀려 대기에서 빠졌어도 결과 화면에서는 이번 판 기록을 올릴 수 있다.
   function renderResultRank(animate) {
     const box = $('result-rank');
-    box.hidden = !rankingEntry && !rankingDone;
+    box.hidden = !resultEntry && !rankingDone;
     if (box.hidden) return;
     box.classList.toggle('done', !!rankingDone);
     if (rankingDone) {
       $('result-rank-prompt').textContent = t('ranking.done', { rank: rankingDone.rank });
     } else {
-      $('result-rank-prompt').textContent = t('ranking.cardPrompt', { rank: rankingEntry.expected });
+      $('result-rank-prompt').textContent = resultEntry.online
+        ? t('ranking.cardPrompt', { rank: resultEntry.expected })
+        : t('ranking.cardPromptOffline');
       const input = $('result-rank-initials');
       if (!input.value) {
         input.value = Joypack.get('initials', INITIALS_KEY) || '';
@@ -775,7 +800,7 @@
     const input = $('result-rank-initials');
     const initials = UpDownRanking.cleanInitials(input.value);
     input.value = initials;
-    if (!rankingEntry) return;
+    if (!resultEntry || rankingDone) return;
     if (!initials) {
       input.focus();
       return;
@@ -783,9 +808,10 @@
     const button = $('result-rank-submit');
     button.disabled = true;
     try {
-      await registerRanking(initials);
+      await registerRanking(initials, resultEntry);
       input.blur(); // 휴대폰 키보드를 닫는다.
     } catch (e) {
+      // 등록 대기에 남아 있으므로 나중에 랭킹 팝업에서 다시 올릴 수 있다.
       showToast(t('ranking.submitFailed'));
     } finally {
       button.disabled = false;
@@ -797,11 +823,12 @@
     const input = $('ranking-initials');
     const initials = UpDownRanking.cleanInitials(input.value);
     input.value = initials;
-    if (!initials || !rankingEntry) return;
+    const entry = pendingFor(rankingTab);
+    if (!initials || !entry) return;
     const button = $('ranking-submit');
     button.disabled = true;
     try {
-      const rank = await registerRanking(initials);
+      const rank = await registerRanking(initials, entry);
       renderRanking();
       if ((await loadRanking()) !== null) $('ranking-status').textContent = t('ranking.done', { rank: rank });
     } catch (e) {
@@ -890,7 +917,7 @@
   }
 
   function startGame(difficulty) {
-    rankingEntry = null; // 등록하지 않고 새 판을 시작하면 이전 기록 등록은 사라진다.
+    resultEntry = null; // 등록하지 않고 새 판을 시작해도 TOP 10 기록은 등록 대기(pending)에 남는다.
     rankingDone = null;
     renderRankingButton();
     game = UpDown.createGame(difficulty);
@@ -961,7 +988,7 @@
     setTimeout(() => screens.result.classList.remove('locked'), 600);
     $('retry').focus();
     if (game.status === 'won') confetti(newBest);
-    rankingEntry = null;
+    resultEntry = null;
     rankingMine = null;
     rankingDone = null;
     $('result-rank-initials').value = '';
@@ -992,7 +1019,6 @@
       button.disabled = key === 'all' ? Object.keys(best).length === 0 : !best[key];
     });
     // 기록이 하나도 없으면 공유할 것이 없다
-    $('share-records').disabled = Object.keys(best).length === 0;
     document.querySelectorAll('[data-theme-option]').forEach((button) => {
       button.setAttribute('aria-pressed', String(button.dataset.themeOption === themePreference));
     });
@@ -1116,7 +1142,6 @@
   $('result-rank').addEventListener('submit', submitResultRank);
   $('result-rank-view').addEventListener('click', openRanking);
   $('settings-close').addEventListener('click', () => $('settings').close());
-  $('share-records').addEventListener('click', shareRecords);
   // 효과음·진동 칩: 누를 때마다 켬/끔. 켜면 바로 맛보기로 한 번 울린다.
   [
     ['sound', 'fx-sound'],

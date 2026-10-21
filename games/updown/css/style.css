@@ -1405,14 +1405,6 @@ h1.lost {
 }
 
 /* ── 설정·확인 팝업 ───────────────────── */
-/* 게임 링크 공유: 설정 제목 오른쪽, 닫기 버튼 앞 */
-.share-game {
-  margin-left: auto;
-  margin-right: 16px;
-  white-space: nowrap;
-  font-weight: 700;
-}
-
 .app-version {
   margin: 0;
   color: var(--text-muted);
@@ -1648,6 +1640,18 @@ h1.lost {
 .ranking-tabs .chip {
   padding-inline: 4px;
   white-space: nowrap;
+}
+
+/* 등록 대기 기록이 있는 난이도: 이름 뒤에 작은 점 */
+.ranking-tabs .chip.has-pending::after {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 4px;
+  border-radius: 50%;
+  background: var(--heart);
+  vertical-align: 0.3em;
 }
 
 /* 목록 높이는 기록 수와 관계없이 늘 10줄 높이: 난이도 탭을 바꿔도 팝업 크기가 변하지 않는다.
