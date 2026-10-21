@@ -2,6 +2,7 @@ import './styles.css';
 import { GAMES, gameVersion, iconUrl, type GameMeta } from './games';
 import { LANG_LABEL, LANGS, formatNumber, getLang, t } from './i18n';
 import { cachedBoard, hasRanking, loadBoard, type Row } from './rankings';
+import { externalOpenUrl, installState, onInstallChange, promptInstall } from './install';
 import { bestRecord, canClearRecords, clearRecords } from './records';
 import { THEMES, applySettings, applyTheme, canVibrate, loadSettings, migrateLegacy, saveSetting, watchSystemTheme } from './settings';
 
@@ -20,10 +21,122 @@ const ICON = {
   play: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg>',
   close: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>',
   cloud: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18h10a4 4 0 0 0 .6-8 6 6 0 0 0-11.4 1.6A3.3 3.3 0 0 0 7 18z"/><path d="m9.5 13.5 2 2 3.5-3.5"/></svg>',
+  download: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10.5l5 5 5-5M5 19.5h14"/></svg>',
+  check: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
+  share: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="m8.2 10.8 7.6-4.1M8.2 13.2l7.6 4.1"/></svg>',
   sparkle: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5c.6 4.2 2.3 6 6.5 6.5-4.2.6-5.9 2.3-6.5 6.5-.6-4.2-2.3-5.9-6.5-6.5 4.2-.5 5.9-2.3 6.5-6.5z"/><path d="M18.5 15.5c.3 1.8 1 2.6 2.5 3-1.5.3-2.2 1.1-2.5 3-.3-1.9-1-2.7-2.5-3 1.5-.4 2.2-1.2 2.5-3z"/></svg>',
 };
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+
+// ---------- 공유받은 링크로 들어온 사람: 첫 화면 위에 설치 안내 ----------
+
+/** 공유 링크에 붙는 표시. 들어오면 주소에서 지우고 이번 방문 동안만 기억한다(새로 고침해도 안내가 남게) */
+const INVITE_PARAM = 'from';
+const INVITE_KEY = 'joypack.invite';
+const DISMISS_KEY = 'joypack.installDismissed';
+
+function readInvite(): boolean {
+  const url = new URL(location.href);
+  if (url.searchParams.get(INVITE_PARAM) === 'share') {
+    url.searchParams.delete(INVITE_PARAM);
+    history.replaceState(null, '', url.pathname + url.search + url.hash);
+    try {
+      sessionStorage.setItem(INVITE_KEY, '1');
+    } catch {
+      // 저장소를 못 쓰는 환경
+    }
+    return true;
+  }
+  try {
+    return sessionStorage.getItem(INVITE_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+const invited = readInvite();
+
+/**
+ * 첫 화면 설치 안내를 보여 줄지.
+ * - 이미 앱으로 실행 중이거나 방금 설치했으면 보이지 않는다
+ * - 공유받은 링크로 들어왔으면 보인다(닫기 전까지)
+ * - 그냥 들어온 사람은 브라우저가 설치 창을 준비해 줬을 때만(안드로이드), 한 번 닫으면 다시 안 보인다
+ */
+function showInstallCard(): boolean {
+  const state = installState();
+  if (state === 'standalone' || state === 'installed') return false;
+  let dismissed = false;
+  try {
+    dismissed = localStorage.getItem(DISMISS_KEY) === '1' || sessionStorage.getItem(DISMISS_KEY) === '1';
+  } catch {
+    // 저장소를 못 쓰는 환경
+  }
+  if (dismissed) return false;
+  return invited || state === 'ready';
+}
+
+/** 설치 방법 안내 문구. 설치 창을 바로 띄울 수 있으면 없음 */
+function installGuide(): string {
+  const state = installState();
+  if (state === 'inapp') return externalOpenUrl() ? t('install.inappGuide') : t('install.inappIosGuide');
+  if (state === 'ios') return t('install.iosGuide');
+  if (state === 'manual') return t('install.manualGuide');
+  return '';
+}
+
+/** 설치 버튼: 설치 창을 띄우거나, 앱 안 브라우저면 기본 브라우저로 연다. 둘 다 못 하면 안내만 */
+function installButton(): string {
+  const state = installState();
+  if (state === 'inapp') {
+    return externalOpenUrl() ? `<a class="primary-btn" href="${esc(externalOpenUrl()!)}">${ICON.download}${t('install.openBrowser')}</a>` : '';
+  }
+  return `<button class="primary-btn" data-install>${ICON.download}${t('install.button')}</button>`;
+}
+
+function installCard(): string {
+  if (!showInstallCard()) return '';
+  const guide = installGuide();
+  return `
+    <section class="install-card" aria-label="${t('install.title')}">
+      <div class="install-row">
+        <img src="logo.svg" alt="" width="48" height="48" />
+        <div>
+          <strong>${invited ? t('invite.title') : t('install.title')}</strong>
+          <p>${t('invite.desc')}</p>
+        </div>
+      </div>
+      ${installButton()}
+      ${guide && installState() !== 'ready' ? `<p class="install-guide" data-guide hidden>${guide}</p>` : ''}
+      <button class="text-btn" data-dismiss>${t('invite.later')}</button>
+    </section>`;
+}
+
+function bindInstallCard(root: HTMLElement): void {
+  const card = root.querySelector<HTMLElement>('.install-card');
+  if (!card) return;
+  card.querySelector('[data-install]')?.addEventListener('click', async () => {
+    if (installState() === 'ready') {
+      await promptInstall();
+      renderHome();
+    } else {
+      // 설치 창을 띄울 수 없는 브라우저(아이폰 Safari 등): 직접 추가하는 방법을 펼친다
+      const guide = card.querySelector<HTMLElement>('[data-guide]');
+      if (guide) guide.hidden = false;
+    }
+  });
+  // 앱 안 브라우저에서는 안내를 처음부터 보여 준다(버튼이 바깥 브라우저로 넘기기만 하므로)
+  if (installState() === 'inapp') card.querySelector<HTMLElement>('[data-guide]')?.removeAttribute('hidden');
+  card.querySelector('[data-dismiss]')!.addEventListener('click', () => {
+    try {
+      // 공유받은 사람은 이번 방문 동안만, 그냥 들어온 사람은 다시 묻지 않는다
+      (invited ? sessionStorage : localStorage).setItem(DISMISS_KEY, '1');
+    } catch {
+      // 저장소를 못 쓰는 환경
+    }
+    card.remove();
+  });
+}
 
 // ---------- 첫 화면 ----------
 
@@ -86,6 +199,7 @@ function renderHome(): void {
       </div>
     </header>
     ${navigator.onLine ? '' : `<p class="banner" role="status">${t('offline.banner')}</p>`}
+    ${installCard()}
     <section class="games" aria-label="${t('games.label')}">
       ${live.map(gameCard).join('')}
       ${soon.length ? soon.map((g) => soonCard(g)).join('') : soonCard()}
@@ -97,7 +211,13 @@ function renderHome(): void {
   app.querySelectorAll<HTMLAnchorElement>('.card.blocked').forEach((a) => a.addEventListener('click', (e) => e.preventDefault()));
   app.querySelector('[data-open="ranking"]')!.addEventListener('click', openRanking);
   app.querySelector('[data-open="settings"]')!.addEventListener('click', openSettings);
+  bindInstallCard(app);
 }
+
+// 브라우저가 설치 창을 준비하거나 설치가 끝나면 첫 화면의 안내를 다시 그린다
+onInstallChange(() => {
+  if (!document.querySelector('dialog[open]')) renderHome();
+});
 
 async function refreshHome(): Promise<void> {
   await refreshCached();
@@ -218,6 +338,13 @@ async function openSettings(): Promise<void> {
   await refreshCached();
   const body = `
     <p class="sheet-sub">${t('settings.note')}</p>
+    <section class="set-group install" data-install-section></section>
+    <section class="set-group">
+      <h3>${t('share.title')}</h3>
+      <p class="hint share-desc">${t('share.desc')}</p>
+      <button class="primary-btn secondary" data-share>${ICON.share}${t('share.button')}</button>
+      <p class="install-guide" data-share-done role="status" hidden>${t('share.copied')}</p>
+    </section>
     <section class="set-group">
       <h3>${t('settings.theme')}</h3>
       ${seg('theme', THEMES, settings.theme, (v) => t(`theme.${v}`))}
@@ -270,6 +397,10 @@ async function openSettings(): Promise<void> {
       <p class="hint">Font: Jua (SIL OFL 1.1)</p>
     </section>`;
   const dialog = openDialog('settings', body, t('settings.title'));
+  renderInstall(dialog.querySelector<HTMLElement>('[data-install-section]')!);
+  dialog.querySelector('[data-share]')!.addEventListener('click', async () => {
+    if (!(await shareJoypack())) dialog.querySelector<HTMLElement>('[data-share-done]')!.hidden = false;
+  });
 
   dialog.querySelectorAll<HTMLElement>('[data-seg]').forEach((group) =>
     group.querySelectorAll<HTMLButtonElement>('button').forEach((b) =>
@@ -330,6 +461,67 @@ async function openSettings(): Promise<void> {
       b.closest('li')!.querySelector('.storage-state')!.textContent = t('storage.none');
     }),
   );
+}
+
+// ---------- 조이팩 공유 ----------
+
+/** 공유할 주소: 조이팩 첫 화면 + 공유 표시(?from=share). 받은 사람이 열면 첫 화면에 설치 안내가 뜬다 */
+function shareUrl(): string {
+  const url = new URL('./', location.href);
+  url.searchParams.set(INVITE_PARAM, 'share');
+  return url.href;
+}
+
+/**
+ * 기기 공유 창(카카오톡·문자 등)으로 보낸다. 공유 창이 없으면(주로 PC) 링크를 복사한다.
+ * 공유 창으로 보냈거나 사용자가 닫았으면 true, 복사로 대신했으면 false(복사했다는 안내를 보여 준다)
+ */
+async function shareJoypack(): Promise<boolean> {
+  const data = { title: t('app.title'), text: t('share.text'), url: shareUrl() };
+  if (navigator.share) {
+    try {
+      await navigator.share(data);
+      return true;
+    } catch (err) {
+      if ((err as DOMException)?.name === 'AbortError') return true;
+    }
+  }
+  try {
+    await navigator.clipboard.writeText(`${data.text}\n${data.url}`);
+  } catch {
+    // 클립보드도 막혀 있으면 주소를 직접 고를 수 있게 띄운다
+    prompt(t('share.button'), data.url);
+  }
+  return false;
+}
+
+// ---------- 앱 설치(설정의 "조이팩 다운로드") ----------
+
+function renderInstall(section: HTMLElement, showGuide = false): void {
+  const state = installState();
+  const guide = installGuide();
+  const button =
+    state === 'standalone' || state === 'installed'
+      ? `<button class="primary-btn" disabled>${ICON.check}${t('install.standalone')}</button>`
+      : installButton();
+  section.innerHTML = `
+    <h3>${t('install.title')}</h3>
+    <div class="install-row">
+      <img src="logo.svg" alt="" width="44" height="44" />
+      <p>${state === 'installed' ? t('install.installed') : t('install.desc')}</p>
+    </div>
+    ${state === 'installed' ? '' : button}
+    ${(showGuide || state === 'inapp') && guide ? `<p class="install-guide" role="status">${guide}</p>` : ''}`;
+  section.querySelector('[data-install]')?.addEventListener('click', async () => {
+    // 브라우저가 설치 창을 준비해 두었으면 바로 띄우고, 아니면(아이폰 등) 직접 추가하는 방법을 보여 준다
+    if (installState() === 'ready') await promptInstall();
+    renderInstall(section, true);
+  });
+  // 설정 창을 연 채로 설치 가능 상태가 바뀌면(설치 창 준비·설치 완료) 다시 그린다
+  const off = onInstallChange(() => {
+    if (section.isConnected) renderInstall(section);
+    off();
+  });
 }
 
 // ---------- 시작 ----------

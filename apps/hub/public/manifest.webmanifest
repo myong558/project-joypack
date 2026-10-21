@@ -3,6 +3,7 @@
   "short_name": "조이팩",
   "description": "하나씩 늘어나는 미니 게임 모음",
   "lang": "ko",
+  "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

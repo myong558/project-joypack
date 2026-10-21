@@ -727,6 +727,112 @@ a.card:active {
   cursor: default;
 }
 
+/* 앱 설치 */
+.install-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.install-row img {
+  flex: none;
+  border-radius: 12px;
+}
+
+.install-row p {
+  margin: 0;
+  font-size: 15px;
+}
+
+.primary-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 16px;
+  background: var(--brand);
+  color: var(--brand-ink);
+  font-size: 18px;
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--brand) 35%, transparent);
+  cursor: pointer;
+}
+
+.primary-btn:active {
+  transform: scale(0.98);
+}
+
+.primary-btn:disabled {
+  background: var(--surface-2);
+  color: var(--muted);
+  box-shadow: none;
+  cursor: default;
+}
+
+.primary-btn:focus-visible {
+  outline: 3px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* 첫 화면 설치 안내(공유받은 링크로 들어왔을 때 등) */
+.install-card {
+  margin: 0 0 16px;
+  padding: 16px;
+  border: 1px solid color-mix(in srgb, var(--brand) 35%, var(--line));
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--brand) 9%, var(--surface));
+  box-shadow: var(--shadow);
+  animation: card-in 450ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+
+.install-card strong {
+  display: block;
+  font-size: 19px;
+  font-weight: 400;
+}
+
+.install-card .install-row p {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+a.primary-btn {
+  text-decoration: none;
+}
+
+.primary-btn.secondary {
+  border: 1px solid var(--brand);
+  background: var(--surface);
+  color: var(--brand);
+  box-shadow: none;
+}
+
+.share-desc {
+  margin: 0 2px 12px;
+}
+
+.text-btn {
+  display: block;
+  margin: 8px auto 0;
+  padding: 6px 12px;
+  border: none;
+  background: none;
+  color: var(--muted);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.install-guide {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  font-size: 14px;
+}
+
 .about p {
   margin: 0;
   font-size: 14px;
