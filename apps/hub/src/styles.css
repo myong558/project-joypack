@@ -167,6 +167,16 @@ input {
   color: inherit;
 }
 
+/* 버튼 글자(main.ts lbl). Jua 는 글자를 글자 칸 위쪽에 그려 떠 보이므로 잉크(영문은 대문자 높이)가 가운데 오도록 내린다 */
+.lbl {
+  position: relative;
+  top: 0.045em;
+}
+
+.lbl.ko {
+  top: 0.08em;
+}
+
 svg {
   width: 1.2em;
   height: 1.2em;
@@ -614,7 +624,7 @@ a.card:hover .card-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 7px;
   margin: 12px 14px 14px;
   padding: 9px 0;
   border-radius: 14px;
@@ -627,11 +637,12 @@ a.card:hover .card-icon {
     box-shadow 140ms ease;
 }
 
+/* 둥근 모서리 삼각형. 그림 칸에 여백 없이 꽉 차게 그려 글자와의 간격이 gap 그대로 보인다 */
 .card-play svg {
-  width: 16px;
-  height: 16px;
+  width: 11px;
+  height: 12.5px;
   fill: currentColor;
-  stroke-width: 1.5;
+  stroke-width: 2.4;
 }
 
 a.card:active .card-play {
@@ -657,12 +668,29 @@ a.card:active .card-play {
   box-shadow: none;
 }
 
+/* 준비 중 카드의 그림 칸: 카드 바탕과 구분되게 검정으로 어둡게 깐다 */
 .card.soon .card-art {
-  background: var(--surface-2);
+  background: color-mix(in srgb, #000 30%, var(--surface));
 }
 
 .card.soon .card-art::before {
-  background-image: radial-gradient(color-mix(in srgb, var(--muted) 22%, transparent) 2px, transparent 2.6px);
+  background-image: radial-gradient(rgb(255 255 255 / 0.16) 2px, transparent 2.6px);
+}
+
+/* 반짝이: 큰 별과 작은 별이 번갈아 커졌다 작아지며 빛난다 */
+.card.soon .card-art > svg {
+  color: rgb(255 255 255 / 0.8);
+  filter: drop-shadow(0 0 6px rgb(255 255 255 / 0.35));
+}
+
+.card.soon .card-art > svg path {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: twinkle 2.4s ease-in-out infinite;
+}
+
+.card.soon .card-art > svg path + path {
+  animation-delay: -1.2s;
 }
 
 .card.soon .card-play {
@@ -1385,6 +1413,18 @@ a.primary-btn {
   }
   75% {
     transform: rotate(-4deg) scale(1.05);
+  }
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    transform: scale(0.82) rotate(0deg);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.12) rotate(18deg);
+    opacity: 1;
   }
 }
 

@@ -19,7 +19,8 @@ const ICON = {
   trophy:
     '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v4a5 5 0 0 1-10 0z"/><path d="M7 6H4.5a2.5 2.5 0 0 0 2.6 3.4M17 6h2.5a2.5 2.5 0 0 1-2.6 3.4M12 13v3.5M8.5 20h7M9.5 16.5h5V20h-5z"/></svg>',
   gear: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.4M12 18.8v2.4M4.2 7.5l2.1 1.2M17.7 15.3l2.1 1.2M4.2 16.5l2.1-1.2M17.7 8.7l2.1-1.2"/><circle cx="12" cy="12" r="7"/></svg>',
-  play: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg>',
+  // 플레이 화살표는 그림 칸에 빈 여백이 없게 딱 맞춰 그린다(여백이 있으면 버튼 안 글자와 함께 한쪽으로 쏠려 보인다)
+  play: '<svg viewBox="0 0 14 16" aria-hidden="true"><path d="M1.5 1.5v13l11-6.5z"/></svg>',
   close: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>',
   cloud: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18h10a4 4 0 0 0 .6-8 6 6 0 0 0-11.4 1.6A3.3 3.3 0 0 0 7 18z"/><path d="m9.5 13.5 2 2 3.5-3.5"/></svg>',
   download: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10.5l5 5 5-5M5 19.5h14"/></svg>',
@@ -79,6 +80,10 @@ function mountDeco(): void {
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
+// 버튼 글자. Jua 글꼴은 글자를 글자 칸 위쪽에 그려 버튼 가운데보다 떠 보이므로 .lbl 로 감싸 살짝 내린다.
+// 한글이 영문보다 더 떠 있어 한글이 든 글자는 .ko 로 조금 더 내린다(styles.css)
+const lbl = (html: string) => `<span class="lbl${/[가-힣]/.test(html) ? ' ko' : ''}">${html}</span>`;
+
 // ---------- 공유받은 링크로 들어온 사람: 첫 화면 위에 설치 안내 ----------
 
 const DISMISS_KEY = 'joypack.installDismissed';
@@ -118,9 +123,9 @@ function installGuide(): string {
 function installButton(): string {
   const state = installState();
   if (state === 'inapp') {
-    return externalOpenUrl() ? `<a class="primary-btn" href="${esc(externalOpenUrl()!)}">${ICON.download}${t('install.openBrowser')}</a>` : '';
+    return externalOpenUrl() ? `<a class="primary-btn" href="${esc(externalOpenUrl()!)}">${ICON.download}${lbl(t('install.openBrowser'))}</a>` : '';
   }
-  return `<button class="primary-btn" data-install>${ICON.download}${t('install.button')}</button>`;
+  return `<button class="primary-btn" data-install>${ICON.download}${lbl(t('install.button'))}</button>`;
 }
 
 function installCard(): string {
@@ -137,7 +142,7 @@ function installCard(): string {
       </div>
       ${installButton()}
       ${guide && installState() !== 'ready' ? `<p class="install-guide" data-guide hidden>${guide}</p>` : ''}
-      <button class="text-btn" data-dismiss>${t('invite.later')}</button>
+      <button class="text-btn" data-dismiss>${lbl(t('invite.later'))}</button>
     </section>`;
 }
 
@@ -196,7 +201,7 @@ function gameCard(game: GameMeta): string {
           ${blocked ? `<span class="chip warn">${t('game.needsOnline')}</span>` : ''}
         </span>
       </span>
-      <span class="card-play" aria-hidden="true">${ICON.play}${t('game.play')}</span>
+      <span class="card-play" aria-hidden="true">${ICON.play}${lbl(t('game.play'))}</span>
     </a>`;
 }
 
@@ -208,7 +213,7 @@ function soonCard(game?: GameMeta): string {
         <strong class="card-name">${esc(game ? game.name[getLang()] : t('game.next'))}</strong>
         <span class="card-desc">${esc(game ? game.desc[getLang()] : t('game.nextDesc'))}</span>
       </span>
-      <span class="card-play" aria-hidden="true">${t('game.soon')}</span>
+      <span class="card-play" aria-hidden="true">${lbl(t('game.soon'))}</span>
     </div>`;
 }
 
@@ -221,7 +226,7 @@ function renderHome(): void {
   const title = [...t('app.title')].map((ch, i) => `<span style="--i:${i}">${esc(ch)}</span>`).join('');
   app.innerHTML = `
     <header class="top">
-      <button class="lang-btn" data-lang="${otherLang}" aria-label="${t('settings.lang')}: ${LANG_LABEL[getLang()]} → ${LANG_LABEL[otherLang]}">${ICON.globe}<span>${LANG_LABEL[otherLang]}</span></button>
+      <button class="lang-btn" data-lang="${otherLang}" aria-label="${t('settings.lang')}: ${LANG_LABEL[getLang()]} → ${LANG_LABEL[otherLang]}">${ICON.globe}${lbl(LANG_LABEL[otherLang])}</button>
       <div class="actions">
         <button class="icon-btn" data-open="ranking" aria-label="${t('ranking.open')}" title="${t('ranking.open')}">${ICON.trophy}</button>
         <button class="icon-btn" data-open="settings" aria-label="${t('settings.open')}" title="${t('settings.open')}">${ICON.gear}</button>
@@ -406,11 +411,11 @@ function openRanking(): void {
           <div class="rank-head">
             <img src="${iconUrl(g)}" alt="" width="32" height="32" />
             <h3>${esc(g.name[getLang()])}</h3>
-            <a class="rank-more" href="${g.path}">${t('ranking.more')}</a>
+            <a class="rank-more" href="${g.path}">${lbl(t('ranking.more'))}</a>
           </div>
           <div class="chips" role="tablist">
             ${g.ranking!.boards
-              .map((b) => `<button role="tab" class="chip-btn" data-board="${b.id}" aria-selected="${b.id === board}">${esc(b.name[getLang()])}</button>`)
+              .map((b) => `<button role="tab" class="chip-btn" data-board="${b.id}" aria-selected="${b.id === board}">${lbl(esc(b.name[getLang()]))}</button>`)
               .join('')}
           </div>
           <div class="rank-rows" style="--rows:${TOP}" aria-live="polite"></div>
@@ -452,7 +457,7 @@ async function showBoard(section: HTMLElement, game: GameMeta, board: string): P
 
 function seg<T extends string>(name: string, options: T[], current: T, label: (v: T) => string): string {
   return `<div class="seg" role="radiogroup" data-seg="${name}">${options
-    .map((v) => `<button role="radio" data-value="${v}" aria-checked="${v === current}">${esc(label(v))}</button>`)
+    .map((v) => `<button role="radio" data-value="${v}" aria-checked="${v === current}">${lbl(esc(label(v)))}</button>`)
     .join('')}</div>`;
 }
 
@@ -473,7 +478,7 @@ async function openSettings(): Promise<void> {
     <section class="set-group">
       <h3>${t('share.title')}</h3>
       <p class="hint share-desc">${t('share.desc')}</p>
-      <button class="primary-btn secondary" data-share>${ICON.share}${t('share.button')}</button>
+      <button class="primary-btn secondary" data-share>${ICON.share}${lbl(t('share.button'))}</button>
       <p class="install-guide" data-share-done role="status" hidden>${t('share.copied')}</p>
     </section>
     <section class="set-group">
@@ -502,7 +507,7 @@ async function openSettings(): Promise<void> {
             <img src="${iconUrl(g)}" alt="" width="28" height="28" />
             <span class="storage-name">${esc(g.name[getLang()])}</span>
             <span class="storage-state">${esc(bestRecord(g) ?? t('records.none'))}</span>
-            <button class="small-btn danger" data-records="${g.id}" ${canClearRecords(g) ? '' : 'disabled'}>${t('records.clear')}</button>
+            <button class="small-btn danger" data-records="${g.id}" ${canClearRecords(g) ? '' : 'disabled'}>${lbl(t('records.clear'))}</button>
           </li>`,
         )
         .join('')}</ul>
@@ -516,7 +521,7 @@ async function openSettings(): Promise<void> {
             <img src="${iconUrl(g)}" alt="" width="28" height="28" />
             <span class="storage-name">${esc(g.name[getLang()])}</span>
             <span class="storage-state">${cached.get(g.id) ? t('storage.ready') : t('storage.none')}</span>
-            <button class="small-btn" data-clear="${g.id}" ${cached.get(g.id) ? '' : 'disabled'}>${t('storage.clear')}</button>
+            <button class="small-btn" data-clear="${g.id}" ${cached.get(g.id) ? '' : 'disabled'}>${lbl(t('storage.clear'))}</button>
           </li>`,
         )
         .join('')}</ul>
@@ -569,11 +574,11 @@ async function openSettings(): Promise<void> {
     b.addEventListener('click', () => {
       const game = live.find((g) => g.id === b.dataset.records)!;
       if (!armed) {
-        b.textContent = t('records.confirm');
+        b.innerHTML = lbl(t('records.confirm'));
         b.classList.add('armed');
         armed = setTimeout(() => {
           armed = undefined;
-          b.textContent = t('records.clear');
+          b.innerHTML = lbl(t('records.clear'));
           b.classList.remove('armed');
         }, 3000);
         return;
@@ -582,7 +587,7 @@ async function openSettings(): Promise<void> {
       armed = undefined;
       clearRecords(game);
       b.classList.remove('armed');
-      b.textContent = t('records.cleared');
+      b.innerHTML = lbl(t('records.cleared'));
       b.disabled = true;
       b.closest('li')!.querySelector('.storage-state')!.textContent = t('records.none');
     });
@@ -630,7 +635,7 @@ function renderInstall(section: HTMLElement, showGuide = false): void {
   const guide = installGuide();
   const button =
     state === 'standalone' || state === 'installed'
-      ? `<button class="primary-btn" disabled>${ICON.check}${t('install.standalone')}</button>`
+      ? `<button class="primary-btn" disabled>${ICON.check}${lbl(t('install.standalone'))}</button>`
       : installButton();
   section.innerHTML = `
     <h3>${t('install.title')}</h3>
