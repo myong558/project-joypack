@@ -1,0 +1,13 @@
+{
+  "name": "project-updown",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "serve . -l 3000",
+    "font": "node --use-system-ca scripts/build-font.mjs"
+  },
+  "devDependencies": {
+    "serve": "^14.2.6",
+    "subset-font": "^2.9.0"
+  }
+}
