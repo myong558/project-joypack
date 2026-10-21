@@ -2173,6 +2173,12 @@ button.dex-item:focus-visible {
   transition: none !important;
 }
 
+/* 결과 화면에 들어온 직후 0.6초: 플레이하던 손가락이 버튼을 잘못 누르지 않게 */
+.result.locked .actions,
+.result.locked .rank-entry {
+  pointer-events: none;
+}
+
 /* 결과 화면의 기록 공유하기 */
 .actions .share-btn {
   flex-direction: row;

@@ -773,6 +773,9 @@ export function resultScreen(opts: {
       <p class="toast" role="status"></p>
     </main>`);
   const q = (s: string) => el.querySelector<HTMLElement>(s)!;
+  // 판이 끝나는 순간 두더지를 두드리던 손가락이 버튼을 잘못 누르지 않도록 0.6초 동안 버튼·등록 카드를 막는다(키 입력은 main.ts)
+  el.classList.add('locked');
+  setTimeout(() => el.classList.remove('locked'), 600);
   fillThumbs(el);
   countUp(q('.final-score'), result.score);
   if (opts.isRecord) setTimeout(() => confetti(q('.confetti-layer')), 400);

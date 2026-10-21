@@ -1057,18 +1057,13 @@
     showVersion();
   }
 
-  // 서비스 워커 캐시 이름(updown-v숫자)이 곧 버전이다. 캐시를 못 쓰는 환경(file:// 등)이면 숨긴다.
+  // 설정 맨 아래 버전. 조이팩 빌드(scripts/build.mjs)가 __APP_VERSION__ 자리에 package.json 의 version 을 넣는다.
+  // 빌드하지 않은 원본 파일을 바로 열었으면(자리 표시가 그대로) 숨긴다.
+  const APP_VERSION = '__APP_VERSION__';
   function showVersion() {
-    if (!window.caches) return;
-    caches
-      .keys()
-      .then((names) => {
-        const name = names.filter((n) => n.indexOf('updown-') === 0).pop();
-        if (!name) return;
-        $('app-version').textContent = t('settings.version', { version: name.replace('updown-', '') });
-        $('app-version').hidden = false;
-      })
-      .catch(() => {});
+    if (APP_VERSION.indexOf('__') === 0) return;
+    $('app-version').textContent = t('settings.version', { version: 'v' + APP_VERSION });
+    $('app-version').hidden = false;
   }
 
   // 되돌릴 수 없는 동작 전에 띄우는 확인 팝업. "지우기"를 누르면 true, 취소·Esc·바깥 클릭은 false 로 끝난다.

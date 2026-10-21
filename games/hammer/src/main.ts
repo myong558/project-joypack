@@ -411,6 +411,8 @@ function showResult(result: GameResult, missionId: MissionId, mode: Mode, date: 
   const onKey = (e: KeyboardEvent) => {
     // 이름을 치는 중이거나 랭킹 창·등록 카드 안에서 누른 키는 그쪽에 맡긴다
     if ((e.target as Element | null)?.closest?.('input, .rank-entry, .modal')) return;
+    // 결과 화면이 막혀 있는 0.6초 동안(누르던 키가 바로 다시 하기가 되지 않게)은 무시한다
+    if (document.querySelector('.screen.result.locked')) return;
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       play(mode);

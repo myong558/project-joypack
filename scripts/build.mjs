@@ -1,6 +1,7 @@
 // 조이팩 전체 빌드: 허브 + 모든 게임 → dist/ 한 곳 (README 3·4.1장)
 //   1. 허브 빌드(apps/hub/dist) → dist/
 //   2. 게임마다: package.json 에 build 스크립트가 있으면 빌드해 그 dist/ 를, 없으면 package.json "files" 에 적힌 파일을 dist/games/<id>/ 로
+//      (빌드 없는 게임은 .js·.html 의 __APP_VERSION__ 을 package.json version 으로 바꿔 넣음)
 //   3. 공통 모듈 packages/shared/joypack.js → dist/shared/joypack.js
 //   4. 게임마다 파일 목록 dist/games/<id>/files.json (경로 + 해시). 처음 열 때 이 목록 전체를 캐시한다
 //   5. 서비스 워커 dist/sw.js: 허브 파일만 미리 캐시, 게임은 처음 열 때 캐시 (scripts/sw-template.js)
@@ -49,6 +50,11 @@ for (const game of games) {
   } else {
     if (!pkg.files?.length) throw new Error(`games/${game.id}/package.json 에 build 스크립트나 "files" 가 필요합니다`);
     for (const entry of pkg.files) cpSync(join(dir, entry), join(out, entry), { recursive: true });
+    // 빌드 없는 게임도 설정 맨 아래에 버전을 보이도록 .js·.html 의 __APP_VERSION__ 을 package.json version 으로 바꾼다
+    for (const file of walk(out).filter((f) => /\.(js|html)$/.test(f))) {
+      const text = readFileSync(file, 'utf8');
+      if (text.includes('__APP_VERSION__')) writeFileSync(file, text.replaceAll('__APP_VERSION__', pkg.version));
+    }
   }
   if (!existsSync(join(out, 'index.html'))) throw new Error(`dist/games/${game.id}/index.html 이 없습니다`);
 }
