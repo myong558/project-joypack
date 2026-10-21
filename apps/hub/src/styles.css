@@ -5,6 +5,7 @@
   font-display: swap;
 }
 
+/* 기본 = 포도 톤. 톤(스킨)은 날마다 바뀐다(index.html). 톤마다 라이트·다크 두 벌 */
 :root {
   --bg: #f5f2ff;
   --surface: #ffffff;
@@ -14,6 +15,8 @@
   --line: #e3ddf6;
   --brand: #6c47ff;
   --brand-ink: #ffffff;
+  --accent: #ffb703;
+  --logo: #6c47ff;
   --ok: #138a5b;
   --warn: #b25a00;
   --gold: #f5b400;
@@ -34,10 +37,107 @@
   --line: #342d50;
   --brand: #9277ff;
   --brand-ink: #14102a;
+  --accent: #ffc94d;
   --ok: #4fd69c;
   --warn: #ffb35c;
   --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 10px 28px rgb(0 0 0 / 0.35);
   color-scheme: dark;
+}
+
+/* 캔디: 분홍 + 보라 */
+:root[data-skin='candy'] {
+  --bg: #fff1f7;
+  --surface-2: #ffe3ef;
+  --text: #33121f;
+  --muted: #85607a;
+  --line: #f7d5e5;
+  --brand: #d6336c;
+  --accent: #7c5cff;
+  --logo: #ff4f8b;
+}
+
+:root[data-theme='dark'][data-skin='candy'] {
+  --bg: #1f0d16;
+  --surface: #2b1520;
+  --surface-2: #3a1d2b;
+  --text: #ffeef6;
+  --muted: #c99ab0;
+  --line: #4a2737;
+  --brand: #ff6fa5;
+  --brand-ink: #2a0a17;
+  --accent: #a58bff;
+}
+
+/* 소다: 파랑 + 청록 */
+:root[data-skin='soda'] {
+  --bg: #ecf6ff;
+  --surface-2: #dcefff;
+  --text: #0f2233;
+  --muted: #587089;
+  --line: #cfe4f7;
+  --brand: #0b6fd6;
+  --accent: #12c2b5;
+  --logo: #1e90ff;
+}
+
+:root[data-theme='dark'][data-skin='soda'] {
+  --bg: #0b1622;
+  --surface: #13212f;
+  --surface-2: #1b2d3f;
+  --text: #eaf5ff;
+  --muted: #8fb0cc;
+  --line: #23384d;
+  --brand: #4aa8ff;
+  --brand-ink: #04121f;
+  --accent: #3ee0d0;
+}
+
+/* 레몬: 주황 + 노랑 */
+:root[data-skin='lemon'] {
+  --bg: #fffbe8;
+  --surface-2: #fff3c4;
+  --text: #2e2408;
+  --muted: #7d6d3e;
+  --line: #f3e6ae;
+  --brand: #c2410c;
+  --accent: #f2b705;
+  --logo: #ff8a00;
+}
+
+:root[data-theme='dark'][data-skin='lemon'] {
+  --bg: #1b1606;
+  --surface: #262010;
+  --surface-2: #352c14;
+  --text: #fff8de;
+  --muted: #c9b77d;
+  --line: #43391a;
+  --brand: #ffb547;
+  --brand-ink: #241800;
+  --accent: #ffd84d;
+}
+
+/* 민트: 초록 + 살구 */
+:root[data-skin='mint'] {
+  --bg: #ebfaf3;
+  --surface-2: #d6f3e6;
+  --text: #0e2a20;
+  --muted: #557a6b;
+  --line: #c8ebdb;
+  --brand: #0a7d57;
+  --accent: #ff9f43;
+  --logo: #0ca678;
+}
+
+:root[data-theme='dark'][data-skin='mint'] {
+  --bg: #0a1914;
+  --surface: #11241d;
+  --surface-2: #183229;
+  --text: #e8fff5;
+  --muted: #8cc2ab;
+  --line: #1f3d32;
+  --brand: #3ddc97;
+  --brand-ink: #04140d;
+  --accent: #ffb466;
 }
 
 * {
@@ -53,8 +153,9 @@ body {
   margin: 0;
   min-height: 100dvh;
   background:
-    radial-gradient(60rem 28rem at 110% -10%, color-mix(in srgb, var(--brand) 14%, transparent), transparent 70%),
-    radial-gradient(40rem 22rem at -20% 0%, color-mix(in srgb, #ffb703 12%, transparent), transparent 70%),
+    radial-gradient(42rem 26rem at 105% -10%, color-mix(in srgb, var(--brand) 22%, transparent), transparent 70%),
+    radial-gradient(36rem 24rem at -10% 8%, color-mix(in srgb, var(--accent) 24%, transparent), transparent 70%),
+    radial-gradient(44rem 30rem at 50% 115%, color-mix(in srgb, var(--brand) 12%, transparent), transparent 70%),
     var(--bg);
   background-attachment: fixed;
   color: var(--text);
@@ -81,48 +182,58 @@ svg {
 }
 
 #app {
+  display: flex;
+  flex-direction: column;
   max-width: 920px;
+  min-height: 100dvh;
   margin: 0 auto;
   padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom))
     max(16px, env(safe-area-inset-left));
 }
 
-/* ---------- 머리 ---------- */
+/* 간판 + 카드. 휴대폰은 위아래로, 넓은 화면은 두 단(아래 @media) */
+.stage {
+  flex: 1;
+}
+
+
+/* ---------- 머리: 왼쪽 위 언어, 오른쪽 위 랭킹·설정 (게임 시작 화면과 같은 자리) ---------- */
 .top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin: 8px 0 20px;
+  gap: 8px;
+  margin: 4px 0 0;
 }
 
-.brand {
-  display: flex;
+/* 언어 전환: 지구 아이콘 + 바꿀 언어 이름 */
+.lang-btn {
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
-
-.logo {
-  width: 52px;
-  height: 52px;
-  border-radius: 16px;
+  gap: 6px;
+  height: 44px;
+  padding: 0 16px 0 13px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
   box-shadow: var(--shadow);
-  animation: logo-in 600ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 140ms ease;
 }
 
-h1 {
-  margin: 0;
-  font-size: 30px;
-  font-weight: 400;
-  line-height: 1.1;
-  letter-spacing: -0.01em;
+.lang-btn:hover {
+  border-color: var(--brand);
+  color: var(--brand);
 }
 
-.tagline {
-  margin: 2px 0 0;
-  color: var(--muted);
-  font-size: 15px;
+.lang-btn:active {
+  transform: scale(0.94);
+}
+
+.lang-btn:focus-visible {
+  outline: 3px solid var(--brand);
+  outline-offset: 2px;
 }
 
 .actions {
@@ -141,6 +252,7 @@ h1 {
   background: var(--surface);
   box-shadow: var(--shadow);
   cursor: pointer;
+  transition: transform 140ms ease;
 }
 
 .icon-btn:hover {
@@ -148,12 +260,17 @@ h1 {
   color: var(--brand);
 }
 
+.icon-btn:active {
+  transform: scale(0.92);
+}
+
 .icon-btn:focus-visible,
 .card:focus-visible,
 .chip-btn:focus-visible,
 .seg button:focus-visible,
 .small-btn:focus-visible,
-.rank-more:focus-visible {
+.rank-more:focus-visible,
+.hero-mark:focus-visible {
   outline: 3px solid var(--brand);
   outline-offset: 2px;
 }
@@ -167,113 +284,289 @@ h1 {
   font-size: 15px;
 }
 
-/* ---------- 게임 카드 ---------- */
+/* ---------- 첫 화면 간판: 로고(네 칸) · 제목 · 소개 · 오늘의 톤 ---------- */
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: -14px 0 22px;
+  text-align: center;
+}
+
+.hero-mark {
+  position: relative;
+  width: 112px;
+  height: 112px;
+  cursor: pointer;
+}
+
+/* 로고 뒤 은은한 빛 */
+.hero-mark::before {
+  content: '';
+  position: absolute;
+  inset: -26px;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--logo) 34%, transparent), transparent 68%);
+  animation: glow 3.6s ease-in-out infinite;
+}
+
+.hero-logo {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  stroke: none;
+  filter: drop-shadow(0 10px 16px color-mix(in srgb, var(--logo) 42%, transparent));
+  animation: logo-float 4.2s ease-in-out infinite;
+}
+
+.logo-box {
+  fill: var(--logo);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.logo-tile {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* 로고 둘레 반짝이: 첫 진입 때만 터진다 */
+.burst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.burst i {
+  position: absolute;
+  top: calc(50% - 6px);
+  left: calc(50% - 6px);
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--accent);
+  opacity: 0;
+}
+
+.burst i:nth-child(3n + 1) {
+  border-radius: 50%;
+  background: var(--brand);
+}
+
+.burst i:nth-child(3n + 2) {
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+  background: #ffd23f;
+}
+
+h1 {
+  margin: 12px 0 0;
+  font-size: 46px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+.hero-title {
+  display: inline-flex;
+}
+
+.hero-title span {
+  display: inline-block;
+  text-shadow: 0 3px 0 color-mix(in srgb, var(--brand) 22%, transparent);
+}
+
+.tagline {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 16px;
+}
+
+/* ---------- 배경에 떠다니는 장난감 조각 ---------- */
+.bg-deco {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.bg-deco i {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  opacity: 0.32;
+  animation:
+    deco-in 900ms cubic-bezier(0.3, 1.5, 0.5, 1) calc(var(--i) * 80ms) both,
+    drift calc(9s + var(--i) * 1.3s) ease-in-out calc(var(--i) * -1.7s) infinite alternate;
+}
+
+.bg-deco .dot {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--brand);
+  opacity: 0.18;
+}
+
+.bg-deco .ring {
+  width: 44px;
+  height: 44px;
+  border: 6px solid var(--accent);
+  border-radius: 50%;
+}
+
+.bg-deco .star {
+  width: 30px;
+  height: 30px;
+  background: var(--accent);
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+}
+
+.bg-deco .tri {
+  background: var(--brand);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  opacity: 0.22;
+}
+
+.bg-deco .square {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  background: var(--accent);
+}
+
+/* ---------- 게임 카드: 누르면 쑥 들어가는 장난감 버튼. 게임이 늘면 칸이 늘어나는 바둑판 ---------- */
 .games {
   display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 14px;
 }
 
 @media (min-width: 720px) {
   .games {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(196px, 1fr));
     gap: 18px;
   }
 }
 
 .card {
+  --depth: color-mix(in srgb, var(--c, var(--brand)) 42%, var(--line));
   position: relative;
   display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 16px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  flex-direction: column;
+  min-width: 0;
+  border: 2px solid color-mix(in srgb, var(--c, var(--brand)) 26%, var(--line));
+  border-radius: 24px;
   background: var(--surface);
-  box-shadow: var(--shadow);
+  box-shadow:
+    0 6px 0 var(--depth),
+    0 16px 26px -12px color-mix(in srgb, var(--c, var(--brand)) 50%, transparent);
   color: inherit;
   text-decoration: none;
   overflow: hidden;
-  animation: card-in 450ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
   transition:
-    transform 160ms ease,
-    border-color 160ms ease;
-}
-
-.card:nth-child(2) {
-  animation-delay: 70ms;
-}
-
-.card:nth-child(3) {
-  animation-delay: 140ms;
-}
-
-.card:nth-child(n + 4) {
-  animation-delay: 210ms;
-}
-
-/* 카드 왼쪽 위 게임 색 띠 */
-.card::before {
-  content: '';
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 6px;
-  background: var(--c, var(--brand));
+    transform 140ms ease,
+    box-shadow 140ms ease;
 }
 
 a.card:hover {
-  transform: translateY(-3px);
-  border-color: color-mix(in srgb, var(--c) 50%, var(--line));
+  transform: translateY(-4px);
+  box-shadow:
+    0 10px 0 var(--depth),
+    0 24px 30px -14px color-mix(in srgb, var(--c) 55%, transparent);
 }
 
+/* 누르는 동안: 아래로 쑥 들어가며 두께(아래 그림자)가 거의 사라진다 */
 a.card:active {
-  transform: translateY(0) scale(0.99);
+  transform: translateY(5px);
+  box-shadow:
+    0 1px 0 var(--depth),
+    0 6px 12px -8px color-mix(in srgb, var(--c) 50%, transparent);
+  transition-duration: 60ms;
+}
+
+/* 위쪽 그림판: 게임 색, 흘러가는 점무늬, 지나가는 반짝임 */
+.card-art {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 108px;
+  background: radial-gradient(circle at 28% 18%, color-mix(in srgb, #fff 38%, var(--c, var(--brand))), var(--c, var(--brand)) 72%);
+  overflow: hidden;
+}
+
+.card-art::before {
+  content: '';
+  position: absolute;
+  inset: -16px;
+  background-image: radial-gradient(rgb(255 255 255 / 0.28) 2px, transparent 2.6px);
+  background-size: 16px 16px;
+  animation: dots 14s linear infinite;
+}
+
+.card-art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 35%, rgb(255 255 255 / 0.55) 50%, transparent 65%);
+  transform: translateX(-120%);
+}
+
+a.card:hover .card-art::after {
+  animation: shine 700ms ease-out;
 }
 
 .card-icon {
-  display: grid;
-  place-items: center;
-  flex: none;
+  position: relative;
+  z-index: 1;
   width: 72px;
   height: 72px;
   border-radius: 20px;
-  background: color-mix(in srgb, var(--c, var(--brand)) 14%, var(--surface));
+  filter: drop-shadow(0 6px 8px rgb(0 0 0 / 0.2));
+  animation: bob 3.2s ease-in-out calc(var(--n, 0) * -0.8s) infinite;
 }
 
-.card-icon img {
-  width: 56px;
-  height: 56px;
-  border-radius: 14px;
+a.card:hover .card-icon {
+  animation: wiggle 520ms ease-in-out;
 }
 
-.card-icon svg {
-  width: 34px;
-  height: 34px;
-  color: var(--brand);
+.card-art > svg {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  color: var(--muted);
 }
 
 .card-body {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
   flex: 1;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding: 12px 14px 0;
 }
 
 .card-name {
-  font-size: 22px;
+  font-size: 21px;
   font-weight: 400;
-  line-height: 1.2;
+  line-height: 1.15;
 }
 
 .card-desc {
+  display: -webkit-box;
+  overflow: hidden;
   color: var(--muted);
-  font-size: 15px;
+  font-size: 14px;
+  line-height: 1.35;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .card-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 4px;
   margin-top: 6px;
 }
 
@@ -285,17 +578,20 @@ a.card:active {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 9px;
+  max-width: 100%;
+  padding: 2px 8px;
+  overflow: hidden;
   border-radius: 999px;
   background: var(--surface-2);
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12px;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .chip svg {
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
 }
 
 .chip.best {
@@ -313,43 +609,69 @@ a.card:active {
 
 .chip.warn {
   color: var(--warn);
+  white-space: normal;
 }
 
+/* 맨 아래 "플레이" 버튼: 게임 색을 어둡게 섞어 흰 글자가 잘 읽히게 하고, 아래 두께를 준다 */
 .card-play {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  background: var(--c, var(--brand));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 12px 14px 14px;
+  padding: 9px 0;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--c, var(--brand)) 72%, #000);
   color: #fff;
-  box-shadow: 0 6px 16px color-mix(in srgb, var(--c) 40%, transparent);
+  font-size: 17px;
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--c, var(--brand)) 45%, #000);
+  transition:
+    transform 140ms ease,
+    box-shadow 140ms ease;
 }
 
 .card-play svg {
+  width: 16px;
+  height: 16px;
   fill: currentColor;
   stroke-width: 1.5;
-  margin-left: 3px;
+}
+
+a.card:active .card-play {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--c) 45%, #000);
 }
 
 .card.blocked {
   opacity: 0.55;
+  filter: grayscale(0.6);
   cursor: not-allowed;
 }
 
-.card.blocked:hover {
+.card.blocked:hover,
+.card.blocked:active {
   transform: none;
 }
 
 .card.soon {
   border-style: dashed;
+  border-color: var(--line);
   background: color-mix(in srgb, var(--surface) 60%, transparent);
   box-shadow: none;
 }
 
-.card.soon::before {
-  background: var(--line);
+.card.soon .card-art {
+  background: var(--surface-2);
+}
+
+.card.soon .card-art::before {
+  background-image: radial-gradient(color-mix(in srgb, var(--muted) 22%, transparent) 2px, transparent 2.6px);
+}
+
+.card.soon .card-play {
+  background: var(--surface-2);
+  color: var(--muted);
+  box-shadow: none;
 }
 
 .foot {
@@ -735,9 +1057,12 @@ a.card:active {
   margin-bottom: 12px;
 }
 
-.install-row img {
+.install-row .mini-logo {
   flex: none;
-  border-radius: 12px;
+  width: 46px;
+  height: 46px;
+  stroke: none;
+  filter: drop-shadow(0 3px 6px color-mix(in srgb, var(--logo) 35%, transparent));
 }
 
 .install-row p {
@@ -838,18 +1163,233 @@ a.primary-btn {
   font-size: 14px;
 }
 
-/* ---------- 움직임 ---------- */
-@keyframes card-in {
-  from {
-    opacity: 0;
-    transform: translateY(14px) scale(0.98);
+/* 넓은 화면(PC·태블릿 가로): 왼쪽 간판, 오른쪽 카드. main.ts 의 fitScreen 이 --z 배로 키워
+   화면을 여백 6%만 남기고 채운다. 최소 높이는 키우기 전 크기로 적어 키운 뒤 화면 높이와 같아지게 한다 */
+@media (min-width: 900px), (orientation: landscape) and (min-width: 640px) {
+  #app {
+    max-width: 1040px;
+    min-height: calc(100dvh / var(--z, 1));
+    padding-inline: 28px;
+    zoom: var(--z, 1);
+  }
+
+  .stage {
+    display: grid;
+    grid-template-columns: minmax(200px, 300px) 1fr;
+    align-items: center;
+    gap: 40px;
+  }
+
+  .hero {
+    margin: 0;
+  }
+
+  .hero-mark {
+    width: 148px;
+    height: 148px;
+  }
+
+  h1 {
+    margin-top: 18px;
+    font-size: 58px;
+  }
+
+  .tagline {
+    font-size: 18px;
+  }
+
+  .games {
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  }
+
+  .foot {
+    margin-top: 16px;
+  }
+
+  /* 대화 상자도 같은 배로 키우되, 화면 높이를 넘지 않게 키우기 전 크기로 줄여 둔다 */
+  .sheet {
+    zoom: var(--z, 1);
+    max-height: calc(86dvh / var(--z, 1));
+  }
+
+  .bg-deco i {
+    scale: var(--z, 1);
   }
 }
 
-@keyframes logo-in {
+/* 키가 작은 휴대폰(가로 모드 등): 간판을 줄여 카드가 일찍 보이게 */
+@media (max-width: 899px) and (max-height: 700px) and (orientation: portrait) {
+  .hero-mark {
+    width: 84px;
+    height: 84px;
+  }
+
+  h1 {
+    font-size: 38px;
+  }
+}
+
+/* ---------- 움직임 ---------- */
+
+/* 첫 진입 연출(#app.intro, 약 1.9초): 로고 상자 → 네 칸이 하나씩 쿵 → 반짝이 터짐 → 제목 글자 → 소개 → 카드가 차례로 튀어 오름 */
+.intro .logo-box {
+  animation: box-pop 520ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+.intro .logo-tile {
+  animation: tile-drop 520ms cubic-bezier(0.3, 1.7, 0.5, 1) calc(260ms + var(--i) * 110ms) both;
+}
+
+.intro .burst i {
+  animation: burst 720ms cubic-bezier(0.2, 0.7, 0.3, 1) calc(760ms + var(--d) * 60ms) both;
+}
+
+.intro .hero-title span {
+  animation: letter-drop 620ms cubic-bezier(0.3, 1.6, 0.5, 1) calc(420ms + var(--i) * 90ms) both;
+}
+
+.intro .tagline {
+  animation: fade-up 500ms ease-out 760ms both;
+}
+
+.intro .top .icon-btn,
+.intro .top .lang-btn {
+  animation: pop-in 480ms cubic-bezier(0.3, 1.6, 0.5, 1) 600ms both;
+}
+
+.intro .install-card,
+.intro .banner {
+  animation: fade-up 500ms ease-out 820ms both;
+}
+
+.intro .games > .card {
+  animation: card-in 620ms cubic-bezier(0.2, 1.3, 0.4, 1) calc(900ms + var(--n, 0) * 110ms) both;
+}
+
+.intro .games > .card .card-art::after {
+  animation: shine 600ms ease-out calc(1000ms + var(--n, 0) * 110ms);
+}
+
+/* 로고를 누르면 네 칸이 다시 통통 */
+.hero-mark.bounce .logo-tile {
+  animation: tile-jump 460ms cubic-bezier(0.3, 1.6, 0.5, 1) calc(var(--i) * 70ms);
+}
+
+@keyframes box-pop {
   from {
     opacity: 0;
-    transform: scale(0.6) rotate(-12deg);
+    transform: scale(0.3) rotate(-14deg);
+  }
+}
+
+@keyframes tile-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-80%) scale(0.2);
+  }
+}
+
+@keyframes tile-jump {
+  40% {
+    transform: translateY(-18%) scale(1.12);
+  }
+}
+
+@keyframes burst {
+  0% {
+    opacity: 1;
+    transform: rotate(var(--a)) translateY(0) scale(0.4);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--a)) translateY(-92px) scale(1) rotate(180deg);
+  }
+}
+
+@keyframes letter-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-48px) scale(0.6) rotate(-10deg);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(46px) scale(0.9) rotate(-2deg);
+  }
+}
+
+@keyframes shine {
+  from {
+    transform: translateX(-120%);
+  }
+  to {
+    transform: translateX(120%);
+  }
+}
+
+@keyframes logo-float {
+  50% {
+    transform: translateY(-5px) rotate(-2deg);
+  }
+}
+
+@keyframes glow {
+  50% {
+    opacity: 0.55;
+    transform: scale(0.9);
+  }
+}
+
+@keyframes bob {
+  50% {
+    transform: translateY(-6px) rotate(-3deg);
+  }
+}
+
+@keyframes wiggle {
+  25% {
+    transform: rotate(-9deg) scale(1.08);
+  }
+  50% {
+    transform: rotate(7deg) scale(1.1);
+  }
+  75% {
+    transform: rotate(-4deg) scale(1.05);
+  }
+}
+
+@keyframes dots {
+  to {
+    transform: translate(16px, 16px);
+  }
+}
+
+@keyframes deco-in {
+  from {
+    opacity: 0;
+    scale: 0.2;
+  }
+}
+
+@keyframes drift {
+  to {
+    transform: translate(18px, -26px) rotate(40deg);
   }
 }
 

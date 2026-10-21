@@ -35,6 +35,46 @@
         var dark = pref === 'dark' || (pref !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
         document.documentElement.dataset.theme = dark ? 'dark' : 'light';
       })();
+      // 오늘의 톤(스킨): 5개 중 날짜마다 하나. 같은 날은 모두 같은 톤이고, 이틀 연속 같은 톤은 나오지 않는다.
+      // 5일씩 묶어 그 묶음 안에서 5개를 섞은 순서대로 쓴다(앞 묶음 마지막 날과 겹치면 첫 두 날을 바꿈).
+      // 사용자가 고르는 설정은 없다. joypack.hubSkin 은 개발 중 톤 확인용 임시 값(src/skins.ts, 곧 삭제).
+      (function () {
+        var SKINS = ['grape', 'candy', 'soda', 'lemon', 'mint'];
+        function hash(n) {
+          n = Math.imul(n ^ (n >>> 16), 0x45d9f3b);
+          n = Math.imul(n ^ (n >>> 16), 0x45d9f3b);
+          return (n ^ (n >>> 16)) >>> 0;
+        }
+        function order(block) {
+          var list = SKINS.slice();
+          for (var i = list.length - 1; i > 0; i--) {
+            var j = hash(block * 31 + i) % (i + 1);
+            var tmp = list[i];
+            list[i] = list[j];
+            list[j] = tmp;
+          }
+          return list;
+        }
+        function skinOf(day) {
+          var block = Math.floor(day / 5);
+          var list = order(block);
+          if (list[0] === order(block - 1)[4]) {
+            var tmp = list[0];
+            list[0] = list[1];
+            list[1] = tmp;
+          }
+          return list[day - block * 5];
+        }
+        var now = new Date();
+        var today = skinOf(Math.floor(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) / 864e5));
+        var preview = null;
+        try {
+          preview = localStorage.getItem('joypack.hubSkin');
+        } catch (e) {}
+        var root = document.documentElement;
+        root.dataset.skinToday = today;
+        root.dataset.skin = SKINS.indexOf(preview) >= 0 ? preview : today;
+      })();
     </script>
   </head>
   <body>

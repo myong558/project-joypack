@@ -5,6 +5,7 @@ import { cachedBoard, hasRanking, loadBoard, type Row } from './rankings';
 import { externalOpenUrl, installState, onInstallChange, promptInstall } from './install';
 import { bestRecord, canClearRecords, clearRecords } from './records';
 import { THEMES, applySettings, applyTheme, canVibrate, loadSettings, migrateLegacy, saveSetting, watchSystemTheme } from './settings';
+import { SKINS, previewSkin, setPreviewSkin, todaySkin, type Skin } from './skins';
 
 migrateLegacy();
 const settings = loadSettings();
@@ -23,9 +24,63 @@ const ICON = {
   cloud: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18h10a4 4 0 0 0 .6-8 6 6 0 0 0-11.4 1.6A3.3 3.3 0 0 0 7 18z"/><path d="m9.5 13.5 2 2 3.5-3.5"/></svg>',
   download: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10.5l5 5 5-5M5 19.5h14"/></svg>',
   check: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
+  globe:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.4 3.4 5.3 3.4 8.5s-1 6.1-3.4 8.5c-2.4-2.4-3.4-5.3-3.4-8.5s1-6.1 3.4-8.5z"/></svg>',
   share: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="m8.2 10.8 7.6-4.1M8.2 13.2l7.6 4.1"/></svg>',
   sparkle: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5c.6 4.2 2.3 6 6.5 6.5-4.2.6-5.9 2.3-6.5 6.5-.6-4.2-2.3-5.9-6.5-6.5 4.2-.5 5.9-2.3 6.5-6.5z"/><path d="M18.5 15.5c.3 1.8 1 2.6 2.5 3-1.5.3-2.2 1.1-2.5 3-.3-1.9-1-2.7-2.5-3 1.5-.4 2.2-1.2 2.5-3z"/></svg>',
 };
+
+// 조이팩 로고(public/logo.svg 와 같은 그림). 첫 화면에서는 네 칸이 하나씩 튀어 들어오도록 칸마다 나눠 그린다.
+// 상자 색은 오늘의 톤을 따른다(--logo).
+const HERO_LOGO = `
+  <svg class="hero-logo" viewBox="0 0 512 512" aria-hidden="true">
+    <rect class="logo-box" width="512" height="512" rx="120"/>
+    <g class="logo-tile" style="--i:0"><rect x="96" y="96" width="146" height="146" rx="40" fill="#4cc9ff"/><path d="M136 169h66M169 136v66" stroke="#fff" stroke-width="22" stroke-linecap="round"/></g>
+    <g class="logo-tile" style="--i:1"><g transform="rotate(10 343 169)"><rect x="270" y="96" width="146" height="146" rx="40" fill="#ffd23f"/><circle cx="343" cy="169" r="26" fill="#fff"/></g></g>
+    <g class="logo-tile" style="--i:2"><rect x="96" y="270" width="146" height="146" rx="40" fill="#ff7a3d"/><path d="M169 305l34 58h-68z" fill="#fff" stroke="#fff" stroke-width="10" stroke-linejoin="round"/></g>
+    <g class="logo-tile" style="--i:3"><rect x="270" y="270" width="146" height="146" rx="40" fill="#3ddc97"/><rect x="314" y="314" width="58" height="58" rx="10" fill="#fff"/></g>
+  </svg>`;
+
+// 작은 로고(설치 안내·설정의 "조이팩 앱"). 파일(logo.svg)을 따로 불러오지 않고 그려 넣어,
+// 주소·캐시 상태와 관계없이 늘 보이고 상자 색도 오늘의 톤을 따른다
+function smallLogo(size: number): string {
+  return `
+    <svg class="mini-logo" viewBox="0 0 512 512" width="${size}" height="${size}" aria-hidden="true">
+      <rect width="512" height="512" rx="120" fill="var(--logo)"/>
+      <rect x="96" y="96" width="146" height="146" rx="40" fill="#4cc9ff"/>
+      <rect x="270" y="96" width="146" height="146" rx="40" fill="#ffd23f" transform="rotate(10 343 169)"/>
+      <rect x="96" y="270" width="146" height="146" rx="40" fill="#ff7a3d"/>
+      <rect x="270" y="270" width="146" height="146" rx="40" fill="#3ddc97"/>
+      <path d="M136 169h66M169 136v66" stroke="#fff" stroke-width="22" stroke-linecap="round"/>
+      <circle cx="343" cy="169" r="26" fill="#fff" transform="rotate(10 343 169)"/>
+      <path d="M169 305l34 58h-68z" fill="#fff" stroke="#fff" stroke-width="10" stroke-linejoin="round"/>
+      <rect x="314" y="314" width="58" height="58" rx="10" fill="#fff"/>
+    </svg>`;
+}
+
+// 로고 둘레로 터지는 반짝이(첫 화면 진입 연출). --a 방향으로 날아가며 사라진다
+const BURST = `<span class="burst" aria-hidden="true">${Array.from({ length: 10 }, (_, i) => `<i style="--a:${i * 36}deg;--d:${i % 3}"></i>`).join('')}</span>`;
+
+// 배경에 떠다니는 장난감 조각(동그라미·별·세모·고리·네모). 화면 뒤에 한 번만 깔고 다시 그리지 않는다
+const DECO_SHAPES = [
+  ['dot', 8, 14, 0],
+  ['ring', 84, 10, 1],
+  ['star', 90, 46, 2],
+  ['tri', 6, 52, 3],
+  ['square', 76, 78, 4],
+  ['dot', 22, 88, 5],
+  ['star', 48, 4, 6],
+  ['ring', 14, 30, 7],
+] as const;
+
+function mountDeco(): void {
+  if (document.querySelector('.bg-deco')) return;
+  const deco = document.createElement('div');
+  deco.className = 'bg-deco';
+  deco.setAttribute('aria-hidden', 'true');
+  deco.innerHTML = DECO_SHAPES.map(([shape, x, y, i]) => `<i class="${shape}" style="left:${x}%;top:${y}%;--i:${i}"></i>`).join('');
+  document.body.prepend(deco);
+}
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
@@ -79,7 +134,7 @@ function installCard(): string {
   return `
     <section class="install-card" aria-label="${t('install.title')}">
       <div class="install-row">
-        <img src="logo.svg" alt="" width="48" height="48" />
+        ${smallLogo(48)}
         <div>
           <strong>${invited ? t('invite.title') : t('install.title')}</strong>
           <p>${t('invite.desc')}</p>
@@ -131,10 +186,12 @@ function gameCard(game: GameMeta): string {
   const best = bestRecord(game);
   const ready = cached.get(game.id) ?? false;
   const blocked = !navigator.onLine && !ready;
+  // 게임 카드 = 장난감 버튼: 위는 게임 색 그림판(아이콘이 둥실), 아래는 이름·설명·기록, 맨 아래 "플레이" 버튼.
+  // 게임이 계속 늘어나므로 휴대폰 두 칸, 넓은 화면은 칸 수가 늘어나는 바둑판으로 쌓는다(styles.css .games)
   return `
     <a class="card${blocked ? ' blocked' : ''}" href="${game.path}" style="--c:${game.color}" data-game="${game.id}"
        ${blocked ? 'aria-disabled="true"' : ''} aria-label="${esc(name)} — ${t('game.play')}">
-      <span class="card-icon"><img src="${iconUrl(game)}" alt="" width="56" height="56" /></span>
+      <span class="card-art"><img class="card-icon" src="${iconUrl(game)}" alt="" width="72" height="72" /></span>
       <span class="card-body">
         <strong class="card-name">${esc(name)}</strong>
         <span class="card-desc">${esc(game.desc[getLang()])}</span>
@@ -144,63 +201,158 @@ function gameCard(game: GameMeta): string {
           ${blocked ? `<span class="chip warn">${t('game.needsOnline')}</span>` : ''}
         </span>
       </span>
-      <span class="card-play" aria-hidden="true">${ICON.play}</span>
+      <span class="card-play" aria-hidden="true">${ICON.play}${t('game.play')}</span>
     </a>`;
 }
 
 function soonCard(game?: GameMeta): string {
   return `
     <div class="card soon" aria-label="${t('game.soon')}">
-      <span class="card-icon">${game ? `<img src="${iconUrl(game)}" alt="" width="56" height="56" />` : ICON.sparkle}</span>
+      <span class="card-art">${game ? `<img class="card-icon" src="${iconUrl(game)}" alt="" width="72" height="72" />` : ICON.sparkle}</span>
       <span class="card-body">
         <strong class="card-name">${esc(game ? game.name[getLang()] : t('game.next'))}</strong>
         <span class="card-desc">${esc(game ? game.desc[getLang()] : t('game.nextDesc'))}</span>
       </span>
-      <span class="chip">${t('game.soon')}</span>
+      <span class="card-play" aria-hidden="true">${t('game.soon')}</span>
     </div>`;
 }
+
+const skinName = (skin: Skin) => t(`skin.${skin}`);
 
 function renderHome(): void {
   document.title = t('app.title');
   const soon = GAMES.filter((g) => g.status === 'soon');
+  const otherLang = LANGS.find((l) => l !== getLang())!;
+  const title = [...t('app.title')].map((ch, i) => `<span style="--i:${i}">${esc(ch)}</span>`).join('');
   app.innerHTML = `
     <header class="top">
-      <div class="brand">
-        <img class="logo" src="logo.svg" alt="" width="52" height="52" />
-        <div>
-          <h1>${t('app.title')}</h1>
-          <p class="tagline">${t('app.tagline')}</p>
-        </div>
-      </div>
+      <button class="lang-btn" data-lang="${otherLang}" aria-label="${t('settings.lang')}: ${LANG_LABEL[getLang()]} → ${LANG_LABEL[otherLang]}">${ICON.globe}<span>${LANG_LABEL[otherLang]}</span></button>
       <div class="actions">
         <button class="icon-btn" data-open="ranking" aria-label="${t('ranking.open')}" title="${t('ranking.open')}">${ICON.trophy}</button>
         <button class="icon-btn" data-open="settings" aria-label="${t('settings.open')}" title="${t('settings.open')}">${ICON.gear}</button>
       </div>
     </header>
-    ${navigator.onLine ? '' : `<p class="banner" role="status">${t('offline.banner')}</p>`}
-    ${installCard()}
-    <section class="games" aria-label="${t('games.label')}">
-      ${live.map(gameCard).join('')}
-      ${soon.length ? soon.map((g) => soonCard(g)).join('') : soonCard()}
-    </section>
+    <main class="stage">
+      <section class="hero">
+        <div class="hero-mark">${BURST}${HERO_LOGO}</div>
+        <h1 aria-label="${esc(t('app.title'))}"><span class="hero-title" aria-hidden="true">${title}</span></h1>
+        <p class="tagline">${t('app.tagline')}</p>
+      </section>
+      <div class="side">
+        ${navigator.onLine ? '' : `<p class="banner" role="status">${t('offline.banner')}</p>`}
+        ${installCard()}
+        <section class="games" aria-label="${t('games.label')}">
+          ${live.map(gameCard).join('')}
+          ${soon.length ? soon.map((g) => soonCard(g)).join('') : soonCard()}
+        </section>
+      </div>
+    </main>
     <footer class="foot">
       <span>${t('app.title')} v${__APP_VERSION__}</span>
     </footer>`;
 
+  app.querySelectorAll<HTMLElement>('.games > .card').forEach((card, i) => card.style.setProperty('--n', String(i)));
   app.querySelectorAll<HTMLAnchorElement>('.card.blocked').forEach((a) => a.addEventListener('click', (e) => e.preventDefault()));
+  // 게임 카드를 누르면 짧게 톡(진동 설정을 따른다)
+  app.querySelectorAll<HTMLAnchorElement>('a.card:not(.blocked)').forEach((a) =>
+    a.addEventListener('click', () => {
+      if (canVibrate && settings.vibrate) navigator.vibrate(15);
+    }),
+  );
+  // 로고를 누르면 네 칸이 다시 한 번 통통 튄다(동작 줄이기면 CSS 가 움직임을 뺀다)
+  const mark = app.querySelector<HTMLElement>('.hero-mark')!;
+  mark.addEventListener('click', () => {
+    mark.classList.remove('bounce');
+    void mark.offsetWidth;
+    mark.classList.add('bounce');
+    if (canVibrate && settings.vibrate) navigator.vibrate(12);
+  });
+  // 언어 전환(설정의 언어와 같은 값, 모든 게임에 적용)
+  app.querySelector<HTMLButtonElement>('[data-lang]')!.addEventListener('click', (e) => {
+    saveSetting(settings, 'lang', (e.currentTarget as HTMLButtonElement).dataset.lang as typeof settings.lang);
+    applySettings(settings);
+    // 진입 연출 중이면 연출을 끝내고 바로 바뀐 언어로 그린다(연출이 처음부터 다시 돌지 않게)
+    introRunning = false;
+    app.classList.remove('intro');
+    renderHome();
+    app.querySelector<HTMLButtonElement>('[data-lang]')!.focus();
+  });
   app.querySelector('[data-open="ranking"]')!.addEventListener('click', openRanking);
   app.querySelector('[data-open="settings"]')!.addEventListener('click', openSettings);
   bindInstallCard(app);
+  fitScreen();
+}
+
+// ---------- 화면 크기에 맞추기 ----------
+// 넓은 화면(가로 900px 이상, 또는 가로로 눕힌 휴대폰)은 왼쪽 간판·오른쪽 카드 두 단으로 놓고,
+// 화면을 여백 6%를 남기고 채우도록 통째로 키운다(css 의 --z, 0.75~2.2배. 내용이 화면보다 길면 조금 줄인다).
+// 게임 안의 PC 화면 확대(업다운 --pc-zoom)와 같은 방식이다. 휴대폰·태블릿 세로는 키우지 않고 칸 수로 맞춘다.
+// 게임이 많아져 0.75배로도 다 안 들어가면 스크롤한다. css 의 @media 조건과 같아야 한다.
+const wideQuery = matchMedia('(min-width: 900px), (orientation: landscape) and (min-width: 640px)');
+
+function fitScreen(): void {
+  const root = document.documentElement;
+  if (!wideQuery.matches) {
+    root.style.removeProperty('--z');
+    return;
+  }
+  // 1배일 때의 자연 크기를 잰다(최소 높이를 잠깐 풀어 내용 높이만)
+  root.style.setProperty('--z', '1');
+  app.style.minHeight = '0';
+  const width = app.offsetWidth;
+  const height = app.offsetHeight;
+  app.style.minHeight = '';
+  const zoom = Math.min(2.2, Math.max(0.75, Math.min((innerWidth * 0.94) / width, (innerHeight * 0.94) / height)));
+  root.style.setProperty('--z', zoom.toFixed(3));
+}
+
+let fitFrame = 0;
+window.addEventListener('resize', () => {
+  cancelAnimationFrame(fitFrame);
+  fitFrame = requestAnimationFrame(fitScreen);
+});
+// 글꼴이 늦게 읽히면 글자 크기가 바뀌므로 한 번 더 맞춘다
+void document.fonts?.ready.then(fitScreen);
+
+// ---------- 첫 진입 연출 ----------
+// 처음 그릴 때만 #app 에 .intro 를 붙여 로고·제목·카드가 차례로 튀어 들어오게 한다(styles.css).
+// 연출 중에 다시 그리면(오프라인 표시·설치 안내 갱신 등) 요소가 새로 만들어져 연출이 처음부터 다시 돌므로,
+// 그동안의 다시 그리기는 연출이 끝난 뒤 한 번으로 모은다.
+const INTRO_MS = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1900;
+let introRunning = false;
+let renderWaiting = false;
+
+function requestRender(): void {
+  if (document.querySelector('dialog[open]')) return;
+  if (introRunning) {
+    renderWaiting = true;
+    return;
+  }
+  renderHome();
+}
+
+function startHome(): void {
+  mountDeco();
+  introRunning = INTRO_MS > 0;
+  app.classList.toggle('intro', introRunning);
+  renderHome();
+  if (!introRunning) return;
+  setTimeout(() => {
+    introRunning = false;
+    app.classList.remove('intro');
+    if (renderWaiting) {
+      renderWaiting = false;
+      requestRender();
+    }
+  }, INTRO_MS);
 }
 
 // 브라우저가 설치 창을 준비하거나 설치가 끝나면 첫 화면의 안내를 다시 그린다
-onInstallChange(() => {
-  if (!document.querySelector('dialog[open]')) renderHome();
-});
+onInstallChange(requestRender);
 
 async function refreshHome(): Promise<void> {
   await refreshCached();
-  if (!document.querySelector('dialog[open]')) renderHome();
+  requestRender();
 }
 
 // ---------- 공통: 대화 상자 ----------
@@ -224,7 +376,7 @@ function openDialog(className: string, body: string, title: string): HTMLDialogE
   });
   dialog.addEventListener('close', () => {
     dialog.remove();
-    renderHome();
+    requestRender();
   });
   dialog.showModal();
   return dialog;
@@ -317,6 +469,11 @@ async function openSettings(): Promise<void> {
   await refreshCached();
   const body = `
     <p class="sheet-sub">${t('settings.note')}</p>
+    <section class="set-group dev">
+      <h3>${t('settings.skinDev')}</h3>
+      ${seg<Skin | 'auto'>('skin', ['auto', ...SKINS], previewSkin(), (v) => (v === 'auto' ? t('skin.auto') : skinName(v)))}
+      <p class="hint">${t('settings.skinDevHint', { name: skinName(todaySkin()) })}</p>
+    </section>
     <section class="set-group install" data-install-section></section>
     <section class="set-group">
       <h3>${t('share.title')}</h3>
@@ -389,6 +546,9 @@ async function openSettings(): Promise<void> {
         if (group.dataset.seg === 'theme') {
           saveSetting(settings, 'theme', value as typeof settings.theme);
           applyTheme(settings.theme);
+        } else if (group.dataset.seg === 'skin') {
+          // 개발용 임시: 톤 미리보기(설정 창 뒤 화면에 바로 보인다)
+          setPreviewSkin(value as Skin | 'auto', settings.theme);
         } else {
           // 언어는 화면 문구가 모두 바뀌므로 설정 창을 새 언어로 다시 연다
           saveSetting(settings, 'lang', value as typeof settings.lang);
@@ -480,7 +640,7 @@ function renderInstall(section: HTMLElement, showGuide = false): void {
   section.innerHTML = `
     <h3>${t('install.title')}</h3>
     <div class="install-row">
-      <img src="logo.svg" alt="" width="44" height="44" />
+      ${smallLogo(44)}
       <p>${state === 'installed' ? t('install.installed') : t('install.desc')}</p>
     </div>
     ${state === 'installed' ? '' : button}
@@ -499,8 +659,11 @@ function renderInstall(section: HTMLElement, showGuide = false): void {
 
 // ---------- 시작 ----------
 
-renderHome();
-void refreshHome();
+// 오프라인 가능 표시를 처음부터 넣어 그리도록 캐시 확인을 잠깐(최대 0.3초) 기다린다. 연출 중에 바뀌면 끝난 뒤 다시 그린다
+const firstCheck = refreshCached();
+// 0.3초 안에 끝나지 않았으면 끝난 뒤 한 번 더 그린다(아직 그리기 전이면 건너뜀)
+void firstCheck.then(() => app.childElementCount && requestRender());
+void Promise.race([firstCheck, new Promise((r) => setTimeout(r, 300))]).then(startHome);
 
 // 게임에서 뒤로 가기로 돌아오면(bfcache) 최고 기록·오프라인 표시를 새로 읽는다
 window.addEventListener('pageshow', (e) => {
