@@ -31,31 +31,10 @@ const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`)
 
 // ---------- 공유받은 링크로 들어온 사람: 첫 화면 위에 설치 안내 ----------
 
-/** 공유 링크에 붙는 표시. 들어오면 주소에서 지우고 이번 방문 동안만 기억한다(새로 고침해도 안내가 남게) */
-const INVITE_PARAM = 'from';
-const INVITE_KEY = 'joypack.invite';
 const DISMISS_KEY = 'joypack.installDismissed';
 
-function readInvite(): boolean {
-  const url = new URL(location.href);
-  if (url.searchParams.get(INVITE_PARAM) === 'share') {
-    url.searchParams.delete(INVITE_PARAM);
-    history.replaceState(null, '', url.pathname + url.search + url.hash);
-    try {
-      sessionStorage.setItem(INVITE_KEY, '1');
-    } catch {
-      // 저장소를 못 쓰는 환경
-    }
-    return true;
-  }
-  try {
-    return sessionStorage.getItem(INVITE_KEY) === '1';
-  } catch {
-    return false;
-  }
-}
-
-const invited = readInvite();
+// 게임에서 공유 링크로 들어왔다가 허브로 넘어온 경우도 공통 모듈이 이번 방문 동안 기억해 둔다
+const invited = Joypack.readInvite();
 
 /**
  * 첫 화면 설치 안내를 보여 줄지.
@@ -465,19 +444,13 @@ async function openSettings(): Promise<void> {
 
 // ---------- 조이팩 공유 ----------
 
-/** 공유할 주소: 조이팩 첫 화면 + 공유 표시(?from=share). 받은 사람이 열면 첫 화면에 설치 안내가 뜬다 */
-function shareUrl(): string {
-  const url = new URL('./', location.href);
-  url.searchParams.set(INVITE_PARAM, 'share');
-  return url.href;
-}
-
 /**
  * 기기 공유 창(카카오톡·문자 등)으로 보낸다. 공유 창이 없으면(주로 PC) 링크를 복사한다.
  * 공유 창으로 보냈거나 사용자가 닫았으면 true, 복사로 대신했으면 false(복사했다는 안내를 보여 준다)
  */
 async function shareJoypack(): Promise<boolean> {
-  const data = { title: t('app.title'), text: t('share.text'), url: shareUrl() };
+  // 공유할 주소: 조이팩 첫 화면 + 공유 표시(?from=share). 받은 사람이 열면 첫 화면에 설치 안내가 뜬다
+  const data = { title: t('app.title'), text: t('share.text'), url: Joypack.shareUrl() };
   if (navigator.share) {
     try {
       await navigator.share(data);

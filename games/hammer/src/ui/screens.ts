@@ -8,7 +8,7 @@ import type { SaveData } from '../storage';
 import { NAME_MAX, RANK_SIZE, boardEntries, cleanName, isValidName, pendingScore, placeOf } from '../ranking';
 import { SKIN_SETTINGS, THEMES, type Skin, type SkinSetting, type Theme } from '../theme';
 import { createMoleEl, holeInner } from './board';
-import { captureResult, shareLink, type ShareOutcome } from '../share';
+import { captureResult, recordsText, sendText, type ShareOutcome } from '../share';
 import { confetti, countUp } from './effects';
 import { DECO_ART, HAMMER, ICONS, MORE_ICONS, SKIN_ICONS, STAR_OFF, STAR_ON, THEME_ICONS } from './icons';
 
@@ -121,6 +121,11 @@ export interface StartOptions {
   opening?: boolean;
   /** 다시 연 설정 창에서 초점을 둘 버튼 */
   settingsFocus?: string;
+}
+
+/** 오늘의 챌린지 최고 기록(오늘 것만) */
+function dailyBestOf(save: SaveData, today: string): number {
+  return save.daily?.date === today ? save.daily.best : 0;
 }
 
 export function startScreen(opts: StartOptions): HTMLElement {
@@ -368,9 +373,9 @@ function settingsPanel(opts: StartOptions): HTMLElement {
           </div>
         </section>
         <section class="share-section">
-          <h3>${t('invite.label')}</h3>
-          <button class="btn" data-share-game>${MORE_ICONS.link} ${t('invite.button')}</button>
-          <p class="note" role="status"></p>
+          <h3>${t('records.label')}</h3>
+          <button class="btn" data-share-records ${save.best > 0 || dailyBestOf(save, opts.today) > 0 ? '' : 'disabled'}>${MORE_ICONS.share} ${t('records.button')}</button>
+          <p class="note" role="status">${save.best > 0 || dailyBestOf(save, opts.today) > 0 ? '' : t('records.empty')}</p>
         </section>
         <section class="reset-section">
           <h3>${t('reset.label')}</h3>
@@ -418,17 +423,19 @@ function settingsPanel(opts: StartOptions): HTMLElement {
     }),
   );
 
-  // 게임 주소를 친구에게 보낸다. 공유 창이 없으면 클립보드에 복사한다
-  const shareGameBtn = el.querySelector<HTMLButtonElement>('[data-share-game]')!;
-  shareGameBtn.addEventListener('click', async () => {
-    shareGameBtn.disabled = true;
-    const outcome = await shareLink(t('invite.text'));
+  // 내 최고 기록(클래식·오늘의 챌린지·도감)을 글과 게임 링크로 친구에게 보낸다. 공유 창이 없으면 클립보드에 복사한다
+  const shareRecordsBtn = el.querySelector<HTMLButtonElement>('[data-share-records]')!;
+  shareRecordsBtn.addEventListener('click', async () => {
+    shareRecordsBtn.disabled = true;
+    const outcome = await sendText(
+      recordsText({ best: save.best, dailyBest: dailyBestOf(save, opts.today), dex: save.dex.length, dexTotal: MOLE_ORDER.length }),
+    );
     el.querySelector('.share-section .note')!.textContent =
       outcome === 'shared' ? t('toast.shared')
-      : outcome === 'copied' ? t('invite.copied')
+      : outcome === 'copied' ? t('records.copied')
       : outcome === 'failed' ? t('toast.failed')
       : '';
-    shareGameBtn.disabled = false;
+    shareRecordsBtn.disabled = false;
   });
 
   const resetBtn = el.querySelector<HTMLButtonElement>('[data-reset]')!;
@@ -749,7 +756,7 @@ export function resultScreen(opts: {
   onRetry: () => void;
   onHome: () => void;
   onShare: (image: Blob | null) => Promise<ShareOutcome>;
-  onShareLink: () => Promise<ShareOutcome>;
+  onShareText: () => Promise<ShareOutcome>;
   ranking: RankingView;
 }): HTMLElement {
   const { result } = opts;
@@ -787,7 +794,7 @@ export function resultScreen(opts: {
           <button class="btn primary" data-act="retry">${t('result.retry')}</button>
           <button class="btn icon-action" data-act="share" aria-label="${t('result.share')}" title="${t('result.share')}">${MORE_ICONS.share}</button>
           <button class="btn icon-action" data-act="home" aria-label="${t('result.home')}" title="${t('result.home')}">${MORE_ICONS.home}</button>
-          <button class="btn share-link" data-act="share-link" hidden>${MORE_ICONS.link} ${t('result.shareLink')}</button>
+          <button class="btn share-link" data-act="share-text" hidden>${MORE_ICONS.share} ${t('result.shareText')}</button>
         </div>
       </div>
       <p class="toast" role="status"></p>
@@ -833,7 +840,7 @@ export function resultScreen(opts: {
   setTimeout(() => el.isConnected && capture(), 1600);
   const toast = q('.toast');
   const shareBtn = q('[data-act="share"]') as HTMLButtonElement;
-  const linkBtn = q('[data-act="share-link"]') as HTMLButtonElement;
+  const textBtn = q('[data-act="share-text"]') as HTMLButtonElement;
   const showOutcome = (outcome: ShareOutcome) => {
     toast.textContent =
       outcome === 'sharedImage' ? t('toast.sharedImage')
@@ -848,19 +855,20 @@ export function resultScreen(opts: {
     toast.textContent = t('toast.preparing');
     const outcome = await opts.onShare(await capture());
     showOutcome(outcome);
-    // 이미지를 보냈으면 게임 링크를 이어서 보낼 버튼을 꺼낸다(공유 시트는 클릭마다 한 번만 열 수 있다)
+    // 이미지를 보냈으면 결과 글(점수·등급·잡은 두더지)과 게임 링크를 이어서 보낼 버튼을 꺼낸다.
+    // 카카오톡 등은 이미지와 함께 온 글을 버리고, 공유 시트는 클릭마다 한 번만 열 수 있다
     if (outcome === 'sharedImage') {
-      linkBtn.hidden = false;
-      linkBtn.focus();
+      textBtn.hidden = false;
+      textBtn.focus();
     }
     shareBtn.disabled = false;
   });
-  linkBtn.addEventListener('click', async () => {
-    linkBtn.disabled = true;
-    const outcome = await opts.onShareLink();
+  textBtn.addEventListener('click', async () => {
+    textBtn.disabled = true;
+    const outcome = await opts.onShareText();
     showOutcome(outcome);
-    if (outcome !== 'cancelled' && outcome !== 'failed') linkBtn.hidden = true;
-    linkBtn.disabled = false;
+    if (outcome !== 'cancelled' && outcome !== 'failed') textBtn.hidden = true;
+    textBtn.disabled = false;
   });
   // 이름이 미리 채워져 있으면 Enter 한 번에 등록되도록 등록 버튼에 초점을 둔다(휴대폰 자판이 저절로 뜨지 않게 입력 칸은 피한다)
   const submit = (entryForm as HTMLElement | null)?.querySelector<HTMLButtonElement>('[type="submit"]');

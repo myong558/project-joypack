@@ -337,9 +337,9 @@
   let shareCard = null; // { game, key, promise }: 같은 판·같은 모양이면 그린 이미지를 다시 쓴다.
   let toastTimer = 0;
 
-  // 게임 주소: 쿼리·해시와 파일 이름(index.html)을 뺀 폴더 주소.
+  // 공유하는 게임 주소: 조이팩 배포 주소 + 공유 표시(?from=share). 받은 사람이 열면 조이팩 앱 설치 안내가 뜬다.
   function gameUrl() {
-    return new URL('./', location.href).href;
+    return Joypack.shareUrl('updown');
   }
 
   function shareText() {
@@ -562,11 +562,20 @@
     }
   }
 
-  // 설정 팝업의 [게임 링크 공유하기]: 초대 문구와 게임 주소를 한 덩어리 글로 보낸다(글만 보내면 카카오톡도 받는다).
-  // 공유 창이 없으면(주로 PC) 링크를 복사하고, 팝업이 알림(.toast)을 가리므로 버튼 문구로 잠깐 알린다.
-  async function shareGameLink() {
-    const button = $('share-game');
-    const message = t('settings.shareText') + '\n' + gameUrl();
+  // 설정 팝업의 [기록 공유]: 난이도별 내 최고 기록과 게임 주소를 한 덩어리 글로 보낸다(글만 보내면 카카오톡도 받는다).
+  // 공유 창이 없으면(주로 PC) 글·링크를 복사하고, 팝업이 알림(.toast)을 가리므로 버튼 문구로 잠깐 알린다.
+  function recordsText() {
+    const list = Object.keys(UpDown.DIFFICULTIES)
+      .filter((key) => best[key])
+      .map((key) => t('settings.recordItem', { level: t('difficulty.' + key), tries: best[key] }))
+      .join(' · ');
+    return t('settings.recordsText', { list: list });
+  }
+
+  async function shareRecords() {
+    const button = $('share-records');
+    if (!Object.keys(best).length) return;
+    const message = recordsText() + '\n' + gameUrl();
     if (navigator.share) {
       try {
         await navigator.share({ text: message });
@@ -582,7 +591,7 @@
     } catch (e) {}
     const label = button.querySelector('span');
     label.textContent = t(copied ? 'settings.linkCopied' : 'share.failed');
-    setTimeout(() => (label.textContent = t('settings.shareGame')), 2000);
+    setTimeout(() => (label.textContent = t('settings.shareRecords')), 2000);
   }
 
   // ── 공유 랭킹(js/ranking.js) ──
@@ -940,6 +949,8 @@
       const key = button.dataset.reset;
       button.disabled = key === 'all' ? Object.keys(best).length === 0 : !best[key];
     });
+    // 기록이 하나도 없으면 공유할 것이 없다
+    $('share-records').disabled = Object.keys(best).length === 0;
     document.querySelectorAll('[data-theme-option]').forEach((button) => {
       button.setAttribute('aria-pressed', String(button.dataset.themeOption === themePreference));
     });
@@ -1057,7 +1068,7 @@
   $('result-rank').addEventListener('submit', submitResultRank);
   $('result-rank-view').addEventListener('click', openRanking);
   $('settings-close').addEventListener('click', () => $('settings').close());
-  $('share-game').addEventListener('click', shareGameLink);
+  $('share-records').addEventListener('click', shareRecords);
   // 효과음·진동 칩: 누를 때마다 켬/끔. 켜면 바로 맛보기로 한 번 울린다.
   [
     ['sound', 'fx-sound'],
@@ -1123,6 +1134,8 @@
     });
     window.addEventListener('load', () => {
       Joypack.registerSW({ root: '../../', game: 'updown' });
+      // 공유 링크로 바로 들어온 사람에게 조이팩 앱 설치 안내 띠
+      Joypack.inviteBar({ root: '../../' });
     });
   }
 })();

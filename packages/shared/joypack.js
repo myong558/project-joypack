@@ -77,6 +77,81 @@
       .catch(() => null);
   }
 
+  // ── 공유 ──
+  // 공유 링크에는 ?from=share 를 붙인다. 받은 사람이 열면 설치 안내(게임: 아래 띠, 허브: 첫 화면 카드)를 보여 준다.
+  // 개발 서버에서 공유해도 친구가 열 수 있도록 배포 주소로 고정한다.
+  const SITE = 'https://myong558.github.io/project-joypack/';
+  const INVITE_KEY = 'joypack.invite';
+
+  function shareUrl(gameId) {
+    return SITE + (gameId ? 'games/' + gameId + '/' : '') + '?from=share';
+  }
+
+  function isStandalone() {
+    return (global.matchMedia && matchMedia('(display-mode: standalone)').matches) || global.navigator.standalone === true;
+  }
+
+  // 공유 링크로 들어왔는지. 주소에서 표시를 지우고 이번 방문 동안 기억한다(허브로 넘어가도 설치 안내가 이어지게)
+  function readInvite() {
+    try {
+      const url = new URL(location.href);
+      if (url.searchParams.get('from') === 'share') {
+        url.searchParams.delete('from');
+        history.replaceState(history.state, '', url.pathname + url.search + url.hash);
+        sessionStorage.setItem(INVITE_KEY, '1');
+        return true;
+      }
+      return sessionStorage.getItem(INVITE_KEY) === '1';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // 게임 화면 아래 "조이팩 앱으로 설치하기" 띠. 공유 링크로 게임에 바로 들어온 사람에게만, 앱으로 실행 중이 아닐 때만 보인다.
+  // 누르면 허브로 가서 설치 안내 카드를 본다. 게임을 시작하려고 화면 다른 곳을 누르면 판을 가리지 않게 사라진다.
+  function inviteBar(options) {
+    const root = (options && options.root) || '../../';
+    let closed = false;
+    try {
+      closed = sessionStorage.getItem(INVITE_KEY + 'BarClosed') === '1';
+    } catch (e) {}
+    if (!readInvite() || closed || isStandalone() || document.querySelector('.joypack-invite')) return;
+    const ko = (get('lang') || navigator.language || 'ko').slice(0, 2) !== 'en';
+    const style = document.createElement('style');
+    style.textContent =
+      '.joypack-invite{position:fixed;left:50%;bottom:max(14px,env(safe-area-inset-bottom));z-index:2147483000;display:flex;align-items:center;gap:4px;' +
+      'max-width:calc(100% - 24px);padding:6px 6px 6px 8px;border-radius:999px;background:#6c47ff;color:#fff;font:15px/1.2 system-ui,sans-serif;' +
+      'box-shadow:0 8px 24px rgb(40 25 110/.35);transform:translateX(-50%);animation:joypack-invite-in .4s cubic-bezier(.2,.9,.3,1.2) both}' +
+      '.joypack-invite a{display:flex;align-items:center;gap:8px;padding:4px 8px;color:inherit;text-decoration:none;white-space:nowrap}' +
+      '.joypack-invite img{width:26px;height:26px;border-radius:8px;background:#fff}' +
+      '.joypack-invite button{width:30px;height:30px;border:0;border-radius:50%;background:rgb(255 255 255/.18);color:#fff;font:18px/1 system-ui;cursor:pointer}' +
+      '@keyframes joypack-invite-in{from{opacity:0;transform:translate(-50%,20px)}}' +
+      '@media (prefers-reduced-motion:reduce){.joypack-invite{animation:none}}';
+    const bar = document.createElement('div');
+    bar.className = 'joypack-invite';
+    bar.setAttribute('role', 'region');
+    bar.setAttribute('aria-label', ko ? '조이팩 앱 설치' : 'Install Joypack');
+    bar.innerHTML =
+      '<a href="' + root + '"><img src="' + root + 'logo.svg" alt="">' + (ko ? '조이팩 앱으로 설치하기' : 'Install the Joypack app') + '</a>' +
+      '<button type="button" aria-label="' + (ko ? '닫기' : 'Close') + '">×</button>';
+    const close = () => {
+      // 한 번 닫으면 이번 방문 동안 다른 게임에서도 다시 띄우지 않는다(허브 첫 화면 카드는 그대로)
+      try {
+        sessionStorage.setItem(INVITE_KEY + 'BarClosed', '1');
+      } catch (e) {}
+      bar.remove();
+      document.removeEventListener('pointerdown', outside, true);
+    };
+    const outside = (e) => {
+      if (!bar.contains(e.target)) close();
+    };
+    bar.querySelector('button').addEventListener('click', close);
+    document.head.append(style);
+    document.body.append(bar);
+    // 띠가 나타난 직후의 누름(공유 링크를 연 손가락 등)은 무시하고, 그다음 화면 누름부터 닫는다
+    setTimeout(() => document.addEventListener('pointerdown', outside, true), 600);
+  }
+
   // 그 게임 파일 전체가 캐시돼 있으면(= 오프라인에서 열림) true. 캐시를 다 받은 뒤에 넣는 files.json 으로 판단한다.
   function isGameCached(id) {
     if (!('caches' in global)) return Promise.resolve(false);
@@ -102,5 +177,8 @@
     registerSW: registerSW,
     isGameCached: isGameCached,
     clearGameCache: clearGameCache,
+    shareUrl: shareUrl,
+    readInvite: readInvite,
+    inviteBar: inviteBar,
   };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -7,7 +7,7 @@ import { nextGoal } from './game/scoring';
 import type { MissionId } from './game/missions';
 import type { GameEvent, GameResult, MoleKind } from './game/types';
 import { setLang, t } from './i18n';
-import { shareLink, shareResult, shareText } from './share';
+import { sendText, shareResult, shareText } from './share';
 import { fetchBoard, submitEntry } from './online';
 import { boardEntries, clearPending, keepPending, placeOf, type RankEntry } from './ranking';
 import { emptyRecords, loadSave, writeSave } from './storage';
@@ -403,7 +403,7 @@ function showResult(result: GameResult, missionId: MissionId, mode: Mode, date: 
       onRetry: () => play(mode),
       onHome: () => showStart(),
       onShare: (image) => shareResult(shareText(result, { date, daily }), image),
-      onShareLink: () => shareLink(shareText(result, { date, daily })),
+      onShareText: () => sendText(shareText(result, { date, daily })),
       ranking: rankingView(date),
     }),
   );
@@ -426,4 +426,8 @@ function showResult(result: GameResult, missionId: MissionId, mode: Mode, date: 
 showStart(undefined, undefined, true);
 
 // 조이팩 서비스 워커(사이트에 하나)를 등록하고, 이 게임 파일 전체를 캐시하라고 알린다(처음 열 때 캐시, 이후에는 바뀐 파일만)
-window.addEventListener('load', () => void Joypack.registerSW({ root: '../../', game: 'hammer' }));
+window.addEventListener('load', () => {
+  void Joypack.registerSW({ root: '../../', game: 'hammer' });
+  // 공유 링크로 바로 들어온 사람에게 조이팩 앱 설치 안내 띠
+  Joypack.inviteBar({ root: '../../' });
+});

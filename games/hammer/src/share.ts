@@ -36,11 +36,19 @@ export async function copyText(text: string): Promise<boolean> {
   }
 }
 
-/** 공유하는 게임 주소. 개발 서버에서 공유해도 친구가 열 수 있도록 배포 주소로 고정한다 */
-export const GAME_URL = 'https://myong558.github.io/project-hammer/';
-
+/** 공유하는 게임 주소: 조이팩 배포 주소 + 공유 표시(?from=share). 받은 사람이 열면 조이팩 앱 설치 안내가 뜬다 */
 export function gameLink(): string {
-  return GAME_URL;
+  return Joypack.shareUrl('hammer');
+}
+
+/** 설정의 "내 기록 공유": 최고 기록·오늘의 챌린지·도감 */
+export function recordsText(save: { best: number; dailyBest: number; dex: number; dexTotal: number }): string {
+  return [
+    `${t('app.title')} 🔨 ${t('records.title')}`,
+    t('records.best', { n: save.best.toLocaleString() }) + (save.dailyBest > 0 ? ` · ${t('records.daily', { n: save.dailyBest.toLocaleString() })}` : ''),
+    t('records.dex', { n: save.dex, total: save.dexTotal }),
+    t('records.challenge'),
+  ].join('\n');
 }
 
 /**
@@ -81,13 +89,13 @@ export async function captureResult(el: HTMLElement): Promise<Blob | null> {
 export type ShareOutcome = 'sharedImage' | 'shared' | 'cancelled' | 'copied' | 'copiedSaved' | 'failed';
 
 /**
- * 두 번에 나눠 보낸다: 먼저 결과 이미지만 보내고, 게임 링크는 이어서 shareLink로 한 번 더 보낸다.
+ * 두 번에 나눠 보낸다: 먼저 결과 이미지만 보내고, 결과 글과 게임 링크는 이어서 sendText로 한 번 더 보낸다("결과 글 보내기" 버튼).
  * 카카오톡 등은 이미지와 글을 같이 받으면 글을 버리기 때문이다. 공유 시트를 열기 전에 결과 글·링크를 클립보드에도 넣어 둔다.
  * 파일 공유를 못 하는 브라우저는 결과 글·링크만 공유하고, 공유 시트가 없으면 글·링크를 복사하고 이미지를 내려받는다.
  */
 export async function shareResult(text: string, image: Blob | null): Promise<ShareOutcome> {
   const message = `${text}\n${gameLink()}`;
-  const file = image && new File([image], 'project-hammer-result.png', { type: 'image/png' });
+  const file = image && new File([image], 'joypack-hammer-result.png', { type: 'image/png' });
 
   try {
     if (file && navigator.canShare?.({ files: [file] })) {
@@ -106,14 +114,14 @@ export async function shareResult(text: string, image: Blob | null): Promise<Sha
 
   const copied = await copyText(message);
   if (image) {
-    download(image, 'project-hammer-result.png');
+    download(image, 'joypack-hammer-result.png');
     return copied ? 'copiedSaved' : 'failed';
   }
   return copied ? 'copied' : 'failed';
 }
 
-/** 이미지를 보낸 뒤, 결과 글과 게임 링크를 한 번 더 보낸다 */
-export async function shareLink(text: string): Promise<ShareOutcome> {
+/** 결과 글과 게임 링크를 한 덩어리 글로 보낸다(결과 이미지를 보낸 뒤 이어서, 또는 설정의 내 기록 공유) */
+export async function sendText(text: string): Promise<ShareOutcome> {
   // 링크를 글 안에 넣어 한 덩어리로 보낸다. url을 따로 주면 iOS에서 앱에 따라 글이나 링크 하나가 빠진다
   const message = `${text}\n${gameLink()}`;
   try {
