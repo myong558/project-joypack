@@ -1425,16 +1425,28 @@ button.dex-item:focus-visible {
 /* ---- 상태 ---- */
 
 .mole.ouch {
-  animation: ouch 140ms ease-out;
+  animation: ouch 180ms ease-out;
 }
 
 @keyframes ouch {
-  40% { transform: translateY(6%) scale(1.1, 0.85); }
+  0% { filter: brightness(1.9); }
+  35% { transform: translateY(9%) scale(1.16, 0.8); filter: none; }
+  70% { transform: translateY(-2%) scale(0.95, 1.06); }
 }
 
 .mole.whacked.up {
   transform: translateY(10%) scale(1.12, 0.75);
   transition-duration: 60ms;
+  animation: whack 260ms cubic-bezier(0.2, 0.8, 0.3, 1.2);
+}
+
+/* 맞힌 순간: 납작하게 눌리며 하얗게 번쩍 → 튀어 오름 → 다시 눌린 자세(위 transform)로 끝나 가라앉기로 이어진다 */
+@keyframes whack {
+  0% { transform: translateY(24%) scale(1.38, 0.52); filter: brightness(2.4) saturate(0.3); }
+  22% { filter: brightness(1.3) saturate(0.8); }
+  38% { transform: translateY(1%) scale(0.88, 1.14); filter: none; }
+  62% { transform: translateY(13%) scale(1.18, 0.7); }
+  100% { transform: translateY(10%) scale(1.12, 0.75); }
 }
 
 .mole.whacked .body,
@@ -1639,9 +1651,74 @@ button.dex-item:focus-visible {
 .popup.king { color: var(--gold); font-size: max(18px, 1.8em); }
 
 @keyframes rise {
-  0% { transform: translate(-50%, 0.6em) scale(0.6); opacity: 0; }
-  20% { transform: translate(-50%, -0.4em) scale(1.2); opacity: 1; }
+  0% { transform: translate(-50%, 0.6em) scale(0.5); opacity: 0; }
+  14% { transform: translate(-50%, -0.5em) scale(1.35); opacity: 1; }
+  26% { transform: translate(-50%, -0.6em) scale(1.05); }
   100% { transform: translate(-50%, -2.2em) scale(1); opacity: 0; }
+}
+
+/* 타격 충격: 퍼지는 고리(::before) + 별 모양 섬광(::after) */
+.impact {
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  z-index: 4;
+  width: 5.6em;
+  aspect-ratio: 1;
+  margin: -2.8em 0 0 -2.8em;
+  pointer-events: none;
+}
+
+.impact::before,
+.impact::after {
+  content: '';
+  position: absolute;
+}
+
+.impact::before {
+  inset: 0;
+  border: 0.32em solid #fff;
+  border-radius: 50%;
+  animation: impact-ring 340ms cubic-bezier(0.1, 0.7, 0.3, 1) forwards;
+}
+
+.impact::after {
+  inset: 14%;
+  background: #fff;
+  clip-path: polygon(50% 0, 59% 33%, 85% 15%, 67% 41%, 100% 50%, 67% 59%, 85% 85%, 59% 67%, 50% 100%, 41% 67%, 15% 85%, 33% 59%, 0 50%, 33% 41%, 15% 15%, 41% 33%);
+  animation: impact-flash 170ms ease-out forwards;
+}
+
+.impact.gold::before { border-color: var(--gold); }
+.impact.gold::after { background: #fff3a6; }
+.impact.bad::before { border-color: #ffb02e; }
+.impact.bad::after { background: #ff7a3c; }
+.impact.small { scale: 0.7; }
+
+@keyframes impact-ring {
+  from { transform: scale(0.2); opacity: 1; }
+  to { transform: scale(1.3); opacity: 0; border-width: 0.04em; }
+}
+
+@keyframes impact-flash {
+  from { transform: scale(0.45) rotate(0deg); opacity: 0.95; }
+  to { transform: scale(1.1) rotate(14deg); opacity: 0; }
+}
+
+/* 흙덩이: 위로 튀었다가 포물선으로 떨어진다 */
+.particle.dirt {
+  top: 70%;
+  width: calc(0.42em * var(--s, 1));
+  clip-path: none;
+  border-radius: 45% 55% 50% 40%;
+  background: var(--dirt-dark);
+  animation: dirt 560ms cubic-bezier(0.25, 0.5, 0.45, 1) forwards;
+}
+
+@keyframes dirt {
+  0% { transform: translate(-50%, 0) scale(1); opacity: 1; }
+  45% { transform: translate(calc(-50% + var(--dx) * 0.6), var(--dy)) scale(1); opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--dx)), calc(var(--dy) + 2.6em)) scale(0.6); opacity: 0; }
 }
 
 /* 튀는 별 조각 */
@@ -1793,6 +1870,16 @@ button.dex-item:focus-visible {
 
 .fever .hammer {
   filter: drop-shadow(0 0 0.25em #ff7a00) drop-shadow(0 0 0.6em #ff3d00);
+}
+
+/* 보통 타격: 판 전체가 아래로 툭 눌렸다 돌아온다 */
+.shake-tiny {
+  animation: shake-tiny 120ms ease-out;
+}
+
+@keyframes shake-tiny {
+  30% { transform: translateY(0.9%) scale(1.006); }
+  65% { transform: translateY(-0.3%); }
 }
 
 .shake-small {

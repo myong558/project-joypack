@@ -13,8 +13,8 @@ const ko = {
   'start.hint': '키보드: 숫자패드 1–9로 치기 · Esc 일시정지 · Enter 다시 하기',
   'sound.on': '소리 켜짐',
   'sound.off': '소리 꺼짐',
-  'shake.on': '흔들림 켜짐',
-  'shake.off': '흔들림 꺼짐',
+  'vibrate.on': '진동 켜짐',
+  'vibrate.off': '진동 꺼짐',
 
   'dex.title': '두더지 도감',
   'dex.locked': '아직 못 만났어요',
@@ -172,8 +172,8 @@ const en: Record<MessageKey, string> = {
   'start.hint': 'Keyboard: numpad 1–9 to whack · Esc pause · Enter replay',
   'sound.on': 'Sound on',
   'sound.off': 'Sound off',
-  'shake.on': 'Shake on',
-  'shake.off': 'Shake off',
+  'vibrate.on': 'Vibration on',
+  'vibrate.off': 'Vibration off',
 
   'dex.title': 'Mole Guide',
   'dex.locked': 'Not met yet',

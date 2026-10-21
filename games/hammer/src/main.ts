@@ -40,8 +40,9 @@ function todayLabel(d: Date): string {
   return `${d.getMonth() + 1}/${d.getDate()}`;
 }
 
+/** 진동은 30ms 아래면 거의 느껴지지 않아, 보통 타격도 40ms 이상으로 준다 */
 function vibrate(pattern: number | number[]): void {
-  if (save.shake) navigator.vibrate?.(pattern);
+  if (save.vibrate) navigator.vibrate?.(pattern);
 }
 
 function cacheBoard(mode: Mode, today: string, entries: RankEntry[]): void {
@@ -150,7 +151,7 @@ function play(mode: Mode): void {
   });
   mount(view.el);
 
-  const fx = new Effects(view.stage, () => save.shake);
+  const fx = new Effects(view.stage);
   const hammer = new Hammer(view.stage);
   const board = new Board(view.board, (hole) => game.hit(hole));
   const hud = new Hud(view.hud, game, view.el.querySelector<HTMLElement>('.pause-btn'));
@@ -221,14 +222,17 @@ function play(mode: Mode): void {
       case 'damage':
         sound.play(e.mole.kind === 'helmet' ? 'clink' : 'king');
         board.damage(e.mole);
+        fx.impact(holeEl(e.mole.hole), 'small');
+        hammer.smash();
         if (e.mole.kind === 'helmet') {
           fx.popup(holeEl(e.mole.hole), t('popup.clink'), 'clink');
+          fx.shake('tiny');
         } else {
           fx.popup(holeEl(e.mole.hole), `${e.mole.hp}`, 'king');
           fx.shake('small');
         }
-        hitstop(40);
-        vibrate(10);
+        hitstop(50);
+        vibrate(30);
         break;
       case 'hit': {
         const { mole, points } = e;
@@ -240,15 +244,25 @@ function play(mode: Mode): void {
         record(mole.kind, el);
         if (mole.kind === 'clock') fx.popup(el, t('popup.time'), 'time');
         if (mole.kind === 'ice') fx.popup(el, t('popup.ice'), 'ice');
-        fx.burst(el, mole.kind === 'golden' || mole.kind === 'king' ? ['#ffd84d', '#fff3a6', '#ff9f43'] : ['#ffffff', '#ffd84d', '#ffb37a']);
+        const gold = mole.kind === 'golden' || mole.kind === 'king';
+        // 손맛: 충격 고리·섬광 → 별·흙 파티클 → 망치 눌림 → 화면 툭 → 잠깐 멈춤(hitstop) → 진동
+        fx.impact(el, gold ? 'gold' : '');
+        fx.burst(el, gold ? ['#ffd84d', '#fff3a6', '#ff9f43'] : ['#ffffff', '#ffd84d', '#ffb37a'], game.inFever ? 12 : 9);
+        fx.dirt(el);
+        hammer.smash();
         if (mole.kind === 'king') {
           fx.banner(t('banner.kingDown'), 'king');
           fx.shake('big');
-          hitstop(140);
-          vibrate([30, 30, 60]);
+          hitstop(160);
+          vibrate([60, 40, 120]);
+        } else if (mole.kind === 'golden') {
+          fx.shake('small');
+          hitstop(90);
+          vibrate([45, 30, 60]);
         } else {
-          hitstop(55);
-          vibrate(15);
+          fx.shake('tiny');
+          hitstop(70);
+          vibrate(game.inFever ? 55 : 40);
         }
         break;
       }
@@ -256,11 +270,13 @@ function play(mode: Mode): void {
         sound.play('bomb');
         board.bomb(e.mole);
         fx.popup(holeEl(e.mole.hole), `${e.points}`, 'bad');
-        fx.burst(holeEl(e.mole.hole), ['#ff5a3c', '#ffb02e', '#5a5470'], 10);
+        fx.impact(holeEl(e.mole.hole), 'bad');
+        fx.burst(holeEl(e.mole.hole), ['#ff5a3c', '#ffb02e', '#5a5470'], 12);
+        fx.dirt(holeEl(e.mole.hole), 7);
         record('bomb', holeEl(e.mole.hole));
         fx.shake('big');
-        hitstop(120);
-        vibrate([60, 40, 60]);
+        hitstop(140);
+        vibrate([90, 50, 140]);
         break;
       case 'whiff':
         sound.play('whiff');

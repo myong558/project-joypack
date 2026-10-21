@@ -36,7 +36,7 @@ export function migrateLegacy(): void {
     theme: [readLocal('updown.theme'), hammer.theme as string],
     lang: [readLocal('updown.lang'), hammer.lang as string],
     sound: [readLocal('updown.sound'), onOff(hammer.sound)],
-    vibrate: [readLocal('updown.vibrate'), onOff(hammer.shake)],
+    vibrate: [readLocal('updown.vibrate'), onOff(hammer.vibrate ?? hammer.shake)],
     initials: [readLocal('updown.initials'), hammer.playerName as string],
   };
   const valid: Record<keyof Settings, (v: string) => boolean> = {

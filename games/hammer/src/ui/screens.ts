@@ -318,11 +318,11 @@ function dexDetail(kind: MoleKind, count: number): HTMLElement {
   return el;
 }
 
-type Toggle = 'sound' | 'shake';
+type Toggle = 'sound' | 'vibrate';
 
 const TOGGLE_ICONS: Record<Toggle, [on: string, off: string]> = {
   sound: [ICONS.soundOn, ICONS.soundOff],
-  shake: [ICONS.shakeOn, ICONS.shakeOff],
+  vibrate: [ICONS.vibrateOn, ICONS.vibrateOff],
 };
 
 function toggleInner(key: Toggle, on: boolean): string {
@@ -364,7 +364,7 @@ function settingsPanel(opts: StartOptions): HTMLElement {
           <h3>${t('settings.feedback')}</h3>
           <div class="toggles">
             ${toggleChip('sound', save.sound)}
-            ${toggleChip('shake', save.shake)}
+            ${'vibrate' in navigator ? toggleChip('vibrate', save.vibrate) : '' /* 진동을 못 하는 기기(아이폰 등)에는 숨긴다 */}
           </div>
         </section>
         <section class="share-section">
