@@ -12,7 +12,7 @@ const FIREBASE = {
   projectId: 'joypack-c6bd2',
 };
 const API = `https://firestore.googleapis.com/v1/projects/${FIREBASE.projectId}/databases/(default)/documents`;
-const TOP = 3;
+export const TOP = 3;
 const FRESH_MS = 5 * 60 * 1000;
 const TIMEOUT_MS = 8000;
 const CACHE_KEY = 'joypack.rankingCache';

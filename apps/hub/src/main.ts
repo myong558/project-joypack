@@ -1,7 +1,7 @@
 import './styles.css';
 import { GAMES, gameVersion, iconUrl, type GameMeta } from './games';
 import { LANG_LABEL, LANGS, formatNumber, getLang, t } from './i18n';
-import { cachedBoard, hasRanking, loadBoard, type Row } from './rankings';
+import { TOP, cachedBoard, hasRanking, loadBoard, type Row } from './rankings';
 import { externalOpenUrl, installState, onInstallChange, promptInstall } from './install';
 import { bestRecord, canClearRecords, clearRecords } from './records';
 import { THEMES, applySettings, applyTheme, canVibrate, loadSettings, migrateLegacy, saveSetting, watchSystemTheme } from './settings';
@@ -418,7 +418,7 @@ function openRanking(): void {
               .map((b) => `<button role="tab" class="chip-btn" data-board="${b.id}" aria-selected="${b.id === board}">${esc(b.name[getLang()])}</button>`)
               .join('')}
           </div>
-          <div class="rank-rows" aria-live="polite"></div>
+          <div class="rank-rows" style="--rows:${TOP}" aria-live="polite"></div>
         </section>`;
       })
       .join('')}`;

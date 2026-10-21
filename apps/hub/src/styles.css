@@ -808,6 +808,14 @@ a.card:active .card-play {
   color: #fff;
 }
 
+/* 순위 칸은 늘 "순위 TOP 줄 + 안내 한 줄" 높이를 잡아 둔다. 탭을 바꿔 불러오는 중·기록 없음·줄 수가 달라져도
+   대화 상자 크기가 흔들리지 않게 */
+.rank-rows {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(var(--rows, 3) * 45px + 32px);
+}
+
 .rank-list {
   margin: 0;
   padding: 0;
@@ -815,6 +823,8 @@ a.card:active .card-play {
 }
 
 .rank-list li {
+  box-sizing: border-box;
+  height: 45px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -870,6 +880,13 @@ a.card:active .card-play {
   margin: 4px;
   color: var(--muted);
   font-size: 14px;
+  line-height: 20px;
+}
+
+/* 불러오는 중·기록 없음·오류는 잡아 둔 칸 가운데에 */
+.rank-empty {
+  margin: auto;
+  text-align: center;
 }
 
 .rank-note {
