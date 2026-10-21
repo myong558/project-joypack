@@ -1,4 +1,6 @@
 // public/logo.svg 로 앱 아이콘(PNG)과 링크 미리보기 이미지(og-image.png)를 만든다. 로고를 바꾸면 `pnpm --filter hub icons`.
+// 로고를 바꾸면 index.html 과 public/manifest.webmanifest 의 아이콘 주소 끝 ?v=숫자 도 하나 올린다.
+// 주소가 같으면 이미 설치된 앱(안드로이드·PC)이 아이콘이 바뀐 줄 모르고 예전 아이콘을 계속 쓴다
 // 만든 PNG 는 저장소에 커밋한다(CI 에서는 다시 만들지 않음).
 import { readFile } from 'node:fs/promises';
 import sharp from 'sharp';
