@@ -171,11 +171,11 @@
     const style = document.createElement('style');
     style.textContent =
       '.joypack-invite{position:fixed;left:50%;bottom:max(14px,env(safe-area-inset-bottom));z-index:2147483000;display:flex;align-items:center;gap:4px;' +
-      'max-width:calc(100% - 24px);padding:6px 6px 6px 8px;border-radius:999px;background:#6c47ff;color:#fff;font:15px/1.2 system-ui,sans-serif;' +
-      'box-shadow:0 8px 24px rgb(40 25 110/.35);transform:translateX(-50%);animation:joypack-invite-in .4s cubic-bezier(.2,.9,.3,1.2) both}' +
+      'max-width:calc(100% - 24px);padding:6px 6px 6px 8px;border-radius:999px;background:#ffb703;color:#3d2a00;font:15px/1.2 system-ui,sans-serif;' +
+      'box-shadow:0 8px 24px rgb(120 70 0/.35);transform:translateX(-50%);animation:joypack-invite-in .4s cubic-bezier(.2,.9,.3,1.2) both}' +
       '.joypack-invite a{display:flex;align-items:center;gap:8px;padding:4px 8px;color:inherit;text-decoration:none;white-space:nowrap}' +
-      '.joypack-invite img{width:26px;height:26px;border-radius:8px;background:#fff}' +
-      '.joypack-invite button{width:30px;height:30px;border:0;border-radius:50%;background:rgb(255 255 255/.18);color:#fff;font:18px/1 system-ui;cursor:pointer}' +
+      '.joypack-invite img{width:26px;height:26px}' +
+      '.joypack-invite button{width:30px;height:30px;border:0;border-radius:50%;background:rgb(61 42 0/.12);color:#3d2a00;font:18px/1 system-ui;cursor:pointer}' +
       '@keyframes joypack-invite-in{from{opacity:0;transform:translate(-50%,20px)}}' +
       '@media (prefers-reduced-motion:reduce){.joypack-invite{animation:none}}';
     const bar = document.createElement('div');

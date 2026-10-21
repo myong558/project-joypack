@@ -1,12 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- 조이팩 로고: 보라 상자 안에 게임 네 칸(하나는 살짝 기울어 통통 튀는 느낌) -->
-  <rect width="512" height="512" rx="120" fill="#6c47ff"/>
-  <rect x="96" y="96" width="146" height="146" rx="40" fill="#4cc9ff"/>
-  <rect x="270" y="96" width="146" height="146" rx="40" fill="#ffd23f" transform="rotate(10 343 169)"/>
-  <rect x="96" y="270" width="146" height="146" rx="40" fill="#ff7a3d"/>
-  <rect x="270" y="270" width="146" height="146" rx="40" fill="#3ddc97"/>
-  <path d="M136 169h66M169 136v66" stroke="#fff" stroke-width="22" stroke-linecap="round"/>
-  <circle cx="343" cy="169" r="26" fill="#fff" transform="rotate(10 343 169)"/>
-  <path d="M169 305l34 58h-68z" fill="#fff" stroke="#fff" stroke-width="10" stroke-linejoin="round"/>
-  <rect x="314" y="314" width="58" height="58" rx="10" fill="#fff"/>
+  <!-- 조이팩 로고: 레몬 상자에 게임기 부품으로 만든 웃는 얼굴(왼눈 십자 버튼, 오른눈 동그란 버튼). 부품 아래 그림자로 툭 튀어나온 장난감 버튼처럼 -->
+  <rect width="512" height="512" rx="120" fill="#ffb703"/>
+  <g transform="translate(0 16)"><rect x="120" y="198" width="116" height="40" rx="14" fill="#d98f00"/><rect x="158" y="160" width="40" height="116" rx="14" fill="#d98f00"/><circle cx="336" cy="218" r="44" fill="#d98f00"/><path d="M152 318 Q256 428 360 318" fill="none" stroke="#d98f00" stroke-width="40" stroke-linecap="round"/></g>
+  <circle cx="122" cy="300" r="26" fill="#ff7a3d" opacity="0.9"/><circle cx="390" cy="300" r="26" fill="#ff7a3d" opacity="0.9"/>
+  <rect x="120" y="198" width="116" height="40" rx="14" fill="#3d2a00"/><rect x="158" y="160" width="40" height="116" rx="14" fill="#3d2a00"/>
+  <circle cx="336" cy="218" r="44" fill="#3d2a00"/>
+  <path d="M152 318 Q256 428 360 318" fill="none" stroke="#3d2a00" stroke-width="40" stroke-linecap="round"/>
 </svg>

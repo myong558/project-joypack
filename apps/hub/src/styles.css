@@ -16,7 +16,8 @@
   --brand: #6c47ff;
   --brand-ink: #ffffff;
   --accent: #ffb703;
-  --logo: #6c47ff;
+  /* 로고 상자색(레몬). 앱 아이콘과 같게 고정, 톤마다 바꾸지 않는다 */
+  --mark: #ffb703;
   --ok: #138a5b;
   --warn: #b25a00;
   --gold: #f5b400;
@@ -53,7 +54,6 @@
   --line: #f7d5e5;
   --brand: #d6336c;
   --accent: #7c5cff;
-  --logo: #ff4f8b;
 }
 
 :root[data-theme='dark'][data-skin='candy'] {
@@ -77,7 +77,6 @@
   --line: #cfe4f7;
   --brand: #0b6fd6;
   --accent: #12c2b5;
-  --logo: #1e90ff;
 }
 
 :root[data-theme='dark'][data-skin='soda'] {
@@ -101,7 +100,6 @@
   --line: #f3e6ae;
   --brand: #c2410c;
   --accent: #f2b705;
-  --logo: #ff8a00;
 }
 
 :root[data-theme='dark'][data-skin='lemon'] {
@@ -125,7 +123,6 @@
   --line: #c8ebdb;
   --brand: #0a7d57;
   --accent: #ff9f43;
-  --logo: #0ca678;
 }
 
 :root[data-theme='dark'][data-skin='mint'] {
@@ -284,7 +281,7 @@ svg {
   font-size: 15px;
 }
 
-/* ---------- 첫 화면 간판: 로고(네 칸) · 제목 · 소개 · 오늘의 톤 ---------- */
+/* ---------- 첫 화면 간판: 로고(웃는 얼굴) · 제목 · 소개 ---------- */
 .hero {
   display: flex;
   flex-direction: column;
@@ -306,7 +303,7 @@ svg {
   position: absolute;
   inset: -26px;
   border-radius: 50%;
-  background: radial-gradient(circle, color-mix(in srgb, var(--logo) 34%, transparent), transparent 68%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--mark) 40%, transparent), transparent 68%);
   animation: glow 3.6s ease-in-out infinite;
 }
 
@@ -316,12 +313,12 @@ svg {
   height: 100%;
   overflow: visible;
   stroke: none;
-  filter: drop-shadow(0 10px 16px color-mix(in srgb, var(--logo) 42%, transparent));
+  filter: drop-shadow(0 10px 16px color-mix(in srgb, #9a5b00 40%, transparent));
   animation: logo-float 4.2s ease-in-out infinite;
 }
 
 .logo-box {
-  fill: var(--logo);
+  fill: var(--mark);
   transform-box: fill-box;
   transform-origin: center;
 }
@@ -1079,7 +1076,7 @@ a.card:active .card-play {
   width: 46px;
   height: 46px;
   stroke: none;
-  filter: drop-shadow(0 3px 6px color-mix(in srgb, var(--logo) 35%, transparent));
+  filter: drop-shadow(0 3px 6px color-mix(in srgb, #9a5b00 35%, transparent));
 }
 
 .install-row p {
@@ -1248,7 +1245,7 @@ a.primary-btn {
 
 /* ---------- 움직임 ---------- */
 
-/* 첫 진입 연출(#app.intro, 약 1.9초): 로고 상자 → 네 칸이 하나씩 쿵 → 반짝이 터짐 → 제목 글자 → 소개 → 카드가 차례로 튀어 오름 */
+/* 첫 진입 연출(#app.intro, 약 1.9초): 로고 상자 → 얼굴 부품(십자·동그란 버튼·입·볼)이 하나씩 쿵 → 반짝이 터짐 → 제목 글자 → 소개 → 카드가 차례로 튀어 오름 */
 .intro .logo-box {
   animation: box-pop 520ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
 }
@@ -1287,7 +1284,7 @@ a.primary-btn {
   animation: shine 600ms ease-out calc(1000ms + var(--n, 0) * 110ms);
 }
 
-/* 로고를 누르면 네 칸이 다시 통통 */
+/* 로고를 누르면 얼굴 부품이 다시 통통 */
 .hero-mark.bounce .logo-tile {
   animation: tile-jump 460ms cubic-bezier(0.3, 1.6, 0.5, 1) calc(var(--i) * 70ms);
 }

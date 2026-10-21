@@ -30,31 +30,26 @@ const ICON = {
   sparkle: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5c.6 4.2 2.3 6 6.5 6.5-4.2.6-5.9 2.3-6.5 6.5-.6-4.2-2.3-5.9-6.5-6.5 4.2-.5 5.9-2.3 6.5-6.5z"/><path d="M18.5 15.5c.3 1.8 1 2.6 2.5 3-1.5.3-2.2 1.1-2.5 3-.3-1.9-1-2.7-2.5-3 1.5-.4 2.2-1.2 2.5-3z"/></svg>',
 };
 
-// 조이팩 로고(public/logo.svg 와 같은 그림). 첫 화면에서는 네 칸이 하나씩 튀어 들어오도록 칸마다 나눠 그린다.
-// 상자 색은 오늘의 톤을 따른다(--logo).
+// 조이팩 로고(public/logo.svg 와 같은 그림): 레몬 상자에 게임기 부품으로 만든 웃는 얼굴.
+// 첫 화면에서는 부품(십자 버튼 → 동그란 버튼 → 입 → 볼)이 하나씩 튀어 들어오도록 그림자와 함께 나눠 그린다.
+// 앱 아이콘과 같은 색으로 고정한다(오늘의 톤을 따르지 않음).
 const HERO_LOGO = `
   <svg class="hero-logo" viewBox="0 0 512 512" aria-hidden="true">
     <rect class="logo-box" width="512" height="512" rx="120"/>
-    <g class="logo-tile" style="--i:0"><rect x="96" y="96" width="146" height="146" rx="40" fill="#4cc9ff"/><path d="M136 169h66M169 136v66" stroke="#fff" stroke-width="22" stroke-linecap="round"/></g>
-    <g class="logo-tile" style="--i:1"><g transform="rotate(10 343 169)"><rect x="270" y="96" width="146" height="146" rx="40" fill="#ffd23f"/><circle cx="343" cy="169" r="26" fill="#fff"/></g></g>
-    <g class="logo-tile" style="--i:2"><rect x="96" y="270" width="146" height="146" rx="40" fill="#ff7a3d"/><path d="M169 305l34 58h-68z" fill="#fff" stroke="#fff" stroke-width="10" stroke-linejoin="round"/></g>
-    <g class="logo-tile" style="--i:3"><rect x="270" y="270" width="146" height="146" rx="40" fill="#3ddc97"/><rect x="314" y="314" width="58" height="58" rx="10" fill="#fff"/></g>
+    <g class="logo-tile" style="--i:0"><g transform="translate(0 16)"><rect x="120" y="198" width="116" height="40" rx="14" fill="#d98f00"/><rect x="158" y="160" width="40" height="116" rx="14" fill="#d98f00"/></g><rect x="120" y="198" width="116" height="40" rx="14" fill="#3d2a00"/><rect x="158" y="160" width="40" height="116" rx="14" fill="#3d2a00"/></g>
+    <g class="logo-tile" style="--i:1"><g transform="translate(0 16)"><circle cx="336" cy="218" r="44" fill="#d98f00"/></g><circle cx="336" cy="218" r="44" fill="#3d2a00"/></g>
+    <g class="logo-tile" style="--i:2"><g transform="translate(0 16)"><path d="M152 318 Q256 428 360 318" fill="none" stroke="#d98f00" stroke-width="40" stroke-linecap="round"/></g><path d="M152 318 Q256 428 360 318" fill="none" stroke="#3d2a00" stroke-width="40" stroke-linecap="round"/></g>
+    <g class="logo-tile" style="--i:3"><circle cx="122" cy="300" r="26" fill="#ff7a3d" opacity="0.9"/><circle cx="390" cy="300" r="26" fill="#ff7a3d" opacity="0.9"/></g>
   </svg>`;
 
 // 작은 로고(설치 안내·설정의 "조이팩 앱"). 파일(logo.svg)을 따로 불러오지 않고 그려 넣어,
-// 주소·캐시 상태와 관계없이 늘 보이고 상자 색도 오늘의 톤을 따른다
+// 주소·캐시 상태와 관계없이 늘 보인다
 function smallLogo(size: number): string {
   return `
     <svg class="mini-logo" viewBox="0 0 512 512" width="${size}" height="${size}" aria-hidden="true">
-      <rect width="512" height="512" rx="120" fill="var(--logo)"/>
-      <rect x="96" y="96" width="146" height="146" rx="40" fill="#4cc9ff"/>
-      <rect x="270" y="96" width="146" height="146" rx="40" fill="#ffd23f" transform="rotate(10 343 169)"/>
-      <rect x="96" y="270" width="146" height="146" rx="40" fill="#ff7a3d"/>
-      <rect x="270" y="270" width="146" height="146" rx="40" fill="#3ddc97"/>
-      <path d="M136 169h66M169 136v66" stroke="#fff" stroke-width="22" stroke-linecap="round"/>
-      <circle cx="343" cy="169" r="26" fill="#fff" transform="rotate(10 343 169)"/>
-      <path d="M169 305l34 58h-68z" fill="#fff" stroke="#fff" stroke-width="10" stroke-linejoin="round"/>
-      <rect x="314" y="314" width="58" height="58" rx="10" fill="#fff"/>
+      <rect width="512" height="512" rx="120" fill="#ffb703"/>
+      <g transform="translate(0 16)"><rect x="120" y="198" width="116" height="40" rx="14" fill="#d98f00"/><rect x="158" y="160" width="40" height="116" rx="14" fill="#d98f00"/><circle cx="336" cy="218" r="44" fill="#d98f00"/><path d="M152 318 Q256 428 360 318" fill="none" stroke="#d98f00" stroke-width="40" stroke-linecap="round"/></g>
+      <circle cx="122" cy="300" r="26" fill="#ff7a3d" opacity="0.9"/><circle cx="390" cy="300" r="26" fill="#ff7a3d" opacity="0.9"/><rect x="120" y="198" width="116" height="40" rx="14" fill="#3d2a00"/><rect x="158" y="160" width="40" height="116" rx="14" fill="#3d2a00"/><circle cx="336" cy="218" r="44" fill="#3d2a00"/><path d="M152 318 Q256 428 360 318" fill="none" stroke="#3d2a00" stroke-width="40" stroke-linecap="round"/>
     </svg>`;
 }
 
@@ -259,7 +254,7 @@ function renderHome(): void {
       if (canVibrate && settings.vibrate) navigator.vibrate(15);
     }),
   );
-  // 로고를 누르면 네 칸이 다시 한 번 통통 튄다(동작 줄이기면 CSS 가 움직임을 뺀다)
+  // 로고를 누르면 얼굴 부품이 다시 한 번 통통 튄다(동작 줄이기면 CSS 가 움직임을 뺀다)
   const mark = app.querySelector<HTMLElement>('.hero-mark')!;
   mark.addEventListener('click', () => {
     mark.classList.remove('bounce');
