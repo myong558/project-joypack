@@ -848,7 +848,18 @@
   function setPick(value) {
     const prev = pick;
     pick = Math.min(game.high, Math.max(game.low, value));
-    if (prev !== null && prev !== pick) UpDownFx.play('tick');
+    if (prev !== null && prev !== pick) {
+      // 범위 끝에 닿으면 툭(조금 센 진동 + 다이얼이 살짝 튕김), 그 사이는 눈금마다 톡(약한 진동 + 숫자 상자가 통통)
+      const atEdge = game.high > game.low && (pick === game.low || pick === game.high);
+      UpDownFx.play(atEdge ? 'edge' : 'tick');
+      if (!reducedMotion.matches) {
+        $('pick-value').animate([{ transform: 'scale(1.12)' }, { transform: 'scale(1)' }], { duration: 120, easing: 'ease-out' });
+        if (atEdge) {
+          const dx = pick === game.low ? -5 : 5;
+          $('dial').animate([{ transform: 'translateX(0)' }, { transform: 'translateX(' + dx + 'px)' }, { transform: 'translateX(0)' }], { duration: 160, easing: 'ease-out' });
+        }
+      }
+    }
     // 숫자가 하나만 남으면 가운데에 둔다.
     const ratio = game.high === game.low ? 0.5 : (pick - game.low) / (game.high - game.low);
     const angle = DIAL_START - (DIAL_START - DIAL_END) * ratio;
@@ -900,9 +911,40 @@
       finishGame();
       return;
     }
-    UpDownFx.play(game.guesses[game.guesses.length - 1].result === 'UP' ? 'up' : 'down');
+    const isUp = game.guesses[game.guesses.length - 1].result === 'UP';
+    const left = UpDown.triesLeft(game);
+    UpDownFx.play(isUp ? 'up' : 'down');
+    // 마지막 기회에 들어서면 UP/DOWN 진동이 끝난 뒤 두근두근 한 번 더
+    if (left === 1) setTimeout(() => UpDownFx.play('danger'), 360);
     renderPlay(true);
+    guessFeedback(isUp, left);
     $('dial').focus();
+  }
+
+  // 확인 뒤 손맛 연출: 숫자가 쾅 박히고, UP/DOWN 이 그 방향으로 튀어 나오고, 화면이 그 방향으로 툭 밀렸다 돌아오고,
+  // 좁혀진 범위가 반짝이고, 방금 쓴 하트가 깨진다. 동작 줄이기 설정이면 하트 색만 바뀐다(css).
+  function guessFeedback(isUp, left) {
+    const heart = $('tries-left').children[left];
+    if (heart) heart.classList.add('break');
+    if (reducedMotion.matches) return;
+    $('hint-value').animate(
+      [
+        { transform: 'scale(1.8)', opacity: 0.2 },
+        { transform: 'scale(0.9)', opacity: 1, offset: 0.55 },
+        { transform: 'scale(1.04)', offset: 0.8 },
+        { transform: 'scale(1)' },
+      ],
+      { duration: 340, easing: 'ease-out' },
+    );
+    const dy = isUp ? -7 : 7;
+    screens.play.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(' + dy + 'px)', offset: 0.35 }, { transform: 'translateY(0)' }], {
+      duration: 260,
+      easing: 'ease-out',
+    });
+    const range = $('range');
+    range.classList.remove('narrowed');
+    void range.offsetWidth;
+    range.classList.add('narrowed');
   }
 
   function finishGame() {
@@ -1033,6 +1075,12 @@
     pickFromPointer(event);
     dial.setPointerCapture(event.pointerId); // 다이얼 밖으로 끌고 나가도 계속 따라오게 한다.
   });
+  // 끄는 동안 손잡이를 키워 손가락 아래에서도 보이고 "잡고 있다"는 느낌을 준다(css 의 .dragging).
+  const endDrag = () => dial.classList.remove('dragging');
+  dial.addEventListener('pointerdown', () => dial.classList.add('dragging'));
+  dial.addEventListener('pointerup', endDrag);
+  dial.addEventListener('pointercancel', endDrag);
+  dial.addEventListener('lostpointercapture', endDrag);
   dial.addEventListener('pointermove', (event) => {
     if (dial.hasPointerCapture(event.pointerId)) pickFromPointer(event);
   });

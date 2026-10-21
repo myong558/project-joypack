@@ -902,6 +902,67 @@ button:focus-visible {
   animation: pop 0.3s ease-out;
 }
 
+/* UP 은 아래에서 위로, DOWN 은 위에서 아래로 튀어 나와 방향을 몸으로 느끼게 한다. */
+.hint.pop.up {
+  animation: hint-up 0.42s cubic-bezier(0.2, 1.5, 0.4, 1);
+}
+
+.hint.pop.down {
+  animation: hint-down 0.42s cubic-bezier(0.2, 1.5, 0.4, 1);
+}
+
+@keyframes hint-up {
+  from {
+    transform: translateY(70%) scale(0.6);
+    opacity: 0;
+  }
+}
+
+@keyframes hint-down {
+  from {
+    transform: translateY(-70%) scale(0.6);
+    opacity: 0;
+  }
+}
+
+/* 좁혀진 범위: 글자가 커졌다 돌아오며 한 번 반짝인다. */
+#range.narrowed {
+  display: inline-block;
+  animation: range-flash 0.5s ease-out;
+}
+
+@keyframes range-flash {
+  0% {
+    transform: scale(1.3);
+    color: var(--action);
+  }
+  60% {
+    transform: scale(0.97);
+  }
+}
+
+/* 방금 쓴 하트: 부풀었다가 기울며 깨지듯 빈 하트로 바뀐다. */
+.hearts .icon.break {
+  animation: heart-break 0.5s ease-out;
+}
+
+@keyframes heart-break {
+  0% {
+    color: var(--heart);
+    transform: scale(1);
+  }
+  30% {
+    color: var(--heart);
+    transform: scale(1.5) rotate(-12deg);
+  }
+  55% {
+    transform: scale(0.8) rotate(14deg);
+  }
+  100% {
+    transform: scale(1) rotate(0);
+  }
+}
+
 /* 시도 기록: 힌트와 숫자 상자 사이의 오목한 판. 기록은 판 아래쪽(입력 쪽)부터 쌓이고, 넘치면 판 안에서만 스크롤된다.
    기록 3줄은 늘 보이도록 최소 높이를 잡고, 높이가 모자라면 다이얼이 줄어 메운다. */
 .history {
@@ -1106,6 +1167,22 @@ button:focus-visible {
   stroke: var(--action-line);
   stroke-width: 4;
   filter: drop-shadow(0 2px 4px var(--shadow-thumb));
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 0.12s ease-out;
+}
+
+/* 끄는 동안: 손잡이가 커지고 채움 선이 굵어진다. */
+.dial-svg.dragging .dial-thumb {
+  transform: scale(1.3);
+}
+
+.dial-svg.dragging .dial-fill {
+  stroke-width: 17;
+}
+
+.dial-fill {
+  transition: stroke-width 0.12s ease-out;
 }
 
 .dial-svg:focus-visible .dial-thumb {
@@ -1138,7 +1215,8 @@ button:focus-visible {
 }
 
 .dial-submit:not(:disabled):active {
-  transform: translateX(-50%) scale(0.96);
+  transform: translateX(-50%) translateY(2px) scale(0.92);
+  box-shadow: none;
 }
 
 /* ── 결과 화면 ────────────────────────── */
@@ -2009,8 +2087,14 @@ h1.lost {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  button {
+  button,
+  .dial-thumb,
+  .dial-fill {
     transition: none;
+  }
+
+  .dial-svg.dragging .dial-thumb {
+    transform: none;
   }
 
   button:not(:disabled):active {
@@ -2027,6 +2111,10 @@ h1.lost {
   #screen-play.last-chance::before,
   .history li.enter,
   .hint.pop,
+  .hint.pop.up,
+  .hint.pop.down,
+  #range.narrowed,
+  .hearts .icon.break,
   .settings[open],
   .result-art.won .result-icon,
   .result-art.lost .result-icon,

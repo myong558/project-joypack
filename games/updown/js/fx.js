@@ -48,9 +48,15 @@
     osc.stop(start + length + 0.02);
   }
 
-  // 효과음: 다이얼 눈금(tick), UP(올라가는 두 음), DOWN(내려가는 두 음), 정답(도미솔도), 실패(내려가는 세 음).
+  // 효과음: 다이얼 눈금(tick), 범위 끝에 닿음(edge), UP(올라가는 두 음), DOWN(내려가는 두 음),
+  // 마지막 기회(danger), 정답(도미솔도), 실패(내려가는 세 음).
   const SOUNDS = {
-    tick: (t) => tone(t, 1800, 0.025, { type: 'triangle', volume: 0.05 }),
+    tick: (t) => tone(t, 1800, 0.025, { type: 'triangle', volume: 0.06 }),
+    edge: (t) => tone(t, 320, 0.06, { type: 'square', volume: 0.05, to: 200 }),
+    danger: (t) => {
+      tone(t, 196, 0.12, { type: 'square', volume: 0.06 });
+      tone(t + 0.16, 196, 0.16, { type: 'square', volume: 0.06 });
+    },
     up: (t) => {
       tone(t, 523, 0.12, { type: 'triangle' });
       tone(t + 0.1, 784, 0.16, { type: 'triangle' });
@@ -67,8 +73,18 @@
     },
   };
 
-  // 진동 패턴(ms): 눈금은 아주 짧게, 정답은 톡톡톡 축하, 실패는 길게 한 번.
-  const VIBRATIONS = { tick: 4, up: 25, down: 25, won: [40, 60, 40, 60, 120], lost: [250] };
+  // 진동 패턴(ms). 10ms 아래는 대부분의 기기에서 느껴지지 않아 눈금도 12ms 로 준다.
+  // 다이얼 눈금은 약하게 톡, 범위 끝은 조금 세게 툭, UP 은 짧게→길게(올라가는 느낌), DOWN 은 길게→짧게,
+  // 마지막 기회는 두근두근, 정답은 톡톡톡 쾅, 실패는 쿵 하고 길게.
+  const VIBRATIONS = {
+    tick: 12,
+    edge: 30,
+    up: [30, 40, 70],
+    down: [70, 40, 30],
+    danger: [90, 70, 90],
+    won: [60, 50, 60, 50, 220],
+    lost: [140, 80, 380],
+  };
 
   let lastTick = 0;
 
