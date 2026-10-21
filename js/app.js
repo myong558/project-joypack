@@ -330,6 +330,7 @@
     $('result-detail').textContent = won ? t('result.wonDetail', { tries: game.guesses.length }) : '';
     $('result-detail').hidden = !won;
     $('result-best').hidden = !newBest;
+    renderResultRank();
   }
 
   // ── 공유하기 ──
@@ -596,6 +597,7 @@
   let rankingTab = 'easy';
   let rankingMine = null; // 방금 등록한 기록 ID (목록에서 강조)
   let rankingRequest = 0;
+  let rankingDone = null; // 이번 판을 등록한 결과 { rank }. 결과 화면 등록 칸이 "N위로 등록했어요"로 바뀐다.
 
   function renderRankingButton() {
     const button = $('ranking-open');
@@ -660,8 +662,11 @@
     try {
       const rows = await UpDownRanking.top(entry.difficulty);
       if (game !== forGame || !UpDownRanking.qualifies(rows, entry)) return;
-      rankingEntry = entry;
+      // 예상 순위: 나보다 앞서거나 완전히 같은 기록(먼저 등록한 쪽이 위) 수 + 1
+      const ahead = rows.filter((row) => row.tries < entry.tries || (row.tries === entry.tries && row.time <= entry.time));
+      rankingEntry = Object.assign({ expected: ahead.length + 1 }, entry);
       renderRankingButton();
+      renderResultRank(true);
     } catch (e) {}
   }
 
@@ -707,6 +712,86 @@
     }
   }
 
+  // 목록에서 기록 ID 의 순위(동률은 같은 순위). 목록에 없으면 0(10위 밖).
+  function rankOf(rows, id) {
+    let rank = 0;
+    for (let i = 0; i < rows.length; i++) {
+      if (i === 0 || rows[i].tries !== rows[i - 1].tries || rows[i].time !== rows[i - 1].time) rank = i + 1;
+      if (rows[i].id === id) return rank;
+    }
+    return 0;
+  }
+
+  // 등록 대기 기록을 올리고 순위를 돌려준다. 결과 화면 등록 칸과 랭킹 팝업이 같이 쓴다.
+  async function registerRanking(initials) {
+    const entry = rankingEntry;
+    rankingMine = await UpDownRanking.submit({
+      initials: initials,
+      difficulty: entry.difficulty,
+      tries: entry.tries,
+      time: entry.time,
+    });
+    try {
+      localStorage.setItem(INITIALS_KEY, initials);
+    } catch (e) {}
+    rankingTab = entry.difficulty;
+    rankingEntry = null;
+    renderRankingButton();
+    let rank = entry.expected;
+    try {
+      rank = rankOf(await UpDownRanking.top(entry.difficulty), rankingMine);
+    } catch (e) {} // 순위를 다시 못 읽으면 등록 전에 계산한 예상 순위를 쓴다.
+    rankingDone = { rank: rank };
+    renderResultRank();
+    return rank;
+  }
+
+  // 결과 화면 등록 칸. animate 면 펼쳐질 때 한 번 튀어나온다(TOP 10 확인이 끝난 직후).
+  function renderResultRank(animate) {
+    const box = $('result-rank');
+    box.hidden = !rankingEntry && !rankingDone;
+    if (box.hidden) return;
+    box.classList.toggle('done', !!rankingDone);
+    if (rankingDone) {
+      $('result-rank-prompt').textContent = t('ranking.done', { rank: rankingDone.rank });
+    } else {
+      $('result-rank-prompt').textContent = t('ranking.cardPrompt', { rank: rankingEntry.expected });
+      const input = $('result-rank-initials');
+      if (!input.value) {
+        try {
+          input.value = localStorage.getItem(INITIALS_KEY) || '';
+        } catch (e) {}
+      }
+    }
+    if (animate) {
+      box.classList.remove('enter');
+      void box.offsetWidth; // 애니메이션 다시 시작
+      box.classList.add('enter');
+    }
+  }
+
+  async function submitResultRank(event) {
+    event.preventDefault();
+    const input = $('result-rank-initials');
+    const initials = UpDownRanking.cleanInitials(input.value);
+    input.value = initials;
+    if (!rankingEntry) return;
+    if (!initials) {
+      input.focus();
+      return;
+    }
+    const button = $('result-rank-submit');
+    button.disabled = true;
+    try {
+      await registerRanking(initials);
+      input.blur(); // 휴대폰 키보드를 닫는다.
+    } catch (e) {
+      showToast(t('ranking.submitFailed'));
+    } finally {
+      button.disabled = false;
+    }
+  }
+
   async function submitRanking(event) {
     event.preventDefault();
     const input = $('ranking-initials');
@@ -716,24 +801,9 @@
     const button = $('ranking-submit');
     button.disabled = true;
     try {
-      rankingMine = await UpDownRanking.submit({
-        initials: initials,
-        difficulty: rankingEntry.difficulty,
-        tries: rankingEntry.tries,
-        time: rankingEntry.time,
-      });
-      try {
-        localStorage.setItem(INITIALS_KEY, initials);
-      } catch (e) {}
-      rankingTab = rankingEntry.difficulty;
-      rankingEntry = null;
-      renderRankingButton();
+      const rank = await registerRanking(initials);
       renderRanking();
-      const index = await loadRanking();
-      if (index !== null) {
-        const place = index >= 0 ? Number($('ranking-list').children[index].firstChild.textContent) : 0;
-        $('ranking-status').textContent = t('ranking.done', { rank: place });
-      }
+      if ((await loadRanking()) !== null) $('ranking-status').textContent = t('ranking.done', { rank: rank });
     } catch (e) {
       $('ranking-status').textContent = t('ranking.submitFailed');
     } finally {
@@ -810,6 +880,7 @@
 
   function startGame(difficulty) {
     rankingEntry = null; // 등록하지 않고 새 판을 시작하면 이전 기록 등록은 사라진다.
+    rankingDone = null;
     renderRankingButton();
     game = UpDown.createGame(difficulty);
     gameStartedAt = Date.now();
@@ -850,6 +921,9 @@
     if (game.status === 'won') confetti(newBest);
     rankingEntry = null;
     rankingMine = null;
+    rankingDone = null;
+    $('result-rank-initials').value = '';
+    renderResultRank();
     renderRankingButton();
     if (game.status === 'won') checkRanking({ difficulty: game.difficulty, tries: tries, time: Date.now() - gameStartedAt }, game);
     UpDownFx.play(game.status === 'won' ? 'won' : 'lost');
@@ -983,10 +1057,14 @@
   $('ranking-close').addEventListener('click', () => $('ranking').close());
   $('ranking-form').addEventListener('submit', submitRanking);
   // 영문만, 대문자로, 5자까지(붙여 넣기 포함)
-  $('ranking-initials').addEventListener('input', (event) => {
-    const clean = UpDownRanking.cleanInitials(event.target.value);
-    if (clean !== event.target.value) event.target.value = clean;
+  ['ranking-initials', 'result-rank-initials'].forEach((id) => {
+    $(id).addEventListener('input', (event) => {
+      const clean = UpDownRanking.cleanInitials(event.target.value);
+      if (clean !== event.target.value) event.target.value = clean;
+    });
   });
+  $('result-rank').addEventListener('submit', submitResultRank);
+  $('result-rank-view').addEventListener('click', openRanking);
   $('settings-close').addEventListener('click', () => $('settings').close());
   $('share-game').addEventListener('click', shareGameLink);
   // 효과음·진동 칩: 누를 때마다 켬/끔. 켜면 바로 맛보기로 한 번 울린다.

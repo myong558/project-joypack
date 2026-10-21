@@ -1227,6 +1227,41 @@ h1.lost {
   font-weight: 700;
 }
 
+/* 결과 화면 랭킹 등록 칸(app.js 의 renderResultRank): 축하 문구 아래, 버튼 위. 대표색 테두리로 눈에 띄게 한다. */
+.result-rank {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-top: calc(var(--space) * 0.75);
+  padding: 12px;
+  background: var(--surface);
+  border: 2px solid var(--action-line);
+  border-radius: 16px;
+  box-shadow: var(--shadow-action);
+}
+
+.result-rank.enter {
+  animation: pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.result-rank-prompt {
+  margin: 0;
+  color: var(--success);
+  font-weight: 700;
+  text-align: center;
+}
+
+/* 등록 전에는 입력 칸, 등록 뒤에는 랭킹 보기 버튼만 */
+.result-rank.done .ranking-entry,
+.result-rank:not(.done) .result-rank-view {
+  display: none;
+}
+
+.result-rank-view {
+  padding-block: 10px;
+}
+
 /* 다시 하기·홈으로: 게임 화면의 확인 버튼 자리와 겹치지 않게 화면 맨 아래에서 조금 띄운다. */
 .actions {
   display: flex;
@@ -1955,7 +1990,8 @@ h1.lost {
     width: min(100%, 520px);
   }
 
-  .actions {
+  .actions,
+  .result-rank {
     width: min(440px, 100%);
     margin-inline: auto;
   }
@@ -1983,7 +2019,8 @@ h1.lost {
   .settings[open],
   .result-art.won .result-icon,
   .result-art.lost .result-icon,
-  .result-art.won .sparkle {
+  .result-art.won .sparkle,
+  .result-rank.enter {
     animation: none;
   }
 }
