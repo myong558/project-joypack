@@ -686,11 +686,21 @@ a.card:active {
 
 .storage-name {
   flex: 1;
+  white-space: nowrap;
 }
 
 .storage-state {
+  min-width: 0;
+  overflow: hidden;
   color: var(--muted);
   font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.small-btn {
+  flex: none;
+  white-space: nowrap;
 }
 
 .small-btn {
@@ -700,6 +710,16 @@ a.card:active {
   background: var(--surface);
   font-size: 14px;
   cursor: pointer;
+}
+
+.small-btn.danger {
+  color: #d23b3b;
+}
+
+.small-btn.armed {
+  border-color: #d23b3b;
+  background: #d23b3b;
+  color: #fff;
 }
 
 .small-btn:disabled {

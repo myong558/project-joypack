@@ -39,9 +39,18 @@ function defaults(): SaveData {
   };
 }
 
-/** 게임 리셋으로 지워지는 부분 */
+/** 처음 상태(기록 없음) */
 export function emptyProgress(): Pick<SaveData, 'best' | 'daily' | 'dex' | 'kills' | 'rankings' | 'pending'> {
-  return { best: 0, daily: null, dex: [], kills: emptyStats().kills, rankings: emptyRankings(), pending: emptyPending() };
+  return { ...emptyRecords(), rankings: emptyRankings(), pending: emptyPending() };
+}
+
+/**
+ * "내 기록 지우기"로 지워지는 부분: 이 기기의 최고 기록·도감·잡은 수.
+ * 온라인 순위표 사본(rankings)과 아직 올리지 않은 등록 대기 기록(pending)은 남긴다. 지워도 온라인 랭킹은 그대로라
+ * 등록 대기까지 지우면 10위 안에 든 기록을 올릴 기회만 잃는다. 조이팩 허브의 "내 기록 지우기"도 같은 범위를 지운다
+ */
+export function emptyRecords(): Pick<SaveData, 'best' | 'daily' | 'dex' | 'kills'> {
+  return { best: 0, daily: null, dex: [], kills: emptyStats().kills };
 }
 
 export function loadSave(): SaveData {

@@ -2,7 +2,7 @@ import './styles.css';
 import { GAMES, gameVersion, iconUrl, type GameMeta } from './games';
 import { LANG_LABEL, LANGS, formatNumber, getLang, t } from './i18n';
 import { cachedBoard, hasRanking, loadBoard, type Row } from './rankings';
-import { bestRecord } from './records';
+import { bestRecord, canClearRecords, clearRecords } from './records';
 import { THEMES, applySettings, applyTheme, canVibrate, loadSettings, migrateLegacy, saveSetting, watchSystemTheme } from './settings';
 
 migrateLegacy();
@@ -237,6 +237,20 @@ async function openSettings(): Promise<void> {
       <p class="hint">${t('settings.initialsHint')}</p>
     </section>
     <section class="set-group">
+      <h3>${t('settings.records')}</h3>
+      <ul class="storage">${live
+        .map(
+          (g) => `<li data-game="${g.id}">
+            <img src="${iconUrl(g)}" alt="" width="28" height="28" />
+            <span class="storage-name">${esc(g.name[getLang()])}</span>
+            <span class="storage-state">${esc(bestRecord(g) ?? t('records.none'))}</span>
+            <button class="small-btn danger" data-records="${g.id}" ${canClearRecords(g) ? '' : 'disabled'}>${t('records.clear')}</button>
+          </li>`,
+        )
+        .join('')}</ul>
+      <p class="hint">${t('settings.recordsHint')}</p>
+    </section>
+    <section class="set-group">
       <h3>${t('settings.storage')}</h3>
       <ul class="storage">${live
         .map(
@@ -283,6 +297,30 @@ async function openSettings(): Promise<void> {
     const clean = Joypack.cleanInitials(initials.value);
     if (clean !== initials.value) initials.value = clean;
     if (clean) saveSetting(settings, 'initials', clean);
+  });
+  // 내 기록 지우기: 실수로 지우지 않게 두 번 눌러야 지운다(첫 번째 누름 뒤 3초 안에 한 번 더)
+  dialog.querySelectorAll<HTMLButtonElement>('[data-records]').forEach((b) => {
+    let armed: ReturnType<typeof setTimeout> | undefined;
+    b.addEventListener('click', () => {
+      const game = live.find((g) => g.id === b.dataset.records)!;
+      if (!armed) {
+        b.textContent = t('records.confirm');
+        b.classList.add('armed');
+        armed = setTimeout(() => {
+          armed = undefined;
+          b.textContent = t('records.clear');
+          b.classList.remove('armed');
+        }, 3000);
+        return;
+      }
+      clearTimeout(armed);
+      armed = undefined;
+      clearRecords(game);
+      b.classList.remove('armed');
+      b.textContent = t('records.cleared');
+      b.disabled = true;
+      b.closest('li')!.querySelector('.storage-state')!.textContent = t('records.none');
+    });
   });
   dialog.querySelectorAll<HTMLButtonElement>('[data-clear]').forEach((b) =>
     b.addEventListener('click', async () => {

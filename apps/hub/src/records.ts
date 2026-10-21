@@ -20,6 +20,35 @@ const READERS: Record<string, (game: GameMeta) => string | null> = {
   },
 };
 
+/**
+ * 허브 설정의 "내 기록 지우기". 각 게임 안의 같은 버튼과 같은 범위만 지운다(이 기기의 최고 기록·도감).
+ * 온라인 랭킹, 설정, 두더지잡기의 등록 대기 기록은 남긴다
+ */
+const CLEARERS: Record<string, () => void> = {
+  updown() {
+    localStorage.removeItem('updown.best');
+  },
+  hammer() {
+    const save = readJson('project-hammer:v1') as Record<string, unknown> | null;
+    if (!save) return;
+    // 잡은 수(kills)는 비워 두면 게임이 불러올 때 0으로 채운다
+    Object.assign(save, { best: 0, daily: null, dex: [], kills: {} });
+    localStorage.setItem('project-hammer:v1', JSON.stringify(save));
+  },
+};
+
+export function canClearRecords(game: GameMeta): boolean {
+  return game.id in CLEARERS && bestRecord(game) !== null;
+}
+
+export function clearRecords(game: GameMeta): void {
+  try {
+    CLEARERS[game.id]?.();
+  } catch {
+    // 저장소를 못 쓰는 환경
+  }
+}
+
 function readJson(key: string): unknown {
   try {
     return JSON.parse(localStorage.getItem(key) ?? 'null');

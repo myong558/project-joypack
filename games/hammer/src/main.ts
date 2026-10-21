@@ -10,7 +10,7 @@ import { setLang, t } from './i18n';
 import { shareLink, shareResult, shareText } from './share';
 import { fetchBoard, submitEntry } from './online';
 import { boardEntries, clearPending, keepPending, placeOf, type RankEntry } from './ranking';
-import { emptyProgress, loadSave, writeSave } from './storage';
+import { emptyRecords, loadSave, writeSave } from './storage';
 import { applySkin, applyTheme, resolveSkin } from './theme';
 import { Board } from './ui/board';
 import { Effects, Hammer } from './ui/effects';
@@ -126,7 +126,7 @@ function showStart(settings?: 'open' | 'reset', settingsFocus?: string, opening 
         writeSave(save);
       },
       onReset() {
-        Object.assign(save, emptyProgress());
+        Object.assign(save, emptyRecords());
         writeSave(save);
         showStart('reset');
       },
