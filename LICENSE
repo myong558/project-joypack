@@ -1,0 +1,16 @@
+© 2026 Myong Bum Soo. All rights reserved.
+
+Joypack (this repository and the site built from it) — source code, graphics,
+sounds and text — may not be copied, modified or redistributed without
+written permission from the author.
+
+Third-party materials keep their own licenses and are not covered by the
+notice above:
+
+- Jua font — SIL Open Font License 1.1
+  (apps/hub/public/fonts/OFL.txt, games/updown/fonts/OFL.txt,
+  games/hammer/public/fonts/LICENSE-Jua.txt)
+- Jalnan 2 / Jalnan Gothic fonts — © GC Company, free license
+  (games/hammer/public/fonts/LICENSE-Jalnan.txt)
+
+See README.md section 8.1 for the full list.

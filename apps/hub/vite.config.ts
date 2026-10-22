@@ -6,9 +6,8 @@ import { defineConfig, type Plugin } from 'vite';
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const readJson = (path: string) => JSON.parse(readFileSync(join(ROOT, path), 'utf8'));
 
-// 설정 화면에 보여 줄 버전: 조이팩은 루트 package.json, 게임은 각 게임 package.json
+// 개발 서버가 게임 주소를 이어 줄 게임 목록. 설정 → 정보에는 조이팩 버전(루트 package.json)만 보인다(게임 버전은 각 게임 설정 맨 아래)
 const games: { id: string }[] = readJson('games.json');
-const gameVersions = Object.fromEntries(games.map((g) => [g.id, readJson(`games/${g.id}/package.json`).version as string]));
 
 const TYPES: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
@@ -57,7 +56,6 @@ export default defineConfig({
   base: './',
   define: {
     __APP_VERSION__: JSON.stringify(readJson('package.json').version),
-    __GAME_VERSIONS__: JSON.stringify(gameVersions),
   },
   server: { port: 5170, open: false, fs: { allow: [ROOT] } },
   build: { outDir: 'dist', emptyOutDir: true },

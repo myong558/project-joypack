@@ -1030,11 +1030,38 @@ a.card:active .card-play {
 }
 
 .rank-more {
+  padding: 0;
+  border: none;
+  background: none;
   color: var(--c);
   font-size: 14px;
   text-decoration: none;
   white-space: nowrap;
   border-radius: 6px;
+  cursor: pointer;
+}
+
+/* 펼쳤을 때 맨 아래: 그 게임으로 가는 작은 링크 */
+.rank-play {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+  margin-top: 6px;
+  color: var(--c);
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.rank-play[hidden] {
+  display: none;
+}
+
+.rank-play svg {
+  width: 9px;
+  height: 10px;
+  fill: currentColor;
+  stroke-width: 2.4;
 }
 
 .rank-more:hover {

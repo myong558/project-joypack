@@ -80,7 +80,3 @@ const ICONS = import.meta.glob<string>(['../../../games/*/**/*.svg', '!**/node_m
 export function iconUrl(game: GameMeta): string {
   return ICONS[`../../../${game.icon}`] ?? '';
 }
-
-export function gameVersion(id: string): string {
-  return __GAME_VERSIONS__[id] ?? '';
-}

@@ -2,6 +2,8 @@
   "name": "hub",
   "private": true,
   "version": "1.0.0",
+  "author": "Myong Bum Soo",
+  "license": "UNLICENSED",
   "description": "조이팩 첫 화면: 게임 목록, 공통 설정, 전체 랭킹",
   "type": "module",
   "scripts": {

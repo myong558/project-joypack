@@ -8,6 +8,8 @@ export type ShareOutcome = 'shared' | 'cancelled' | 'saved' | 'copied' | 'failed
 
 export interface JoypackApi {
   KEYS: Record<SharedSetting, string>;
+  /** 저작권 표기 한 줄. 설정 맨 아래 버전 밑에 그대로 보인다 */
+  COPYRIGHT: string;
   /** 숨김 미리보기(games.json status "preview")로 배포된 게임인지. 랭킹은 미리보기 동안에도 등록된다 */
   isPreview(): boolean;
   /** 공통 상단 메뉴 아이콘 SVG 문자열 */

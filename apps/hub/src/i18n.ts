@@ -44,7 +44,9 @@ const ko = {
   'ranking.empty': '아직 기록이 없어요. 첫 번째 주인공이 되어 보세요!',
   'ranking.error': '랭킹을 불러오지 못했어요',
   'ranking.cached': '마지막으로 불러온 순위예요',
-  'ranking.more': 'TOP 10 전체 보기',
+  'ranking.more': 'TOP 10 보기',
+  'ranking.less': '접기',
+  'ranking.play': '게임 하러 가기',
   'ranking.tries': '{tries}회 · {time}초',
   'ranking.score': '{score}점',
 
@@ -136,7 +138,9 @@ const en: Record<keyof typeof ko, string> = {
   'ranking.empty': 'No records yet. Be the first!',
   'ranking.error': "Couldn't load the ranking",
   'ranking.cached': 'Showing the last loaded ranking',
-  'ranking.more': 'See full Top 10',
+  'ranking.more': 'See Top 10',
+  'ranking.less': 'Show less',
+  'ranking.play': 'Play this game',
   'ranking.tries': '{tries} tries · {time}s',
   'ranking.score': '{score} pts',
 

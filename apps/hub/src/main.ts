@@ -1,8 +1,8 @@
 import '@joypack/shared/topbar.css';
 import './styles.css';
-import { GAMES, byNewest, gameVersion, iconUrl, isNew, isPublic, isScheduled, patternOf, type GameMeta } from './games';
+import { GAMES, byNewest, iconUrl, isNew, isPublic, isScheduled, patternOf, type GameMeta } from './games';
 import { LANG_LABEL, LANGS, formatNumber, getLang, t } from './i18n';
-import { TOP, cachedBoard, hasRanking, loadBoard, type Row } from './rankings';
+import { FULL, TOP, cachedBoard, hasRanking, loadBoard, type Row } from './rankings';
 import { externalOpenUrl, installState, onInstallChange, promptInstall } from './install';
 import { checkPassword, previewOn, setPreview } from './preview';
 import { bestRecord, canClearRecords, clearRecords } from './records';
@@ -508,10 +508,13 @@ function openDialog(className: string, body: string, title: string): HTMLDialogE
 // ---------- 전체 랭킹 ----------
 
 const boardChoice = new Map<string, string>();
+/** TOP 10 으로 펼친 게임 */
+const expanded = new Set<string>();
 
-function rowsHtml(game: GameMeta, rows: Row[]): string {
+function rowsHtml(game: GameMeta, rows: Row[], limit = TOP): string {
   if (!rows.length) return `<p class="rank-empty">${t('ranking.empty')}</p>`;
   return `<ol class="rank-list">${rows
+    .slice(0, limit)
     .map((r, i) => {
       const value =
         'score' in r
@@ -535,14 +538,15 @@ function openRanking(): void {
           <div class="rank-head">
             <img src="${iconUrl(g)}" alt="" width="32" height="32" />
             <h3>${esc(g.name[getLang()])}</h3>
-            <a class="rank-more" href="${g.path}">${lbl(t('ranking.more'))}</a>
+            <button class="rank-more" data-more aria-expanded="${expanded.has(g.id)}">${lbl(t(expanded.has(g.id) ? 'ranking.less' : 'ranking.more'))}</button>
           </div>
           <div class="chips" role="tablist">
             ${g.ranking!.boards
               .map((b) => `<button role="tab" class="chip-btn" data-board="${b.id}" aria-selected="${b.id === board}">${lbl(esc(b.name[getLang()]))}</button>`)
               .join('')}
           </div>
-          <div class="rank-rows" style="--rows:${TOP}" aria-live="polite"></div>
+          <div class="rank-rows" style="--rows:${expanded.has(g.id) ? FULL : TOP}" aria-live="polite"></div>
+          <a class="rank-play" href="${g.path}" ${expanded.has(g.id) ? '' : 'hidden'}>${lbl(t('ranking.play'))} ${ICON.play}</a>
         </section>`;
       })
       .join('')}`;
@@ -556,6 +560,18 @@ function openRanking(): void {
       void showBoard(section, game, board);
     };
     section.querySelectorAll<HTMLButtonElement>('[data-board]').forEach((b) => b.addEventListener('click', () => show(b.dataset.board!)));
+    // TOP 10 보기 ↔ 접기: 창을 벗어나지 않고 그 게임 칸만 펼친다(이번 방문 동안 기억)
+    section.querySelector<HTMLButtonElement>('[data-more]')!.addEventListener('click', (e) => {
+      const open = !expanded.has(game.id);
+      if (open) expanded.add(game.id);
+      else expanded.delete(game.id);
+      const btn = e.currentTarget as HTMLButtonElement;
+      btn.setAttribute('aria-expanded', String(open));
+      btn.innerHTML = lbl(t(open ? 'ranking.less' : 'ranking.more'));
+      section.querySelector<HTMLElement>('.rank-rows')!.style.setProperty('--rows', String(open ? FULL : TOP));
+      section.querySelector<HTMLElement>('.rank-play')!.hidden = !open;
+      show(boardChoice.get(game.id) ?? game.ranking!.default);
+    });
     show(boardChoice.get(game.id) ?? game.ranking!.default);
   }
 }
@@ -565,12 +581,13 @@ async function showBoard(section: HTMLElement, game: GameMeta, board: string): P
   // 응답을 기다리는 사이 다른 순위표를 고르면 늦게 온 응답은 버린다
   const req = String(Number(section.dataset.req ?? 0) + 1);
   section.dataset.req = req;
+  const limit = expanded.has(game.id) ? FULL : TOP;
   const early = cachedBoard(game.id, board);
-  target.innerHTML = early ? rowsHtml(game, early) : `<p class="rank-empty">${t('ranking.loading')}</p>`;
+  target.innerHTML = early ? rowsHtml(game, early, limit) : `<p class="rank-empty">${t('ranking.loading')}</p>`;
   try {
-    const result = await loadBoard(game.id, board);
+    const result = await loadBoard(game.id, board, limit);
     if (section.dataset.req !== req) return;
-    target.innerHTML = rowsHtml(game, result.rows) + (result.stale ? `<p class="rank-note">${t('ranking.cached')}</p>` : '');
+    target.innerHTML = rowsHtml(game, result.rows, limit) + (result.stale ? `<p class="rank-note">${t('ranking.cached')}</p>` : '');
   } catch {
     if (section.dataset.req !== req) return;
     target.innerHTML = `<p class="rank-empty">${t('ranking.error')}</p>`;
@@ -653,8 +670,8 @@ async function openSettings(): Promise<void> {
     </section>
     <section class="set-group about">
       <h3>${t('settings.about')}</h3>
-      <p><span class="ver-tap" data-ver-tap>${t('app.title')} v${__APP_VERSION__}</span> · ${live.map((g) => `${esc(g.name[getLang()])} v${gameVersion(g.id)}`).join(' · ')}</p>
-      <p class="hint">Font: Jua (SIL OFL 1.1)</p>
+      <p><span class="ver-tap" data-ver-tap>${t('app.title')} v${__APP_VERSION__}</span></p>
+      <p class="hint copyright">${esc(Joypack.COPYRIGHT)}</p>
     </section>`;
   const dialog = openDialog('settings', body, t('settings.title'));
   renderInstall(dialog.querySelector<HTMLElement>('[data-install-section]')!);

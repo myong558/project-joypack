@@ -4,6 +4,7 @@
  *
  * 서버 부담을 줄이려고
  * - 랭킹 창을 열 때, 보고 있는 순위표만 읽는다(허브를 여는 것만으로는 읽지 않음)
+ * - 처음에는 TOP 3 만 읽고, "TOP 10 보기"로 펼칠 때만 10위까지 읽는다(문서 1개 방식 게임은 어차피 한 번에 옴)
  * - 불러온 순위는 기기에 남겨 두고 5분 안에 다시 열면 서버를 부르지 않는다
  * - 오프라인이거나 실패하면 마지막으로 불러온 순위를 보여 준다
  */
@@ -13,6 +14,8 @@ const FIREBASE = {
 };
 const API = `https://firestore.googleapis.com/v1/projects/${FIREBASE.projectId}/databases/(default)/documents`;
 export const TOP = 3;
+/** "TOP 10 보기"로 펼쳤을 때 */
+export const FULL = 10;
 const FRESH_MS = 5 * 60 * 1000;
 const TIMEOUT_MS = 8000;
 const CACHE_KEY = 'joypack.rankingCache';
@@ -25,7 +28,8 @@ export interface BoardResult {
   stale: boolean;
 }
 
-type Cache = Record<string, { at: number; rows: Row[] }>;
+/** limit: 이 항목을 읽을 때 요청한 줄 수(예전 항목은 없음 = TOP) */
+type Cache = Record<string, { at: number; rows: Row[]; limit?: number }>;
 
 function readCache(): Cache {
   try {
@@ -61,13 +65,13 @@ function dateKey(d = new Date()): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-type Fetcher = (board: string) => Promise<Row[]>;
+type Fetcher = (board: string, limit: number) => Promise<Row[]>;
 
 const FETCHERS: Record<string, { key: (board: string) => string; fetch: Fetcher }> = {
   // 업다운: 기록 1건 = 문서 1개. 게임과 같은 정렬(시도 횟수 → 걸린 시간 → 먼저 등록)이라 같은 복합 색인을 쓴다
   updown: {
     key: (board) => board,
-    async fetch(board) {
+    async fetch(board, limit) {
       const res = await request('games/updown:runQuery', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -76,7 +80,7 @@ const FETCHERS: Record<string, { key: (board: string) => string; fetch: Fetcher 
             from: [{ collectionId: 'scores' }],
             where: { fieldFilter: { field: { fieldPath: 'difficulty' }, op: 'EQUAL', value: { stringValue: board } } },
             orderBy: ['tries', 'time', 'createdAt'].map((fieldPath) => ({ field: { fieldPath }, direction: 'ASCENDING' })),
-            limit: TOP,
+            limit,
           },
         }),
       });
@@ -94,7 +98,7 @@ const FETCHERS: Record<string, { key: (board: string) => string; fetch: Fetcher 
   // 두더지잡기: 순위표 1개 = 문서 1개({ entries: [...] }). 오늘의 챌린지는 날짜마다 새 문서다
   hammer: {
     key: (board) => (board === 'daily' ? `daily-${dateKey()}` : 'classic'),
-    async fetch(board) {
+    async fetch(board, limit) {
       const doc = board === 'daily' ? `daily-${dateKey()}` : 'classic';
       const res = await request(`games/hammer/rankings/${doc}`);
       if (res.status === 404) return []; // 오늘 아직 아무도 안 올림
@@ -107,7 +111,7 @@ const FETCHERS: Record<string, { key: (board: string) => string; fetch: Fetcher 
           score: Number(v.mapValue?.fields.score?.integerValue ?? 0),
         }))
         .sort((a, b) => b.score - a.score)
-        .slice(0, TOP);
+        .slice(0, limit);
     },
   },
 };
@@ -122,20 +126,22 @@ export function cachedBoard(gameId: string, board: string): Row[] | null {
   return f ? (readCache()[`${gameId}:${f.key(board)}`]?.rows ?? null) : null;
 }
 
-export async function loadBoard(gameId: string, board: string): Promise<BoardResult> {
+export async function loadBoard(gameId: string, board: string, limit = TOP): Promise<BoardResult> {
   const f = FETCHERS[gameId];
   if (!f) return { rows: [], stale: false };
   const cacheKey = `${gameId}:${f.key(board)}`;
   const cache = readCache();
   const hit = cache[cacheKey];
-  if (hit && Date.now() - hit.at < FRESH_MS) return { rows: hit.rows, stale: false };
+  // 펼친 상태(10위)를 TOP 3 로 읽어 둔 항목으로 채우지 않는다. 줄 수가 모자라도 그 이하만 있으면 끝까지 읽은 것
+  const enough = hit && ((hit.limit ?? TOP) >= limit || hit.rows.length < (hit.limit ?? TOP));
+  if (hit && enough && Date.now() - hit.at < FRESH_MS) return { rows: hit.rows, stale: false };
   if (!navigator.onLine) {
     if (hit) return { rows: hit.rows, stale: true };
     throw new Error('offline');
   }
   try {
-    const rows = await f.fetch(board);
-    cache[cacheKey] = { at: Date.now(), rows };
+    const rows = await f.fetch(board, limit);
+    cache[cacheKey] = { at: Date.now(), rows, limit };
     writeCache(cache);
     return { rows, stale: false };
   } catch (err) {

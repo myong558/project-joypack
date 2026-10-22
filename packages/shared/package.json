@@ -2,6 +2,8 @@
   "name": "@joypack/shared",
   "private": true,
   "version": "1.0.0",
+  "author": "Myong Bum Soo",
+  "license": "UNLICENSED",
   "description": "조이팩 공통 모듈: 공통 설정, 랭킹 이름 규칙, 서비스 워커 등록, 게임 캐시 확인, 공통 상단 메뉴(topbar.css)",
   "main": "joypack.js",
   "types": "joypack.d.ts",

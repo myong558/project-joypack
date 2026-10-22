@@ -362,8 +362,12 @@
     return typeof document !== 'undefined' && document.documentElement.hasAttribute('data-jp-preview');
   }
 
+  // 저작권 표기: 조이팩 설정 → 정보, 각 게임 설정 맨 아래 버전 밑에 그대로 쓴다(기준서 1.4). 바꿀 때는 여기 한 곳만
+  var COPYRIGHT = '© 2026 Myong Bum Soo. All rights reserved.';
+
   global.Joypack = {
     KEYS: KEYS,
+    COPYRIGHT: COPYRIGHT,
     isPreview: isPreview,
     topIcon: topIcon,
     deviceLang: deviceLang,

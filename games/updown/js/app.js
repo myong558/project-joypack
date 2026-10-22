@@ -1092,6 +1092,8 @@
   // 빌드하지 않은 원본 파일을 바로 열었으면(자리 표시가 그대로) 숨긴다.
   const APP_VERSION = '__APP_VERSION__';
   function showVersion() {
+    // 저작권 표기는 조이팩 공통 모듈 한 곳에서(빌드 전 원본에서도 보임)
+    if (window.Joypack) $('app-copyright').textContent = Joypack.COPYRIGHT;
     if (APP_VERSION.indexOf('__') === 0) return;
     $('app-version').textContent = t('settings.version', { version: 'v' + APP_VERSION });
     $('app-version').hidden = false;

@@ -448,7 +448,8 @@ function settingsPanel(opts: StartOptions): HTMLElement {
           </div>
         </section>
       </div>
-      <p class="app-version">${t('settings.version')} v${__APP_VERSION__}</p>    </div>`);
+      <p class="app-version">${t('settings.version')} v${__APP_VERSION__}</p>
+      <p class="app-copyright">${Joypack.COPYRIGHT}</p>    </div>`);
 
   const select = (attr: string, value: string) =>
     el.querySelectorAll<HTMLButtonElement>(`[data-${attr}]`).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset[attr] === value)));
