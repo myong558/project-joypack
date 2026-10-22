@@ -217,16 +217,21 @@ svg {
 .lang-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  height: 44px;
-  padding: 0 16px 0 13px;
+  gap: 7px;
+  height: 50px;
+  padding: 0 18px 0 14px;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: var(--surface);
   box-shadow: var(--shadow);
-  font-size: 16px;
+  font-size: 18px;
   cursor: pointer;
   transition: transform 140ms ease;
+}
+
+.lang-btn svg {
+  width: 24px;
+  height: 24px;
 }
 
 .lang-btn:hover {
@@ -260,6 +265,18 @@ svg {
   box-shadow: var(--shadow);
   cursor: pointer;
   transition: transform 140ms ease;
+}
+
+/* 첫 화면 위 메뉴(랭킹·설정): 휴대폰에서도 한눈에 알아보게 단추와 그림을 크게 */
+.top .icon-btn {
+  width: 50px;
+  height: 50px;
+}
+
+.top .icon-btn svg {
+  width: 27px;
+  height: 27px;
+  stroke-width: 2.1;
 }
 
 .icon-btn:hover {
