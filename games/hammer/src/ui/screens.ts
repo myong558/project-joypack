@@ -194,9 +194,16 @@ export function startScreen(opts: StartOptions): HTMLElement {
   };
   window.addEventListener('resize', fitStart);
   requestAnimationFrame(fitStart);
-  // 글꼴·그림이 늦게 들어와 내용 높이가 바뀌어도 다시 맞춘다. 맞춘 뒤 크기가 그대로면 다시 불리지 않는다
+  // 글꼴·그림이 늦게 들어와 내용 높이가 바뀌어도 다시 맞춘다. 맞춘 뒤 크기가 그대로면 다시 불리지 않는다.
+  // 화면(el) 자체도 지켜본다: 설치 앱에서 처음 열 때는 상태 표시줄·주소창이 자리 잡으며 화면 높이만 나중에 줄어드는데,
+  // 이때 window resize 가 오지 않아 줄어든 높이를 놓치고 도감이 잘렸다(앱을 내렸다 올리면 그제야 맞춰짐)
   const resized = new ResizeObserver(() => (el.isConnected ? fitStart() : resized.disconnect()));
+  resized.observe(el);
   el.querySelectorAll('.col').forEach((c) => resized.observe(c));
+  // 화면을 보이는 크기(visualViewport)가 바뀌거나 앱으로 돌아왔을 때도 다시 맞춘다
+  const refit = () => (el.isConnected ? fitStart() : (visualViewport?.removeEventListener('resize', refit), window.removeEventListener('pageshow', refit)));
+  visualViewport?.addEventListener('resize', refit);
+  window.addEventListener('pageshow', refit);
 
   if (opts.opening) {
     el.classList.add('opening');
