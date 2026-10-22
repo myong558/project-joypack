@@ -502,7 +502,10 @@ p {
 }
 
 /* ---------- 오프닝: 페이지에 처음 들어왔을 때 한 번 ----------
- * 구멍이 솟고 → 두더지가 튀어나오고 → 제목 글자가 떨어지고 → 망치가 날아와 제목을 콩! → 버튼·도감이 차례로.
+ * 구멍이 솟고 → 두더지가 튀어나오고 → 제목 글자가 떨어지고 → 망치가 날아와 제자리에 섰다가 두더지를 콩! 치고 돌아오고
+ * → 맞은 두더지는 찌그러지며 구멍으로 쏙 → 버튼·도감이 차례로. 그 뒤로는 평소처럼 두더지가 나왔다 들어가고 망치가 흔들린다.
+ * 망치가 두더지까지 가는 거리(--hit-x, --hit-y)는 화면 크기마다 달라 screens.ts 가 재서 넣는다.
+ * 두더지 쪽 오프닝(intro-peek)은 아래 "시작 화면 두더지" 블록에 있다.
  * 단추의 눌림(transform)과 겹치지 않게 translate·scale 속성만 쓰고, 끝난 뒤에는 남지 않도록 backwards로 채운다.
  * 건너뛰기(누르기)를 하면 .opening이 빠지며 모든 요소가 바로 제자리에 선다 */
 @media (prefers-reduced-motion: no-preference) {
@@ -510,24 +513,20 @@ p {
     animation: intro-pop 450ms cubic-bezier(0.3, 1.6, 0.6, 1) backwards;
   }
 
-  .opening .title-hole .mole.bob {
-    animation:
-      intro-peek 1s 300ms ease-out backwards,
-      bob 2.4s 1.3s ease-in-out infinite;
-  }
-
   .opening .title-text .ch {
     animation: intro-drop 500ms calc(450ms + var(--i) * 60ms) cubic-bezier(0.3, 1.5, 0.6, 1) backwards;
   }
 
-  .opening .title-hammer {
-    animation:
-      intro-hammer 500ms 1050ms ease-in backwards,
-      title-swing 2.4s 1.6s ease-in-out infinite;
+  /* 두더지(구멍 안 z-index 있는 층)보다 앞에서 치도록 제목 줄을 위로 올린다 */
+  .opening h1 {
+    position: relative;
+    z-index: 10;
   }
 
-  .opening h1 {
-    animation: intro-bonk 300ms 1400ms ease-out;
+  .opening .title-hammer {
+    animation:
+      intro-hammer 1000ms 1050ms ease-in-out backwards,
+      title-swing 2.4s 2.3s ease-in-out infinite;
   }
 
   .opening .tagline { animation: intro-rise 400ms 1250ms ease-out backwards; }
@@ -545,10 +544,13 @@ p {
   from { scale: 0; opacity: 0; }
 }
 
+/* 300ms 에 시작해 1.7초. 망치가 닿는 1.6초(76%)에 찌그러지고 구멍으로 들어간다 */
 @keyframes intro-peek {
   0% { transform: translateY(105%); }
-  30% { transform: translateY(-14%); }
-  42%, 80% { transform: translateY(0); }
+  18% { transform: translateY(-14%); }
+  26%, 75% { transform: translateY(0); }
+  79% { transform: translateY(10%) scale(1.18, 0.78); }
+  86% { transform: translateY(30%) scale(0.95, 1.05); }
   100% { transform: translateY(105%); }
 }
 
@@ -557,15 +559,15 @@ p {
   60% { translate: 0 0.08em; rotate: 4deg; opacity: 1; }
 }
 
+/* 1050ms 에 시작해 1초: 날아와 제자리(30%) → 두더지 위로 들어 올림(45%) → 콩(55%, 1.6초) → 튕김 → 제자리로(100%) */
 @keyframes intro-hammer {
-  0% { translate: 3em -3em; rotate: 140deg; opacity: 0; }
-  60% { translate: 0 0; rotate: -45deg; opacity: 1; }
-  80% { rotate: 18deg; }
-}
-
-@keyframes intro-bonk {
-  40% { scale: 1.08 0.82; }
-  70% { scale: 0.96 1.06; }
+  0% { translate: 3em -3em; rotate: 140deg; scale: 1; opacity: 0; }
+  22% { translate: 0 0; rotate: -30deg; scale: 1; opacity: 1; }
+  30% { translate: 0 0; rotate: 0deg; scale: 1; }
+  45% { translate: calc(var(--hit-x, 0px) + 0.5em) calc(var(--hit-y, 0px) - 0.6em); rotate: 45deg; scale: 2.2; }
+  55% { translate: var(--hit-x, 0px) var(--hit-y, 0px); rotate: -28deg; scale: 2.2; }
+  63% { translate: calc(var(--hit-x, 0px) + 0.1em) calc(var(--hit-y, 0px) - 0.3em); rotate: -12deg; scale: 2.2; }
+  100% { translate: 0 0; rotate: 0deg; scale: 1; }
 }
 
 @keyframes intro-rise {
@@ -4121,13 +4123,13 @@ body {
 @media (prefers-reduced-motion: no-preference) {
   .opening .title-hole .mole.bob {
     animation:
-      intro-peek 1s 300ms ease-out backwards,
-      bob 4.8s 1.3s ease-in-out infinite,
-      title-glance 4.8s 1.3s ease-in-out infinite;
+      intro-peek 1.7s 300ms linear backwards,
+      bob 4.8s 2s ease-in-out infinite,
+      title-glance 4.8s 2s ease-in-out infinite;
   }
 
   .opening .title-hole .mole.bob .eye::after {
-    animation-delay: 1.3s;
+    animation-delay: 2s;
   }
 }
 
