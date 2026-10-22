@@ -4,7 +4,7 @@
  *
  * 서버 부담을 줄이려고
  * - 랭킹 창을 열 때, 보고 있는 순위표만 읽는다(허브를 여는 것만으로는 읽지 않음)
- * - 처음에는 TOP 3 만 읽고, "TOP 10 보기"로 펼칠 때만 10위까지 읽는다(문서 1개 방식 게임은 어차피 한 번에 옴)
+ * - 처음에는 게임별 1위(TOP 1)만 읽고, "TOP 10 보기"로 펼칠 때만 10위까지 읽는다(문서 1개 방식 게임은 어차피 한 번에 옴)
  * - 불러온 순위는 기기에 남겨 두고 5분 안에 다시 열면 서버를 부르지 않는다
  * - 오프라인이거나 실패하면 마지막으로 불러온 순위를 보여 준다
  */
@@ -13,7 +13,8 @@ const FIREBASE = {
   projectId: 'joypack-c6bd2',
 };
 const API = `https://firestore.googleapis.com/v1/projects/${FIREBASE.projectId}/databases/(default)/documents`;
-export const TOP = 3;
+/** 랭킹 창에서 게임마다 처음 보이는 줄 수. 게임이 늘어도 창이 길어지지 않게 1위만 */
+export const TOP = 1;
 /** "TOP 10 보기"로 펼쳤을 때 */
 export const FULL = 10;
 const FRESH_MS = 5 * 60 * 1000;
@@ -132,7 +133,7 @@ export async function loadBoard(gameId: string, board: string, limit = TOP): Pro
   const cacheKey = `${gameId}:${f.key(board)}`;
   const cache = readCache();
   const hit = cache[cacheKey];
-  // 펼친 상태(10위)를 TOP 3 로 읽어 둔 항목으로 채우지 않는다. 줄 수가 모자라도 그 이하만 있으면 끝까지 읽은 것
+  // 펼친 상태(10위)를 1위만 읽어 둔 항목으로 채우지 않는다. 줄 수가 모자라도 그 이하만 있으면 끝까지 읽은 것
   const enough = hit && ((hit.limit ?? TOP) >= limit || hit.rows.length < (hit.limit ?? TOP));
   if (hit && enough && Date.now() - hit.at < FRESH_MS) return { rows: hit.rows, stale: false };
   if (!navigator.onLine) {

@@ -39,7 +39,7 @@ const ko = {
 
   'ranking.open': '전체 랭킹',
   'ranking.title': '전체 랭킹',
-  'ranking.sub': '게임별 TOP 3',
+  'ranking.sub': '게임별 1위',
   'ranking.mine': '내 기록 있는 게임만',
   'ranking.mineEmpty': '아직 기록이 있는 게임이 없어요. 한 판 해 보고 다시 와 주세요!',
   'ranking.loading': '불러오는 중…',
@@ -135,7 +135,7 @@ const en: Record<keyof typeof ko, string> = {
 
   'ranking.open': 'Rankings',
   'ranking.title': 'Rankings',
-  'ranking.sub': 'Top 3 of each game',
+  'ranking.sub': 'No. 1 of each game',
   'ranking.mine': 'Only games I played',
   'ranking.mineEmpty': 'No games with your record yet. Play one and come back!',
   'ranking.loading': 'Loading…',

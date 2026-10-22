@@ -313,7 +313,7 @@ games/<id>/
 | --- | --- | --- |
 | 1 | `games.json` | 항목 추가: id, name/desc(ko·en), path, icon, color(허브 카드색), ranking(boards), `added`(공개하는 날, 허브는 최신 게임부터 보이고 14일 동안 NEW), `status: "soon"`(배포 안 함, 목록 아래 "다음 게임" 띠에 이름만) → 휴대폰 확인은 `"preview"`(7.3) → 완성되면 `pnpm release <id>`(지금 공개) 또는 `--at`(공개 예약, `open`)으로 `"live"`(7.4). 허브 카드는 위쪽이 `color` 그림판이고 그 위에 아이콘(72px)이 떠 있으므로, 아이콘은 **자기 배경이 있는 둥근 네모**로 만들고 `color` 는 흰 글자가 올라가도 되는 진한 색으로 고릅니다(플레이 버튼은 이 색을 어둡게 섞어 씀). 설명은 카드에서 두 줄까지 보입니다 |
 | 2 | `apps/hub/src/records.ts` | `READERS`(허브 카드 "최고 …")와 `CLEARERS`(허브 "내 기록 지우기", 게임 안 버튼과 같은 범위)에 게임 추가 |
-| 3 | `apps/hub/src/rankings.ts` | `FETCHERS` 에 TOP 3 읽는 방법 추가(순위표 문서 방식이면 두더지잡기 것을 복사) |
+| 3 | `apps/hub/src/rankings.ts` | `FETCHERS` 에 순위 읽는 방법 추가(`limit` 줄 수만큼: 처음 1위, "TOP 10 보기"로 펼치면 10위까지)(순위표 문서 방식이면 두더지잡기 것을 복사) |
 | 4 | `apps/hub/src/i18n.ts` | 허브 카드 최고 기록 문구(`best.<id>`) |
 | 5 | `firestore.rules` | `games/<id>/…` 블록 추가 → Firebase 콘솔에 게시(사람이 해야 함, 답변에 알림) |
 | 6 | 허브 글꼴 | 게임 이름·설명이 허브에 새 글자를 쓰면 `pnpm --filter hub font` |
@@ -454,13 +454,13 @@ games/<id>/
 | 화면 높이 맞추기 | `--vh-px` 고정 + 안쪽 스크롤 | `trackViewport`·`guardBottom` + `--fit` 줄이기 | 🟡 방식은 게임마다, 규칙은 1.3 |
 | 가로 낮은 화면 | 두 칸 배치(시작 2×2·게임·결과) | 가로 배치 + `safe center` 스크롤 | 🟡 게임마다, 규칙은 1.9 |
 | 화면 크기 점검 목록 | `screen-check.mjs` | `screen-check.mjs` | ✅ 도구 공통(`pnpm check:screens`, 7.1) |
-| 허브 연결(최고 기록·지우기·TOP 3) | `records.ts`·`rankings.ts` 에 직접 | 같음 | 🟠 게임이 늘면 각 게임이 `joypack.meta.js` 로 내보내는 방식 검토 |
+| 허브 연결(최고 기록·지우기·순위 읽기) | `records.ts`·`rankings.ts` 에 직접 | 같음 | 🟠 게임이 늘면 각 게임이 `joypack.meta.js` 로 내보내는 방식 검토 |
 
 ### 공통화 대기 목록 (다음에 게임을 만들 때 함께 처리하면 좋은 것)
 
 1. `Joypack.vibrate(level)`: 1.7 진동 세기표를 공통 모듈 함수로(진동 설정 확인 포함).
 2. 랭킹 클라이언트·랭킹 창 UI: 순위표 문서 방식으로 공통 패키지화(`packages/ranking`). 업다운 이전은 데이터 이전이 필요하므로 별도 판단.
-3. 허브 연결 메타: 게임이 `games/<id>/joypack.meta.ts`(최고 기록 읽기·지우기·TOP 3 읽기)를 내보내고 허브가 자동으로 모음 → 6장 2~4번이 사라짐.
+3. 허브 연결 메타: 게임이 `games/<id>/joypack.meta.ts`(최고 기록 읽기·지우기·순위 읽기)를 내보내고 허브가 자동으로 모음 → 6장 2~4번이 사라짐.
 
 ---
 
