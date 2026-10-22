@@ -58,7 +58,7 @@ for (const game of games) {
     }
   }
   if (!existsSync(join(out, 'index.html'))) throw new Error(`dist/games/${game.id}/index.html 이 없습니다`);
-  // 미리보기 표시: 게임은 Joypack.isPreview() 로 알고 랭킹 등록을 건너뛴다
+  // 미리보기 표시: 게임은 Joypack.isPreview() 로 미리보기로 배포된 것을 안다(랭킹은 그대로 등록됨)
   if (game.status === 'preview') {
     const index = join(out, 'index.html');
     writeFileSync(index, readFileSync(index, 'utf8').replace(/<html\b/i, '<html data-jp-preview'));

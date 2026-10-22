@@ -8,7 +8,7 @@ export type ShareOutcome = 'shared' | 'cancelled' | 'saved' | 'copied' | 'failed
 
 export interface JoypackApi {
   KEYS: Record<SharedSetting, string>;
-  /** 숨김 미리보기(games.json status "preview")로 배포된 게임인지. true 면 랭킹 등록을 하지 않는다 */
+  /** 숨김 미리보기(games.json status "preview")로 배포된 게임인지. 랭킹은 미리보기 동안에도 등록된다 */
   isPreview(): boolean;
   /** 공통 상단 메뉴 아이콘 SVG 문자열 */
   topIcon(name: TopIcon): string;

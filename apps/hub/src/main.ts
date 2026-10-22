@@ -457,8 +457,8 @@ function rowsHtml(game: GameMeta, rows: Row[]): string {
 }
 
 function openRanking(): void {
-  // 미리보기 게임은 랭킹 등록을 하지 않으므로 공개된 게임만
-  const games = live.filter((g) => g.status === 'live' && g.ranking && hasRanking(g.id));
+  // 첫 화면 카드와 같은 게임: 미리보기를 켠 기기에서만 미리보기 게임 랭킹도 보인다(테스트용)
+  const games = live.filter((g) => g.ranking && hasRanking(g.id));
   const body = `
     <p class="sheet-sub">${t('ranking.sub')}</p>
     ${games
