@@ -17,10 +17,12 @@ const fullBleed = (scale) =>
       .replace('<rect width="512" height="512" rx="120" fill="#ffb703"/>', '<rect width="512" height="512" fill="#ffb703"/><g transform="translate(256 248) scale(' + scale + ') translate(-256 -270)">')
       .replace('</svg>', '</g></svg>'),
   );
+// 안드로이드 Chrome 바로가기는 마스커블을 적응형 아이콘(108dp 중 가운데 72dp, 약 66%만 보임)으로 넣어 1.5배 확대돼 보인다.
+// 그래서 마스커블은 얼굴을 0.6배로 줄여, 잘린 뒤 보이는 크기가 원래 로고와 같게 한다
 const fullIcon = (scale, size, file) => sharp(fullBleed(scale), { density: 384 }).resize(size, size).png().toFile(file);
 await fullIcon(0.8, 192, 'public/pwa-192x192.png');
 await fullIcon(0.8, 512, 'public/pwa-512x512.png');
-await fullIcon(0.8, 512, 'public/maskable-icon-512x512.png');
+await fullIcon(0.6, 512, 'public/maskable-icon-512x512.png');
 await fullIcon(0.92, 180, 'public/apple-touch-icon-180x180.png');
 
 // 링크 미리보기 1200×630
