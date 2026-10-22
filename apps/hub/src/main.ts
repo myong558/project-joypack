@@ -1,6 +1,6 @@
 import '@joypack/shared/topbar.css';
 import './styles.css';
-import { GAMES, gameVersion, iconUrl, type GameMeta } from './games';
+import { GAMES, byNewest, gameVersion, iconUrl, isNew, patternOf, type GameMeta } from './games';
 import { LANG_LABEL, LANGS, formatNumber, getLang, t } from './i18n';
 import { TOP, cachedBoard, hasRanking, loadBoard, type Row } from './rankings';
 import { externalOpenUrl, installState, onInstallChange, promptInstall } from './install';
@@ -14,7 +14,8 @@ applySettings(settings);
 watchSystemTheme(() => settings.theme);
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
-const live = GAMES.filter((g) => g.status === 'live');
+// 최근에 추가한 게임부터(카드·랭킹 탭·설정 목록 모두 같은 순서)
+const live = byNewest(GAMES.filter((g) => g.status === 'live'));
 
 const ICON = {
   trophy:
@@ -231,12 +232,13 @@ function gameCard(game: GameMeta): string {
   const best = bestRecord(game);
   const ready = cached.get(game.id) ?? false;
   const blocked = !navigator.onLine && !ready;
+  const fresh = isNew(game, live[0]);
   // 게임 카드 = 장난감 버튼: 위는 게임 색 그림판(아이콘이 둥실), 아래는 이름·설명·기록, 맨 아래 "플레이" 버튼.
   // 게임이 계속 늘어나므로 휴대폰 두 칸, 넓은 화면은 칸 수가 늘어나는 바둑판으로 쌓는다(styles.css .games)
   return `
     <a class="card${blocked ? ' blocked' : ''}" href="${game.path}" style="--c:${game.color}" data-game="${game.id}"
-       ${blocked ? 'aria-disabled="true"' : ''} aria-label="${esc(name)} — ${t('game.play')}">
-      <span class="card-art"><img class="card-icon" src="${iconUrl(game)}" alt="" width="72" height="72" /></span>
+       ${blocked ? 'aria-disabled="true"' : ''} aria-label="${fresh ? `${t('game.newLabel')} · ` : ''}${esc(name)} — ${t('game.play')}">
+      <span class="card-art" data-pat="${patternOf(game)}">${fresh ? `<span class="card-new" aria-hidden="true">${t('game.new')}</span>` : ''}<img class="card-icon" src="${iconUrl(game)}" alt="" width="72" height="72" /></span>
       <span class="card-body">
         <strong class="card-name">${esc(name)}</strong>
         <span class="card-desc">${esc(game.desc[getLang()])}</span>
@@ -250,23 +252,22 @@ function gameCard(game: GameMeta): string {
     </a>`;
 }
 
-function soonCard(game?: GameMeta): string {
-  return `
-    <div class="card soon" aria-label="${t('game.soon')}">
-      <span class="card-art">${game ? `<img class="card-icon" src="${iconUrl(game)}" alt="" width="72" height="72" />` : ICON.sparkle}</span>
-      <span class="card-body">
-        <strong class="card-name">${esc(game ? game.name[getLang()] : t('game.next'))}</strong>
-        <span class="card-desc">${esc(game ? game.desc[getLang()] : t('game.nextDesc'))}</span>
-      </span>
-      <span class="card-play" aria-hidden="true">${lbl(t('game.soon'))}</span>
-    </div>`;
+/**
+ * 다음 게임 안내: 카드 대신 게임 목록 아래 한 줄 띠.
+ * 목록은 최신 게임부터라 "앞으로 나올 게임"을 카드로 끼우면 순서가 어긋나므로 목록 밖, 끝맺음 자리에 둔다
+ */
+function nextStrip(): string {
+  const soon = GAMES.filter((g) => g.status === 'soon');
+  const text = soon.length
+    ? t('game.nextNamed', { name: soon.map((g) => g.name[getLang()]).join(', ') })
+    : t('game.nextDesc');
+  return `<p class="next-strip">${ICON.sparkle}<span>${esc(text)}</span></p>`;
 }
 
 const skinName = (skin: Skin) => t(`skin.${skin}`);
 
 function renderHome(): void {
   document.title = t('app.title');
-  const soon = GAMES.filter((g) => g.status === 'soon');
   const otherLang = LANGS.find((l) => l !== getLang())!;
   const title = [...t('app.title')].map((ch, i) => `<span style="--i:${i}">${esc(ch)}</span>`).join('');
   app.innerHTML = `
@@ -290,8 +291,8 @@ function renderHome(): void {
         ${installCard()}
         <section class="games" aria-label="${t('games.label')}">
           ${live.map(gameCard).join('')}
-          ${soon.length ? soon.map((g) => soonCard(g)).join('') : soonCard()}
         </section>
+        ${nextStrip()}
       </div>
     </main>
     <footer class="foot">

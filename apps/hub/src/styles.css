@@ -516,13 +516,74 @@ a.card:active {
   overflow: hidden;
 }
 
+/*
+ * 그림판 무늬: 게임을 추가한 순서대로 아래 여섯 가지를 돌려 쓴다(main.ts patternOf → data-pat).
+ * 무늬 한 칸(--pat-x, --pat-y)만큼 옮기면 처음과 똑같아져 끊김 없이 계속 흐른다
+ */
 .card-art::before {
+  --ink: rgb(255 255 255 / 0.26);
   content: '';
   position: absolute;
-  inset: -16px;
+  inset: -48px;
   background-image: radial-gradient(rgb(255 255 255 / 0.28) 2px, transparent 2.6px);
   background-size: 16px 16px;
-  animation: dots 14s linear infinite;
+  animation: pattern-loop 14s linear infinite;
+}
+
+/* 1 사선 줄무늬: 오른쪽으로 흐름 */
+.card-art[data-pat='1']::before {
+  --ink: rgb(255 255 255 / 0.15);
+  --pat-x: 16px;
+  --pat-y: 0px;
+  background-image: linear-gradient(45deg, var(--ink) 25%, transparent 25% 50%, var(--ink) 50% 75%, transparent 75%);
+  background-size: 16px 16px;
+  animation-duration: 6s;
+}
+
+/* 2 모눈: 오른쪽 아래로 */
+.card-art[data-pat='2']::before {
+  --pat-x: 18px;
+  --pat-y: 18px;
+  background-image:
+    linear-gradient(var(--ink) 1.5px, transparent 1.5px), linear-gradient(90deg, var(--ink) 1.5px, transparent 1.5px);
+  background-size: 18px 18px;
+  animation-duration: 12s;
+}
+
+/* 3 체크무늬: 위로 */
+.card-art[data-pat='3']::before {
+  --ink: rgb(255 255 255 / 0.14);
+  --pat-x: 0px;
+  --pat-y: -24px;
+  background-image: conic-gradient(var(--ink) 25%, transparent 0 50%, var(--ink) 0 75%, transparent 0);
+  background-size: 24px 24px;
+  animation-duration: 10s;
+}
+
+/* 4 동그라미 고리: 왼쪽 아래로 */
+.card-art[data-pat='4']::before {
+  --pat-x: -22px;
+  --pat-y: 22px;
+  background-image: radial-gradient(circle, transparent 4px, var(--ink) 4.6px 6.2px, transparent 6.8px);
+  background-size: 22px 22px;
+  animation-duration: 14s;
+}
+
+/* 5 지그재그: 왼쪽으로 */
+.card-art[data-pat='5']::before {
+  --ink: rgb(255 255 255 / 0.2);
+  --pat-x: -20px;
+  --pat-y: 0px;
+  background-image:
+    linear-gradient(135deg, var(--ink) 25%, transparent 25%), linear-gradient(225deg, var(--ink) 25%, transparent 25%),
+    linear-gradient(315deg, var(--ink) 25%, transparent 25%), linear-gradient(45deg, var(--ink) 25%, transparent 25%);
+  background-position:
+    -10px 0,
+    -10px 0,
+    0 0,
+    0 0;
+  background-size: 20px 20px;
+  animation-duration: 8s;
 }
 
 .card-art::after {
@@ -674,46 +735,63 @@ a.card:active .card-play {
   transform: none;
 }
 
-.card.soon {
-  border-style: dashed;
-  border-color: var(--line);
-  background: color-mix(in srgb, var(--surface) 60%, transparent);
-  box-shadow: none;
+/* NEW 표시: 가장 최근에 추가한 게임 그림판 왼쪽 위에 붙는 작은 리본 */
+.card-new {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  padding: 3px 9px 2px;
+  border-radius: 999px;
+  background: #fff;
+  color: color-mix(in srgb, var(--c, var(--brand)) 80%, #000);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--c, var(--brand)) 55%, #000);
+  animation: new-pop 2.4s ease-in-out infinite;
 }
 
-/* 준비 중 카드의 그림 칸: 아래 칸처럼 배경이 비쳐 보이게 반투명 검정으로 딤 처리한다 */
-.card.soon .card-art {
-  background: rgb(0 0 0 / 0.1);
+/* 다음 게임 안내: 게임 목록 아래 점선 띠 한 줄. 카드가 아니라 목록 순서에 끼지 않는다 */
+.next-strip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 18px 0 0;
+  padding: 10px 14px;
+  border: 2px dashed var(--line);
+  border-radius: 16px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.35;
+  text-align: center;
 }
 
-:root[data-theme='dark'] .card.soon .card-art {
-  background: rgb(0 0 0 / 0.22);
+/* 넓은 화면은 바둑판에 빈 칸이 남으므로 띠를 끝까지 늘이지 않고 글자 길이만큼, 카드 왼쪽 끝에 맞춘다 */
+@media (min-width: 720px) {
+  .next-strip {
+    width: fit-content;
+    max-width: 100%;
+    padding-inline: 20px;
+  }
 }
 
-.card.soon .card-art::before {
-  background-image: radial-gradient(rgb(255 255 255 / 0.16) 2px, transparent 2.6px);
+.next-strip svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  fill: var(--gold);
 }
 
-/* 반짝이: 큰 별과 작은 별이 번갈아 커졌다 작아지며 빛난다 */
-.card.soon .card-art > svg {
-  color: rgb(255 255 255 / 0.8);
-  filter: drop-shadow(0 0 6px rgb(255 255 255 / 0.35));
-}
-
-.card.soon .card-art > svg path {
+.next-strip svg path {
   transform-box: fill-box;
   transform-origin: center;
   animation: twinkle 2.4s ease-in-out infinite;
 }
 
-.card.soon .card-art > svg path + path {
+.next-strip svg path + path {
   animation-delay: -1.2s;
-}
-
-.card.soon .card-play {
-  background: var(--surface-2);
-  color: var(--muted);
-  box-shadow: none;
 }
 
 .foot {
@@ -1529,6 +1607,16 @@ a.primary-btn {
   }
 }
 
+@keyframes new-pop {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
 @keyframes twinkle {
   0%,
   100% {
@@ -1541,9 +1629,9 @@ a.primary-btn {
   }
 }
 
-@keyframes dots {
+@keyframes pattern-loop {
   to {
-    transform: translate(16px, 16px);
+    transform: translate(var(--pat-x, 16px), var(--pat-y, 16px));
   }
 }
 

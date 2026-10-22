@@ -310,7 +310,7 @@ games/<id>/
 
 | # | 파일 | 할 일 |
 | --- | --- | --- |
-| 1 | `games.json` | 항목 추가: id, name/desc(ko·en), path, icon, color(허브 카드색), ranking(boards), `status: "soon"` → 완성되면 `"live"`. 허브 카드는 위쪽이 `color` 그림판이고 그 위에 아이콘(72px)이 떠 있으므로, 아이콘은 **자기 배경이 있는 둥근 네모**로 만들고 `color` 는 흰 글자가 올라가도 되는 진한 색으로 고릅니다(플레이 버튼은 이 색을 어둡게 섞어 씀). 설명은 카드에서 두 줄까지 보입니다 |
+| 1 | `games.json` | 항목 추가: id, name/desc(ko·en), path, icon, color(허브 카드색), ranking(boards), `added`(공개하는 날, 허브는 최신 게임부터 보이고 14일 동안 NEW), `status: "soon"`(목록 아래 "다음 게임" 띠에 이름만) → 완성되면 `"live"`. 허브 카드는 위쪽이 `color` 그림판이고 그 위에 아이콘(72px)이 떠 있으므로, 아이콘은 **자기 배경이 있는 둥근 네모**로 만들고 `color` 는 흰 글자가 올라가도 되는 진한 색으로 고릅니다(플레이 버튼은 이 색을 어둡게 섞어 씀). 설명은 카드에서 두 줄까지 보입니다 |
 | 2 | `apps/hub/src/records.ts` | `READERS`(허브 카드 "최고 …")와 `CLEARERS`(허브 "내 기록 지우기", 게임 안 버튼과 같은 범위)에 게임 추가 |
 | 3 | `apps/hub/src/rankings.ts` | `FETCHERS` 에 TOP 3 읽는 방법 추가(순위표 문서 방식이면 두더지잡기 것을 복사) |
 | 4 | `apps/hub/src/i18n.ts` | 허브 카드 최고 기록 문구(`best.<id>`) |
