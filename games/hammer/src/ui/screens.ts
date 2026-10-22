@@ -161,30 +161,47 @@ export function startScreen(opts: StartOptions): HTMLElement {
       </div>
     </main>`);
 
+  // 오프닝에서 망치가 두더지를 치러 갈 거리: 제자리 망치에서 구멍 위쪽(두더지 머리)까지.
+  // 오프닝 중에는 요소들이 움직이거나 커지는 중이라 화면 위치 대신 움직임과 관계없는 배치 위치(offset)로 잰다
+  const layoutBox = (node: HTMLElement) => {
+    let x = 0;
+    let y = 0;
+    for (let n: HTMLElement | null = node; n; n = n.offsetParent as HTMLElement | null) {
+      x += n.offsetLeft;
+      y += n.offsetTop;
+    }
+    return { x, y, w: node.offsetWidth, h: node.offsetHeight };
+  };
+  const aimHammer = () => {
+    const hammer = el.querySelector<HTMLElement>('.title-hammer')!;
+    const ham = layoutBox(hammer);
+    const hole = layoutBox(el.querySelector<HTMLElement>('.title-hole')!);
+    const home = { x: ham.x + ham.w / 2, y: ham.y + ham.h / 2 };
+    const target = { x: hole.x + hole.w * 0.58, y: hole.y + hole.h * 0.2 };
+    hammer.style.setProperty('--hit-x', `${Math.round(target.x - home.x)}px`);
+    hammer.style.setProperty('--hit-y', `${Math.round(target.y - home.y)}px`);
+  };
+
+  // 화면 비율에 따라 내용(특히 아래 도감)이 설계 높이를 넘으면 잘리므로, 넘친 만큼 시작 화면 전체를 줄인다(--fit, styles.css .start).
+  // 크기가 바뀌면 망치가 갈 거리도 다시 잰다
+  const fitStart = () => {
+    if (!el.isConnected) return window.removeEventListener('resize', fitStart);
+    el.style.setProperty('--fit', '1');
+    const cols = [...el.children].filter((c): c is HTMLElement => c instanceof HTMLElement && getComputedStyle(c).position !== 'absolute');
+    const need = Math.max(...cols.map((c) => c.offsetTop + c.offsetHeight)) + parseFloat(getComputedStyle(el).paddingBottom);
+    if (need > el.clientHeight) el.style.setProperty('--fit', ((el.clientHeight / need) * 0.98).toFixed(3));
+    if (opts.opening) aimHammer();
+  };
+  window.addEventListener('resize', fitStart);
+  requestAnimationFrame(fitStart);
+  // 글꼴·그림이 늦게 들어와 내용 높이가 바뀌어도 다시 맞춘다. 맞춘 뒤 크기가 그대로면 다시 불리지 않는다
+  const resized = new ResizeObserver(() => (el.isConnected ? fitStart() : resized.disconnect()));
+  el.querySelectorAll('.col').forEach((c) => resized.observe(c));
+
   if (opts.opening) {
     el.classList.add('opening');
     // 누르면 바로 건너뛴다. 저절로 끝날 때는 클래스를 그대로 둬야 이어지는 망치·두더지 연출이 처음부터 다시 돌지 않는다
     el.addEventListener('pointerdown', () => el.classList.remove('opening'), { once: true });
-    // 오프닝에서 망치가 두더지를 치러 갈 거리: 화면에 붙은 뒤 제자리 망치에서 구멍 위쪽(두더지 머리)까지 잰다
-    // 망치·구멍 모두 오프닝 중에는 움직이거나 커지는 중이라 화면 위치(getBoundingClientRect) 대신 움직임과 관계없는 배치 위치(offset)로 잰다
-    const layoutBox = (node: HTMLElement) => {
-      let x = 0;
-      let y = 0;
-      for (let n: HTMLElement | null = node; n; n = n.offsetParent as HTMLElement | null) {
-        x += n.offsetLeft;
-        y += n.offsetTop;
-      }
-      return { x, y, w: node.offsetWidth, h: node.offsetHeight };
-    };
-    requestAnimationFrame(() => {
-      const hammer = el.querySelector<HTMLElement>('.title-hammer')!;
-      const ham = layoutBox(hammer);
-      const hole = layoutBox(el.querySelector<HTMLElement>('.title-hole')!);
-      const home = { x: ham.x + ham.w / 2, y: ham.y + ham.h / 2 };
-      const target = { x: hole.x + hole.w * 0.58, y: hole.y + hole.h * 0.2 };
-      hammer.style.setProperty('--hit-x', `${Math.round(target.x - home.x)}px`);
-      hammer.style.setProperty('--hit-y', `${Math.round(target.y - home.y)}px`);
-    });
   }
 
   const titleMole = createMoleEl('normal');

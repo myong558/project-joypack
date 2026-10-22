@@ -502,7 +502,7 @@ p {
 }
 
 /* ---------- 오프닝: 페이지에 처음 들어왔을 때 한 번 ----------
- * 구멍이 솟고 → 두더지가 튀어나오고 → 제목 글자가 떨어지고 → 망치가 날아와 제자리에 섰다가 두더지를 콩! 치고 돌아오고
+ * 구멍이 솟고 → 두더지가 튀어나오고 → 제목 글자가 떨어지고 → 화면 밖에서 망치가 날아와 두더지를 콩! 치고 제목 오른쪽 제자리로 가고
  * → 맞은 두더지는 찌그러지며 구멍으로 쏙 → 버튼·도감이 차례로. 그 뒤로는 평소처럼 두더지가 나왔다 들어가고 망치가 흔들린다.
  * 망치가 두더지까지 가는 거리(--hit-x, --hit-y)는 화면 크기마다 달라 screens.ts 가 재서 넣는다.
  * 두더지 쪽 오프닝(intro-peek)은 아래 "시작 화면 두더지" 블록에 있다.
@@ -559,11 +559,9 @@ p {
   60% { translate: 0 0.08em; rotate: 4deg; opacity: 1; }
 }
 
-/* 1050ms 에 시작해 1초: 날아와 제자리(30%) → 두더지 위로 들어 올림(45%) → 콩(55%, 1.6초) → 튕김 → 제자리로(100%) */
+/* 1050ms 에 시작해 1초: 화면 밖(오른쪽 위)에서 두더지 위로 날아옴(45%) → 콩(55%, 1.6초) → 튕김 → 제목 오른쪽 제자리로(100%) */
 @keyframes intro-hammer {
-  0% { translate: 3em -3em; rotate: 140deg; scale: 1; opacity: 0; }
-  22% { translate: 0 0; rotate: -30deg; scale: 1; opacity: 1; }
-  30% { translate: 0 0; rotate: 0deg; scale: 1; }
+  0% { translate: calc(var(--hit-x, 0px) + 60vw) calc(var(--hit-y, 0px) - 40vh); rotate: 200deg; scale: 2.2; }
   45% { translate: calc(var(--hit-x, 0px) + 0.5em) calc(var(--hit-y, 0px) - 0.6em); rotate: 45deg; scale: 2.2; }
   55% { translate: var(--hit-x, 0px) var(--hit-y, 0px); rotate: -28deg; scale: 2.2; }
   63% { translate: calc(var(--hit-x, 0px) + 0.1em) calc(var(--hit-y, 0px) - 0.3em); rotate: -12deg; scale: 2.2; }
@@ -2260,6 +2258,8 @@ button.dex-item:focus-visible {
 
 .start {
   padding-top: 3.2em;
+  /* 내용이 화면 높이를 넘으면 screens.ts(fitStart)가 --fit 을 1보다 작게 넣어 전체를 줄인다 */
+  font-size: calc(16 * var(--u) * var(--fit, 1));
 }
 
 .corner {
