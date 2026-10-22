@@ -710,16 +710,19 @@ function openPreviewLock(settingsDialog: HTMLDialogElement): void {
 
 /** 미리보기 켜기·끄기 창. 닫으면 설정 창까지 닫아 첫 화면·랭킹을 새 상태로 다시 그린다 */
 function openPreviewSwitch(settingsDialog: HTMLDialogElement): void {
+  // 스위치는 고르기만 하고 "확인"을 눌러야 적용한다. X·바깥으로 닫으면 바꾼 것 없이 설정 창으로 돌아간다
   const body = `
-    <p class="sheet-sub">${t('preview.hint')}</p>
-    <label class="switch"><span>${t('preview.switch')}</span><input type="checkbox" role="switch" data-preview-toggle ${previewOn() ? 'checked' : ''} /><i aria-hidden="true"></i></label>`;
+    <div class="preview-lock">
+      <p class="sheet-sub">${t('preview.hint')}</p>
+      <label class="switch"><span>${t('preview.switch')}</span><input type="checkbox" role="switch" data-preview-toggle ${previewOn() ? 'checked' : ''} /><i aria-hidden="true"></i></label>
+      <button class="primary-btn" data-preview-apply>${lbl(t('preview.unlock'))}</button>
+    </div>`;
   const dialog = openDialog('preview center', body, t('preview.title'));
-  dialog.querySelector<HTMLInputElement>('[data-preview-toggle]')!.addEventListener('change', (e) => {
-    setPreview((e.target as HTMLInputElement).checked);
+  dialog.querySelector('[data-preview-apply]')!.addEventListener('click', async () => {
+    setPreview(dialog.querySelector<HTMLInputElement>('[data-preview-toggle]')!.checked);
     live = shownGames();
-  });
-  dialog.addEventListener('close', async () => {
     await refreshCached();
+    dialog.close();
     settingsDialog.close();
   });
 }
