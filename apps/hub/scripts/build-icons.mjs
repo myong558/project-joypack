@@ -6,14 +6,10 @@ import { readFile } from 'node:fs/promises';
 import sharp from 'sharp';
 
 const logo = await readFile('public/logo.svg');
-const png = (size) => sharp(logo, { density: 384 }).resize(size, size).png();
-
-await png(192).toFile('public/pwa-192x192.png');
-await png(512).toFile('public/pwa-512x512.png');
-
 // 아이폰 홈 화면·마스커블 아이콘은 기기가 모양을 잘라 쓰므로, 로고 안쪽의 둥근 상자를 빼고 레몬색을 끝까지 채운 뒤 얼굴만 얹는다.
 // 상자를 작게 넣으면 런처마다 보이는 범위가 달라(앱 설치는 가운데 약 80%, 브라우저 바로가기는 약 66%) 상자 테두리가 잘리며 확대돼 보인다.
-// 마스커블은 얼굴을 scale 배로 줄여 가장 좁게 잘라도(가운데 66% 원) 볼·입이 잘리지 않게 한다
+// 브라우저 바로가기(삼성 인터넷·Chrome "홈 화면에 추가" 등)는 마스커블이 아닌 일반 아이콘(pwa-*)을 골라 원·둥근 사각으로 잘라 쓰기도 하므로
+// 일반 아이콘도 같은 꽉 찬 모양으로 만든다. 얼굴을 scale 배로 줄여 가장 좁게 잘라도(가운데 66% 원) 볼·입이 잘리지 않게 한다
 const fullBleed = (scale) =>
   Buffer.from(
     logo
@@ -22,6 +18,8 @@ const fullBleed = (scale) =>
       .replace('</svg>', '</g></svg>'),
   );
 const fullIcon = (scale, size, file) => sharp(fullBleed(scale), { density: 384 }).resize(size, size).png().toFile(file);
+await fullIcon(0.8, 192, 'public/pwa-192x192.png');
+await fullIcon(0.8, 512, 'public/pwa-512x512.png');
 await fullIcon(0.8, 512, 'public/maskable-icon-512x512.png');
 await fullIcon(0.92, 180, 'public/apple-touch-icon-180x180.png');
 
