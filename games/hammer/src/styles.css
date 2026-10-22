@@ -8,6 +8,13 @@
   font-display: block;
 }
 
+/* 위 메뉴(조이팩 공통 .jp-top-btn)의 글꼴. 조이팩·업다운과 같은 글꼴로 맞추려고 업다운의 Jua 부분 글꼴을 함께 쓴다(OFL, LICENSE-Jua.txt) */
+@font-face {
+  font-family: 'Jua';
+  src: url('./fonts/jua-subset.woff2') format('woff2');
+  font-display: swap;
+}
+
 @font-face {
   font-family: 'Jalnan Gothic';
   src: url('./fonts/JalnanGothic.woff2') format('woff2');

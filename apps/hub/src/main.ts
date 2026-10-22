@@ -272,7 +272,7 @@ function renderHome(): void {
   app.innerHTML = `
     <nav class="top jp-topbar" aria-label="${esc(t('app.title'))}">
       <div class="jp-topbar-group">
-        <button class="jp-top-btn jp-top-pill lang-btn" data-lang="${otherLang}" aria-label="${t('settings.lang')}: ${LANG_LABEL[getLang()]} → ${LANG_LABEL[otherLang]}">${Joypack.topIcon('globe')}${lbl(LANG_LABEL[otherLang])}</button>
+        <button class="jp-top-btn jp-top-pill lang-btn" data-lang="${otherLang}" aria-label="${t('settings.lang')}: ${LANG_LABEL[getLang()]} → ${LANG_LABEL[otherLang]}">${Joypack.topIcon('globe')}<span lang="${otherLang}">${LANG_LABEL[otherLang]}</span></button>
       </div>
       <div class="jp-topbar-group">
         <button class="jp-top-btn" data-open="ranking" aria-label="${t('ranking.open')}" title="${t('ranking.open')}">${Joypack.topIcon('trophy')}</button>

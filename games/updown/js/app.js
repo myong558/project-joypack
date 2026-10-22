@@ -147,6 +147,9 @@
     document.querySelectorAll('[data-i18n]').forEach((el) => {
       el.textContent = t(el.dataset.i18n);
     });
+    // 언어 버튼 글자는 바꿀 언어로 쓰여 있으므로 그 언어를 단다(위 메뉴 공통 css 가 한글이면 조금 더 내린다)
+    const langs = UpDownI18n.LANGS;
+    $('lang-toggle').querySelector('span').lang = langs[(langs.indexOf(UpDownI18n.getLang()) + 1) % langs.length];
     document.querySelectorAll('[data-i18n-aria-label]').forEach((el) => {
       el.setAttribute('aria-label', t(el.dataset.i18nAriaLabel));
     });

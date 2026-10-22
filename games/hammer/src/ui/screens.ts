@@ -135,7 +135,7 @@ export function startScreen(opts: StartOptions): HTMLElement {
       <nav class="jp-topbar" aria-label="${t('app.title')}">
         <div class="jp-topbar-group">
           <a class="jp-top-btn hub-btn" href="../../" aria-label="${t('nav.hub')}" title="${t('nav.hub')}">${Joypack.topIcon('apps')}</a>
-          <button class="jp-top-btn jp-top-pill top-lang" data-lang="${otherLang}" aria-label="${t('lang.label')}: ${LANG_LABEL[lang]} → ${LANG_LABEL[otherLang]}">${Joypack.topIcon('globe')}<span>${LANG_LABEL[otherLang]}</span></button>
+          <button class="jp-top-btn jp-top-pill top-lang" data-lang="${otherLang}" aria-label="${t('lang.label')}: ${LANG_LABEL[lang]} → ${LANG_LABEL[otherLang]}">${Joypack.topIcon('globe')}<span lang="${otherLang}">${LANG_LABEL[otherLang]}</span></button>
         </div>
         <div class="jp-topbar-group">
           <button class="jp-top-btn rank-btn" data-ranking aria-label="${t('ranking.open')}">${Joypack.topIcon('trophy')}${pendingIn('classic') || pendingIn('daily') ? `<i class="jp-top-dot" role="img" aria-label="${t('ranking.newBadge')}"></i>` : ''}</button>

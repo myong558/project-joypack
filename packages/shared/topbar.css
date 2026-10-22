@@ -97,8 +97,11 @@
   background: var(--jp-top-bg);
   box-shadow: var(--jp-top-shadow);
   color: var(--jp-top-ink);
-  font: inherit;
+  /* 글꼴도 모든 앱이 같게: Jua(조이팩·업다운은 원래 쓰고, 두더지잡기는 따로 넣음). 앱은 'Jua' 글꼴을 준비해 둔다 */
+  font-family: 'Jua', system-ui, -apple-system, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
   font-size: var(--jp-top-font);
+  font-weight: 400;
+  letter-spacing: 0;
   line-height: 1;
   text-decoration: none;
   white-space: nowrap;
@@ -118,6 +121,17 @@
   width: auto;
   gap: 0.4em;
   padding: 0 1.05em 0 0.8em;
+}
+
+/* Jua 는 글자를 글자 칸 위쪽에 그려 떠 보이므로, 알약 버튼 글자를 살짝 내려 아이콘과 위아래 가운데를 맞춘다 */
+.jp-top-pill > span {
+  position: relative;
+  top: 0.06em;
+}
+
+/* 한글은 영문보다 더 떠 있어 조금 더 내린다. 언어 버튼 글자에는 그 글자의 언어를 lang 으로 단다(예: <span lang="ko">한국어</span>) */
+.jp-top-pill > span:lang(ko) {
+  top: 0.11em;
 }
 
 .jp-top-btn svg {
