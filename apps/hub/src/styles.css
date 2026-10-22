@@ -1286,9 +1286,11 @@ a.primary-btn {
     padding-bottom: max(12px, env(safe-area-inset-bottom));
   }
 
+  /* 카드가 화면보다 길어 스크롤될 때 간판이 가운데 정렬로 화면 아래로 밀려나지 않게 위에 붙인다 */
   .stage {
-    grid-template-columns: minmax(150px, 210px) 1fr;
-    gap: 28px;
+    grid-template-columns: minmax(140px, 200px) 1fr;
+    align-items: start;
+    gap: 24px;
   }
 
   .hero-mark {
@@ -1306,7 +1308,7 @@ a.primary-btn {
   }
 
   .games {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
     gap: 14px;
   }
 
