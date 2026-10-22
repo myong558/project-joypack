@@ -196,6 +196,10 @@ body {
   width: min(100vw, 768px);
   height: min(100vh, 1024px);
   height: min(100dvh, 1024px);
+  /* 화면 끝까지 그리되(viewport-fit=cover, 조이팩·업다운과 같게) 상태 표시줄·내비게이션 바 자리는 비운다.
+   * 설치 앱에서 조이팩 첫 화면(cover)에서 넘어올 때 이 설정이 다르면 안드로이드가 처음에 내비게이션 바 자리까지 화면으로 잡아
+   * 아래 도감이 바 뒤로 잘렸다(앱을 내렸다 올리면 그제야 맞춰짐). 안쪽 여백은 컨테이너 크기(cq)에서 빠지므로 화면 맞춤도 이 안에서 한다 */
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
   container-type: size;
   overflow: hidden;
   /* 움직이는 배경 위에서도 글자가 읽히도록 가운데를 옅게 덮는다 */
@@ -4360,7 +4364,7 @@ body {
 .screen.result {
   overflow-y: auto;
   justify-content: safe space-evenly;
-  padding-bottom: calc(1.2em + env(safe-area-inset-bottom, 0px));
+  padding-bottom: 1.2em; /* 내비게이션 바 자리는 #app 이 이미 비운다 */
 }
 
 .result .rank-entry {
