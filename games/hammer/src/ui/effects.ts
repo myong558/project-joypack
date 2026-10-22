@@ -117,19 +117,6 @@ export class Hammer {
     });
   }
 
-  stun(): void {
-    this.el.animate(
-      [
-        { rotate: '0deg', filter: 'grayscale(1)' },
-        { rotate: '15deg', offset: 0.25 },
-        { rotate: '-15deg', offset: 0.5 },
-        { rotate: '10deg', offset: 0.75 },
-        { rotate: '0deg', filter: 'grayscale(0)' },
-      ],
-      { duration: 300, easing: 'ease-in-out' },
-    );
-  }
-
   private rect: DOMRect | null = null;
   private hideTimer: ReturnType<typeof setTimeout> | undefined;
 }

@@ -21,7 +21,6 @@ export const COUNTDOWN = 3_000 + GO_TIME;
 export const GRID = 3;
 export const HOLES = GRID * GRID;
 
-const WHIFF_STUN = 300;
 const HOLE_COOLDOWN = 300;
 const TIME_BONUS = 3_000;
 const MAX_CLOCKS = 2;
@@ -71,7 +70,6 @@ export class Game {
   moles: Mole[] = [];
   feverUntil = 0;
   slowUntil = 0;
-  stunUntil = 0;
   segmentIndex = -1;
   result: GameResult | null = null;
   readonly stats = emptyStats();
@@ -109,10 +107,6 @@ export class Game {
 
   get slowed(): boolean {
     return this.slowUntil > this.time;
-  }
-
-  get stunned(): boolean {
-    return this.stunUntil > this.time;
   }
 
   get lastSpurt(): boolean {
@@ -189,14 +183,16 @@ export class Game {
   }
 
   hit(hole: number): void {
-    if (this.phase !== 'playing' || this.stunned) return;
+    if (this.phase !== 'playing') return;
     this.stats.taps++;
 
     // 머리만 내민 두더지는 아직 안 나온 것이라 빈 구멍을 친 것과 같다. 다 올라오기 전(올라오는 중)도 마찬가지
     const mole = this.moles.find((m) => m.hole === hole && m.peekUntil === 0 && m.readyAt <= this.time);
     if (!mole) {
+      // 헛치면 콤보가 끊긴다(점수 배율·피버를 잃음). 예전에는 0.3초 동안 망치를 막았는데, 망치가 안 눌리는 것처럼 느껴지고
+      // 멀티 터치에서 다른 손가락까지 막혀서 뺐다. 콤보 손해만으로도 마구 두드리기는 점수가 크게 줄어 손해다
       this.stats.whiffs++;
-      this.stunUntil = this.time + WHIFF_STUN;
+      this.breakCombo();
       this.emit({ type: 'whiff', hole });
       return;
     }

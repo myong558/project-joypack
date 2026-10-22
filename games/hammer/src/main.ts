@@ -282,7 +282,6 @@ function play(mode: Mode): void {
       case 'whiff':
         sound.play('whiff');
         board.whiff(e.hole);
-        hammer.stun();
         break;
       case 'comboUp':
         if (COMBO_WORDS[e.multiplier]) fx.banner(`${COMBO_WORDS[e.multiplier]} x${e.multiplier}`, 'combo');

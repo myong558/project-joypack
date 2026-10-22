@@ -96,16 +96,27 @@ describe('Game', () => {
     }
   });
 
-  it('헛치면 잠깐 경직되고 그동안의 타격은 무시된다', () => {
+  it('헛쳐도 망치는 막히지 않고 바로 다음 두더지를 칠 수 있다', () => {
     const { game, events } = playingGame();
     game.place('normal', 0);
     game.hit(5);
     expect(events.at(-1)).toEqual({ type: 'whiff', hole: 5 });
     game.hit(0);
-    expect(game.moles).toHaveLength(1);
-    game.tick(300);
-    game.hit(0);
+    expect(game.moles).toHaveLength(0);
     expect(game.score).toBe(10);
+  });
+
+  it('헛치면 콤보가 끊긴다', () => {
+    const { game, events } = playingGame();
+    game.place('normal', 0);
+    game.hit(0);
+    game.place('normal', 1);
+    game.hit(1);
+    expect(game.combo).toBe(2);
+    game.hit(5);
+    expect(game.combo).toBe(0);
+    expect(events.at(-2)).toEqual({ type: 'comboBreak', combo: 2 });
+    expect(events.at(-1)).toEqual({ type: 'whiff', hole: 5 });
   });
 
   it('폭탄을 치면 감점되고 콤보가 끊긴다', () => {

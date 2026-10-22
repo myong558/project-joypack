@@ -1861,17 +1861,6 @@ button.dex-item:focus-visible {
   40% { transform: translate(-25%, -75%) rotate(40deg); }
 }
 
-.hammer.stunned {
-  animation: stunned 300ms ease-in-out;
-  filter: grayscale(1);
-}
-
-@keyframes stunned {
-  25% { transform: translate(-25%, -75%) rotate(-10deg); }
-  50% { transform: translate(-25%, -75%) rotate(-40deg); }
-  75% { transform: translate(-25%, -75%) rotate(-15deg); }
-}
-
 .fever .hammer {
   filter: drop-shadow(0 0 0.25em #ff7a00) drop-shadow(0 0 0.6em #ff3d00);
 }
