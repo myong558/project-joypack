@@ -28,7 +28,7 @@ const ko = {
   'preview.unlock': '확인',
   'preview.wrong': '비밀번호가 맞지 않아요',
   'preview.switch': '미리보기',
-  'preview.hint': '켜면 첫 화면과 랭킹에 테스트 중인 게임이 보여요. 이 기기는 비밀번호 없이 켜고 끌 수 있어요.',
+  'preview.hint': '켜면 이 기기의 첫 화면과 랭킹에 테스트 중인 게임이 보여요.',
   'offline.banner': '오프라인이에요. 한 번 열어 본 게임만 플레이할 수 있어요.',
   'update.ready': '새 버전이 준비됐어요',
 
@@ -118,7 +118,7 @@ const en: Record<keyof typeof ko, string> = {
   'preview.unlock': 'OK',
   'preview.wrong': 'Wrong password',
   'preview.switch': 'Preview',
-  'preview.hint': 'When on, games still in testing show on the home screen and in rankings. This device can turn it on and off without the password.',
+  'preview.hint': 'When on, games still in testing show on the home screen and in rankings on this device.',
   'offline.banner': "You're offline. Only games you've opened before can be played.",
   'update.ready': 'A new version is ready',
 

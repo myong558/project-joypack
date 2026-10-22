@@ -4,7 +4,7 @@ import { GAMES, byNewest, gameVersion, iconUrl, isNew, patternOf, type GameMeta 
 import { LANG_LABEL, LANGS, formatNumber, getLang, t } from './i18n';
 import { TOP, cachedBoard, hasRanking, loadBoard, type Row } from './rankings';
 import { externalOpenUrl, installState, onInstallChange, promptInstall } from './install';
-import { previewOn, previewUnlocked, setPreview, unlockPreview } from './preview';
+import { checkPassword, previewOn, setPreview } from './preview';
 import { bestRecord, canClearRecords, clearRecords } from './records';
 import { THEMES, applySettings, applyTheme, canVibrate, loadSettings, migrateLegacy, saveSetting, watchSystemTheme } from './settings';
 import { SKINS, previewSkin, setPreviewSkin, todaySkin, type Skin } from './skins';
@@ -13,6 +13,9 @@ migrateLegacy();
 const settings = loadSettings();
 applySettings(settings);
 watchSystemTheme(() => settings.theme);
+
+// 보이는 화면 높이를 --jp-vh 로(styles.css body·#app). 설치 앱에서 100dvh 가 실제보다 커 스크롤이 생기던 것 방지
+Joypack.trackViewport();
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 // 첫 화면에 카드로 보일 게임. 최근에 추가한 게임부터(카드·랭킹 탭·설정 목록 모두 같은 순서).
@@ -305,7 +308,10 @@ function renderHome(): void {
       </div>
     </main>
     <footer class="foot">
-      <span>${t('app.title')} v${__APP_VERSION__}</span>
+      <span>${
+        // 미리보기가 켜져 있으면 버전 앞에 작은 로고만 붙인다(글자 높이 안이라 배치는 그대로)
+        previewOn() ? smallLogo(14) : ''
+      }${t('app.title')} v${__APP_VERSION__}</span>
     </footer>`;
 
   app.querySelectorAll<HTMLElement>('.games > .card').forEach((card, i) => card.style.setProperty('--n', String(i)));
@@ -588,12 +594,6 @@ async function openSettings(): Promise<void> {
     <section class="set-group about">
       <h3>${t('settings.about')}</h3>
       <p><span class="ver-tap" data-ver-tap>${t('app.title')} v${__APP_VERSION__}</span> · ${live.map((g) => `${esc(g.name[getLang()])} v${gameVersion(g.id)}`).join(' · ')}</p>
-      ${
-        previewUnlocked()
-          ? `<label class="switch"><span>${t('preview.switch')}</span><input type="checkbox" role="switch" data-preview-toggle ${previewOn() ? 'checked' : ''} /><i aria-hidden="true"></i></label>
-      <p class="hint">${t('preview.hint')}</p>`
-          : ''
-      }
       <p class="hint">Font: Jua (SIL OFL 1.1)</p>
     </section>`;
   const dialog = openDialog('settings', body, t('settings.title'));
@@ -663,7 +663,8 @@ async function openSettings(): Promise<void> {
       b.closest('li')!.querySelector('.storage-state')!.textContent = t('storage.none');
     }),
   );
-  // 숨김 미리보기: 버전 글자를 7번 연속(누름 사이 0.8초 안) 누르면 비밀번호 창
+  // 숨김 미리보기: 버전 글자를 7번 연속(누름 사이 0.8초 안) 누르면 늘 비밀번호 창 → 맞으면 켜기·끄기 창.
+  // 설정 화면에는 미리보기용 항목을 두지 않는다(켜져 있어도 테스트 화면이 공개 화면과 같도록)
   let taps = 0;
   let tapTimer: ReturnType<typeof setTimeout> | undefined;
   dialog.querySelector('[data-ver-tap]')!.addEventListener('click', () => {
@@ -671,18 +672,11 @@ async function openSettings(): Promise<void> {
     tapTimer = setTimeout(() => (taps = 0), 800);
     if (++taps < 7) return;
     taps = 0;
-    // 이미 잠금이 풀린 기기는 아래 스위치로 켜고 끈다
-    if (!previewUnlocked()) openPreviewLock(dialog);
-  });
-  // 미리보기 스위치: 첫 화면·랭킹은 설정 창을 닫을 때 새 상태로 다시 그린다
-  dialog.querySelector<HTMLInputElement>('[data-preview-toggle]')?.addEventListener('change', async (e) => {
-    setPreview((e.target as HTMLInputElement).checked);
-    live = shownGames();
-    await refreshCached();
+    openPreviewLock(dialog);
   });
 }
 
-/** 미리보기 비밀번호 창. 맞으면 이 기기의 잠금을 풀고 켠 뒤 설정 창까지 닫아 첫 화면을 다시 그린다 */
+/** 미리보기 비밀번호 창. 맞으면 켜기·끄기 창으로 넘어간다 */
 function openPreviewLock(settingsDialog: HTMLDialogElement): void {
   const body = `
     <form class="preview-lock" data-preview-form>
@@ -696,14 +690,28 @@ function openPreviewLock(settingsDialog: HTMLDialogElement): void {
   input.focus();
   dialog.querySelector('[data-preview-form]')!.addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (!(await unlockPreview(input.value))) {
+    if (!(await checkPassword(input.value))) {
       dialog.querySelector<HTMLElement>('[data-preview-wrong]')!.hidden = false;
       input.select();
       return;
     }
-    live = shownGames();
-    await refreshCached();
     dialog.close();
+    openPreviewSwitch(settingsDialog);
+  });
+}
+
+/** 미리보기 켜기·끄기 창. 닫으면 설정 창까지 닫아 첫 화면·랭킹을 새 상태로 다시 그린다 */
+function openPreviewSwitch(settingsDialog: HTMLDialogElement): void {
+  const body = `
+    <p class="sheet-sub">${t('preview.hint')}</p>
+    <label class="switch"><span>${t('preview.switch')}</span><input type="checkbox" role="switch" data-preview-toggle ${previewOn() ? 'checked' : ''} /><i aria-hidden="true"></i></label>`;
+  const dialog = openDialog('preview', body, t('preview.title'));
+  dialog.querySelector<HTMLInputElement>('[data-preview-toggle]')!.addEventListener('change', (e) => {
+    setPreview((e.target as HTMLInputElement).checked);
+    live = shownGames();
+  });
+  dialog.addEventListener('close', async () => {
+    await refreshCached();
     settingsDialog.close();
   });
 }

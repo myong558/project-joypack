@@ -1,7 +1,7 @@
 {
   "name": "joypack",
   "private": true,
-  "version": "1.11.0",
+  "version": "1.12.0",
   "description": "조이팩: 미니 게임 모음 웹앱",
   "type": "module",
   "packageManager": "pnpm@12.8.1",
