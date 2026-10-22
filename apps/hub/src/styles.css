@@ -774,6 +774,67 @@ a.card:active .card-play {
   animation: new-pop 2.4s ease-in-out infinite;
 }
 
+/* 공개 예약 COMING SOON 카드: 어떤 게임인지 숨긴 밤하늘색 미스터리 카드. 누를 수 없다(div) */
+.card.teaser {
+  --c: #3b2f73;
+  cursor: default;
+}
+
+.card.teaser .card-art {
+  background: radial-gradient(circle at 28% 18%, #6d5bd0, #2a2052 72%);
+}
+
+/* 가운데 물음표 상자: 금빛 상자가 살짝 흔들린다 */
+.teaser-box {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, #ffd84d, #f5a300);
+  box-shadow:
+    0 5px 0 #b86f00,
+    0 10px 18px -6px rgb(0 0 0 / 0.5);
+  color: #fff;
+  font-size: 40px;
+  line-height: 1;
+  text-shadow: 0 2px 0 #b86f00;
+  animation: teaser-wobble 2.6s ease-in-out infinite;
+}
+
+/* 좁은 휴대폰 카드(약 150px)에서도 한 줄 */
+.card.teaser .card-name {
+  overflow: hidden;
+  font-size: 18px;
+  letter-spacing: 0.02em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card.teaser .card-play {
+  background: var(--surface-2);
+  color: var(--muted);
+  box-shadow: none;
+}
+
+.card.teaser .card-play svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+}
+
+@keyframes teaser-wobble {
+  0%,
+  100% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(4deg) translateY(-3px);
+  }
+}
+
 /* 미리보기 게임(TEST): NEW 와 같은 자리, 검정 바탕으로 구분 */
 .card-new.test {
   background: #1f1a2e;
@@ -1475,6 +1536,13 @@ a.primary-btn {
     width: 56px;
     height: 56px;
     border-radius: 16px;
+  }
+
+  .teaser-box {
+    width: 50px;
+    height: 50px;
+    border-radius: 14px;
+    font-size: 32px;
   }
 
   .foot {

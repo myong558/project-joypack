@@ -1,6 +1,6 @@
 import '@joypack/shared/topbar.css';
 import './styles.css';
-import { GAMES, byNewest, gameVersion, iconUrl, isNew, patternOf, type GameMeta } from './games';
+import { GAMES, byNewest, gameVersion, iconUrl, isNew, isPublic, isScheduled, patternOf, type GameMeta } from './games';
 import { LANG_LABEL, LANGS, formatNumber, getLang, t } from './i18n';
 import { TOP, cachedBoard, hasRanking, loadBoard, type Row } from './rankings';
 import { externalOpenUrl, installState, onInstallChange, promptInstall } from './install';
@@ -24,13 +24,15 @@ const markScrolled = () => document.documentElement.classList.toggle('scrolled',
 window.addEventListener('scroll', markScrolled, { passive: true });
 markScrolled();
 // 첫 화면에 카드로 보일 게임. 최근에 추가한 게임부터(카드·랭킹 탭·설정 목록 모두 같은 순서).
-// 미리보기를 켠 기기는 preview 게임도 함께 보인다(켜고 끄면 다시 계산)
+// 공개(live)·공개 예약 시각이 지난 게임은 모두에게, 개발자 모드를 켠 기기는 미리보기 게임도 함께(켜고 끄면·예약 시각이 되면 다시 계산)
 let live: GameMeta[] = [];
-const shownGames = () =>
-  byNewest(GAMES.filter((g) => g.status === 'live' || (g.status === 'preview' && previewOn())));
+const shownGames = () => byNewest(GAMES.filter((g) => isPublic(g) || (g.status === 'preview' && previewOn())));
 live = shownGames();
-/** NEW 를 붙일 게임: 공개된 게임 중 가장 최근 것(미리보기 게임은 TEST 표시) */
-const newestPublic = byNewest(GAMES.filter((g) => g.status === 'live'))[0];
+/** 공개 예약을 기다리는 게임: 누를 수 없는 COMING SOON 카드로(개발자 모드에서는 실제 카드가 TEST 로 보이므로 없음) */
+const teaserGames = () =>
+  previewOn() ? [] : GAMES.filter((g) => isScheduled(g)).sort((a, b) => Date.parse(a.open!) - Date.parse(b.open!));
+/** NEW 를 붙일 게임: 모두에게 공개된 게임 중 가장 최근 것(미리보기 게임은 TEST 표시) */
+const newestPublic = () => byNewest(GAMES.filter((g) => isPublic(g)))[0];
 
 const ICON = {
   trophy:
@@ -42,6 +44,7 @@ const ICON = {
   download: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10.5l5 5 5-5M5 19.5h14"/></svg>',
   check: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
   share: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="m8.2 10.8 7.6-4.1M8.2 13.2l7.6 4.1"/></svg>',
+  lock: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
   sparkle: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5c.6 4.2 2.3 6 6.5 6.5-4.2.6-5.9 2.3-6.5 6.5-.6-4.2-2.3-5.9-6.5-6.5 4.2-.5 5.9-2.3 6.5-6.5z"/><path d="M18.5 15.5c.3 1.8 1 2.6 2.5 3-1.5.3-2.2 1.1-2.5 3-.3-1.9-1-2.7-2.5-3 1.5-.4 2.2-1.2 2.5-3z"/></svg>',
 };
 
@@ -247,8 +250,8 @@ function gameCard(game: GameMeta): string {
   const best = bestRecord(game);
   const ready = cached.get(game.id) ?? false;
   const blocked = !navigator.onLine && !ready;
-  const test = game.status === 'preview';
-  const fresh = !test && isNew(game, newestPublic);
+  const test = !isPublic(game);
+  const fresh = !test && isNew(game, newestPublic());
   // 게임 카드 = 장난감 버튼: 위는 게임 색 그림판(아이콘이 둥실), 아래는 이름·설명·기록, 맨 아래 "플레이" 버튼.
   // 게임이 계속 늘어나므로 휴대폰 두 칸, 넓은 화면은 칸 수가 늘어나는 바둑판으로 쌓는다(styles.css .games)
   return `
@@ -269,12 +272,40 @@ function gameCard(game: GameMeta): string {
 }
 
 /**
+ * 공개 예약 게임(COMING SOON): 어떤 게임인지 숨긴 누를 수 없는 미스터리 카드. 공개 날짜·시각과 D-day 를 보인다.
+ * 그 시각이 되면 scheduleOpen 이 첫 화면을 다시 그려 정식 카드(NEW)로 바뀐다
+ */
+function teaserCard(game: GameMeta): string {
+  const open = new Date(game.open!);
+  const day = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const days = Math.round((day(open) - day(new Date())) / 86_400_000);
+  const when = open.toLocaleString(getLang() === 'ko' ? 'ko-KR' : 'en-US', {
+    month: 'short',
+    day: 'numeric',
+    weekday: 'short',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+  const opens = esc(t('teaser.opens', { when }));
+  return `
+    <div class="card teaser" aria-disabled="true" aria-label="Coming soon · ${opens}">
+      <span class="card-art" data-pat="${patternOf(game)}"><span class="teaser-box" aria-hidden="true">?</span></span>
+      <span class="card-body">
+        <strong class="card-name">COMING SOON</strong>
+        <span class="card-desc">${opens}</span>
+      </span>
+      <span class="card-play" aria-hidden="true">${ICON.lock}${lbl(days > 0 ? `D-${days}` : 'D-DAY')}</span>
+    </div>`;
+}
+
+/**
  * 다음 게임 안내: 카드 대신 게임 목록 아래 한 줄 띠.
  * 목록은 최신 게임부터라 "앞으로 나올 게임"을 카드로 끼우면 순서가 어긋나므로 목록 밖, 끝맺음 자리에 둔다
  */
 function nextStrip(): string {
   // 미리보기 게임도 비밀번호를 확인하지 않은 기기에서는 준비 중으로 보인다
-  const soon = GAMES.filter((g) => g.status === 'soon' || (g.status === 'preview' && !live.includes(g)));
+  // 공개 예약 게임은 COMING SOON 카드가 대신하므로 띠에 넣지 않는다
+  const soon = GAMES.filter((g) => g.status === 'soon' || (g.status === 'preview' && !g.open && !live.includes(g)));
   const text = soon.length
     ? t('game.nextNamed', { name: soon.map((g) => g.name[getLang()]).join(', ') })
     : t('game.nextDesc');
@@ -307,7 +338,7 @@ function renderHome(): void {
         ${navigator.onLine ? '' : `<p class="banner" role="status">${t('offline.banner')}</p>`}
         ${installCard()}
         <section class="games" aria-label="${t('games.label')}">
-          ${live.map(gameCard).join('')}
+          ${teaserGames().map(teaserCard).join('')}${live.map(gameCard).join('')}
         </section>
         ${nextStrip()}
       </div>
@@ -321,7 +352,7 @@ function renderHome(): void {
 
   app.querySelectorAll<HTMLElement>('.games > .card').forEach((card, i) => card.style.setProperty('--n', String(i)));
   // "다음 게임" 띠는 마지막 카드 다음 차례로 올라온다(styles.css .intro .next-strip)
-  app.querySelector<HTMLElement>('.next-strip')?.style.setProperty('--n', String(live.length));
+  app.querySelector<HTMLElement>('.next-strip')?.style.setProperty('--n', String(app.querySelectorAll('.games > .card').length));
   app.querySelectorAll<HTMLAnchorElement>('.card.blocked').forEach((a) => a.addEventListener('click', (e) => e.preventDefault()));
   // 게임 카드를 누르면 짧게 톡(진동 설정을 따른다)
   app.querySelectorAll<HTMLAnchorElement>('a.card:not(.blocked)').forEach((a) =>
@@ -389,7 +420,7 @@ void document.fonts?.ready.then(fitScreen);
 // 연출 중에 다시 그리면(오프라인 표시·설치 안내 갱신 등) 요소가 새로 만들어져 연출이 처음부터 다시 돌므로,
 // 그동안의 다시 그리기는 연출이 끝난 뒤 한 번으로 모은다.
 // 끝나는 때: 기본 1.9초, 게임이 많으면 "다음 게임" 띠(1.2초 + 카드 수 × 0.11초에 시작, 0.5초)가 다 올라온 뒤까지
-const INTRO_MS = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : Math.max(1900, 1750 + live.length * 110);
+const INTRO_MS = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : Math.max(1900, 1750 + (live.length + teaserGames().length) * 110);
 let introRunning = false;
 let renderWaiting = false;
 
@@ -404,6 +435,7 @@ function requestRender(): void {
 
 function startHome(): void {
   mountDeco();
+  scheduleOpen();
   introRunning = INTRO_MS > 0;
   app.classList.toggle('intro', introRunning);
   renderHome();
@@ -417,6 +449,26 @@ function startHome(): void {
     }
   }, INTRO_MS);
 }
+
+// 공개 예약: 다음 공개 시각에 첫 화면을 다시 그려 COMING SOON 카드를 정식 카드로 바꾼다.
+// 백그라운드에 있던 앱은 타이머가 늦을 수 있어 화면으로 돌아올 때도 다시 확인한다
+let openTimer: ReturnType<typeof setTimeout> | undefined;
+function scheduleOpen(): void {
+  clearTimeout(openTimer);
+  const now = Date.now();
+  const next = Math.min(...GAMES.filter((g) => isScheduled(g, now)).map((g) => Date.parse(g.open!)));
+  if (!Number.isFinite(next)) return;
+  openTimer = setTimeout(openDue, Math.min(next - now + 500, 2 ** 31 - 1));
+}
+function openDue(): void {
+  const before = live.map((g) => g.id).join();
+  live = shownGames();
+  if (live.map((g) => g.id).join() !== before) void refreshHome();
+  scheduleOpen();
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') openDue();
+});
 
 // 브라우저가 설치 창을 준비하거나 설치가 끝나면 첫 화면의 안내를 다시 그린다
 onInstallChange(requestRender);

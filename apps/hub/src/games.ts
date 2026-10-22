@@ -24,10 +24,25 @@ export interface GameMeta {
   status: 'live' | 'preview' | 'soon';
   /** 조이팩에 추가한 날(YYYY-MM-DD). 허브 카드는 이 날짜가 늦은 게임부터 보인다 */
   added: string;
+  /**
+   * 공개 예약 시각(ISO, 예: 2026-11-01T10:00:00+09:00). status "preview" 와 함께 쓴다.
+   * 이 시각 전에는 누를 수 없는 COMING SOON 카드, 이 시각부터는 모두에게 정식 카드(pnpm release --at)
+   */
+  open?: string;
   ranking?: { path: string; default: string; boards: Board[] };
 }
 
 export const GAMES = list as GameMeta[];
+
+/** 모두에게 보이는 게임: 공개(live)이거나, 공개 예약 시각이 지난 미리보기 게임 */
+export function isPublic(game: GameMeta, now = Date.now()): boolean {
+  return game.status === 'live' || (game.status === 'preview' && !!game.open && now >= Date.parse(game.open));
+}
+
+/** 공개 예약을 기다리는 게임(COMING SOON 카드) */
+export function isScheduled(game: GameMeta, now = Date.now()): boolean {
+  return game.status === 'preview' && !!game.open && now < Date.parse(game.open);
+}
 
 /** 가장 최근에 추가한 게임에 NEW 를 붙여 두는 날 수 */
 const NEW_DAYS = 14;

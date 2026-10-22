@@ -206,6 +206,7 @@ dist/                       → https://myong558.github.io/project-joypack/
 - 버전은 여기 적지 않고 각 게임 `package.json` 의 `version` 을 빌드 때 읽습니다(중복 방지).
 - `added` 는 조이팩에 추가한 날(YYYY-MM-DD)입니다. 허브는 이 날짜가 늦은 게임부터 보이고(같은 날이면 파일에서 뒤에 적힌 게임이 앞), 가장 최근 게임 하나에 추가 후 14일 동안 NEW 를 붙입니다(`apps/hub/src/games.ts`).
 - `status` 가 `soon` 이면 카드로 보이지 않고 배포에서도 빠지며, 게임 목록 아래 "다음 게임" 띠에 이름만 나옵니다. `soon` 인 게임이 없으면 띠에 "다음 미니 게임을 만들고 있어요"가 보입니다.
+- `open`(선택)은 공개 예약 시각(ISO, `+09:00`)입니다. `status: "preview"` 와 함께 쓰면 그 전까지 누를 수 없는 COMING SOON 카드, 그 시각부터 모두에게 정식 카드로 보입니다(`pnpm release <id> --at`).
 - `status` 가 `preview` 면 배포는 하지만 허브에는 `soon` 처럼 보입니다. 설정 → 정보의 버전 글자를 7번 누르고 비밀번호를 맞힌 기기에만 `TEST` 표시 카드로 보입니다(휴대폰 확인용, 기준서 7.3). 랭킹은 미리보기 동안에도 실제로 등록되고, 허브 랭킹 창에는 미리보기를 켠 기기에서만 그 게임 탭이 보입니다.
 - 허브 카드의 "내 최고 기록"과 전체 랭킹 조회는 게임마다 저장 형식이 달라 `apps/hub/src/records.ts`, `rankings.ts` 에 게임별로 읽는 방법을 하나씩 둡니다.
 
@@ -321,6 +322,7 @@ dist/                       → https://myong558.github.io/project-joypack/
 - [x] 개발자 모드 창(허브 v1.13.1): 화면 글자 "미리보기" → "개발자 모드"(영문 Developer mode, 내부 이름 `status: "preview"`·`joypack.preview` 는 그대로). 비밀번호·켜고 끄기 창을 아래 시트 대신 화면 가운데 창(`.sheet.center`)으로, 키패드가 올라오면 보이는 높이(`--jp-vh`)의 가운데로 옮겨 가리지 않음.
 - [x] 개발자 모드 확인 버튼(허브 v1.13.2): 켜고 끄기 창의 스위치는 고르기만 하고 "확인"을 눌러야 적용(창과 설정 창이 닫히고 첫 화면이 새 상태로). X·바깥으로 닫으면 바꾼 것 없이 설정 창으로 돌아감.
 - [x] 맨 아래 버전 표시(허브 v1.13.3): 버전 앞 14px 로고를 늘 보이게 하고, 개발자 모드가 켜진 기기는 "조이팩 v…" 대신 "개발자 v…"(영문 Developer). 줄 높이 19px 그대로.
+- [x] 정식 공개·공개 예약(허브 v1.14.0): `pnpm release <id>`(scripts/release.mjs)가 games.json 의 그 게임 줄만 고쳐 공개(`live`, added 오늘), `--at "YYYY-MM-DD HH:mm"`(한국 시각) 공개 예약(`open`), `--cancel` 예약 취소, 허브 patch 버전 올리고 test·build. 예약 중인 게임은 허브 맨 앞에 누를 수 없는 COMING SOON 카드(밤하늘색, 흔들리는 금빛 물음표 상자, "○월 ○일 (요일) 시각 공개", 자물쇠 + D-day)로 보이고 다음 게임 띠에는 이름을 숨김. 공개 시각이 되면 열린 허브도 새로고침 없이 정식 카드(NEW)·랭킹 탭으로 바뀜(타이머 + 화면 복귀 때 확인). 기준서 7.4 정식 공개 절차, CLAUDE.md 에 요청 문구 안내.
   공유 링크로 게임에 바로 들어온 사람에게는 화면 아래 "조이팩 앱으로 설치하기" 띠(`Joypack.inviteBar`)를 보여 주고, 누르면 허브의 설치 안내 카드로 이어진다
   공유 링크는 `?from=share` 가 붙어, 받은 사람이 열면 첫 화면 맨 위에 설치 안내 카드가 뜬다. 카카오톡 등 앱 안 브라우저에서는 설치가 안 되므로 "브라우저로 열기"(카카오톡은 `kakaotalk://web/openExternal`, 그 밖의 안드로이드 앱은 Chrome intent)로 넘긴다. 아이폰의 앱 안 브라우저는 "Safari로 열기" 안내만 한다
 
@@ -347,6 +349,7 @@ pnpm build               # 허브 + 모든 게임 → dist/
 pnpm preview             # dist/ 를 http://localhost:4170/project-joypack/ 로 띄워 확인(서비스 워커 포함)
 pnpm check:screens hammer # 가로·주소창·폴드 등 14가지 크기로 모든 화면을 찍어 잘림 점검(기준서 7.1, 먼저 build)
 pnpm font                # 허브·업다운 웹폰트 서브셋 다시 만들기(화면 문구를 바꾼 뒤)
+pnpm release hammer      # 개발자 모드 게임 정식 공개. --at "2026-11-01 10:00" 공개 예약, --cancel 예약 취소(기준서 7.4)
 pnpm --filter hub icons  # 로고(apps/hub/public/logo.svg)를 바꾼 뒤 앱 아이콘·og-image 다시 만들기
 ```
 
