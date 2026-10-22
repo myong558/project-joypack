@@ -894,6 +894,23 @@ a.card:active .card-play {
   }
 }
 
+/* 가운데 창(개발자 모드 비밀번호·켜고 끄기): 휴대폰에서도 아래 시트가 아니라 화면 가운데.
+   키패드가 올라오면 보이는 높이(--jp-vh, Joypack.trackViewport)가 줄어드니 그 남은 영역의 가운데로 옮겨 가리지 않게 한다 */
+.sheet.center {
+  width: min(380px, calc(100% - 32px));
+  bottom: max(0px, calc(100% - var(--jp-vh, 100%)));
+  margin: auto;
+  border-radius: 26px;
+}
+
+.sheet.center[open] {
+  animation: center-in 220ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+
+.sheet.center .sheet-body {
+  padding-bottom: 20px;
+}
+
 .sheet-head {
   display: flex;
   align-items: center;
@@ -1734,6 +1751,13 @@ a.primary-btn {
   from {
     opacity: 0;
     transform: translateY(24px);
+  }
+}
+
+@keyframes center-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
   }
 }
 

@@ -693,7 +693,7 @@ function openPreviewLock(settingsDialog: HTMLDialogElement): void {
       <p class="hint warn-text" data-preview-wrong role="alert" hidden>${t('preview.wrong')}</p>
       <button class="primary-btn" type="submit">${lbl(t('preview.unlock'))}</button>
     </form>`;
-  const dialog = openDialog('preview', body, t('preview.title'));
+  const dialog = openDialog('preview center', body, t('preview.title'));
   const input = dialog.querySelector<HTMLInputElement>('[data-preview-pass]')!;
   input.focus();
   dialog.querySelector('[data-preview-form]')!.addEventListener('submit', async (e) => {
@@ -713,7 +713,7 @@ function openPreviewSwitch(settingsDialog: HTMLDialogElement): void {
   const body = `
     <p class="sheet-sub">${t('preview.hint')}</p>
     <label class="switch"><span>${t('preview.switch')}</span><input type="checkbox" role="switch" data-preview-toggle ${previewOn() ? 'checked' : ''} /><i aria-hidden="true"></i></label>`;
-  const dialog = openDialog('preview', body, t('preview.title'));
+  const dialog = openDialog('preview center', body, t('preview.title'));
   dialog.querySelector<HTMLInputElement>('[data-preview-toggle]')!.addEventListener('change', (e) => {
     setPreview((e.target as HTMLInputElement).checked);
     live = shownGames();
