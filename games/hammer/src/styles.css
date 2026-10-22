@@ -4399,6 +4399,8 @@ body {
 .ranking {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
+  /* 탭을 바꿔도 창 높이는 고정(screens.ts lockHeight). 남는 자리는 아래로 모아 줄 간격이 벌어지지 않게 한다 */
+  align-content: start;
   gap: 0.55em;
 }
 
@@ -4426,6 +4428,11 @@ body {
 .ranking .note {
   font-size: max(18px, 0.7em);
   color: var(--muted);
+}
+
+/* 위 안내(불러오는 중·오프라인·탭 설명)는 문구가 바뀌어도 순위표가 들썩이지 않게 두 줄 자리를 잡아 둔다 */
+.ranking .rank-note {
+  min-height: 2lh;
 }
 
 .rank-pending:empty {

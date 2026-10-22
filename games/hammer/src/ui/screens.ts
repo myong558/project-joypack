@@ -663,6 +663,24 @@ function openRanking(host: HTMLElement, view: RankingView, start: Mode, mark: nu
   render();
   fetchBoard(mode);
   openModal(host, box, t('ranking.title'));
+  // 탭마다 안내 문구 줄 수·빈 순위 안내·등록 카드가 달라 창 높이가 출렁이므로, 두 탭을 한 번씩 그려 더 큰 높이로 고정한다.
+  // 화면 크기를 따라 글자가 커지고 작아지므로 em 으로 둔다
+  const lockHeight = () => {
+    if (!box.isConnected) return window.removeEventListener('resize', lockHeight);
+    const current = mode;
+    box.style.minHeight = '';
+    let tallest = 0;
+    for (const m of ['classic', 'daily'] as Mode[]) {
+      mode = m;
+      render();
+      tallest = Math.max(tallest, box.offsetHeight);
+    }
+    mode = current;
+    render();
+    box.style.minHeight = `${(tallest / parseFloat(getComputedStyle(box).fontSize)).toFixed(3)}em`;
+  };
+  lockHeight();
+  window.addEventListener('resize', lockHeight);
 }
 
 /* ---------- 게임 화면 ---------- */
