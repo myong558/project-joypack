@@ -1003,6 +1003,52 @@ a.card:active .card-play {
   font-size: 15px;
 }
 
+/* 랭킹 창 위: 안내 + "내 기록 있는 게임만" 토글 */
+.rank-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 14px;
+}
+
+.rank-top .sheet-sub {
+  margin: 0 4px;
+}
+
+.mine-btn {
+  --c: var(--brand);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.mine-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 3;
+  opacity: 0.35;
+}
+
+.mine-btn[aria-pressed='true'] {
+  border-color: var(--c);
+  background: var(--c);
+  color: #fff;
+}
+
+.mine-btn[aria-pressed='true'] svg {
+  opacity: 1;
+}
+
+.mine-empty {
+  padding: 28px 12px;
+}
+
+.rank-game[hidden] {
+  display: none;
+}
+
 /* 랭킹 */
 .rank-game {
   margin-bottom: 14px;

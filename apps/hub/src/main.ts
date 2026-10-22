@@ -510,6 +510,15 @@ function openDialog(className: string, body: string, title: string): HTMLDialogE
 const boardChoice = new Map<string, string>();
 /** TOP 10 으로 펼친 게임 */
 const expanded = new Set<string>();
+/** "내 기록 있는 게임만": 이 기기에 내 최고 기록이 있는 게임만 보인다(기기에 기억) */
+const MINE_KEY = 'joypack.rankingMine';
+let mineOnly = (() => {
+  try {
+    return localStorage.getItem(MINE_KEY) === '1';
+  } catch {
+    return false;
+  }
+})();
 
 function rowsHtml(game: GameMeta, rows: Row[], limit = TOP): string {
   if (!rows.length) return `<p class="rank-empty">${t('ranking.empty')}</p>`;
@@ -529,7 +538,11 @@ function openRanking(): void {
   // 첫 화면 카드와 같은 게임: 미리보기를 켠 기기에서만 미리보기 게임 랭킹도 보인다(테스트용)
   const games = live.filter((g) => g.ranking && hasRanking(g.id));
   const body = `
-    <p class="sheet-sub">${t('ranking.sub')}</p>
+    <div class="rank-top">
+      <p class="sheet-sub">${t('ranking.sub')}</p>
+      <button class="chip-btn mine-btn" data-mine aria-pressed="${mineOnly}">${ICON.check}${lbl(t('ranking.mine'))}</button>
+    </div>
+    <p class="rank-empty mine-empty" hidden>${t('ranking.mineEmpty')}</p>
     ${games
       .map((g) => {
         const board = boardChoice.get(g.id) ?? g.ranking!.default;
@@ -552,6 +565,34 @@ function openRanking(): void {
       .join('')}`;
   const dialog = openDialog('ranking', body, t('ranking.title'));
 
+  // 순위는 보이는 게임 칸만 읽는다(숨긴 칸은 다시 보일 때 처음 읽음)
+  const loaders = new Map<string, () => void>();
+  const loaded = new Set<string>();
+  const applyMine = () => {
+    let visible = 0;
+    for (const game of games) {
+      const section = dialog.querySelector<HTMLElement>(`.rank-game[data-game="${game.id}"]`)!;
+      section.hidden = mineOnly && bestRecord(game) === null;
+      if (section.hidden) continue;
+      visible++;
+      if (!loaded.has(game.id)) {
+        loaded.add(game.id);
+        loaders.get(game.id)!();
+      }
+    }
+    dialog.querySelector<HTMLElement>('.mine-empty')!.hidden = visible > 0;
+  };
+  dialog.querySelector<HTMLButtonElement>('[data-mine]')!.addEventListener('click', (e) => {
+    mineOnly = !mineOnly;
+    (e.currentTarget as HTMLButtonElement).setAttribute('aria-pressed', String(mineOnly));
+    try {
+      localStorage.setItem(MINE_KEY, mineOnly ? '1' : '0');
+    } catch {
+      // 저장소를 못 쓰는 환경
+    }
+    applyMine();
+  });
+
   for (const game of games) {
     const section = dialog.querySelector<HTMLElement>(`.rank-game[data-game="${game.id}"]`)!;
     const show = (board: string) => {
@@ -572,8 +613,9 @@ function openRanking(): void {
       section.querySelector<HTMLElement>('.rank-play')!.hidden = !open;
       show(boardChoice.get(game.id) ?? game.ranking!.default);
     });
-    show(boardChoice.get(game.id) ?? game.ranking!.default);
+    loaders.set(game.id, () => show(boardChoice.get(game.id) ?? game.ranking!.default));
   }
+  applyMine();
 }
 
 async function showBoard(section: HTMLElement, game: GameMeta, board: string): Promise<void> {
