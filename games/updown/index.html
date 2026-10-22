@@ -61,6 +61,18 @@
       }
       fitZoom();
       window.addEventListener('resize', fitZoom);
+      // 화면 높이의 1%(css 의 --vh 기준값). 간격·카드 크기가 이 값을 따르므로, 처음 연 높이로 정해 두고
+      // 폭이 바뀔 때(회전 등)와 PC 창 크기를 바꿀 때만 다시 잰다. 설치 앱에서 1~2초 뒤 상태 표시줄·내비게이션 바 자리가
+      // 정리되며 높이만 바뀌면 난이도 카드 높이와 로고 위치가 덜컥 움직였다(그동안은 화면 안쪽 스크롤로 맞춘다)
+      var vhWidth = 0;
+      function fitVh(force) {
+        var pc = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+        if (!force && !pc && window.innerWidth === vhWidth) return;
+        vhWidth = window.innerWidth;
+        root.style.setProperty('--vh-px', (window.innerHeight / 100).toFixed(2) + 'px');
+      }
+      fitVh(true);
+      window.addEventListener('resize', function () { fitVh(false); });
       // 주소창·상태바 색도 바로 맞춘다(스타일시트는 이 스크립트보다 먼저 읽힌다).
       var bg = getComputedStyle(root).getPropertyValue('--bg').trim();
       if (bg) document.querySelector('meta[name="theme-color"]').setAttribute('content', bg);
@@ -209,17 +221,22 @@
          왼쪽 위는 시작 화면이면 언어 전환, 게임 화면이면 홈 버튼이다. -->
     <!-- 위 메뉴 버튼은 조이팩 공통 모양(../../shared/topbar.css, .jp-top-btn). 아이콘은 app.js 가 data-top-icon 이름으로
          공통 그림(Joypack.topIcon)을 넣는다. 랭킹·설정은 아이콘만 두고 이름은 aria-label 로 읽힌다. -->
-    <div class="topbar">
-      <a id="hub-link" class="jp-top-btn" href="../../" data-top-icon="apps" data-i18n-aria-label="nav.hub"></a>
-      <button id="home" type="button" class="jp-top-btn jp-top-pill" data-top-icon="home" hidden>
-        <span data-i18n="nav.home"></span>
-      </button>
-      <button id="lang-toggle" type="button" class="jp-top-btn jp-top-pill" data-top-icon="globe" data-i18n-aria-label="lang.switchLabel">
-        <span data-i18n="lang.switch"></span>
-      </button>
-      <button id="ranking-open" type="button" class="jp-top-btn" data-top-icon="trophy" aria-haspopup="dialog"></button>
-      <button id="settings-open" type="button" class="jp-top-btn" data-top-icon="gear" aria-haspopup="dialog" data-i18n-aria-label="settings.open"></button>
-    </div>
+    <!-- 위 메뉴 줄도 공통(.jp-topbar): 조이팩·다른 게임과 같은 자리(화면 맨 위 고정)라 넘어올 때 버튼이 움직이지 않는다. -->
+    <nav class="topbar jp-topbar">
+      <div class="jp-topbar-group">
+        <a id="hub-link" class="jp-top-btn" href="../../" data-top-icon="apps" data-i18n-aria-label="nav.hub"></a>
+        <button id="home" type="button" class="jp-top-btn jp-top-pill" data-top-icon="home" hidden>
+          <span data-i18n="nav.home"></span>
+        </button>
+        <button id="lang-toggle" type="button" class="jp-top-btn jp-top-pill" data-top-icon="globe" data-i18n-aria-label="lang.switchLabel">
+          <span data-i18n="lang.switch"></span>
+        </button>
+      </div>
+      <div class="jp-topbar-group">
+        <button id="ranking-open" type="button" class="jp-top-btn" data-top-icon="trophy" aria-haspopup="dialog"></button>
+        <button id="settings-open" type="button" class="jp-top-btn" data-top-icon="gear" aria-haspopup="dialog" data-i18n-aria-label="settings.open"></button>
+      </div>
+    </nav>
 
     <section id="screen-start" class="screen">
       <div class="brand">

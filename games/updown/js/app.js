@@ -56,7 +56,26 @@
     $('home').hidden = name !== 'play';
     $('ranking-open').hidden = name === 'play';
     if (name !== 'start') endIntro();
+    else freezeStartLayout();
   }
+
+  // 휴대폰 시작 화면: 처음 그린 배치(로고 위·로고와 카드 사이 여백)를 px 로 고정한다. 설치 앱에서 1~2초 뒤 화면 높이가
+  // 조금 줄면, 가운데 맞춤(margin auto) 때문에 로고가 줄어든 높이의 절반만큼 위로 덜컥 움직였다.
+  // 고정해 두면 높이가 줄어도 아래 남는 공간만 줄고(모자라면 화면 안쪽 스크롤), 폭이 바뀔 때(회전 등)만 다시 잰다.
+  // PC(마우스)는 창 크기를 자유롭게 바꾸므로 고정하지 않는다.
+  const touchScreen = !window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  let frozenWidth = 0;
+  function freezeStartLayout() {
+    if (!touchScreen || screens.start.hidden) return;
+    const parts = [screens.start.firstElementChild, $('difficulty-list')];
+    parts.forEach((el) => (el.style.marginTop = ''));
+    const margins = parts.map((el) => getComputedStyle(el).marginTop);
+    parts.forEach((el, i) => (el.style.marginTop = margins[i]));
+    frozenWidth = window.innerWidth;
+  }
+  window.addEventListener('resize', () => {
+    if (window.innerWidth !== frozenWidth) freezeStartLayout();
+  });
 
   // 첫 실행 인트로(css 의 .intro)는 한 번만 재생한다.
   function endIntro() {
@@ -1008,6 +1027,7 @@
     renderScreen();
     renderRankingButton();
     if ($('settings').open) renderSettings();
+    freezeStartLayout(); // 언어마다 글자 길이가 달라 배치를 다시 잰다
   }
 
   function toggleLang() {

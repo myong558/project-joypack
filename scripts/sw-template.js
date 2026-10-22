@@ -4,6 +4,8 @@
  * - 허브: 서비스 워커 설치 때 미리 캐시(precache). 빌드마다 VERSION 이 바뀌어 새 캐시로 교체된다
  * - 게임: 그 게임을 처음 열 때 games/<id>/files.json 에 적힌 파일 전체를 게임별 캐시(joypack-game-<id>)에 담는다.
  *         이후에는 해시가 바뀐 파일만 다시 받는다. 한 번도 안 연 게임은 받지 않는다
+ *         게임을 열 때는 해시 붙은 빌드 파일(assets/)만 캐시 먼저, 나머지(페이지·해시 없는 파일)는 네트워크 먼저(브라우저 캐시도
+ *         건너뜀) → 고쳐서 배포하면 다음 실행에 바로 새 버전. 오프라인이거나 3초 안에 응답이 없으면 캐시
  * - Firestore 등 다른 출처 요청, files.json, og-image.png 는 캐시하지 않는다
  */
 const VERSION = '__VERSION__';
@@ -93,8 +95,11 @@ async function match(cacheName, req) {
   return (await cache.match(url)) || (url.endsWith('/') ? cache.match(url + 'index.html') : undefined);
 }
 
-async function fetchAndPut(cacheName, req) {
-  const res = await fetch(req);
+// fresh: 브라우저 HTTP 캐시(GitHub Pages 는 약 10분)를 건너뛰고 서버에 바뀌었는지 물어본다(안 바뀌었으면 304 로 가볍게 끝남)
+async function fetchAndPut(cacheName, req, fresh) {
+  let res = await fetch(fresh ? new Request(req.url, { cache: 'no-cache', credentials: 'same-origin' }) : req);
+  // 주소를 새로 만들어 받았으므로, 넘어간(redirect) 응답을 페이지 이동에 그대로 주면 브라우저가 거절한다 → 새 응답으로 감싼다
+  if (fresh && res.redirected) res = new Response(await res.blob(), { status: res.status, statusText: res.statusText, headers: res.headers });
   if (res.ok && res.type === 'basic') {
     const cache = await caches.open(cacheName);
     await cache.put(req.url.split(/[?#]/)[0], res.clone());
@@ -111,26 +116,22 @@ async function fromGame(event, id, path) {
   const req = event.request;
   const cacheName = GAME_PREFIX + id;
 
-  // 게임 페이지: 네트워크 먼저, 3초 안에 응답이 없거나 오프라인이면 캐시.
-  // 캐시도 없으면(한 번도 안 연 게임) 허브로 보낸다 → 허브가 "인터넷 연결 후 한 번 열어 주세요" 안내
-  if (req.mode === 'navigate') {
-    const network = fetchAndPut(cacheName, req);
-    const timeout = new Promise((resolve) => setTimeout(() => resolve(null), NETWORK_TIMEOUT));
-    const first = await Promise.race([network.catch(() => null), timeout]);
-    if (first) return first;
-    const hit = await match(cacheName, req);
-    if (hit) return hit;
-    return network.catch(() => Response.redirect(SCOPE, 302));
-  }
-
-  const hit = await match(cacheName, req);
   // 해시가 붙은 파일(빌드 결과 assets/): 내용이 바뀌면 이름이 바뀌므로 캐시 먼저
-  if (path.includes('/assets/')) return hit || fetchAndPut(cacheName, req);
-  // 해시 없는 파일: 캐시로 바로 보여 주고 뒤에서 새로 받아 둔다
-  const network = fetchAndPut(cacheName, req);
+  if (req.mode !== 'navigate' && path.includes('/assets/')) return (await match(cacheName, req)) || fetchAndPut(cacheName, req);
+
+  // 게임 페이지와 해시 없는 파일(빌드 없는 게임의 js·css, 아이콘 등): 네트워크 먼저(브라우저 캐시도 건너뜀),
+  // 3초 안에 응답이 없거나 오프라인이면 캐시. 예전에는 해시 없는 파일을 "캐시 먼저 + 뒤에서 새로 받기"로 내줘서
+  // 게임을 고쳐 배포해도 첫 실행은 늘 옛 버전이었다(설치 앱에서 게임 버전이 안 올라가는 문제)
+  const network = fetchAndPut(cacheName, req, true);
+  const timeout = new Promise((resolve) => setTimeout(() => resolve(null), NETWORK_TIMEOUT));
+  const first = await Promise.race([network.catch(() => null), timeout]);
+  if (first) return first;
+  const hit = await match(cacheName, req);
   if (hit) {
     event.waitUntil(network.catch(() => {}));
     return hit;
   }
+  // 캐시도 없으면: 게임 페이지는 허브로 보낸다 → 허브가 "인터넷 연결 후 한 번 열어 주세요" 안내
+  if (req.mode === 'navigate') return network.catch(() => Response.redirect(SCOPE, 302));
   return network;
 }

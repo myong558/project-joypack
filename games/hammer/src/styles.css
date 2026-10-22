@@ -541,7 +541,7 @@ p {
   .opening .dex h2 { animation: intro-rise 400ms 1300ms ease-out backwards; }
   .opening .dex li { animation: intro-pop 350ms calc(1350ms + var(--i) * 50ms) cubic-bezier(0.3, 1.6, 0.6, 1) backwards; }
   .opening .hint { animation: intro-rise 400ms 1700ms ease-out backwards; }
-  .opening .corner { animation: intro-fade 400ms 1500ms ease-out backwards; }
+  .opening .jp-topbar { animation: intro-fade 400ms 1500ms ease-out backwards; }
 }
 
 @keyframes intro-pop {
@@ -2261,23 +2261,10 @@ button.dex-item:focus-visible {
 /* ---------- 시작 화면 모서리: 언어(좌상단) · 랭킹·설정(우상단) ---------- */
 
 .start {
-  padding-top: 3.2em;
+  /* 위 메뉴(.jp-topbar, 화면 맨 위 고정) 높이만큼 비우고 시작 */
+  padding-top: calc(var(--jp-top-inset) + var(--jp-top-size) + 0.3em);
   /* 내용이 화면 높이를 넘으면 screens.ts(fitStart)가 --fit 을 1보다 작게 넣어 전체를 줄인다 */
   font-size: calc(16 * var(--u) * var(--fit, 1));
-}
-
-.corner {
-  position: absolute;
-  top: 0.6em;
-  z-index: 5;
-}
-
-.corner.left {
-  left: 0.6em;
-}
-
-.corner.right {
-  right: 0.6em;
 }
 
 .seg {
@@ -2336,7 +2323,7 @@ button.dex-item:focus-visible {
 
 @media (orientation: landscape) {
   .start {
-    padding-top: 2.6em;
+    padding-top: calc(var(--jp-top-inset) + var(--jp-top-size) + 0.2em);
   }
 
   .start .title-hole {
@@ -4167,24 +4154,10 @@ body {
 
 /* ---------- 랭킹: 메인의 랭킹 버튼 · 결과 화면의 등록 카드 · 랭킹 창 ---------- */
 
-/* 위 메뉴 버튼 모양은 조이팩 공통(packages/shared/topbar.css, .jp-top-btn).
- * 이 게임은 화면 크기에 맞춰 통째로 커지므로, 휴대폰(폭 390)에서 공통 크기(50·26·18px)가 되도록 --u 에 묶고,
- * PC 에서는 조이팩·업다운(약 62~64px)보다 커지지 않게 상한을 둔다 */
+/* 위 메뉴는 조이팩 공통(packages/shared/topbar.css, .jp-topbar·.jp-top-btn): 조이팩·다른 게임과 같은 자리·크기로 고정.
+ * 이 게임은 대표색만 넘긴다 */
 .start {
-  --jp-top-size: min(64px, calc(46 * var(--u) * var(--fit, 1)));
-  --jp-top-icon: min(33px, calc(24 * var(--u) * var(--fit, 1)));
-  --jp-top-font: clamp(16px, calc(16.6 * var(--u) * var(--fit, 1)), 23px);
   --jp-top-accent: var(--accent);
-}
-
-/* 우상단: 설정 버튼 바로 왼쪽에 랭킹 */
-.corner.rank-btn {
-  right: calc(0.6em + var(--jp-top-size) + 0.5em);
-}
-
-/* 좌상단: 조이팩 게임 목록 버튼, 그 오른쪽에 언어 버튼 */
-.start .corner.top-lang {
-  left: calc(0.6em + var(--jp-top-size) + 0.5em);
 }
 
 .rank-entry-title .icon,

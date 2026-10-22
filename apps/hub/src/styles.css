@@ -194,7 +194,8 @@ svg {
   max-width: 920px;
   min-height: 100dvh;
   margin: 0 auto;
-  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom))
+  /* 위 메뉴(.jp-topbar)는 화면 맨 위에 고정이라, 내용은 그 높이(--jp-top-space)만큼 아래에서 시작한다 */
+  padding: calc(var(--jp-top-space) + 4px) max(16px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom))
     max(16px, env(safe-area-inset-left));
 }
 
@@ -205,23 +206,12 @@ svg {
 
 
 /* ---------- 머리: 왼쪽 위 언어, 오른쪽 위 랭킹·설정 (게임 시작 화면과 같은 자리) ---------- */
-.top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin: 4px 0 0;
-}
 
 /* 위 메뉴 버튼 모양은 조이팩 공통(packages/shared/topbar.css, .jp-top-btn). 여기서는 대표색만 넘긴다 */
 :root {
   --jp-top-accent: var(--brand);
 }
 
-.actions {
-  display: flex;
-  gap: 8px;
-}
 
 .icon-btn {
   display: grid;
@@ -1238,8 +1228,11 @@ a.primary-btn {
   #app {
     max-width: 1040px;
     min-height: calc(100dvh / var(--z, 1));
+    padding-top: calc((var(--jp-top-space) + 8px) / var(--z, 1));
     padding-inline: 28px;
     zoom: var(--z, 1);
+    /* 화면을 통째로 키워도 위 메뉴는 게임들과 같은 크기·자리에 두도록 확대를 되돌린다 */
+    --jp-top-unzoom: var(--z, 1);
   }
 
   .stage {

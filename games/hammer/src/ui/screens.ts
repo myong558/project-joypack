@@ -132,10 +132,16 @@ export function startScreen(opts: StartOptions): HTMLElement {
   const pendingIn = (m: Mode) => pendingScore(save.rankings, save.pending, m, opts.today) > 0;
   const el = html(`
     <main class="screen start">
-      <a class="corner left jp-top-btn hub-btn" href="../../" aria-label="${t('nav.hub')}" title="${t('nav.hub')}">${Joypack.topIcon('apps')}</a>
-      <button class="corner left jp-top-btn jp-top-pill top-lang" data-lang="${otherLang}" aria-label="${t('lang.label')}: ${LANG_LABEL[lang]} → ${LANG_LABEL[otherLang]}">${Joypack.topIcon('globe')}<span>${LANG_LABEL[otherLang]}</span></button>
-      <button class="corner right jp-top-btn rank-btn" data-ranking aria-label="${t('ranking.open')}">${Joypack.topIcon('trophy')}${pendingIn('classic') || pendingIn('daily') ? `<i class="jp-top-dot" role="img" aria-label="${t('ranking.newBadge')}"></i>` : ''}</button>
-      <button class="corner right jp-top-btn settings-btn" aria-label="${t('settings.open')}">${Joypack.topIcon('gear')}</button>
+      <nav class="jp-topbar" aria-label="${t('app.title')}">
+        <div class="jp-topbar-group">
+          <a class="jp-top-btn hub-btn" href="../../" aria-label="${t('nav.hub')}" title="${t('nav.hub')}">${Joypack.topIcon('apps')}</a>
+          <button class="jp-top-btn jp-top-pill top-lang" data-lang="${otherLang}" aria-label="${t('lang.label')}: ${LANG_LABEL[lang]} → ${LANG_LABEL[otherLang]}">${Joypack.topIcon('globe')}<span>${LANG_LABEL[otherLang]}</span></button>
+        </div>
+        <div class="jp-topbar-group">
+          <button class="jp-top-btn rank-btn" data-ranking aria-label="${t('ranking.open')}">${Joypack.topIcon('trophy')}${pendingIn('classic') || pendingIn('daily') ? `<i class="jp-top-dot" role="img" aria-label="${t('ranking.newBadge')}"></i>` : ''}</button>
+          <button class="jp-top-btn settings-btn" aria-label="${t('settings.open')}">${Joypack.topIcon('gear')}</button>
+        </div>
+      </nav>
       <div class="col main-col">
         ${holeMarkup('title-hole')}
         <h1 aria-label="${t('app.title')}"><span class="title-text" aria-hidden="true">${titleLetters(t('app.title'))}</span> <span class="title-hammer">${HAMMER}</span></h1>
@@ -185,7 +191,7 @@ export function startScreen(opts: StartOptions): HTMLElement {
   const fitStart = () => {
     if (!el.isConnected) return window.removeEventListener('resize', fitStart);
     el.style.setProperty('--fit', '1');
-    const cols = [...el.children].filter((c): c is HTMLElement => c instanceof HTMLElement && getComputedStyle(c).position !== 'absolute');
+    const cols = [...el.children].filter((c): c is HTMLElement => c instanceof HTMLElement && !['absolute', 'fixed'].includes(getComputedStyle(c).position));
     const need = Math.max(...cols.map((c) => c.offsetTop + c.offsetHeight)) + parseFloat(getComputedStyle(el).paddingBottom);
     if (need > el.clientHeight) el.style.setProperty('--fit', ((el.clientHeight / need) * 0.98).toFixed(3));
     if (opts.opening) aimHammer();

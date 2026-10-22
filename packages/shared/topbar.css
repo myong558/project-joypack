@@ -7,8 +7,7 @@
  *   눌러야 할 때 강조     .jp-top-btn.is-on (예: 랭킹 등록 대기)
  * 불러오기: Vite 앱은 import '@joypack/shared/topbar.css', 빌드 없는 게임은 <link rel="stylesheet" href="../../shared/topbar.css">
  *
- * 크기·색은 변수로 조정한다. 기본은 휴대폰 기준(단추 50px, 아이콘 26px, 글자 18px).
- * 화면 크기에 따라 통째로 커지는 게임은 em 으로 넣는다(예: 두더지잡기 --jp-top-size: 2.9em).
+ * 크기·색은 변수로 조정한다. 기본은 휴대폰 기준(단추 50px, 아이콘 26px, 글자 18px), PC(폭 900·높이 560 이상)는 60·31·21px.
  *   --jp-top-size, --jp-top-icon, --jp-top-font, --jp-top-accent(마우스 올림·초점·강조 색, 게임 대표색) */
 :root {
   --jp-top-size: 50px;
@@ -35,6 +34,51 @@
     --jp-top-line: rgb(255 255 255 / 0.12);
     --jp-top-shadow: 0 2px 8px rgb(0 0 0 / 0.35);
   }
+}
+
+/* 위 메뉴 줄: 모든 앱이 화면 맨 위 같은 자리(상태 표시줄 아래 16px, 좌우 16px)에 고정한다.
+ * 조이팩 → 게임으로 넘어가도 버튼이 한 픽셀도 움직이지 않게 하려는 것. 앱은 내용을 --jp-top-space 만큼 아래에서 시작한다.
+ *   <nav class="jp-topbar"><div class="jp-topbar-group">조이팩·언어</div><div class="jp-topbar-group">랭킹·설정</div></nav>
+ * 앱이 화면을 통째로 확대(zoom)하면 메뉴도 따라 커지므로, 확대한 상자 안에 둘 때는 --jp-top-unzoom 에 그 배수를 넣는다 */
+:root {
+  --jp-top-inset: 16px;
+  --jp-top-gap: 8px;
+  --jp-top-space: calc(env(safe-area-inset-top, 0px) + var(--jp-top-inset) + var(--jp-top-size));
+}
+
+@media (min-width: 900px) and (min-height: 560px) {
+  :root {
+    --jp-top-size: 60px;
+    --jp-top-icon: 31px;
+    --jp-top-font: 21px;
+    --jp-top-inset: 24px;
+    --jp-top-gap: 10px;
+  }
+}
+
+.jp-topbar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 40;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--jp-top-gap);
+  margin: 0;
+  padding: calc(env(safe-area-inset-top, 0px) + var(--jp-top-inset)) calc(env(safe-area-inset-right, 0px) + var(--jp-top-inset)) 0
+    calc(env(safe-area-inset-left, 0px) + var(--jp-top-inset));
+  pointer-events: none;
+  zoom: calc(1 / var(--jp-top-unzoom, 1));
+}
+
+.jp-topbar-group {
+  display: flex;
+  align-items: center;
+  gap: var(--jp-top-gap);
+  pointer-events: auto;
 }
 
 .jp-top-btn {
@@ -113,6 +157,12 @@
   border-color: var(--jp-top-accent);
   background: var(--jp-top-accent);
   color: #fff;
+}
+
+/* 지금 있는 곳(조이팩 첫 화면의 조이팩 버튼): 대표색 테두리·글자 */
+.jp-top-btn.is-current {
+  border-color: var(--jp-top-accent);
+  color: var(--jp-top-accent);
 }
 
 /* 버튼 모서리 알림 점 */

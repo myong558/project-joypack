@@ -92,7 +92,7 @@
   --field-focus: var(--focus);
   --text-on-action: var(--text-on-primary);
   /* 화면 높이의 1%. PC 화면 확대(--pc-zoom) 때는 확대 배수로 나눠, 높이 비례 크기가 확대로 화면을 넘지 않게 한다. */
-  --vh: 1vh;
+  --vh: var(--vh-px, 1vh); /* --vh-px: index.html 이 처음 연 높이로 정한 값(높이만 바뀔 때는 그대로) */
   /* 세로 간격 기준값: 화면 높이에 비례 (568px 13px · 640px 16px · 844px 24px, 최대 40px) */
   --space: clamp(8px, 4.2 * var(--vh) - 11px, 40px);
   /* 화면 좌우 여백. 팝업 최대 너비도 이 값으로 계산한다. */
@@ -101,7 +101,7 @@
 
 @supports (height: 1dvh) {
   :root {
-    --vh: 1dvh;
+    --vh: var(--vh-px, 1dvh);
   }
 }
 
@@ -508,7 +508,8 @@ button:focus-visible {
   height: 100%; /* 고정된 body 를 채운다 = 지금 보이는 화면 높이 */
   max-width: 768px;
   margin: 0 auto;
-  padding: calc(var(--space) + env(safe-area-inset-top)) var(--gutter) calc(var(--space) + env(safe-area-inset-bottom));
+  /* 위 메뉴(.jp-topbar, 고정) 높이만큼 비우고 시작 */
+  padding: calc(var(--jp-top-space) + var(--space) * 0.5) var(--gutter) calc(var(--space) + env(safe-area-inset-bottom));
 }
 
 /* 아주 낮은 화면에서만 안쪽 스크롤. 스크롤 영역이 그림자를 자르지 않도록 여백만큼 padding 을 주고 음수 margin 으로 상쇄한다. */
@@ -539,34 +540,10 @@ button:focus-visible {
   margin-bottom: auto;
 }
 
-/* 상단 버튼 줄. 화면 영역의 음수 margin 에 가려지지 않게 위로 올린다. */
-.topbar {
-  display: flex;
-  flex: none;
-  justify-content: space-between;
-  margin-bottom: calc(var(--space) * 0.5);
-  position: relative;
-  z-index: 1;
-}
-
-#ranking-open,
-#settings-open {
-  margin-left: auto;
-}
-
-#ranking-open:not([hidden]) + #settings-open {
-  margin-left: 8px;
-}
-
-/* 위 메뉴 버튼 모양은 조이팩 공통(../../shared/topbar.css, .jp-top-btn). 여기서는 대표색과 간격만 정한다.
-   랭킹 등록이 남았을 때의 강조(.is-on)도 공통 규칙을 쓴다. */
+/* 위 메뉴는 조이팩 공통(../../shared/topbar.css, .jp-topbar·.jp-top-btn): 조이팩·다른 게임과 같은 자리·크기로 화면 맨 위에 고정.
+   여기서는 대표색만 정한다. 랭킹 등록이 남았을 때의 강조(.is-on)도 공통 규칙을 쓴다. */
 .topbar {
   --jp-top-accent: var(--action);
-  align-items: center;
-}
-
-#hub-link {
-  margin-right: 8px;
 }
 
 /* ── 공통 버튼 ────────────────────────── */
@@ -1996,14 +1973,17 @@ h1.lost {
    시작: 난이도 카드 2×2 / 게임: 왼쪽에 상태·힌트·기록, 오른쪽에 숫자 고르기 / 결과: 버튼 폭을 줄여 가운데. */
 @media (min-width: 900px) and (min-height: 560px) {
   :root {
-    --vh: calc(1dvh / var(--pc-zoom, 1));
+    --vh: calc(var(--vh-px, 1dvh) / var(--pc-zoom, 1));
   }
 
   /* 화면 전체를 --pc-zoom 배로 키운다(index.html 이 화면 높이에 맞춰 계산해 위아래를 채운다). 높이 100%·max-height 같은 % 값은 키워지지 않아 화면을 넘지 않는다. */
   .app {
     max-width: 1080px;
     padding-inline: 32px;
+    padding-top: calc(var(--jp-top-space) / var(--pc-zoom, 1) + var(--space) * 0.5);
     zoom: var(--pc-zoom, 1);
+    /* 화면을 통째로 키워도 위 메뉴는 조이팩·다른 게임과 같은 크기·자리에 두도록 확대를 되돌린다 */
+    --jp-top-unzoom: var(--pc-zoom, 1);
   }
 
   .settings {
