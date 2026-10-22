@@ -852,7 +852,7 @@ a.card:active .card-play {
   text-align: center;
 }
 
-/* 미리보기가 켜진 기기: 버전 앞 작은 로고(글자 높이 안이라 줄 높이·배치는 그대로) */
+/* 맨 아래 버전 앞 작은 로고(글자 높이 안이라 줄 높이는 그대로) */
 .foot .mini-logo {
   width: 14px;
   height: 14px;

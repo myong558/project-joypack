@@ -313,10 +313,10 @@ function renderHome(): void {
       </div>
     </main>
     <footer class="foot">
-      <span>${
-        // 미리보기가 켜져 있으면 버전 앞에 작은 로고만 붙인다(글자 높이 안이라 배치는 그대로)
-        previewOn() ? smallLogo(14) : ''
-      }${t('app.title')} v${__APP_VERSION__}</span>
+      <span>${smallLogo(14)}${
+        // 개발자 모드(숨김 미리보기)가 켜진 기기는 "조이팩" 자리에 "개발자"(글자 수가 같아 배치는 그대로)
+        previewOn() ? t('preview.foot') : t('app.title')
+      } v${__APP_VERSION__}</span>
     </footer>`;
 
   app.querySelectorAll<HTMLElement>('.games > .card').forEach((card, i) => card.style.setProperty('--n', String(i)));
