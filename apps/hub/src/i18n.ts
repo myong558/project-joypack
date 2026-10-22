@@ -178,9 +178,9 @@ export function getLang(): Lang {
   return lang;
 }
 
+/** 저장한 선택이 없을 때: 기기 설정 언어(한국어면 ko, 그 밖은 모두 en). 조이팩·모든 게임 공통 규칙(Joypack.deviceLang) */
 export function detectLang(): Lang {
-  const browser = (navigator.language || '').slice(0, 2).toLowerCase();
-  return LANGS.includes(browser as Lang) ? (browser as Lang) : 'ko';
+  return Joypack.deviceLang();
 }
 
 export function t(key: MessageKey, params: Record<string, string | number> = {}): string {

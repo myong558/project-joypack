@@ -165,14 +165,13 @@
   // 언어 선택 버튼에 쓰는 이름. 어느 언어 화면에서든 그 언어 자체 표기로 보여준다.
   const NAMES = { ko: '한국어', en: 'English' };
 
-  // 저장된 선택이 없으면 브라우저 언어를 따른다.
+  // 저장된 선택이 없으면 기기 설정 언어를 따른다(한국어면 ko, 그 밖은 모두 en). 조이팩·모든 게임 공통 규칙(Joypack.deviceLang)
   function detectLang() {
     try {
       const saved = Joypack.get('lang', LANG_KEY);
       if (MESSAGES[saved]) return saved;
     } catch (e) {}
-    const browser = (navigator.language || '').slice(0, 2).toLowerCase();
-    return MESSAGES[browser] ? browser : DEFAULT_LANG;
+    return Joypack.deviceLang();
   }
 
   let lang = detectLang();

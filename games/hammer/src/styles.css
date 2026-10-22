@@ -4542,11 +4542,3 @@ body {
   70% { opacity: 1; }
   100% { translate: var(--dx) var(--dy); rotate: 160deg; scale: 1; opacity: 0; }
 }
-
-/* 임시: 설치 앱 아래 잘림 원인 확인용 화면 값(설정 맨 아래). 확인이 끝나면 지운다 */
-.viewport-report {
-  font-size: 11px;
-  line-height: 1.4;
-  word-break: break-all;
-  opacity: 0.75;
-}

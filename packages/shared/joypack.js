@@ -167,7 +167,7 @@
       closed = sessionStorage.getItem(INVITE_KEY + 'BarClosed') === '1';
     } catch (e) {}
     if (!readInvite() || closed || isStandalone() || document.querySelector('.joypack-invite')) return;
-    const ko = (get('lang') || navigator.language || 'ko').slice(0, 2) !== 'en';
+    const ko = (get('lang') || deviceLang()) === 'ko';
     const style = document.createElement('style');
     style.textContent =
       '.joypack-invite{position:fixed;left:50%;bottom:max(14px,env(safe-area-inset-bottom));z-index:2147483000;display:flex;align-items:center;gap:4px;' +
@@ -306,6 +306,14 @@
     return '처음: ' + firstReport + ' / 지금: ' + now;
   }
 
+  // 기본 언어: 저장한 선택이 없으면 기기(휴대폰·PC)의 설정 언어를 따른다. 한국어면 'ko', 그 밖의 언어는 모두 'en'.
+  // 조이팩과 모든 게임이 같은 규칙을 쓴다
+  function deviceLang() {
+    const nav = global.navigator || {};
+    const first = (nav.languages && nav.languages[0]) || nav.language || '';
+    return String(first).toLowerCase().indexOf('ko') === 0 ? 'ko' : 'en';
+  }
+
   function topIcon(name) {
     return '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' + (TOP_ICONS[name] || '') + '</svg>';
   }
@@ -313,6 +321,7 @@
   global.Joypack = {
     KEYS: KEYS,
     topIcon: topIcon,
+    deviceLang: deviceLang,
     guardBottom: guardBottom,
     trackViewport: trackViewport,
     viewportReport: viewportReport,
