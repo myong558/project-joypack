@@ -767,14 +767,6 @@ a.card:active .card-play {
   -webkit-tap-highlight-color: transparent;
 }
 
-.preview-state {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  color: var(--ok);
-}
-
 .preview-lock {
   display: grid;
   gap: 12px;

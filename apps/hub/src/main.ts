@@ -4,7 +4,7 @@ import { GAMES, byNewest, gameVersion, iconUrl, isNew, patternOf, type GameMeta 
 import { LANG_LABEL, LANGS, formatNumber, getLang, t } from './i18n';
 import { TOP, cachedBoard, hasRanking, loadBoard, type Row } from './rankings';
 import { externalOpenUrl, installState, onInstallChange, promptInstall } from './install';
-import { checkPassword, previewOn, setPreview } from './preview';
+import { previewOn, previewUnlocked, setPreview, unlockPreview } from './preview';
 import { bestRecord, canClearRecords, clearRecords } from './records';
 import { THEMES, applySettings, applyTheme, canVibrate, loadSettings, migrateLegacy, saveSetting, watchSystemTheme } from './settings';
 import { SKINS, previewSkin, setPreviewSkin, todaySkin, type Skin } from './skins';
@@ -588,7 +588,12 @@ async function openSettings(): Promise<void> {
     <section class="set-group about">
       <h3>${t('settings.about')}</h3>
       <p><span class="ver-tap" data-ver-tap>${t('app.title')} v${__APP_VERSION__}</span> · ${live.map((g) => `${esc(g.name[getLang()])} v${gameVersion(g.id)}`).join(' · ')}</p>
-      ${previewOn() ? `<p class="preview-state"><span>${t('preview.on')}</span><button class="small-btn" data-preview-off>${lbl(t('preview.off'))}</button></p>` : ''}
+      ${
+        previewUnlocked()
+          ? `<label class="switch"><span>${t('preview.switch')}</span><input type="checkbox" role="switch" data-preview-toggle ${previewOn() ? 'checked' : ''} /><i aria-hidden="true"></i></label>
+      <p class="hint">${t('preview.hint')}</p>`
+          : ''
+      }
       <p class="hint">Font: Jua (SIL OFL 1.1)</p>
     </section>`;
   const dialog = openDialog('settings', body, t('settings.title'));
@@ -666,16 +671,18 @@ async function openSettings(): Promise<void> {
     tapTimer = setTimeout(() => (taps = 0), 800);
     if (++taps < 7) return;
     taps = 0;
-    if (!previewOn()) openPreviewLock(dialog);
+    // 이미 잠금이 풀린 기기는 아래 스위치로 켜고 끈다
+    if (!previewUnlocked()) openPreviewLock(dialog);
   });
-  dialog.querySelector('[data-preview-off]')?.addEventListener('click', () => {
-    setPreview(false);
+  // 미리보기 스위치: 첫 화면·랭킹은 설정 창을 닫을 때 새 상태로 다시 그린다
+  dialog.querySelector<HTMLInputElement>('[data-preview-toggle]')?.addEventListener('change', async (e) => {
+    setPreview((e.target as HTMLInputElement).checked);
     live = shownGames();
-    dialog.close();
+    await refreshCached();
   });
 }
 
-/** 미리보기 비밀번호 창. 맞으면 이 기기에 미리보기를 켜고 설정 창까지 닫아 첫 화면을 다시 그린다 */
+/** 미리보기 비밀번호 창. 맞으면 이 기기의 잠금을 풀고 켠 뒤 설정 창까지 닫아 첫 화면을 다시 그린다 */
 function openPreviewLock(settingsDialog: HTMLDialogElement): void {
   const body = `
     <form class="preview-lock" data-preview-form>
@@ -689,12 +696,11 @@ function openPreviewLock(settingsDialog: HTMLDialogElement): void {
   input.focus();
   dialog.querySelector('[data-preview-form]')!.addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (!(await checkPassword(input.value))) {
+    if (!(await unlockPreview(input.value))) {
       dialog.querySelector<HTMLElement>('[data-preview-wrong]')!.hidden = false;
       input.select();
       return;
     }
-    setPreview(true);
     live = shownGames();
     await refreshCached();
     dialog.close();

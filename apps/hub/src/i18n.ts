@@ -27,8 +27,8 @@ const ko = {
   'preview.prompt': '비밀번호를 넣으면 이 기기에서 테스트 중인 게임이 보여요.',
   'preview.unlock': '확인',
   'preview.wrong': '비밀번호가 맞지 않아요',
-  'preview.on': '미리보기 켜짐 · 테스트 중인 게임이 보여요',
-  'preview.off': '끄기',
+  'preview.switch': '미리보기',
+  'preview.hint': '켜면 첫 화면과 랭킹에 테스트 중인 게임이 보여요. 이 기기는 비밀번호 없이 켜고 끌 수 있어요.',
   'offline.banner': '오프라인이에요. 한 번 열어 본 게임만 플레이할 수 있어요.',
   'update.ready': '새 버전이 준비됐어요',
 
@@ -117,8 +117,8 @@ const en: Record<keyof typeof ko, string> = {
   'preview.prompt': 'Enter the password to show games still in testing on this device.',
   'preview.unlock': 'OK',
   'preview.wrong': 'Wrong password',
-  'preview.on': 'Preview on · games in testing are shown',
-  'preview.off': 'Turn off',
+  'preview.switch': 'Preview',
+  'preview.hint': 'When on, games still in testing show on the home screen and in rankings. This device can turn it on and off without the password.',
   'offline.banner': "You're offline. Only games you've opened before can be played.",
   'update.ready': 'A new version is ready',
 
