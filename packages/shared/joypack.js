@@ -220,8 +220,24 @@
     return caches.delete(GAME_CACHE_PREFIX + id).catch(() => false);
   }
 
+  // 공통 상단 메뉴 아이콘(topbar.css 의 .jp-top-btn 안에 넣는다). 24 격자 선 그림 + 안쪽 옅은 채움(.jp-fill).
+  // 조이팩 첫 화면과 모든 게임이 같은 그림을 쓴다
+  const GEAR =
+    'M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.4.3a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.5a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.4.3a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.4-.3a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.5a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.4-.3a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2z';
+  const TOP_ICONS = {
+    apps: '<rect class="jp-fill" x="3.5" y="3.5" width="7" height="7" rx="2"/><rect class="jp-fill" x="13.5" y="13.5" width="7" height="7" rx="2"/><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/>',
+    globe: '<circle class="jp-fill" cx="12" cy="12" r="9.5"/><circle cx="12" cy="12" r="9.5"/><path d="M12 2.5a14 14 0 0 0 0 19 14 14 0 0 0 0-19M2.5 12h19"/>',
+    trophy: '<path class="jp-fill" d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3M12 14v3M8 20h8M9.5 17h5v3h-5z"/>',
+    gear: '<path class="jp-fill" d="' + GEAR + '"/><path d="' + GEAR + '"/><circle cx="12" cy="12" r="3"/>',
+    home: '<path class="jp-fill" d="M4 10.5 12 4l8 6.5V20H4z"/><path d="M3 11 12 3.5 21 11M5.5 9.5V20h13V9.5M10 20v-5.5h4V20"/>',
+  };
+  function topIcon(name) {
+    return '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' + (TOP_ICONS[name] || '') + '</svg>';
+  }
+
   global.Joypack = {
     KEYS: KEYS,
+    topIcon: topIcon,
     get: get,
     set: set,
     cleanInitials: cleanInitials,

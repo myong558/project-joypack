@@ -598,11 +598,14 @@
     return rows.filter((row) => !isBetter(entry, row)).length + 1;
   }
 
+  // 랭킹 버튼은 아이콘만 둔다. 등록할 기록이 남았으면 대표색으로 채우고(공통 .is-on) 이름도 "등록하기"로 읽힌다
   function renderRankingButton() {
     const button = $('ranking-open');
     const waiting = hasPending();
-    button.classList.toggle('pending', waiting);
-    button.querySelector('span').textContent = t(waiting ? 'ranking.register' : 'ranking.open');
+    const label = t(waiting ? 'ranking.register' : 'ranking.open');
+    button.classList.toggle('is-on', waiting);
+    button.setAttribute('aria-label', label);
+    button.title = label;
   }
 
   function openRanking() {
@@ -1183,9 +1186,14 @@
   // iOS Safari 는 touchstart 리스너가 있어야 버튼에 :active(눌림 효과)를 적용한다.
   document.addEventListener('touchstart', () => {}, { passive: true });
 
+  // 위 메뉴 아이콘: 조이팩 공통 그림을 넣는다(shared/joypack.js)
+  document.querySelectorAll('[data-top-icon]').forEach((el) => el.insertAdjacentHTML('afterbegin', Joypack.topIcon(el.dataset.topIcon)));
   renderStaticTexts();
   renderRankingButton();
   goToStart();
+  // 글자를 다 채운 뒤에 화면을 보이고 인트로를 시작한다(.booting, css). 스크립트가 늦게 오면 빈 글자로 먼저 그려졌다가
+  // 1~2초 뒤 글자가 채워지며 위 버튼이 커지고 화면 전체가 덜컥 밀렸다
+  document.querySelector('.app').classList.remove('booting');
   // 인트로(css 의 .intro, 약 1.1초)가 끝난 뒤 클래스를 지운다. 여러 요소가 시차를 두고 움직여서 animationend 대신 타이머를 쓴다.
   setTimeout(endIntro, 1400);
 

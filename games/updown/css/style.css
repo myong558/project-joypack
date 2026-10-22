@@ -558,46 +558,15 @@ button:focus-visible {
   margin-left: 8px;
 }
 
-/* 정답을 맞혀 랭킹 등록이 남았을 때: 대표색으로 채워 눈에 띄게 */
-#ranking-open.pending {
-  background: var(--action);
-  color: var(--text-on-action);
-  border-color: var(--action);
-}
-
-#ranking-open.pending .icon {
-  color: inherit;
-}
-
-.pill-button {
-  display: inline-flex;
+/* 위 메뉴 버튼 모양은 조이팩 공통(../../shared/topbar.css, .jp-top-btn). 여기서는 대표색과 간격만 정한다.
+   랭킹 등록이 남았을 때의 강조(.is-on)도 공통 규칙을 쓴다. */
+.topbar {
+  --jp-top-accent: var(--action);
   align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  background: var(--pill-bg);
-  color: var(--pill-text);
-  border: 1px solid var(--pill-line);
-  box-shadow: var(--shadow-box);
-  border-radius: 999px;
 }
 
-.pill-button .icon {
-  color: var(--pill-icon);
-}
-
-/* 조이팩 게임 목록으로: 아이콘만 둔 동그란 버튼, 옆 언어 버튼과 간격 */
 #hub-link {
-  margin-right: 6px;
-  padding: 4px 8px;
-  text-decoration: none;
-}
-
-#hub-link[hidden] {
-  display: none;
-}
-
-.pill-button:hover {
-  background: var(--pill-bg-hover);
+  margin-right: 8px;
 }
 
 /* ── 공통 버튼 ────────────────────────── */
@@ -1791,6 +1760,23 @@ h1.lost {
    끝나면 app.js 가 .intro 를 지워, 시작 화면으로 돌아올 때는 다시 재생하지 않는다. */
 .intro #screen-start {
   overflow: hidden;
+}
+
+/* 스크립트가 글자를 채우기 전(.booting)에는 내용을 숨기고 인트로도 멈춰 둔다. 다 채우면 app.js 가 지운다.
+   스크립트가 끝내 안 돌면(오류 등) 3초 뒤에는 그냥 보인다. */
+.booting {
+  visibility: hidden;
+  animation: boot-reveal 0s 3s forwards;
+}
+
+.booting * {
+  animation-play-state: paused !important;
+}
+
+@keyframes boot-reveal {
+  to {
+    visibility: visible;
+  }
 }
 
 .intro .brand {

@@ -132,12 +132,10 @@ export function startScreen(opts: StartOptions): HTMLElement {
   const pendingIn = (m: Mode) => pendingScore(save.rankings, save.pending, m, opts.today) > 0;
   const el = html(`
     <main class="screen start">
-      <a class="corner left icon-btn hub-btn" href="../../" aria-label="${t('nav.hub')}" title="${t('nav.hub')}">${ICONS.apps}</a>
-      <button class="corner left lang-btn" data-lang="${otherLang}" aria-label="${t('lang.label')}: ${LANG_LABEL[lang]} → ${LANG_LABEL[otherLang]}">
-        ${ICONS.globe}<span>${LANG_LABEL[otherLang]}</span>
-      </button>
-      <button class="corner right icon-btn rank-btn" data-ranking aria-label="${t('ranking.open')}">${MORE_ICONS.trophy}${pendingIn('classic') || pendingIn('daily') ? `<i class="rank-dot" role="img" aria-label="${t('ranking.newBadge')}"></i>` : ''}</button>
-      <button class="corner right icon-btn settings-btn" aria-label="${t('settings.open')}">${ICONS.gear}</button>
+      <a class="corner left jp-top-btn hub-btn" href="../../" aria-label="${t('nav.hub')}" title="${t('nav.hub')}">${Joypack.topIcon('apps')}</a>
+      <button class="corner left jp-top-btn jp-top-pill top-lang" data-lang="${otherLang}" aria-label="${t('lang.label')}: ${LANG_LABEL[lang]} → ${LANG_LABEL[otherLang]}">${Joypack.topIcon('globe')}<span>${LANG_LABEL[otherLang]}</span></button>
+      <button class="corner right jp-top-btn rank-btn" data-ranking aria-label="${t('ranking.open')}">${Joypack.topIcon('trophy')}${pendingIn('classic') || pendingIn('daily') ? `<i class="jp-top-dot" role="img" aria-label="${t('ranking.newBadge')}"></i>` : ''}</button>
+      <button class="corner right jp-top-btn settings-btn" aria-label="${t('settings.open')}">${Joypack.topIcon('gear')}</button>
       <div class="col main-col">
         ${holeMarkup('title-hole')}
         <h1 aria-label="${t('app.title')}"><span class="title-text" aria-hidden="true">${titleLetters(t('app.title'))}</span> <span class="title-hammer">${HAMMER}</span></h1>
@@ -221,7 +219,7 @@ export function startScreen(opts: StartOptions): HTMLElement {
   el.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((b) =>
     b.addEventListener('click', () => opts.onPlay(b.dataset.mode as Mode)),
   );
-  el.querySelector('.lang-btn')!.addEventListener('click', () => opts.onLang(otherLang));
+  el.querySelector('.top-lang')!.addEventListener('click', () => opts.onLang(otherLang));
   el.querySelectorAll<HTMLButtonElement>('.dex [data-kind]').forEach((b) =>
     b.addEventListener('click', () => {
       const found = MOLE_ORDER.filter((k) => dex.has(k));
@@ -232,7 +230,7 @@ export function startScreen(opts: StartOptions): HTMLElement {
   // 등록 대기 기록이 있는 쪽을 먼저 연다. 대기 기록을 모두 올리면 버튼의 점을 지운다
   el.querySelector('[data-ranking]')!.addEventListener('click', () =>
     openRanking(el, opts.ranking, pendingIn('daily') && !pendingIn('classic') ? 'daily' : 'classic', null, () => {
-      if (!pendingIn('classic') && !pendingIn('daily')) el.querySelector('.rank-dot')?.remove();
+      if (!pendingIn('classic') && !pendingIn('daily')) el.querySelector('.jp-top-dot')?.remove();
     }),
   );
 

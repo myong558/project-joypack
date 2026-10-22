@@ -1,3 +1,4 @@
+import '@joypack/shared/topbar.css';
 import './styles.css';
 import { Sound, type SoundName } from './audio';
 import { Game } from './game/engine';

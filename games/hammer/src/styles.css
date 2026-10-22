@@ -2876,8 +2876,7 @@ button.dex-item:focus-visible {
   opacity: 0.18;
 }
 
-.chip,
-.lang-btn {
+.chip {
   display: inline-flex;
   align-items: center;
   gap: 0.4em;
@@ -2889,39 +2888,6 @@ button.dex-item:focus-visible {
 
 .chip[aria-pressed='false'] .icon {
   color: var(--muted);
-}
-
-/* 좌상단 언어 버튼: 지금 언어를 보여 주고, 누르면 다른 언어로 바뀐다 */
-.lang-btn {
-  font-size: max(18px, 0.9em);
-  padding: 0.35em 0.9em 0.35em 0.6em;
-  border: 2px solid var(--border);
-  border-radius: 999px;
-  background: var(--surface);
-  color: var(--fg);
-  font-family: inherit;
-  cursor: pointer;
-  box-shadow: 0 0.18em 0 var(--border);
-  transition: transform 80ms, box-shadow 80ms;
-}
-
-.lang-btn .icon {
-  color: var(--accent);
-  transition: transform 400ms;
-}
-
-.lang-btn:hover .icon {
-  transform: rotate(180deg);
-}
-
-.lang-btn:active {
-  transform: translateY(0.12em);
-  box-shadow: 0 0.05em 0 var(--border);
-}
-
-.lang-btn:focus-visible {
-  outline: 3px solid var(--accent);
-  outline-offset: 2px;
 }
 
 .icon-btn .icon {
@@ -3612,9 +3578,7 @@ body {
 
 .dex,
 .stat,
-.hud-row .pause-btn,
-.corner.icon-btn,
-.corner.lang-btn {
+.hud-row .pause-btn {
   background: var(--glass);
   border: 1.5px solid var(--line);
   box-shadow: var(--soft-shadow);
@@ -4203,28 +4167,26 @@ body {
 
 /* ---------- 랭킹: 메인의 랭킹 버튼 · 결과 화면의 등록 카드 · 랭킹 창 ---------- */
 
-/* 우상단 설정 버튼 바로 왼쪽(설정 버튼 폭 2.3em + 간격) */
+/* 위 메뉴 버튼 모양은 조이팩 공통(packages/shared/topbar.css, .jp-top-btn).
+ * 이 게임은 화면 크기에 맞춰 통째로 커지므로, 휴대폰(폭 390)에서 공통 크기(50·26·18px)가 되도록 --u 에 묶고,
+ * PC 에서는 조이팩·업다운(약 62~64px)보다 커지지 않게 상한을 둔다 */
+.start {
+  --jp-top-size: min(64px, calc(46 * var(--u) * var(--fit, 1)));
+  --jp-top-icon: min(33px, calc(24 * var(--u) * var(--fit, 1)));
+  --jp-top-font: clamp(16px, calc(16.6 * var(--u) * var(--fit, 1)), 23px);
+  --jp-top-accent: var(--accent);
+}
+
+/* 우상단: 설정 버튼 바로 왼쪽에 랭킹 */
 .corner.rank-btn {
-  right: calc(0.6em + 2.3em + 0.5em);
+  right: calc(0.6em + var(--jp-top-size) + 0.5em);
 }
 
 /* 좌상단: 조이팩 게임 목록 버튼, 그 오른쪽에 언어 버튼 */
-.corner.hub-btn {
-  display: grid;
-  place-items: center;
-  color: inherit;
-  text-decoration: none;
+.start .corner.top-lang {
+  left: calc(0.6em + var(--jp-top-size) + 0.5em);
 }
 
-.start .corner.lang-btn {
-  left: calc(0.6em + 2.3em + 0.5em);
-}
-
-.rank-btn:hover {
-  transform: none;
-}
-
-.rank-btn .icon,
 .rank-entry-title .icon,
 .ranking h2 .icon {
   width: 1.2em;
@@ -4232,18 +4194,6 @@ body {
   color: var(--accent);
 }
 
-/* 아직 등록하지 않은 기록이 있으면 버튼 모서리에 점을 찍는다 */
-.rank-dot {
-  position: absolute;
-  top: -0.2em;
-  right: -0.2em;
-  width: 0.7em;
-  height: 0.7em;
-  border: 2px solid var(--surface);
-  border-radius: 50%;
-  background: var(--accent);
-  animation: pulse 900ms ease-in-out infinite;
-}
 
 .rank-entry {
   display: grid;
@@ -4529,7 +4479,6 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .rank-entry .rank-view,
-  .rank-dot,
   .rank-list .me,
   .result .rank-entry {
     animation: none;

@@ -2,7 +2,7 @@
 //   1. 허브 빌드(apps/hub/dist) → dist/
 //   2. 게임마다: package.json 에 build 스크립트가 있으면 빌드해 그 dist/ 를, 없으면 package.json "files" 에 적힌 파일을 dist/games/<id>/ 로
 //      (빌드 없는 게임은 .js·.html 의 __APP_VERSION__ 을 package.json version 으로 바꿔 넣음)
-//   3. 공통 모듈 packages/shared/joypack.js → dist/shared/joypack.js
+//   3. 공통 모듈 packages/shared/joypack.js·topbar.css → dist/shared/ (빌드 없는 게임이 불러옴)
 //   4. 게임마다 파일 목록 dist/games/<id>/files.json (경로 + 해시). 처음 열 때 이 목록 전체를 캐시한다
 //   5. 서비스 워커 dist/sw.js: 허브 파일만 미리 캐시, 게임은 처음 열 때 캐시 (scripts/sw-template.js)
 import { execSync } from 'node:child_process';
@@ -62,6 +62,7 @@ for (const game of games) {
 // 3. 공통 모듈(빌드 없는 게임이 <script> 로 불러옴)
 mkdirSync(join(DIST, 'shared'), { recursive: true });
 cpSync(join(ROOT, 'packages/shared/joypack.js'), join(DIST, 'shared/joypack.js'));
+cpSync(join(ROOT, 'packages/shared/topbar.css'), join(DIST, 'shared/topbar.css'));
 
 // 4. 게임별 파일 목록
 for (const game of games) {

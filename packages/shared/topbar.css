@@ -1,0 +1,143 @@
+/* 조이팩 공통 상단 메뉴: 조이팩 첫 화면과 모든 게임의 시작 화면 위 버튼을 같은 모양·크기·톤으로 맞춘다.
+ *
+ * 쓰는 법(자리는 각 앱이 정하고, 모양만 여기서 가져온다)
+ *   동그란 아이콘 버튼  <button class="jp-top-btn" aria-label="…">${Joypack.topIcon('gear')}</button>
+ *   알약 버튼(아이콘+글자) <button class="jp-top-btn jp-top-pill">${Joypack.topIcon('globe')}<span>English</span></button>
+ *   알림 점             버튼 안에 <i class="jp-top-dot"></i>
+ *   눌러야 할 때 강조     .jp-top-btn.is-on (예: 랭킹 등록 대기)
+ * 불러오기: Vite 앱은 import '@joypack/shared/topbar.css', 빌드 없는 게임은 <link rel="stylesheet" href="../../shared/topbar.css">
+ *
+ * 크기·색은 변수로 조정한다. 기본은 휴대폰 기준(단추 50px, 아이콘 26px, 글자 18px).
+ * 화면 크기에 따라 통째로 커지는 게임은 em 으로 넣는다(예: 두더지잡기 --jp-top-size: 2.9em).
+ *   --jp-top-size, --jp-top-icon, --jp-top-font, --jp-top-accent(마우스 올림·초점·강조 색, 게임 대표색) */
+:root {
+  --jp-top-size: 50px;
+  --jp-top-icon: 26px;
+  --jp-top-font: 18px;
+  --jp-top-accent: #6c47ff;
+  --jp-top-bg: rgb(255 255 255 / 0.9);
+  --jp-top-ink: #2a2433;
+  --jp-top-line: rgb(42 36 51 / 0.1);
+  --jp-top-shadow: 0 2px 8px rgb(42 36 51 / 0.12), 0 1px 1px rgb(42 36 51 / 0.06);
+}
+
+:root[data-theme='dark'] {
+  --jp-top-bg: rgb(36 33 48 / 0.86);
+  --jp-top-ink: #f4f1fa;
+  --jp-top-line: rgb(255 255 255 / 0.12);
+  --jp-top-shadow: 0 2px 8px rgb(0 0 0 / 0.35);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']):not([data-theme='dark']) {
+    --jp-top-bg: rgb(36 33 48 / 0.86);
+    --jp-top-ink: #f4f1fa;
+    --jp-top-line: rgb(255 255 255 / 0.12);
+    --jp-top-shadow: 0 2px 8px rgb(0 0 0 / 0.35);
+  }
+}
+
+.jp-top-btn {
+  position: relative;
+  box-sizing: border-box;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--jp-top-size);
+  height: var(--jp-top-size);
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--jp-top-line);
+  border-radius: 999px;
+  background: var(--jp-top-bg);
+  box-shadow: var(--jp-top-shadow);
+  color: var(--jp-top-ink);
+  font: inherit;
+  font-size: var(--jp-top-font);
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease;
+}
+
+.jp-top-btn[hidden] {
+  display: none;
+}
+
+.jp-top-pill {
+  width: auto;
+  gap: 0.4em;
+  padding: 0 1.05em 0 0.8em;
+}
+
+.jp-top-btn svg {
+  flex: none;
+  width: var(--jp-top-icon);
+  height: var(--jp-top-icon);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* 아이콘 안쪽을 옅게 채워 작은 화면에서도 모양이 또렷하게 */
+.jp-top-btn svg .jp-fill {
+  fill: currentColor;
+  stroke: none;
+  opacity: 0.18;
+}
+
+.jp-top-btn:hover {
+  border-color: var(--jp-top-accent);
+  color: var(--jp-top-accent);
+}
+
+.jp-top-btn:active {
+  transform: scale(0.92);
+}
+
+.jp-top-btn:focus-visible {
+  outline: 3px solid var(--jp-top-accent);
+  outline-offset: 2px;
+}
+
+/* 눌러야 할 일이 있을 때(랭킹 등록 대기 등): 대표색으로 채운다 */
+.jp-top-btn.is-on {
+  border-color: var(--jp-top-accent);
+  background: var(--jp-top-accent);
+  color: #fff;
+}
+
+/* 버튼 모서리 알림 점 */
+.jp-top-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--jp-top-bg);
+  border-radius: 50%;
+  background: var(--jp-top-accent);
+  animation: jp-top-pulse 900ms ease-in-out infinite;
+}
+
+@keyframes jp-top-pulse {
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jp-top-btn,
+  .jp-top-dot {
+    animation: none;
+    transition: none;
+  }
+}
