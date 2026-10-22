@@ -213,6 +213,27 @@ svg {
   --jp-top-accent: var(--brand);
 }
 
+/* 스크롤하면(main.ts html.scrolled) 고정된 위 메뉴 뒤에 흐린 띠를 깔아 아래로 지나가는 카드와 겹쳐 보이지 않게 한다.
+   맨 위에서는 지금처럼 버튼만 떠 있다 */
+.top::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 -10px;
+  z-index: -1;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+  background: color-mix(in srgb, var(--bg) 74%, transparent);
+  box-shadow: 0 6px 18px -12px rgb(0 0 0 / 0.35);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease;
+}
+
+html.scrolled .top::before {
+  opacity: 1;
+}
+
 
 .icon-btn {
   display: grid;
@@ -1545,6 +1566,11 @@ a.primary-btn {
 
 .intro .games > .card {
   animation: card-in 620ms cubic-bezier(0.2, 1.3, 0.4, 1) calc(900ms + var(--n, 0) * 110ms) both;
+}
+
+/* 다음 게임 띠: 마지막 카드가 튀어 오른 뒤(--n = 카드 수) 살짝 떠오른다 */
+.intro .next-strip {
+  animation: fade-up 500ms ease-out calc(1200ms + var(--n, 0) * 110ms) both;
 }
 
 .intro .games > .card .card-art::after {

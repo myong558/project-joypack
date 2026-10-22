@@ -18,6 +18,11 @@ watchSystemTheme(() => settings.theme);
 Joypack.trackViewport();
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
+
+// 조금이라도 내리면 위 메뉴 뒤에 흐린 띠(styles.css html.scrolled .top::before)
+const markScrolled = () => document.documentElement.classList.toggle('scrolled', window.scrollY > 4);
+window.addEventListener('scroll', markScrolled, { passive: true });
+markScrolled();
 // 첫 화면에 카드로 보일 게임. 최근에 추가한 게임부터(카드·랭킹 탭·설정 목록 모두 같은 순서).
 // 미리보기를 켠 기기는 preview 게임도 함께 보인다(켜고 끄면 다시 계산)
 let live: GameMeta[] = [];
@@ -315,6 +320,8 @@ function renderHome(): void {
     </footer>`;
 
   app.querySelectorAll<HTMLElement>('.games > .card').forEach((card, i) => card.style.setProperty('--n', String(i)));
+  // "다음 게임" 띠는 마지막 카드 다음 차례로 올라온다(styles.css .intro .next-strip)
+  app.querySelector<HTMLElement>('.next-strip')?.style.setProperty('--n', String(live.length));
   app.querySelectorAll<HTMLAnchorElement>('.card.blocked').forEach((a) => a.addEventListener('click', (e) => e.preventDefault()));
   // 게임 카드를 누르면 짧게 톡(진동 설정을 따른다)
   app.querySelectorAll<HTMLAnchorElement>('a.card:not(.blocked)').forEach((a) =>
@@ -381,7 +388,8 @@ void document.fonts?.ready.then(fitScreen);
 // 처음 그릴 때만 #app 에 .intro 를 붙여 로고·제목·카드가 차례로 튀어 들어오게 한다(styles.css).
 // 연출 중에 다시 그리면(오프라인 표시·설치 안내 갱신 등) 요소가 새로 만들어져 연출이 처음부터 다시 돌므로,
 // 그동안의 다시 그리기는 연출이 끝난 뒤 한 번으로 모은다.
-const INTRO_MS = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1900;
+// 끝나는 때: 기본 1.9초, 게임이 많으면 "다음 게임" 띠(1.2초 + 카드 수 × 0.11초에 시작, 0.5초)가 다 올라온 뒤까지
+const INTRO_MS = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : Math.max(1900, 1750 + live.length * 110);
 let introRunning = false;
 let renderWaiting = false;
 
