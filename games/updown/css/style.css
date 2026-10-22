@@ -622,43 +622,101 @@ button:focus-visible {
   margin-top: auto;
 }
 
+/* 난이도 버튼: 정보 목록처럼 보이지 않게 장난감 버튼 모양으로. 난이도 색 판에 아래 두께(그림자)가 있고,
+   누르면 쑥 들어가며 두께가 사라진다. 오른쪽 둥근 시작 표시(.difficulty-go)가 "누르면 시작"을 알려 준다.
+   --tone: 난이도 색 판, --tone-line: 테두리, --depth: 아래 두께(테두리 색을 어둡게) */
 .difficulty {
+  --depth: color-mix(in srgb, var(--tone-line) 62%, var(--text) 38%);
+  position: relative;
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'label go'
+    'detail go';
+  align-items: center;
   gap: 2px 12px;
-  padding: calc(var(--space) * 0.45) 18px;
+  margin-bottom: 5px; /* 아래 두께만큼 */
+  padding: calc(var(--space) * 0.45 + 2px) 12px calc(var(--space) * 0.45 + 2px) 18px;
   text-align: left;
-  border: 1px solid;
-  box-shadow: var(--shadow-button);
-  border-radius: 14px;
+  background: linear-gradient(to bottom, color-mix(in srgb, #fff 45%, var(--tone)), var(--tone) 60%);
+  border: 2px solid var(--tone-line);
+  border-radius: 18px;
+  box-shadow:
+    0 5px 0 var(--depth),
+    0 10px 18px -8px color-mix(in srgb, var(--depth) 70%, transparent);
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+}
+
+/* 다크: 위쪽 윤기는 옅게, 두께는 밝은 글자색이 아니라 어둡게 섞는다 */
+:root[data-theme='dark'] .difficulty {
+  --depth: color-mix(in srgb, var(--tone-line) 45%, #000 55%);
+  background: linear-gradient(to bottom, color-mix(in srgb, #fff 9%, var(--tone)), var(--tone) 60%);
 }
 
 .difficulty-easy {
-  background: var(--surface-sage);
-  border-color: var(--line-sage);
+  --tone: var(--surface-sage);
+  --tone-line: var(--line-sage);
 }
 
 .difficulty-normal {
-  background: var(--surface-steel);
-  border-color: var(--line-steel);
+  --tone: var(--surface-steel);
+  --tone-line: var(--line-steel);
 }
 
 .difficulty-hard {
-  background: var(--surface-brick);
-  border-color: var(--line-brick);
+  --tone: var(--surface-brick);
+  --tone-line: var(--line-brick);
 }
 
 .difficulty-extreme {
-  background: var(--surface-plum);
-  border-color: var(--line-plum);
+  --tone: var(--surface-plum);
+  --tone-line: var(--line-plum);
 }
 
 .difficulty:hover {
   border-color: var(--primary);
 }
 
+.difficulty:hover .difficulty-go {
+  transform: scale(1.08);
+}
+
+/* 누르는 동안: 두께만큼 내려앉는다 */
 .difficulty:not(:disabled):active {
-  transform: scale(0.98);
+  transform: translateY(4px);
+  box-shadow:
+    0 1px 0 var(--depth),
+    0 4px 8px -6px color-mix(in srgb, var(--depth) 70%, transparent);
+  transition-duration: 0.05s;
+}
+
+.difficulty-label {
+  grid-area: label;
+}
+
+.difficulty-detail {
+  grid-area: detail;
+}
+
+/* 오른쪽 둥근 시작 표시 */
+.difficulty-go {
+  grid-area: go;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--action);
+  color: var(--text-on-action);
+  font-size: 1.35rem;
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--action) 60%, #000 40%);
+  transition: transform 0.12s ease;
+}
+
+.difficulty-go .icon {
+  translate: 0.06em 0; /* 삼각형은 무게 중심이 왼쪽이라 살짝 오른쪽으로 */
 }
 
 .difficulty-label {
@@ -699,9 +757,9 @@ button:focus-visible {
   gap: 14px;
 }
 
+/* 최고 기록은 범위·기회 줄 오른쪽 끝(시작 표시 왼쪽)에 */
 .difficulty-best {
-  grid-column: 2;
-  grid-row: 1 / span 2;
+  margin-left: auto;
   gap: 4px;
 }
 

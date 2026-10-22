@@ -51,6 +51,44 @@
   }
 
   /**
+   * 랭킹 이름(이니셜) 입력 칸을 공통 규칙으로 맞춘다: 영문 대문자 A–Z 5자까지만 들어간다.
+   * - 휴대폰 키보드: 웹에서는 키보드 언어를 직접 고를 수 없어서, 한국어 키보드도 영문 자판으로 바뀌는
+   *   이메일 입력 종류(inputmode="email")로 열고, 대문자 시작(autocapitalize="characters")을 함께 건다.
+   *   소문자로 쳐도 바로 대문자로 바뀌고, 한글·숫자·기호는 들어가지 않는다(붙여 넣기 포함).
+   * - 한글 조합 중(isComposing)에는 건드리지 않고 조합이 끝나면 걸러 낸다(조합 중에 값을 바꾸면 글자가 겹쳐 들어간다).
+   * onChange(clean): 걸러 낸 값이 바뀔 때마다 부른다(허브 설정처럼 바로 저장할 때).
+   */
+  function initialsInput(input, onChange) {
+    if (!input) return;
+    input.type = 'text';
+    input.maxLength = 5;
+    input.setAttribute('inputmode', 'email');
+    input.setAttribute('autocapitalize', 'characters');
+    input.setAttribute('autocomplete', 'off');
+    input.setAttribute('autocorrect', 'off');
+    input.setAttribute('spellcheck', 'false');
+    input.setAttribute('enterkeyhint', 'done');
+    input.setAttribute('lang', 'en');
+    input.style.textTransform = 'uppercase';
+    const sync = function () {
+      const clean = cleanInitials(input.value);
+      if (clean !== input.value) {
+        const end = input.selectionEnd;
+        const cut = input.value.length - clean.length;
+        input.value = clean;
+        try {
+          input.setSelectionRange(Math.max(0, end - cut), Math.max(0, end - cut));
+        } catch (e) {}
+      }
+      if (onChange) onChange(clean);
+    };
+    input.addEventListener('input', function (e) {
+      if (!e.isComposing) sync();
+    });
+    input.addEventListener('compositionend', sync);
+  }
+
+  /**
    * 조이팩 서비스 워커를 등록한다. 서비스 워커는 사이트에 하나(root/sw.js)이고, 게임 페이지에서 등록해도 같은 것을 쓴다.
    * game 을 주면 그 게임 파일 전체를 캐시하라고(이미 있으면 바뀐 파일만 다시 받으라고) 서비스 워커에 알린다.
    * root: 이 페이지에서 사이트 루트까지의 상대 경로(허브 './', 게임 '../../')
@@ -328,6 +366,7 @@
     get: get,
     set: set,
     cleanInitials: cleanInitials,
+    initialsInput: initialsInput,
     registerSW: registerSW,
     isGameCached: isGameCached,
     clearGameCache: clearGameCache,

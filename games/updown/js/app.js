@@ -203,7 +203,12 @@
         t('difficulty.detail', { min: config.min, max: config.max, tries: config.maxTries }),
         best[key] ? t('difficulty.best', { tries: best[key] }) : t('difficulty.noBest'),
       ].join(', '));
-      button.append(label, detail, record);
+      // 오른쪽 둥근 시작 표시: 정보 목록이 아니라 누르면 바로 시작하는 버튼으로 보이게 한다
+      const go = document.createElement('span');
+      go.className = 'difficulty-go';
+      go.append(icon('play'));
+      detail.append(record);
+      button.append(label, detail, go);
       button.addEventListener('click', () => startGame(key));
       list.appendChild(button);
     });
@@ -1153,13 +1158,8 @@
   $('ranking-open').addEventListener('click', openRanking);
   $('ranking-close').addEventListener('click', () => $('ranking').close());
   $('ranking-form').addEventListener('submit', submitRanking);
-  // 영문만, 대문자로, 5자까지(붙여 넣기 포함)
-  ['ranking-initials', 'result-rank-initials'].forEach((id) => {
-    $(id).addEventListener('input', (event) => {
-      const clean = UpDownRanking.cleanInitials(event.target.value);
-      if (clean !== event.target.value) event.target.value = clean;
-    });
-  });
+  // 영문 대문자 5자까지(붙여 넣기 포함), 휴대폰은 영문 자판으로(조이팩 공통 Joypack.initialsInput)
+  ['ranking-initials', 'result-rank-initials'].forEach((id) => Joypack.initialsInput($(id)));
   $('result-rank').addEventListener('submit', submitResultRank);
   $('result-rank-view').addEventListener('click', openRanking);
   $('settings-close').addEventListener('click', () => $('settings').close());

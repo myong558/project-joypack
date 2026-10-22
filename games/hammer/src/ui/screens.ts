@@ -532,21 +532,18 @@ function rankEntryForm(opts: {
     <form class="rank-entry" novalidate>
       <p class="rank-entry-title">${MORE_ICONS.trophy}<span>${opts.title}</span></p>
       <div class="rank-entry-row">
-        <input name="name" value="${opts.name}" maxlength="${NAME_MAX}" placeholder="AAAAA" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="done" aria-label="${t('ranking.nameLabel')}">
+        <input name="name" value="${opts.name}" maxlength="${NAME_MAX}" placeholder="AAAAA" inputmode="email" lang="en" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="done" aria-label="${t('ranking.nameLabel')}">
         <button class="btn primary" type="submit">${t('ranking.submit')}</button>
       </div>
       <p class="rank-entry-hint">${opts.compact ? '' : t('ranking.nameLabel')}</p>
     </form>`);
   const input = el.querySelector('input')!;
   const submit = el.querySelector<HTMLButtonElement>('[type="submit"]')!;
-  const sync = () => {
-    const clean = cleanName(input.value);
-    if (input.value !== clean) input.value = clean;
+  // 영문 대문자 5자까지, 휴대폰은 영문 자판·대문자로 연다(조이팩 공통 Joypack.initialsInput, 한글 조합 중에는 끝난 뒤 거름)
+  const sync = (clean = cleanName(input.value)) => {
     submit.disabled = !isValidName(clean);
   };
-  // 한글 자판으로 치는 중에는 조합이 끝난 뒤에 거른다
-  input.addEventListener('input', (e) => (e as InputEvent).isComposing || sync());
-  input.addEventListener('compositionend', sync);
+  Joypack.initialsInput(input, sync);
   sync();
   const hint = el.querySelector<HTMLElement>('.rank-entry-hint')!;
   const hintText = hint.innerHTML;

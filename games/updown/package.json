@@ -1,6 +1,6 @@
 {
   "name": "updown",
-  "version": "1.8.4",
+  "version": "1.9.0",
   "private": true,
   "description": "조이팩 미니 게임: 업다운(숫자 맞추기). 빌드 없이 파일 그대로 배포한다.",
   "scripts": {

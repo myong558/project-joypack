@@ -23,6 +23,8 @@ export interface JoypackApi {
   /** 공통 키에 쓰고, legacyKey 를 주면 거기에도 같이 쓴다 */
   set(name: SharedSetting, value: string, legacyKey?: string): void;
   cleanInitials(text: string): string;
+  /** 랭킹 이름 입력 칸: 영문 대문자 5자만, 휴대폰은 영문 자판·대문자로 열기. onChange 는 걸러 낸 값이 바뀔 때마다 */
+  initialsInput(input: HTMLInputElement | null, onChange?: (clean: string) => void): void;
   registerSW(options?: { root?: string; game?: string }): Promise<ServiceWorkerRegistration | null>;
   isGameCached(id: string): Promise<boolean>;
   clearGameCache(id: string): Promise<boolean>;

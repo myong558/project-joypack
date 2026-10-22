@@ -543,7 +543,7 @@ async function openSettings(): Promise<void> {
     </section>
     <section class="set-group">
       <h3><label for="initials">${t('settings.initials')}</label></h3>
-      <input id="initials" class="initials" value="${esc(settings.initials)}" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="latin" placeholder="ABCDE" />
+      <input id="initials" class="initials" value="${esc(settings.initials)}" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="email" lang="en" placeholder="ABCDE" />
       <p class="hint">${t('settings.initialsHint')}</p>
     </section>
     <section class="set-group">
@@ -610,9 +610,8 @@ async function openSettings(): Promise<void> {
     input.addEventListener('change', () => saveSetting(settings, input.dataset.toggle as 'sound' | 'vibrate', input.checked)),
   );
   const initials = dialog.querySelector<HTMLInputElement>('#initials')!;
-  initials.addEventListener('input', () => {
-    const clean = Joypack.cleanInitials(initials.value);
-    if (clean !== initials.value) initials.value = clean;
+  // 영문 대문자 5자까지, 휴대폰은 영문 자판으로(조이팩 공통). 바뀔 때마다 바로 저장
+  Joypack.initialsInput(initials, (clean) => {
     if (clean) saveSetting(settings, 'initials', clean);
   });
   // 내 기록 지우기: 실수로 지우지 않게 두 번 눌러야 지운다(첫 번째 누름 뒤 3초 안에 한 번 더)

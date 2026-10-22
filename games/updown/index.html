@@ -169,6 +169,8 @@
         <rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.8"/>
       </g>
     </symbol>
+    <!-- 난이도 버튼 오른쪽 시작 표시(둥근 삼각형) -->
+    <symbol id="i-play" viewBox="0 0 24 24"><path fill="currentColor" d="M8.5 5.2c-.9-.6-2 .1-2 1.1v11.4c0 1 1.1 1.7 2 1.1l9.1-5.7c.8-.5.8-1.7 0-2.2z"/></symbol>
     <symbol id="i-home" viewBox="0 0 24 24">
       <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M3 11l9-7 9 7"/>
@@ -318,7 +320,7 @@
       <form id="result-rank" class="result-rank" hidden novalidate>
         <p id="result-rank-prompt" class="result-rank-prompt"></p>
         <div class="ranking-entry">
-          <input id="result-rank-initials" class="ranking-input" type="text" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="latin" enterkeyhint="done" data-i18n-placeholder="ranking.initials" data-i18n-aria-label="ranking.initials">
+          <input id="result-rank-initials" class="ranking-input" type="text" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="email" lang="en" enterkeyhint="done" data-i18n-placeholder="ranking.initials" data-i18n-aria-label="ranking.initials">
           <button id="result-rank-submit" type="submit" class="primary" data-i18n="ranking.submit"></button>
         </div>
         <button id="result-rank-view" type="button" class="secondary result-rank-view">
@@ -449,7 +451,7 @@
       <form id="ranking-form" class="ranking-form" hidden>
         <p id="ranking-prompt" class="ranking-prompt"></p>
         <div class="ranking-entry">
-          <input id="ranking-initials" class="ranking-input" type="text" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="latin" enterkeyhint="done" data-i18n-placeholder="ranking.initials" data-i18n-aria-label="ranking.initials" required>
+          <input id="ranking-initials" class="ranking-input" type="text" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="email" lang="en" enterkeyhint="done" data-i18n-placeholder="ranking.initials" data-i18n-aria-label="ranking.initials" required>
           <button id="ranking-submit" type="submit" class="primary" data-i18n="ranking.submit"></button>
         </div>
       </form>
