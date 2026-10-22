@@ -562,9 +562,9 @@ p {
 /* 1050ms 에 시작해 1초: 화면 밖(오른쪽 위)에서 두더지 위로 날아옴(45%) → 콩(55%, 1.6초) → 튕김 → 제목 오른쪽 제자리로(100%) */
 @keyframes intro-hammer {
   0% { translate: calc(var(--hit-x, 0px) + 60vw) calc(var(--hit-y, 0px) - 40vh); rotate: 200deg; scale: 2.2; }
-  45% { translate: calc(var(--hit-x, 0px) + 0.5em) calc(var(--hit-y, 0px) - 0.6em); rotate: 45deg; scale: 2.2; }
-  55% { translate: var(--hit-x, 0px) var(--hit-y, 0px); rotate: -28deg; scale: 2.2; }
-  63% { translate: calc(var(--hit-x, 0px) + 0.1em) calc(var(--hit-y, 0px) - 0.3em); rotate: -12deg; scale: 2.2; }
+  45% { translate: calc(var(--hit-x, 0px) + 0.4em) calc(var(--hit-y, 0px) - 0.8em); rotate: 10deg; scale: 2.2; }
+  55% { translate: var(--hit-x, 0px) var(--hit-y, 0px); rotate: -72deg; scale: 2.2; }
+  63% { translate: calc(var(--hit-x, 0px) + 0.1em) calc(var(--hit-y, 0px) - 0.3em); rotate: -50deg; scale: 2.2; }
   100% { translate: 0 0; rotate: 0deg; scale: 1; }
 }
 
@@ -4530,4 +4530,90 @@ body {
   .result .rank-entry {
     animation: none;
   }
+}
+
+/* ---------- 오프닝: 망치가 두더지 머리 오른쪽 위를 칠 때(1.6초) 번쩍! ----------
+ * 흰 별빛이 터지고, 고리가 퍼지고, 노란 별 다섯 개가 사방으로 튄다. 오프닝이 아니면 보이지 않는다 */
+.title-bonk {
+  position: absolute;
+  left: 78%;
+  top: 10%;
+  z-index: 3;
+  width: 3.6em;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  pointer-events: none;
+}
+
+.title-bonk b,
+.title-bonk b::before,
+.title-bonk i {
+  position: absolute;
+  opacity: 0;
+}
+
+.title-bonk b {
+  inset: 0;
+}
+
+.title-bonk b::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  clip-path: polygon(50% 0, 59% 33%, 85% 15%, 67% 41%, 100% 50%, 67% 59%, 85% 85%, 59% 67%, 50% 100%, 41% 67%, 15% 85%, 33% 59%, 0 50%, 33% 41%, 15% 15%, 41% 33%);
+  filter: drop-shadow(0 0 0.15em #ffe27a);
+}
+
+.title-bonk b::before {
+  content: '';
+  inset: -10%;
+  border: 0.3em solid #fff;
+  box-shadow: 0 0 0.3em #ffe27a;
+  border-radius: 50%;
+}
+
+.title-bonk i {
+  left: 50%;
+  top: 50%;
+  width: 1em;
+  aspect-ratio: 1;
+  margin: -0.5em;
+  background: #ffd23f;
+  filter: drop-shadow(0 0 0.08em #b86e00);
+  clip-path: polygon(50% 0, 62% 35%, 100% 38%, 70% 60%, 80% 100%, 50% 76%, 20% 100%, 30% 60%, 0 38%, 38% 35%);
+}
+
+.title-bonk i:nth-of-type(1) { --dx: 2.6em; --dy: -1.6em; }
+.title-bonk i:nth-of-type(2) { --dx: 2.9em; --dy: 0.9em; }
+.title-bonk i:nth-of-type(3) { --dx: 0.5em; --dy: -2.8em; }
+.title-bonk i:nth-of-type(4) { --dx: -2.2em; --dy: -2em; }
+.title-bonk i:nth-of-type(5) { --dx: 1.6em; --dy: 2.2em; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .opening .title-bonk b { animation: bonk-flash 520ms 1600ms ease-out; }
+  .opening .title-bonk b::after { animation: bonk-star 450ms 1600ms ease-out; }
+  .opening .title-bonk b::before { animation: bonk-ring 520ms 1600ms cubic-bezier(0.1, 0.7, 0.3, 1); }
+  .opening .title-bonk i { animation: bonk-spark 750ms 1600ms cubic-bezier(0.2, 0.8, 0.4, 1); }
+}
+
+@keyframes bonk-flash {
+  0%, 100% { opacity: 1; }
+}
+
+@keyframes bonk-star {
+  0% { transform: scale(0.3) rotate(0deg); opacity: 1; }
+  40% { transform: scale(1.1) rotate(10deg); opacity: 1; }
+  100% { transform: scale(1.25) rotate(20deg); opacity: 0; }
+}
+
+@keyframes bonk-ring {
+  from { transform: scale(0.2); opacity: 1; }
+  to { transform: scale(1.4); opacity: 0; border-width: 0.03em; }
+}
+
+@keyframes bonk-spark {
+  0% { translate: 0 0; rotate: 0deg; scale: 0.4; opacity: 1; }
+  70% { opacity: 1; }
+  100% { translate: var(--dx) var(--dy); rotate: 160deg; scale: 1; opacity: 0; }
 }

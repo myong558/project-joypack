@@ -177,7 +177,7 @@ export function startScreen(opts: StartOptions): HTMLElement {
     const ham = layoutBox(hammer);
     const hole = layoutBox(el.querySelector<HTMLElement>('.title-hole')!);
     const home = { x: ham.x + ham.w / 2, y: ham.y + ham.h / 2 };
-    const target = { x: hole.x + hole.w * 0.58, y: hole.y + hole.h * 0.2 };
+    const target = { x: hole.x + hole.w * 1.1, y: hole.y + hole.h * 0.04 };
     hammer.style.setProperty('--hit-x', `${Math.round(target.x - home.x)}px`);
     hammer.style.setProperty('--hit-y', `${Math.round(target.y - home.y)}px`);
   };
@@ -214,6 +214,8 @@ export function startScreen(opts: StartOptions): HTMLElement {
   const titleMole = createMoleEl('normal');
   el.querySelector('.title-hole .slot')!.append(titleMole);
   titleMole.classList.add('bob');
+  // 오프닝에서 망치가 두더지 머리 오른쪽 위를 칠 때 번쩍이는 효과(styles.css .title-bonk)
+  el.querySelector('.title-hole')!.insertAdjacentHTML('beforeend', '<span class="title-bonk"><b></b><i></i><i></i><i></i><i></i><i></i></span>');
   fillThumbs(el);
 
   el.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((b) =>
