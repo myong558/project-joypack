@@ -4,7 +4,7 @@
 
 이 문서는 게임이 하나 늘 때마다 고칩니다. 새 게임까지 포함한 모든 게임을 다시 보고, 공통 요소는 1·2장과 8장에, 정체성(게임에 맞게 고르는 톤·색·캐릭터 등)은 3장 등록부에 반영합니다(9장 "문서 키우기").
 
-- 문서 버전: **1.12** (2026-10-22, 업다운 v1.8.4 · 두더지잡기 v0.11.6 · 허브 v1.7.4 기준)
+- 문서 버전: **1.13** (2026-10-22, 업다운 v1.9.0 · 두더지잡기 v0.11.8 · 허브 v1.7.6 기준)
 - 저장소 구조·배포·서비스 워커 같은 플랫폼 설명은 루트 [README.md](../README.md)에 있습니다. 이 문서는 "게임 하나를 어떻게 만드는가"만 다룹니다.
 
 ---
@@ -25,6 +25,18 @@
 8. **버전·커밋**: 게임 `package.json` 버전, 커밋, 답변에 "확인 버전"을 적습니다.
 
 > 요청에 없는 것을 크게 상상해 붙이지 않습니다. 게임 하나는 **30초~3분 안에 한 판이 끝나는** 가벼운 게임이 기본입니다.
+
+### 0.1 새 세션에서 시작하기
+
+새 게임은 **새 세션(대화)에서** 만듭니다. 이전 작업 대화가 길게 쌓인 세션은 매 요청마다 그 내용을 다시 읽어 토큰이 많이 들고, 오래된 맥락(이미 바뀐 코드)이 섞일 수 있습니다. 필요한 맥락은 모두 이 문서와 코드에 있습니다.
+
+- **첫 메시지**: `새 게임: <이름> — <한두 줄 설명>` 이면 됩니다. 정체성(분위기·색)이나 모드에 바람이 있으면 덧붙입니다. 나머지는 이 문서 기본값으로 채우고 README "가정"에 적습니다.
+- **처음 읽을 것**: `CLAUDE.md`(세션 시작 때 자동으로 읽힘) → 이 문서 전체 → 필요한 파일만 5.1 "참고 파일 지도"에서 골라 엽니다.
+- **토큰 아끼기**:
+  - 큰 파일은 통째로 읽지 않습니다(두더지잡기 `styles.css` 4,500줄·`screens.ts` 900줄, 업다운 `style.css` 2,300줄·`app.js` 1,200줄). 필요한 부분을 검색해서 그 근처만 봅니다.
+  - 화면 확인은 7.1 분기점에서만 합니다.
+  - 기존 게임 전체를 분석하지 않습니다. 비교·공통화는 9장 "문서 키우기" 때 한 번만 합니다.
+- **끝낼 때**: 7장 완료 검사, 9장 문서 키우기, 버전·커밋·푸시(사용자가 요청할 때), 답변 끝에 "확인 버전"을 적습니다.
 
 ---
 
@@ -56,6 +68,12 @@
 | `Joypack.shareUrl()` | 기록 공유하기에 붙이는 조이팩 주소(첫 화면 + `?from=share`). 받은 사람에게 앱 설치·홈 화면에 추가 안내가 뜸. `shareUrl(id)` 는 게임 주소 |
 | `Joypack.cleanInitials(text)` | 랭킹 이름 정리(A–Z 대문자 5자) |
 | `Joypack.initialsInput(input, onChange?)` | 랭킹 이름 입력 칸: A–Z 대문자 5자만 들어가고(붙여 넣기·한글 조합 포함), 휴대폰은 영문 자판(`inputmode="email"`)·대문자로 연다 |
+| `Joypack.deviceLang()` | 저장된 언어가 없을 때 기본 언어(기기 언어가 한국어면 `ko`, 그 밖은 `en`, 1.4) |
+| `Joypack.topIcon(name)` | 위 메뉴 아이콘 SVG(`apps`·`globe`·`trophy`·`gear`·`home`, 1.3) |
+| `Joypack.trackViewport()` | 실제로 보이는 화면 높이를 `--jp-vh` 로 계속 맞춤. 화면 높이를 꽉 채우는 게임은 시작할 때 한 번(1.3) |
+| `Joypack.guardBottom()` | 설치 앱이 내비게이션 바 높이를 0으로 알려 줄 때 `--jp-bottom-guard` 로 아래 여백(1.3) |
+| `Joypack.viewportReport()` | 화면 높이 값들을 한 줄 글로(사용자 기기에서 잘림 원인을 찾을 때 설정 맨 아래에 잠깐 띄움) |
+| `Joypack.isGameCached(id)` / `clearGameCache(id)` | 허브 설정의 오프라인 저장 표시·비우기(게임은 보통 안 씀) |
 
 공통 모듈에 없는 기능을 두 게임 이상이 똑같이 쓰게 되면 공통 모듈로 옮깁니다(9장).
 
@@ -264,6 +282,28 @@ games/<id>/
 └── tests/                 game/ 단위 테스트
 ```
 
+### 5.1 참고 파일 지도 (무엇을 어디서 보고 본뜰까)
+
+새 게임은 **두더지잡기(Vite + TS)를 기본 본보기**로 삼습니다. 업다운은 빌드 없는 정적 게임이라 일부 기법만 참고합니다. 파일을 통째로 복사하지 말고, 필요한 부분을 찾아 새 게임에 맞게 다시 씁니다(3장 정체성).
+
+| 만들 것 | 볼 파일 | 볼 부분 |
+| --- | --- | --- |
+| Vite 설정·버전 | `games/hammer/vite.config.ts`, `package.json` | `base: './'`, `define: { __APP_VERSION__ }`, `@joypack/shared` 의존 |
+| 시작 흐름·화면 전환 | `games/hammer/src/main.ts` | `mount`·`showStart`·`play`·결과 연결, `registerSW`·`inviteBar`·`trackViewport`·`guardBottom` 부르는 곳 |
+| 화면(시작·게임·결과·대화 상자) | `games/hammer/src/ui/screens.ts` | `startScreen`(위 메뉴 `.jp-topbar`), `openModal`(딤·Esc·초점), `fitStart`(화면에 맞춰 줄이기), `rankEntryForm`(등록 카드), `resultScreen`(0.6초 누름 막기) |
+| 랭킹 | `games/hammer/src/online.ts`, `ranking.ts` | 순위표 문서 1개·트랜잭션 등록·8초 제한, TOP 10·동점·등록 대기·사본 |
+| 저장·설정 | `games/hammer/src/storage.ts`, `theme.ts` | `<id>:v1` 한 키, 공통 설정은 `Joypack.get/set`, 스킨 "자동"(날짜 시드) |
+| 결과 공유 이미지 | `games/hammer/src/share.ts` | `html-to-image` 로 결과 화면 복제를 찍어 `Joypack.shareResult` |
+| 소리·연출 | `games/hammer/src/audio.ts`, `ui/effects.ts` | Web Audio 합성, 팝업·파티클·흔들림·히트 스톱 |
+| 규칙·테스트 | `games/hammer/src/game/*`, `tests/*` | DOM 없는 엔진·시드 난수(`rng.ts`), Vitest |
+| 문구 | `games/hammer/src/i18n.ts` | ko/en 한 파일, `detectLang` 은 `Joypack.deviceLang()` |
+| 화면 크기 점검 목록 | `games/hammer/screen-check.mjs` | 화면마다 `{ name, setup, go, reach }` |
+| 글자 채우기 전 숨김·높이 고정 | `games/updown/index.html`, `js/app.js` | `.booting`, `--vh-px`(폭이 바뀔 때만 다시 잼), 시작 화면 여백 고정 |
+| 가로 낮은 화면 두 칸 배치 | `games/updown/css/style.css` | `@media (orientation: landscape) and (max-height: 559px)` 블록 |
+| 장난감 버튼(두께·눌림) | `games/updown/css/style.css` `.difficulty`, `apps/hub/src/styles.css` `.card` | 아래 두께 그림자, 누르면 `translateY` |
+| 허브 연결 | `games.json`, `apps/hub/src/records.ts`·`rankings.ts`·`i18n.ts` | 6장 체크리스트 |
+| 공통 모듈 | `packages/shared/joypack.js`(+ `.d.ts`), `topbar.css` | 1.2 표 |
+
 ---
 
 ## 6. 조이팩에 연결하는 체크리스트
@@ -340,6 +380,23 @@ games/<id>/
 - 오래 걸리므로 백그라운드로 돌리고 그동안 다른 일을 합니다.
 - 결과는 콘솔 줄을 먼저 봅니다. 낱장 그림은 모음 그림에서 이상한 크기가 보일 때만 엽니다.
 
+### 7.2 자주 걸린 함정 (기존 게임을 만들며 실제로 겪은 것)
+
+| 함정 | 증상 | 피하는 법 |
+| --- | --- | --- |
+| 설치 앱의 화면 높이 | 조이팩 → 게임으로 넘어오면 아래(도감 등)가 잘리고, 앱을 내렸다 올리면 정상 | `Joypack.trackViewport()` + 높이를 `var(--jp-vh, 100dvh)`, 크기 변화는 ResizeObserver·visualViewport 로도 다시 맞춤 |
+| 높이 비례 크기(`dvh`) | 열고 1~2초 뒤 버튼 높이·로고 위치가 덜컥 움직임 | 휴대폰은 처음 높이로 고정하고 폭이 바뀔 때만 다시 잼(1.3) |
+| 늦게 채우는 글자 | 첫 화면이 그려진 뒤 글자가 들어오며 밀림 | 채우기 전에는 `visibility: hidden`(`.booting`) |
+| 가운데 정렬 + 넘침 | 가로에서 제목이 위 메뉴 밑으로 숨음 | `align-items: safe center` + 안쪽 스크롤, 줄이기는 내용 전체 높이로 계산 |
+| 글자 최소 px + em 폭 | 화면을 줄이면 버튼 글이 세 줄로 접힘 | 폭에도 최소값(`max(17.5em, 300px)`) |
+| `calc(46px * var(--u))` | `--u` 가 길이면 계산이 깨져 2px 버튼 | 길이 변수에는 숫자만 곱함(`calc(46 * var(--u))`) |
+| 고정(fixed) 위 메뉴 | 확대(zoom)한 화면에서 메뉴 크기가 게임마다 다름 | `--jp-top-unzoom` 에 확대 배수 |
+| 작은 딱지·장식에 최소 18px | NEW 딱지가 숫자를 덮음 | 딱지는 작게(11px), 모서리에 걸치게 |
+| 한글 입력 조합 중 값 바꾸기 | 글자가 겹쳐 들어감 | `isComposing` 이면 건너뛰고 `compositionend` 에서 거름(`Joypack.initialsInput`) |
+| 서비스 워커 캐시 | 게임을 고쳐도 설치 앱에서 옛 버전 | 게임 파일은 네트워크 먼저(`scripts/sw-template.js`), 버전은 설정 맨 아래에서 확인 |
+| 헤드리스 확인을 PC 로 흉내 | PC 전용 안내가 보여 실제와 다름 | 휴대폰 크기는 터치(`pointer: coarse`)로(점검 도구가 함) |
+| 파일 줄바꿈(CRLF) | 스크립트로 바꿀 문자열을 못 찾음 | 파일 편집은 편집 도구로, 스크립트면 `\r\n` 을 고려 |
+
 ---
 
 ## 8. 공통 요소 현황 (게임이 늘 때마다 갱신)
@@ -365,6 +422,11 @@ games/<id>/
 | 스킨 "자동"(날짜마다) | 날짜 해시로 계절 | 날짜 시드로 장소 | 🟡 규칙 같음, 묶음은 정체성 |
 | 인트로 연출 | 있음 | 있음 | 🟡 게임마다 |
 | 내 기록 지우기 | 설정(전체·난이도별) | 설정(전체) | 🟡 범위 규칙은 통일(1.4) |
+| 기본 언어 | `Joypack.deviceLang()` | `Joypack.deviceLang()` | ✅ 공통 모듈(1.4) |
+| 랭킹 이름 입력 | `Joypack.initialsInput`(결과·랭킹 창) | `Joypack.initialsInput`(등록 카드) | ✅ 공통 모듈(1.6, 허브 설정도) |
+| 화면 높이 맞추기 | `--vh-px` 고정 + 안쪽 스크롤 | `trackViewport`·`guardBottom` + `--fit` 줄이기 | 🟡 방식은 게임마다, 규칙은 1.3 |
+| 가로 낮은 화면 | 두 칸 배치(시작 2×2·게임·결과) | 가로 배치 + `safe center` 스크롤 | 🟡 게임마다, 규칙은 1.9 |
+| 화면 크기 점검 목록 | `screen-check.mjs` | `screen-check.mjs` | ✅ 도구 공통(`pnpm check:screens`, 7.1) |
 | 허브 연결(최고 기록·지우기·TOP 3) | `records.ts`·`rankings.ts` 에 직접 | 같음 | 🟠 게임이 늘면 각 게임이 `joypack.meta.js` 로 내보내는 방식 검토 |
 
 ### 공통화 대기 목록 (다음에 게임을 만들 때 함께 처리하면 좋은 것)
@@ -391,6 +453,7 @@ games/<id>/
 | 문서 버전 | 날짜 | 내용 |
 | --- | --- | --- |
 | 1.0 | 2026-10-21 | 업다운·두더지잡기 분석으로 처음 작성 |
+| 1.13 | 2026-10-22 | 새 게임 준비 정리: 0.1 새 세션에서 시작하기(첫 메시지·처음 읽을 것·토큰 아끼기), 1.2 표에 빠진 공통 함수, 5.1 참고 파일 지도, 7.2 자주 걸린 함정, 8장 현황표 5줄(기본 언어·이름 입력·화면 높이·가로·점검 목록) |
 | 1.12 | 2026-10-22 | 랭킹 이름 입력 공통화(허브 v1.7.6 · 업다운 v1.9.0 · 두더지잡기 v0.11.8): `Joypack.initialsInput`, 1.2 표·1.6 이름 규칙 |
 | 1.11 | 2026-10-22 | 화면 크기 점검 도구 `pnpm check:screens`(scripts/screen-check, 앱마다 screen-check.mjs). 7.1 쓰는 법·결과 읽기·언제 돌리나(분기점 A~D), 0장 순서·5장 폴더 구조에 반영 |
 | 1.10 | 2026-10-22 | 가로·주소창·폴드 화면 점검(허브 v1.7.4 · 업다운 v1.8.4 · 두더지잡기 v0.11.6): 1.9에 가로로 눕힌 휴대폰 규칙(두 칸·safe center·안쪽 스크롤), 7장에 확인 크기 목록 |
