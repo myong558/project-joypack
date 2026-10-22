@@ -901,9 +901,15 @@ const firstCheck = refreshCached();
 void firstCheck.then(() => app.childElementCount && requestRender());
 void Promise.race([firstCheck, new Promise((r) => setTimeout(r, 300))]).then(startHome);
 
-// 게임에서 뒤로 가기로 돌아오면(bfcache) 최고 기록·오프라인 표시를 새로 읽는다
+// 조이팩으로 들어오면 늘 시작 화면: 게임으로 떠날 때 열린 창(랭킹·설정·개발자 모드)을 닫아 두고,
+// 뒤로 가기로 되살아나면(bfcache) 맨 위로 올려 최고 기록·오프라인 표시를 새로 읽는다(되살아난 순위는 옛 값이라 보이지 않게)
+const closeDialogs = () => document.querySelectorAll<HTMLDialogElement>('dialog[open]').forEach((d) => d.close());
+window.addEventListener('pagehide', closeDialogs);
 window.addEventListener('pageshow', (e) => {
-  if (e.persisted) void refreshHome();
+  if (!e.persisted) return;
+  closeDialogs();
+  window.scrollTo(0, 0);
+  void refreshHome();
 });
 window.addEventListener('online', () => void refreshHome());
 window.addEventListener('offline', () => void refreshHome());
