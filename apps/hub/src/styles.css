@@ -752,6 +752,43 @@ a.card:active .card-play {
   animation: new-pop 2.4s ease-in-out infinite;
 }
 
+/* 미리보기 게임(TEST): NEW 와 같은 자리, 검정 바탕으로 구분 */
+.card-new.test {
+  background: #1f1a2e;
+  color: #ffd84d;
+  box-shadow: 0 2px 0 rgb(0 0 0 / 0.35);
+  animation: none;
+}
+
+/* 설정 → 정보: 버전 글자(7번 누르면 미리보기 비밀번호 창). 연타해도 글자가 선택되지 않게 */
+.ver-tap {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.preview-state {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--ok);
+}
+
+.preview-lock {
+  display: grid;
+  gap: 12px;
+}
+
+.preview-lock .initials {
+  text-transform: none;
+}
+
+.preview-lock [data-preview-wrong] {
+  margin: 0;
+  color: var(--warn);
+}
+
 /* 다음 게임 안내: 게임 목록 아래 점선 띠 한 줄. 카드가 아니라 목록 순서에 끼지 않는다 */
 .next-strip {
   display: flex;

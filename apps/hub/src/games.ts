@@ -17,8 +17,11 @@ export interface GameMeta {
   /** 저장소 루트 기준 아이콘 파일. 허브 빌드에 함께 넣어 오프라인에서도 보인다 */
   icon: string;
   color: string;
-  /** live: 공개, soon: "준비 중" 카드로만 보임 */
-  status: 'live' | 'soon';
+  /**
+   * live: 공개. preview: 배포하지만 비밀번호를 확인한 기기에만 카드가 보임(그 밖에는 soon 처럼).
+   * soon: 배포하지 않고 "다음 게임" 띠에 이름만
+   */
+  status: 'live' | 'preview' | 'soon';
   /** 조이팩에 추가한 날(YYYY-MM-DD). 허브 카드는 이 날짜가 늦은 게임부터 보인다 */
   added: string;
   ranking?: { path: string; default: string; boards: Board[] };

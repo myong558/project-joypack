@@ -8,6 +8,8 @@ export type ShareOutcome = 'shared' | 'cancelled' | 'saved' | 'copied' | 'failed
 
 export interface JoypackApi {
   KEYS: Record<SharedSetting, string>;
+  /** 숨김 미리보기(games.json status "preview")로 배포된 게임인지. true 면 랭킹 등록을 하지 않는다 */
+  isPreview(): boolean;
   /** 공통 상단 메뉴 아이콘 SVG 문자열 */
   topIcon(name: TopIcon): string;
   /** 기본 언어: 기기 설정 언어가 한국어면 'ko', 그 밖은 모두 'en' */

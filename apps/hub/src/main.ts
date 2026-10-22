@@ -4,6 +4,7 @@ import { GAMES, byNewest, gameVersion, iconUrl, isNew, patternOf, type GameMeta 
 import { LANG_LABEL, LANGS, formatNumber, getLang, t } from './i18n';
 import { TOP, cachedBoard, hasRanking, loadBoard, type Row } from './rankings';
 import { externalOpenUrl, installState, onInstallChange, promptInstall } from './install';
+import { checkPassword, previewOn, setPreview } from './preview';
 import { bestRecord, canClearRecords, clearRecords } from './records';
 import { THEMES, applySettings, applyTheme, canVibrate, loadSettings, migrateLegacy, saveSetting, watchSystemTheme } from './settings';
 import { SKINS, previewSkin, setPreviewSkin, todaySkin, type Skin } from './skins';
@@ -14,8 +15,14 @@ applySettings(settings);
 watchSystemTheme(() => settings.theme);
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
-// 최근에 추가한 게임부터(카드·랭킹 탭·설정 목록 모두 같은 순서)
-const live = byNewest(GAMES.filter((g) => g.status === 'live'));
+// 첫 화면에 카드로 보일 게임. 최근에 추가한 게임부터(카드·랭킹 탭·설정 목록 모두 같은 순서).
+// 미리보기를 켠 기기는 preview 게임도 함께 보인다(켜고 끄면 다시 계산)
+let live: GameMeta[] = [];
+const shownGames = () =>
+  byNewest(GAMES.filter((g) => g.status === 'live' || (g.status === 'preview' && previewOn())));
+live = shownGames();
+/** NEW 를 붙일 게임: 공개된 게임 중 가장 최근 것(미리보기 게임은 TEST 표시) */
+const newestPublic = byNewest(GAMES.filter((g) => g.status === 'live'))[0];
 
 const ICON = {
   trophy:
@@ -232,13 +239,14 @@ function gameCard(game: GameMeta): string {
   const best = bestRecord(game);
   const ready = cached.get(game.id) ?? false;
   const blocked = !navigator.onLine && !ready;
-  const fresh = isNew(game, live[0]);
+  const test = game.status === 'preview';
+  const fresh = !test && isNew(game, newestPublic);
   // 게임 카드 = 장난감 버튼: 위는 게임 색 그림판(아이콘이 둥실), 아래는 이름·설명·기록, 맨 아래 "플레이" 버튼.
   // 게임이 계속 늘어나므로 휴대폰 두 칸, 넓은 화면은 칸 수가 늘어나는 바둑판으로 쌓는다(styles.css .games)
   return `
     <a class="card${blocked ? ' blocked' : ''}" href="${game.path}" style="--c:${game.color}" data-game="${game.id}"
-       ${blocked ? 'aria-disabled="true"' : ''} aria-label="${fresh ? `${t('game.newLabel')} · ` : ''}${esc(name)} — ${t('game.play')}">
-      <span class="card-art" data-pat="${patternOf(game)}">${fresh ? `<span class="card-new" aria-hidden="true">${t('game.new')}</span>` : ''}<img class="card-icon" src="${iconUrl(game)}" alt="" width="72" height="72" /></span>
+       ${blocked ? 'aria-disabled="true"' : ''} aria-label="${test ? `${t('game.testLabel')} · ` : fresh ? `${t('game.newLabel')} · ` : ''}${esc(name)} — ${t('game.play')}">
+      <span class="card-art" data-pat="${patternOf(game)}">${test ? `<span class="card-new test" aria-hidden="true">${t('game.test')}</span>` : fresh ? `<span class="card-new" aria-hidden="true">${t('game.new')}</span>` : ''}<img class="card-icon" src="${iconUrl(game)}" alt="" width="72" height="72" /></span>
       <span class="card-body">
         <strong class="card-name">${esc(name)}</strong>
         <span class="card-desc">${esc(game.desc[getLang()])}</span>
@@ -257,7 +265,8 @@ function gameCard(game: GameMeta): string {
  * 목록은 최신 게임부터라 "앞으로 나올 게임"을 카드로 끼우면 순서가 어긋나므로 목록 밖, 끝맺음 자리에 둔다
  */
 function nextStrip(): string {
-  const soon = GAMES.filter((g) => g.status === 'soon');
+  // 미리보기 게임도 비밀번호를 확인하지 않은 기기에서는 준비 중으로 보인다
+  const soon = GAMES.filter((g) => g.status === 'soon' || (g.status === 'preview' && !live.includes(g)));
   const text = soon.length
     ? t('game.nextNamed', { name: soon.map((g) => g.name[getLang()]).join(', ') })
     : t('game.nextDesc');
@@ -448,7 +457,8 @@ function rowsHtml(game: GameMeta, rows: Row[]): string {
 }
 
 function openRanking(): void {
-  const games = live.filter((g) => g.ranking && hasRanking(g.id));
+  // 미리보기 게임은 랭킹 등록을 하지 않으므로 공개된 게임만
+  const games = live.filter((g) => g.status === 'live' && g.ranking && hasRanking(g.id));
   const body = `
     <p class="sheet-sub">${t('ranking.sub')}</p>
     ${games
@@ -577,7 +587,8 @@ async function openSettings(): Promise<void> {
     </section>
     <section class="set-group about">
       <h3>${t('settings.about')}</h3>
-      <p>${t('app.title')} v${__APP_VERSION__} · ${live.map((g) => `${esc(g.name[getLang()])} v${gameVersion(g.id)}`).join(' · ')}</p>
+      <p><span class="ver-tap" data-ver-tap>${t('app.title')} v${__APP_VERSION__}</span> · ${live.map((g) => `${esc(g.name[getLang()])} v${gameVersion(g.id)}`).join(' · ')}</p>
+      ${previewOn() ? `<p class="preview-state"><span>${t('preview.on')}</span><button class="small-btn" data-preview-off>${lbl(t('preview.off'))}</button></p>` : ''}
       <p class="hint">Font: Jua (SIL OFL 1.1)</p>
     </section>`;
   const dialog = openDialog('settings', body, t('settings.title'));
@@ -647,6 +658,48 @@ async function openSettings(): Promise<void> {
       b.closest('li')!.querySelector('.storage-state')!.textContent = t('storage.none');
     }),
   );
+  // 숨김 미리보기: 버전 글자를 7번 연속(누름 사이 0.8초 안) 누르면 비밀번호 창
+  let taps = 0;
+  let tapTimer: ReturnType<typeof setTimeout> | undefined;
+  dialog.querySelector('[data-ver-tap]')!.addEventListener('click', () => {
+    clearTimeout(tapTimer);
+    tapTimer = setTimeout(() => (taps = 0), 800);
+    if (++taps < 7) return;
+    taps = 0;
+    if (!previewOn()) openPreviewLock(dialog);
+  });
+  dialog.querySelector('[data-preview-off]')?.addEventListener('click', () => {
+    setPreview(false);
+    live = shownGames();
+    dialog.close();
+  });
+}
+
+/** 미리보기 비밀번호 창. 맞으면 이 기기에 미리보기를 켜고 설정 창까지 닫아 첫 화면을 다시 그린다 */
+function openPreviewLock(settingsDialog: HTMLDialogElement): void {
+  const body = `
+    <form class="preview-lock" data-preview-form>
+      <p class="sheet-sub">${t('preview.prompt')}</p>
+      <input class="initials" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" data-preview-pass aria-label="${t('preview.title')}" />
+      <p class="hint warn-text" data-preview-wrong role="alert" hidden>${t('preview.wrong')}</p>
+      <button class="primary-btn" type="submit">${lbl(t('preview.unlock'))}</button>
+    </form>`;
+  const dialog = openDialog('preview', body, t('preview.title'));
+  const input = dialog.querySelector<HTMLInputElement>('[data-preview-pass]')!;
+  input.focus();
+  dialog.querySelector('[data-preview-form]')!.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!(await checkPassword(input.value))) {
+      dialog.querySelector<HTMLElement>('[data-preview-wrong]')!.hidden = false;
+      input.select();
+      return;
+    }
+    setPreview(true);
+    live = shownGames();
+    await refreshCached();
+    dialog.close();
+    settingsDialog.close();
+  });
 }
 
 // ---------- 조이팩 공유 ----------

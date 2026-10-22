@@ -38,7 +38,8 @@ run('pnpm --filter hub build');
 cpSync(join(ROOT, 'apps/hub/dist'), DIST, { recursive: true });
 
 // 2. 게임
-const games = readJson('games.json').filter((g) => g.status === 'live');
+// preview(숨김 미리보기)도 배포한다. 허브는 비밀번호를 확인한 기기에서만 카드를 보인다
+const games = readJson('games.json').filter((g) => g.status === 'live' || g.status === 'preview');
 for (const game of games) {
   const dir = join(ROOT, 'games', game.id);
   const pkg = readJson(`games/${game.id}/package.json`);
@@ -57,6 +58,12 @@ for (const game of games) {
     }
   }
   if (!existsSync(join(out, 'index.html'))) throw new Error(`dist/games/${game.id}/index.html 이 없습니다`);
+  // 미리보기 표시: 게임은 Joypack.isPreview() 로 알고 랭킹 등록을 건너뛴다
+  if (game.status === 'preview') {
+    const index = join(out, 'index.html');
+    writeFileSync(index, readFileSync(index, 'utf8').replace(/<html\b/i, '<html data-jp-preview'));
+    console.log(`games/${game.id}: 숨김 미리보기(비밀번호 확인한 기기의 허브에만 보임)`);
+  }
 }
 
 // 3. 공통 모듈(빌드 없는 게임이 <script> 로 불러옴)

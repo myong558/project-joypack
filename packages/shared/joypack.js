@@ -356,8 +356,15 @@
     return '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' + (TOP_ICONS[name] || '') + '</svg>';
   }
 
+  // 숨김 미리보기로 배포된 게임인지(games.json status "preview"). 빌드가 그 게임 index.html 의 <html> 에 data-jp-preview 를 붙인다.
+  // 미리보기 게임은 테스트 점수가 실제 랭킹에 섞이지 않도록 랭킹 등록을 하지 않는다
+  function isPreview() {
+    return typeof document !== 'undefined' && document.documentElement.hasAttribute('data-jp-preview');
+  }
+
   global.Joypack = {
     KEYS: KEYS,
+    isPreview: isPreview,
     topIcon: topIcon,
     deviceLang: deviceLang,
     guardBottom: guardBottom,
