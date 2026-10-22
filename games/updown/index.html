@@ -313,6 +313,8 @@
       </p>
       <!-- 랭킹 등록 칸: TOP 10 에 들면 축하 아래에 펼쳐진다(app.js 의 renderResultRank). 팝업을 열지 않고 바로 등록하고,
            등록하면 "N위로 등록했어요 + 랭킹 보기"로 바뀐다. 등록하지 않고 넘어가도 위 [랭킹 등록] 버튼으로 나중에 할 수 있다. -->
+      <!-- 랭킹 등록 + 버튼 묶음. 세로 화면에서는 display: contents 라 없는 것과 같고, 가로로 눕힌 낮은 화면에서 오른쪽 칸이 된다(style.css) -->
+      <div class="result-side">
       <form id="result-rank" class="result-rank" hidden novalidate>
         <p id="result-rank-prompt" class="result-rank-prompt"></p>
         <div class="ranking-entry">
@@ -340,6 +342,7 @@
             <span data-i18n="result.home"></span>
           </button>
         </div>
+      </div>
       </div>
       <p id="toast" class="toast" role="status" aria-live="polite"></p>
     </section>

@@ -335,7 +335,7 @@ function renderHome(): void {
 // 화면을 여백 6%를 남기고 채우도록 통째로 키운다(css 의 --z, 0.75~2.2배. 내용이 화면보다 길면 조금 줄인다).
 // 게임 안의 PC 화면 확대(업다운 --pc-zoom)와 같은 방식이다. 휴대폰·태블릿 세로는 키우지 않고 칸 수로 맞춘다.
 // 게임이 많아져 0.75배로도 다 안 들어가면 스크롤한다. css 의 @media 조건과 같아야 한다.
-const wideQuery = matchMedia('(min-width: 900px), (orientation: landscape) and (min-width: 640px)');
+const wideQuery = matchMedia('(min-width: 900px), (orientation: landscape) and (min-width: 560px)');
 
 function fitScreen(): void {
   const root = document.documentElement;

@@ -1202,6 +1202,22 @@ button:focus-visible {
   animation: wobble 1s ease-in-out;
 }
 
+/* 랭킹 등록 칸이 펼쳐지면 자리가 모자라 다시 하기 버튼이 화면 밖으로 밀리므로 실패 얼굴을 트로피 크기로 줄인다 */
+#screen-result:has(.result-rank:not([hidden])) {
+  gap: calc(var(--space) * 0.6);
+}
+
+#screen-result:has(.result-rank:not([hidden])) .result-art.lost .result-icon {
+  width: min(112px, 12 * var(--vh));
+  height: min(112px, 12 * var(--vh));
+  padding: min(16px, 2 * var(--vh));
+}
+
+/* 이때는 등록 칸이 확인 버튼 자리를 이미 비켜 두므로 버튼 아래 여백도 줄인다 */
+#screen-result:has(.result-rank:not([hidden])) .actions {
+  padding-bottom: calc(var(--space) * 0.5);
+}
+
 .sparkle {
   position: absolute;
   display: none;
@@ -1309,6 +1325,11 @@ h1.lost {
 /* 결과 화면이 막 뜬 직후에는 버튼을 누를 수 없다(app.js 의 finishGame). 확인 버튼을 연달아 누르다 잘못 눌리는 것을 막는다. */
 #screen-result.locked .actions {
   pointer-events: none;
+}
+
+/* 랭킹 등록 + 버튼 묶음: 세로 화면에서는 없는 것처럼(자식이 화면에 바로 놓임). 가로로 눕힌 낮은 화면에서만 오른쪽 칸 */
+.result-side {
+  display: contents;
 }
 
 /* 공유하기·홈으로: 한 줄에 반씩. 버튼을 하나 더 두어도 결과 화면 높이가 늘지 않는다. */
@@ -1967,7 +1988,124 @@ h1.lost {
   }
 }
 
-/* 움직임 줄이기: 크기 변화·애니메이션 없이 어두워지는 눌림 효과만 남긴다 */
+/* ── 가로로 눕힌 휴대폰 ───────────────── */
+/* 바로가기·브라우저에서는 세로 고정이 안 돼 가로로도 열린다. 주소창·아래 버튼까지 빠지면 높이가 260~560px 이라
+   한 줄로 쌓으면 다이얼·버튼이 화면 밖으로 밀린다. 그래서 두 칸으로 나눈다(PC 화면 배치와 같은 생각, 확대 없음).
+   시작: 난이도 카드 2×2 / 게임: 왼쪽 상태·힌트·기록, 오른쪽 숫자 고르기 / 결과: 왼쪽 결과, 오른쪽 등록·버튼.
+   그래도 모자라는 아주 낮은 화면은 화면 안쪽 스크롤(.screen)로 본다. */
+@media (orientation: landscape) and (max-height: 559px) {
+  .app {
+    max-width: 920px;
+    padding-inline: max(var(--gutter), env(safe-area-inset-left)) max(var(--gutter), env(safe-area-inset-right));
+  }
+
+  .difficulty-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: calc(var(--space) * 0.6) 14px;
+    margin-top: calc(var(--space) * 0.5);
+    margin-bottom: auto;
+  }
+
+  #screen-play {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-areas:
+      'status form'
+      'hint form'
+      'history form';
+    column-gap: 28px;
+    row-gap: 8px;
+  }
+
+  #screen-play .status {
+    grid-area: status;
+    gap: 8px;
+  }
+
+  #screen-play .status-item {
+    padding-block: 4px;
+  }
+
+  #screen-play .hint-box {
+    grid-area: hint;
+    padding-block: 0;
+  }
+
+  /* 높이 비례(--vh)로는 너무 작아져, 가로에서는 폭이 넉넉한 만큼 고정 크기로 둔다 */
+  #screen-play .hint-value {
+    font-size: clamp(1.6rem, 10 * var(--vh), 2.6rem);
+  }
+
+  #screen-play .hint {
+    font-size: clamp(1.2rem, 6 * var(--vh), 1.8rem);
+  }
+
+  #screen-play .history {
+    grid-area: history;
+    min-height: 72px;
+  }
+
+  #screen-play .guess-form {
+    grid-area: form;
+    align-self: center;
+    justify-content: center;
+  }
+
+  .dial {
+    --dial-gap: 0px;
+    width: min(100%, 420px);
+  }
+
+  /* 결과: 왼쪽 칸에 그림·제목·정답·기록을 차례로, 오른쪽 칸에 랭킹 등록과 버튼을 세로 가운데에 */
+  #screen-result {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-content: center;
+    column-gap: 28px;
+    row-gap: 4px;
+  }
+
+  #screen-result > * {
+    grid-column: 1;
+    justify-self: center;
+    margin-block: 0;
+  }
+
+  #screen-result > .result-side {
+    grid-column: 2;
+    grid-row: 1 / span 5;
+    align-self: center;
+    justify-self: stretch;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .result-side > .result-rank,
+  .result-side > .actions {
+    margin: 0;
+    padding-bottom: 0;
+  }
+
+  /* 낮은 화면이라 실패 얼굴(세로에서 화면 높이의 32%)을 줄이고, 랭킹 등록 칸도 촘촘하게 */
+  .result-art.lost .result-icon {
+    width: min(160px, 26 * var(--vh));
+    height: min(160px, 26 * var(--vh));
+  }
+
+  .result-rank {
+    gap: 6px;
+    padding: 8px 10px;
+  }
+
+  .result-rank-prompt {
+    font-size: 1rem;
+    line-height: 1.35;
+  }
+}
+
 /* ── PC 화면 ──────────────────────────── */
 /* 가로가 넉넉한 화면(PC 브라우저)은 휴대폰처럼 한 줄로 길게 늘이지 않고 나눠 놓는다.
    시작: 난이도 카드 2×2 / 게임: 왼쪽에 상태·힌트·기록, 오른쪽에 숫자 고르기 / 결과: 버튼 폭을 줄여 가운데. */

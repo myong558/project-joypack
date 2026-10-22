@@ -2110,11 +2110,12 @@ button.dex-item:focus-visible {
 .kills {
   list-style: none;
   margin: 0;
-  padding: 0.4em 0 0;
+  /* NEW 딱지가 칸 위로 반쯤 올라가므로 위·줄 사이를 그만큼 띄운다 */
+  padding: 0.75em 0 0;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 0.35em;
+  gap: 0.8em 0.45em;
 }
 
 .kills li {
@@ -2135,17 +2136,23 @@ button.dex-item:focus-visible {
   margin-left: 0.1em;
 }
 
+/* 처음 잡은 두더지 딱지: 칸 오른쪽 위 모서리에 작게 걸쳐 잡은 수(×15)를 가리지 않는다.
+   다른 글자처럼 최소 18px 로 키우면 칸 반을 덮어 숫자가 안 보였다 */
 .kills em {
   position: absolute;
-  top: -0.7em;
-  right: -0.5em;
-  padding: 0 0.3em;
-  border-radius: 0.4em;
+  top: 0;
+  right: 0;
+  translate: 35% -60%;
+  padding: 0.1em 0.4em;
+  border-radius: 0.5em;
   background: var(--bad);
   color: #fff;
-  font-size: max(18px, 0.55em);
+  font-size: max(11px, 0.5em);
   font-style: normal;
   font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.25);
 }
 
 .actions {
@@ -2321,8 +2328,16 @@ button.dex-item:focus-visible {
 }
 
 @media (orientation: landscape) {
+  /* 주소창·아래 버튼까지 빠진 아주 낮은 가로 화면은 줄여도(--fit 0.6배까지) 다 안 들어간다.
+     그때 가운데 정렬이면 제목이 위 메뉴 밑으로 숨으므로 위부터 놓고(safe) 안쪽에서 스크롤한다 */
   .start {
     padding-top: calc(var(--jp-top-inset) + var(--jp-top-size) + 0.2em);
+  }
+
+  .start,
+  .result {
+    align-items: safe center;
+    overflow-y: auto;
   }
 
   .start .title-hole {
@@ -2352,7 +2367,10 @@ button.dex-item:focus-visible {
 .modal {
   width: min(100%, 21em);
   max-height: 100%;
-  overflow: hidden;
+  /* 가로로 눕힌 낮은 화면(주소창·아래 버튼까지 빠지면 260px 안팎)에서는 설정·도감 창도 화면보다 길어져 안쪽에서 스크롤한다 */
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 1em;
   border: 2px solid var(--border);
   border-radius: 1.2em;
@@ -3099,6 +3117,7 @@ small {
   .kills em {
     top: -0.25em;
     right: -0.2em;
+    translate: none;
     width: 0.65em;
     height: 0.65em;
     padding: 0;
@@ -3602,8 +3621,9 @@ body {
 }
 
 /* 시작 화면: 버튼 폭을 줄이고 요소 사이를 넓혀 숨 쉴 자리를 만든다 */
+/* 버튼 글자는 최소 18px 이라, 화면을 줄여(--fit) em 폭만 좁아지면 '오늘의 챌린지' 설명이 세 줄로 접힌다. 폭은 300px 아래로 줄이지 않는다 */
 .start .modes {
-  width: min(100%, 17.5em);
+  width: min(100%, max(17.5em, 300px));
   margin-inline: auto;
 }
 

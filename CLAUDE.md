@@ -15,4 +15,5 @@
 - 게임·허브를 고치면 버전을 올린다: 게임은 `games/<id>/package.json`, 허브는 루트 `package.json` (기능 추가 minor, 수정 patch).
 - 답변 끝에 **확인 버전**(바뀐 대상 → 새 버전, 확인 위치: 게임 설정 창 맨 아래 / 조이팩 설정 → 정보)을 적는다.
 - 확인: `pnpm test`, `pnpm build`, `pnpm preview`(http://localhost:4170/project-joypack/)로 실제 화면.
+- 화면 배치(CSS 배치·글자 크기·화면 맞춤 코드)를 바꿨으면 `pnpm check:screens <hub | 게임 id>`로 가로·주소창·폴드 크기를 점검한다. 언제 어디까지 돌릴지는 기준서 7.1 "언제 돌리나"를 따르고, 묻지 않고 진행한다. 색·문구·규칙만 바꿨으면 돌리지 않는다.
 - Firestore 규칙(`firestore.rules`)을 바꾸면 콘솔 게시는 사람이 해야 하므로 답변에 알린다.

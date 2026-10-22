@@ -74,9 +74,12 @@ function openModal(host: HTMLElement, content: HTMLElement, label: string, reope
   // 화면을 다시 그려 판이 바뀌면 대화상자도 함께 사라진다
   const watch = new MutationObserver(() => host.isConnected || close());
   if (host.parentNode) watch.observe(host.parentNode, { childList: true });
+  // 판 글자 크기는 창 크기 말고도 바뀐다(시작 화면 --fit: 주소창이 접히거나 화면을 돌린 뒤 늦게 맞춰짐). 다시 맞출 때마다 따른다
+  host.addEventListener('fitchange', fit);
   const close = () => {
     backdrop.remove();
     watch.disconnect();
+    host.removeEventListener('fitchange', fit);
     document.removeEventListener('keydown', onKey, true);
     window.removeEventListener('resize', fit);
     if (opener?.isConnected) opener.focus();
@@ -192,8 +195,23 @@ export function startScreen(opts: StartOptions): HTMLElement {
     if (!el.isConnected) return window.removeEventListener('resize', fitStart);
     el.style.setProperty('--fit', '1');
     const cols = [...el.children].filter((c): c is HTMLElement => c instanceof HTMLElement && !['absolute', 'fixed'].includes(getComputedStyle(c).position));
-    const need = Math.max(...cols.map((c) => c.offsetTop + c.offsetHeight)) + parseFloat(getComputedStyle(el).paddingBottom);
-    if (need > el.clientHeight) el.style.setProperty('--fit', ((el.clientHeight / need) * 0.98).toFixed(3));
+    // 내용은 세로 가운데 정렬이라 넘치면 위로도 삐져나간다(가로 모드에서 제목이 위 메뉴 밑으로 숨음).
+    // 그래서 아래 끝만 보지 않고 내용 전체 높이(맨 위 칸 ~ 맨 아래 칸)를 위·아래 여백을 뺀 자리와 비교한다.
+    // 위 메뉴·버튼 글자 최소 크기(px) 등 줄지 않는 부분이 섞여, 많이 줄이면 버튼 글이 줄바꿈돼 오히려 길어지기도 한다.
+    // 그래서 1배에서 조금씩 줄여 가며 처음 들어가는 배율을 쓰고, 끝까지 안 들어가면 가장 덜 넘치는 배율을 쓴다(0.6배까지)
+    const over = () => {
+      const cs = getComputedStyle(el);
+      const room = el.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+      return Math.max(...cols.map((c) => c.offsetTop + c.offsetHeight)) - Math.min(...cols.map((c) => c.offsetTop)) - room;
+    };
+    let best = { fit: 1, over: over() };
+    for (let fit = 0.975; best.over > 0 && fit >= 0.6; fit -= 0.025) {
+      el.style.setProperty('--fit', fit.toFixed(3));
+      const o = over();
+      if (o < best.over) best = { fit, over: o };
+    }
+    el.style.setProperty('--fit', best.fit.toFixed(3));
+    el.dispatchEvent(new Event('fitchange'));
     if (opts.opening) aimHammer();
   };
   window.addEventListener('resize', fitStart);

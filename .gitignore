@@ -3,3 +3,4 @@ dist/
 dev-dist/
 *.log
 .DS_Store
+/screen-check/
