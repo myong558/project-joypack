@@ -159,12 +159,6 @@
   color: #fff;
 }
 
-/* 지금 있는 곳(조이팩 첫 화면의 조이팩 버튼): 대표색 테두리·글자 */
-.jp-top-btn.is-current {
-  border-color: var(--jp-top-accent);
-  color: var(--jp-top-accent);
-}
-
 /* 버튼 모서리 알림 점 */
 .jp-top-dot {
   position: absolute;

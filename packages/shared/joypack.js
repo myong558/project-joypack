@@ -231,6 +231,31 @@
     gear: '<path class="jp-fill" d="' + GEAR + '"/><path d="' + GEAR + '"/><circle cx="12" cy="12" r="3"/>',
     home: '<path class="jp-fill" d="M4 10.5 12 4l8 6.5V20H4z"/><path d="M3 11 12 3.5 21 11M5.5 9.5V20h13V9.5M10 20v-5.5h4V20"/>',
   };
+  // 아래 가림 막기: 안드로이드 설치 앱에서 조이팩 → 게임으로 넘어오면, 화면을 내비게이션 바 뒤까지 쓰면서도
+  // 바 높이(env(safe-area-inset-bottom))를 0으로 알려 줘 맨 아래 내용이 바에 가리는 일이 있었다(앱을 내렸다 올리면 정상).
+  // 그때만 "화면 전체 높이 - 시스템이 쓰는 높이"(최대 72px)를 --jp-bottom-guard 로 넣는다. 바 높이가 제대로 오면 0.
+  // 게임 css 는 아래 여백을 max(env(safe-area-inset-bottom), var(--jp-bottom-guard, 0px)) 로 둔다
+  function guardBottom() {
+    const root = document.documentElement;
+    const probe = document.createElement('div');
+    probe.style.cssText = 'position:fixed;bottom:0;height:0;visibility:hidden;padding-bottom:env(safe-area-inset-bottom,0px)';
+    const update = () => {
+      if (!probe.isConnected) document.body.append(probe);
+      const inset = parseFloat(getComputedStyle(probe).paddingBottom) || 0;
+      const scr = global.screen;
+      const standalone = isStandalone();
+      const fullScreen = scr && Math.abs(global.innerHeight - scr.height) <= 2;
+      const guard = standalone && inset === 0 && fullScreen ? Math.min(72, Math.max(0, scr.height - scr.availHeight)) : 0;
+      root.style.setProperty('--jp-bottom-guard', guard + 'px');
+    };
+    update();
+    global.addEventListener('resize', update);
+    global.addEventListener('pageshow', update);
+    document.addEventListener('visibilitychange', update);
+    // 바 높이가 늦게 오는 기기를 위해 처음 몇 초 동안 몇 번 더 본다
+    [300, 1000, 2500].forEach((ms) => setTimeout(update, ms));
+  }
+
   function topIcon(name) {
     return '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' + (TOP_ICONS[name] || '') + '</svg>';
   }
@@ -238,6 +263,7 @@
   global.Joypack = {
     KEYS: KEYS,
     topIcon: topIcon,
+    guardBottom: guardBottom,
     get: get,
     set: set,
     cleanInitials: cleanInitials,
