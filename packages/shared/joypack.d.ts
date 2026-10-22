@@ -12,6 +12,10 @@ export interface JoypackApi {
   topIcon(name: TopIcon): string;
   /** 설치 앱에서 내비게이션 바 높이가 0으로 와 맨 아래가 가릴 때 --jp-bottom-guard(px)를 넣는다. 게임 css 의 아래 여백에 쓴다 */
   guardBottom(): void;
+  /** 보이는 화면 높이(페이지·보이는 영역 중 작은 값)를 --jp-vh(px)로 넣고 바뀔 때마다 갱신한다 */
+  trackViewport(): void;
+  /** 원인 확인용: 처음 잰 화면 값과 지금 값 */
+  viewportReport(): string;
   /** 공통 설정을 먼저 읽고, 없으면 게임이 예전에 쓰던 키(legacyKey)를 읽는다 */
   get(name: SharedSetting, legacyKey?: string): string | null;
   /** 공통 키에 쓰고, legacyKey 를 주면 거기에도 같이 쓴다 */

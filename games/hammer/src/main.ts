@@ -426,6 +426,8 @@ function showResult(result: GameResult, missionId: MissionId, mode: Mode, date: 
 
 // 설치 앱에서 내비게이션 바 높이가 0으로 와 아래 도감이 바에 가리는 경우를 막는다(#app 아래 여백, styles.css)
 Joypack.guardBottom();
+// 화면 높이를 css(100dvh) 대신 실제 보이는 높이로 잡는다(설치 앱에서 조이팩 → 게임으로 넘어올 때 아래가 화면 밖으로 나가던 것)
+Joypack.trackViewport();
 showStart(undefined, undefined, true);
 
 // 조이팩 서비스 워커(사이트에 하나)를 등록하고, 이 게임 파일 전체를 캐시하라고 알린다(처음 열 때 캐시, 이후에는 바뀐 파일만)

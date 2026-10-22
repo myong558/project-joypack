@@ -256,6 +256,56 @@
     [300, 1000, 2500].forEach((ms) => setTimeout(update, ms));
   }
 
+  // 보이는 화면 높이 따라가기: 설치 앱에서 조이팩 → 게임으로 넘어오면 css 의 화면 높이(100dvh·100%)가 실제 보이는 높이보다
+  // 크게 잡혀 맨 아래가 화면 밖으로 나가는 일이 있었다(앱을 내렸다 올리면 정상). 페이지 높이·보이는 영역 높이 중 작은 값을
+  // --jp-vh(px)로 넣고, 처음 몇 초 동안과 화면이 바뀔 때마다 다시 잰다. 게임 css 는 height: var(--jp-vh, 100dvh) 로 쓴다.
+  // 원인 확인용으로 처음 잰 값과 지금 값을 viewportReport() 로 돌려준다(설정 창 맨 아래에 잠깐 표시)
+  let firstReport = '';
+  function viewportNumbers() {
+    const vv = global.visualViewport;
+    const probe = document.createElement('div');
+    probe.style.cssText = 'position:fixed;visibility:hidden;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)';
+    document.body.append(probe);
+    const cs = getComputedStyle(probe);
+    const top = parseFloat(cs.paddingTop) || 0;
+    const bottom = parseFloat(cs.paddingBottom) || 0;
+    probe.remove();
+    const scr = global.screen || {};
+    return {
+      inner: global.innerHeight,
+      vv: vv ? Math.round(vv.height) : 0,
+      client: document.documentElement.clientHeight,
+      screen: scr.height,
+      avail: scr.availHeight,
+      top: top,
+      bottom: bottom,
+      dpr: global.devicePixelRatio,
+      standalone: isStandalone(),
+    };
+  }
+  function trackViewport() {
+    const root = document.documentElement;
+    const update = () => {
+      const n = viewportNumbers();
+      const h = Math.min(n.inner, n.vv || n.inner, n.client || n.inner);
+      root.style.setProperty('--jp-vh', h + 'px');
+      if (!firstReport) firstReport = format(n) + ' → ' + h;
+    };
+    const format = (n) =>
+      'inner ' + n.inner + ' vv ' + n.vv + ' client ' + n.client + ' screen ' + n.screen + '/' + n.avail + ' safe ' + n.top + '/' + n.bottom + ' dpr ' + n.dpr + (n.standalone ? ' app' : '');
+    update();
+    global.addEventListener('resize', update);
+    if (global.visualViewport) global.visualViewport.addEventListener('resize', update);
+    global.addEventListener('pageshow', update);
+    document.addEventListener('visibilitychange', update);
+    [100, 300, 1000, 2500].forEach((ms) => setTimeout(update, ms));
+    trackViewport.format = format;
+  }
+  function viewportReport() {
+    const now = trackViewport.format ? trackViewport.format(viewportNumbers()) : '';
+    return '처음: ' + firstReport + ' / 지금: ' + now;
+  }
+
   function topIcon(name) {
     return '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' + (TOP_ICONS[name] || '') + '</svg>';
   }
@@ -264,6 +314,8 @@
     KEYS: KEYS,
     topIcon: topIcon,
     guardBottom: guardBottom,
+    trackViewport: trackViewport,
+    viewportReport: viewportReport,
     get: get,
     set: set,
     cleanInitials: cleanInitials,

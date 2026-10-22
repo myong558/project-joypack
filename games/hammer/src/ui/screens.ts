@@ -431,6 +431,8 @@ function settingsPanel(opts: StartOptions): HTMLElement {
         </section>
       </div>
       <p class="app-version">${t('settings.version')} v${__APP_VERSION__}</p>
+      <!-- 임시: 설치 앱 아래 잘림 원인 확인용 화면 값(확인이 끝나면 지운다) -->
+      <p class="app-version viewport-report">${Joypack.viewportReport()}</p>
     </div>`);
 
   const select = (attr: string, value: string) =>

@@ -184,6 +184,8 @@
 html,
 body {
   height: 100%;
+  /* 보이는 화면 높이(Joypack.trackViewport, main.ts). 설치 앱에서 css 의 화면 높이가 실제보다 크게 잡혀 아래가 잘리던 것 대비 */
+  height: var(--jp-vh, 100%);
   overflow: hidden;
 }
 
@@ -202,7 +204,7 @@ body {
   z-index: 1;
   width: min(100vw, 768px);
   height: min(100vh, 1024px);
-  height: min(100dvh, 1024px);
+  height: min(var(--jp-vh, 100dvh), 1024px);
   /* 화면 끝까지 그리되(viewport-fit=cover, 조이팩·업다운과 같게) 상태 표시줄·내비게이션 바 자리는 비운다.
    * 설치 앱에서 조이팩 첫 화면(cover)에서 넘어올 때 이 설정이 다르면 안드로이드가 처음에 내비게이션 바 자리까지 화면으로 잡아
    * 아래 도감이 바 뒤로 잘렸다(앱을 내렸다 올리면 그제야 맞춰짐). 안쪽 여백은 컨테이너 크기(cq)에서 빠지므로 화면 맞춤도 이 안에서 한다 */
@@ -218,7 +220,7 @@ body {
   #app {
     width: min(100vw, 1024px);
     height: min(100vh, 768px);
-    height: min(100dvh, 768px);
+    height: min(var(--jp-vh, 100dvh), 768px);
   }
 }
 
@@ -228,7 +230,7 @@ body {
   #app {
     width: 100vw;
     height: 100vh;
-    height: 100dvh;
+    height: var(--jp-vh, 100dvh);
   }
 }
 
@@ -4539,4 +4541,12 @@ body {
   0% { translate: 0 0; rotate: 0deg; scale: 0.4; opacity: 1; }
   70% { opacity: 1; }
   100% { translate: var(--dx) var(--dy); rotate: 160deg; scale: 1; opacity: 0; }
+}
+
+/* 임시: 설치 앱 아래 잘림 원인 확인용 화면 값(설정 맨 아래). 확인이 끝나면 지운다 */
+.viewport-report {
+  font-size: 11px;
+  line-height: 1.4;
+  word-break: break-all;
+  opacity: 0.75;
 }
