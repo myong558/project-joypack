@@ -10,7 +10,7 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "font": "node --use-system-ca scripts/build-font.mjs"
+    "font": "node --use-system-ca ../../scripts/font-subset.mjs dohyeon=src/fonts/dohyeon-subset.woff2 dongle-bold=src/fonts/dongle-bold-subset.woff2"
   },
   "devDependencies": {
     "typescript": "^7.0.2",

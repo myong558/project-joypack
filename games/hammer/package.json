@@ -1,7 +1,7 @@
 {
   "name": "hammer",
   "private": true,
-  "version": "0.15.2",
+  "version": "0.15.3",
   "author": "Myong Bum Soo",
   "license": "UNLICENSED",
   "type": "module",
@@ -9,7 +9,8 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "font": "node --use-system-ca ../../scripts/font-subset.mjs bagel-fat-one=src/fonts/bagel-fat-one-subset.woff2 jua=src/fonts/jua-subset.woff2"
   },
   "devDependencies": {
     "typescript": "^7.0.2",
