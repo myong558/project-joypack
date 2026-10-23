@@ -12,6 +12,7 @@ import { createHash } from 'node:crypto';
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { checkFonts } from './check-fonts.mjs';
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const DIST = join(ROOT, 'dist');
@@ -114,3 +115,11 @@ const sw = readFileSync(join(ROOT, 'scripts/sw-template.js'), 'utf8')
 writeFileSync(join(DIST, 'sw.js'), sw);
 const hubKb = hubFiles.reduce((sum, p) => sum + statSync(join(DIST, p)).size, 0) / 1024;
 console.log(`허브: 파일 ${hubFiles.length}개, ${hubKb.toFixed(0)} KB (설치 때 미리 캐시) · 서비스 워커 ${version}`);
+
+// 6. 글꼴 상업 이용 검사(기준서 1.10, 필수): 목록 밖 글꼴·상업 이용이 확인되지 않은 글꼴·라이선스 파일이 빠진 글꼴이 있으면 빌드 실패
+const fontErrors = checkFonts(DIST);
+if (fontErrors.length) {
+  console.error(`글꼴 상업 이용 검사 실패(기준서 1.10):\n- ${fontErrors.join('\n- ')}`);
+  process.exit(1);
+}
+console.log('글꼴 검사: 목록·배포본 모두 상업 이용 가능한 무료 글꼴');

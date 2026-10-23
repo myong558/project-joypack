@@ -406,7 +406,7 @@ pnpm --filter hub icons  # 로고(apps/hub/public/logo.svg)를 바꾼 뒤 앱 �
 
 | 저작물 | 쓰는 곳 | 출처·라이선스 | 상업 이용 | 함께 배포하는 파일 |
 | --- | --- | --- | --- | --- |
-| Jua 글꼴 | 허브·업다운·두더지잡기 위 메뉴 | SIL OFL 1.1(Reserved Font Name 없음 → 서브셋 허용) | 가능(글꼴만 따로 팔기는 불가) | 허브 `fonts/OFL.txt`(apps/hub/public), 업다운 `games/updown/fonts/OFL.txt`, 두더지잡기 `fonts/LICENSE-Jua.txt` |
+| Jua 글꼴 | 허브·업다운·두더지잡기 위 메뉴 | SIL OFL 1.1(Reserved Font Name 없음 → 서브셋 허용) | 가능(글꼴만 따로 팔기는 불가) | 허브 `fonts/LICENSE-Jua.txt`(apps/hub/public), 업다운 `games/updown/fonts/LICENSE-Jua.txt`, 두더지잡기 `fonts/LICENSE-Jua.txt` |
 | Do Hyeon 글꼴 | 타임 투 플립(본문·숫자) | SIL OFL 1.1(Reserved Font Name 없음 → 서브셋 허용), Google Fonts 저장소 원본 | 가능(글꼴만 따로 팔기는 불가) | 타임 투 플립 `fonts/LICENSE-DoHyeon.txt`(games/timetoflip/public/fonts) |
 | Dongle 글꼴(Bold) | 타임 투 플립(제목·팝업) | SIL OFL 1.1(© The Dongle Project Authors, Reserved Font Name 없음 → 서브셋 허용), Google Fonts 저장소 원본 | 가능(글꼴만 따로 팔기는 불가) | 타임 투 플립 `fonts/LICENSE-Dongle.txt`(games/timetoflip/public/fonts) |
 | Gothic A1 글꼴(Black) | 두더지잡기(제목·버튼·숫자) | SIL OFL 1.1(© HanYang I&C, Reserved Font Name 없음 → 서브셋 허용), Google Fonts 저장소 원본 | 가능(글꼴만 따로 팔기는 불가) | 두더지잡기 `fonts/LICENSE-GothicA1.txt`(games/hammer/public/fonts) |

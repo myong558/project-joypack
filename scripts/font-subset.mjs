@@ -10,6 +10,7 @@ import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import subsetFont from 'subset-font';
+import { declaresReservedName, fontProblems } from './check-fonts.mjs';
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const CACHE = join(ROOT, 'node_modules/.cache/fonts');
@@ -20,6 +21,12 @@ const jobs = process.argv.slice(2).map((arg) => {
   const font = catalog.fonts.find((f) => f.id === id);
   if (!font || !output) {
     console.error(`글꼴 목록(fonts/catalog.json)에 없는 id 이거나 출력 경로가 없어요: ${arg}\n있는 id: ${catalog.fonts.map((f) => f.id).join(', ')}`);
+    process.exit(1);
+  }
+  // 상업 이용 무료 글꼴만(기준서 1.10): 목록에 그렇게 적혀 있지 않으면 만들지 않는다
+  const problems = fontProblems(font, catalog);
+  if (problems.length) {
+    console.error(`${font.family}: 상업 이용 무료 글꼴 조건을 갖추지 않아 쓸 수 없어요 — ${problems.join(', ')}`);
     process.exit(1);
   }
   return { font, output };
@@ -70,6 +77,11 @@ const chars = [...new Set(text)].filter((c) => c >= ' ').join('');
 
 for (const { font, output } of jobs) {
   const { ttf, license } = await source(font);
+  // 받은 라이선스 원문도 다시 본다: OFL 이 맞고 예약 글꼴 이름이 없어야 서브셋(수정본)을 만들 수 있다
+  if (!/SIL Open Font License/i.test(license) || declaresReservedName(license)) {
+    console.error(`${font.family}: 라이선스 원문이 OFL 이 아니거나 예약 글꼴 이름이 있어 서브셋을 만들 수 없어요. 목록에서 빼거나 다시 검증하세요`);
+    process.exit(1);
+  }
   const woff2 = await subsetFont(ttf, chars, { targetFormat: 'woff2' });
   await mkdir(dirname(output), { recursive: true });
   await writeFile(output, woff2);
