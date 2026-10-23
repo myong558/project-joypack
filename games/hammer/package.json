@@ -1,7 +1,7 @@
 {
   "name": "hammer",
   "private": true,
-  "version": "0.15.4",
+  "version": "0.15.5",
   "author": "Myong Bum Soo",
   "license": "UNLICENSED",
   "type": "module",
@@ -10,7 +10,7 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "font": "node --use-system-ca ../../scripts/font-subset.mjs gothic-a1-black=src/fonts/gothic-a1-black-subset.woff2 jua=src/fonts/jua-subset.woff2"
+    "font": "node --use-system-ca ../../scripts/font-subset.mjs jua=src/fonts/jua-subset.woff2"
   },
   "devDependencies": {
     "typescript": "^7.0.2",

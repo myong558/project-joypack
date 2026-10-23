@@ -148,7 +148,7 @@ Project Hammer 🔨 10/19
 | 언어 | TypeScript | 게임 상태 타입 안정성 |
 | UI | 순수 DOM + CSS | 9~16칸 그리드에 프레임워크·Canvas 불필요 |
 | 애니메이션 | CSS transform/transition, keyframes | 두더지 올라옴/내려감, 타격·기절·화면 흔들림 |
-| 글꼴 | Gothic A1 Black(제목·버튼·숫자) + Jua(본문·위 메뉴), 둘 다 SIL OFL 1.1 | 또렷하고 현대적인 굵은 상태판 글씨 + 둥근 본문, 상업적 사용 가능. 화면 글자만 남긴 서브셋(`pnpm --filter hammer font`, 조이팩 글꼴 목록 `fonts/catalog.json`). v0.15.3 전에는 여기어때 잘난체 2종(서브셋 불가, 약 850 KB), v0.15.3 에는 Bagel Fat One(낡아 보여 v0.15.4에서 바꿈)을 썼음 |
+| 글꼴 | Jua 하나(제목·버튼·숫자·본문·위 메뉴), SIL OFL 1.1 | 둥글고 친근한 게임 느낌, 상업적 사용 가능. 화면 글자만 남긴 서브셋(`pnpm --filter hammer font`, 조이팩 글꼴 목록 `fonts/catalog.json`), 약 117 KB. 지난 글꼴: v0.15.2까지 여기어때 잘난체 2종(서브셋 불가, 약 850 KB), v0.15.3 Bagel Fat One(낡아 보임), v0.15.4 Gothic A1 Black(딱딱함) |
 | 사운드 | Web Audio API | 지연 없는 효과음, 피버 시 음높이 변경 |
 | 저장 | localStorage | 최고 기록·도감·설정 저장 (실패 시 무시) |
 | 테스트 | Vitest | 게임 로직 단위 테스트 |
