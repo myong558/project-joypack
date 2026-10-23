@@ -60,7 +60,8 @@
   ];
   const BAD_NAME_EXACT = ['ASS', 'ARSE', 'CUM', 'FAG', 'SEX', 'SEXY', 'TIT', 'TITS', 'ANAL', 'ANUS', 'HOMO', 'GAY', 'JAP', 'SIBA', 'SSIB', 'BYUNG', 'GSAEK', 'SEKI', 'SAEKI', 'SEKKI'];
 
-  // 랭킹 이름으로 써도 되는지(영문 대문자 1~5자이고 금지어가 아님). 등록 버튼·등록 직전에 검사한다
+  // 랭킹 이름으로 써도 되는지(영문 대문자 1~5자이고 금지어가 아님). 등록 버튼·등록 직전에 검사한다.
+  // 서버(firestore.rules 의 allowedName)도 같은 목록으로 다시 검사하므로, 금지어를 고치면 두 곳을 같이 고친다
   function isAllowedName(name) {
     const clean = cleanInitials(name);
     if (!clean || clean !== String(name || '').toUpperCase()) return false;

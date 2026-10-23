@@ -1,7 +1,7 @@
 {
   "name": "hammer",
   "private": true,
-  "version": "0.14.0",
+  "version": "0.14.1",
   "author": "Myong Bum Soo",
   "license": "UNLICENSED",
   "type": "module",

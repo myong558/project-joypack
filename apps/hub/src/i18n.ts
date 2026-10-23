@@ -185,7 +185,7 @@ const en: Record<keyof typeof ko, string> = {
   'share.desc': 'Send Joypack to a friend. They can open the link and install it as an app.',
   'share.button': 'Share Joypack',
   'share.copied': 'Link copied. Paste it into a chat to send.',
-  'share.text': "Joypack mini games! Let's play Up Down and Whack-a-Mole 🎮",
+  'share.text': "Joypack mini games! Let's play Up Down and Mole Bonk 🎮",
   'settings.about': 'About',
   close: 'Close',
 };

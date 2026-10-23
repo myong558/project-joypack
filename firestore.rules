@@ -1,47 +1,136 @@
+// =====================================================================================================
 // 조이팩 Firestore 보안 규칙 원본 (Firebase 프로젝트 joypack-c6bd2)
 // 고친 뒤 Firebase 콘솔 → Firestore Database → 규칙 에 그대로 붙여 넣고 게시한다.
-// 게임마다 games/<게임ID>/ 아래만 열어 두고, 나머지 경로는 모두 막힌다(규칙이 없는 경로는 거부).
 //
-// 주의: 두더지잡기(hammer) 블록은 그 게임 README 의 규칙 설명(문서 이름 classic·daily-날짜만, 필드는 entries 10개 이하만,
-// 삭제 금지)으로 다시 쓴 것이다. 처음 이 파일을 게시하기 전에 콘솔에 게시된 규칙과 대조하고, 다르면 콘솔 쪽을 이 파일에 옮긴다.
+// 게임마다 games/<게임ID>/ 아래만 열어 두고, 나머지 경로는 모두 막힌다(규칙이 없는 경로는 거부).
+// 새 게임을 추가하면 맨 아래에 "■ 게임: ..." 구역을 하나 더 만든다.
+//
+// 목차
+//   ■ 공통        allowedName(랭킹 이름 검사)
+//   ■ 업다운      games/updown/scores-{50|100|200}/{id}   기록 1건 = 문서 1개
+//   ■ 두더지잡기  games/hammer/rankings/{classic|daily-YYYY-MM-DD}   순위표 1개 = 문서 1개
+// =====================================================================================================
 rules_version = '2';
 service cloud.firestore {
   match /databases/{db}/documents {
 
-    // 업다운(v1.11.0~): 범위(1~50·1~100·1~200)마다 컬렉션 scores-<끝 숫자>, 기록 1건 = 문서 1개. 누구나 읽기·등록만, 고치기·지우기 금지.
-    // 점수는 games/updown/js/game.js 의 score() 와 같은 식으로 검사한다:
-    //   1000 + 100 × (정석 횟수 − 시도 횟수) − (걸린 시간 ms ÷ 100, 버림). 그보다 높게 올리면 거부(0점은 항상 허용).
-    //   정석 횟수 = ⌈log2(끝 숫자 + 1)⌉ → 50: 6, 100: 7, 200: 8
-    // 예전 하트·난이도 방식 기록(games/updown/scores)은 더 읽지 않는다. 규칙이 없으니 읽기·쓰기 모두 막힌다.
+    // -------------------------------------------------------------------------------------------------
+    // ■ 공통
+    // -------------------------------------------------------------------------------------------------
+
+    // 랭킹 이름: 영문 대문자 1~5자이고 금지어가 아님.
+    // 게임 안의 Joypack.isAllowedName(packages/shared/joypack.js)과 같은 목록을 서버에서도 검사한다
+    // (앱을 거치지 않고 직접 보내는 요청 대비). 목록을 고치면 두 곳을 같이 고친다.
+    function allowedName(n) {
+      return n is string
+        && n.matches('^[A-Z]{1,5}$')
+        // 이름 전체가 이 낱말이면 금지
+        && !(n in ['ASS', 'ARSE', 'CUM', 'FAG', 'SEX', 'SEXY', 'TIT', 'TITS', 'ANAL', 'ANUS', 'HOMO', 'GAY', 'JAP',
+                   'SIBA', 'SSIB', 'BYUNG', 'GSAEK', 'SEKI', 'SAEKI', 'SEKKI'])
+        // 이름 어디에든 이 낱말이 들어 있으면 금지
+        && !n.matches('.*(FUCK|FUK|FCK|SHIT|CUNT|COCK|DICK|PUSSY|BITCH|BICH|SLUT|WHORE|PENIS|VAGIN|NIGG|NIGA|FAGG|RAPE|PORN|NAZI|HITLR|HITLE|KKK|BOOB|DILDO|JIZZ|TWAT|WANK|SIBAL|SSIBA|SHIBA|SIBBA|JOTGA|JOTKA|BYUNS|GAESE|GESEK|GAESA|JIRAL|JIRAR|NIGMI|NIMIR|BOJI|JAJI).*');
+    }
+
+    // -------------------------------------------------------------------------------------------------
+    // ■ 게임: 업다운 (updown)
+    //   경로   games/updown/scores-50 · scores-100 · scores-200 / {자동 ID}
+    //   모양   기록 1건 = 문서 1개 { initials, score, tries, time, createdAt }
+    //   권한   누구나 읽기·등록만. 고치기·지우기 금지
+    //   점수   games/updown/js/game.js 의 score() 와 같은 식으로 상한을 검사한다(0점은 항상 허용)
+    //          1000 + 100 × (정석 횟수 − 시도 횟수) − (걸린 시간 ms ÷ 100, 버림)
+    //          정석 횟수 = ⌈log2(끝 숫자 + 1)⌉ → 50: 6, 100: 7, 200: 8
+    //   참고   예전 하트·난이도 방식 기록(games/updown/scores)은 규칙이 없어 읽기·쓰기 모두 막힌다
+    // -------------------------------------------------------------------------------------------------
     match /games/updown/{board}/{id} {
-      allow read: if board in ['scores-50', 'scores-100', 'scores-200'];
-      allow create: if board in ['scores-50', 'scores-100', 'scores-200']
+      function updownBoard() {
+        return board in ['scores-50', 'scores-100', 'scores-200'];
+      }
+      function updownScore(d) {
+        return d.score is int
+          && d.score >= 0
+          && (d.score == 0
+            || d.score <= 1000
+              + 100 * ({'scores-50': 6, 'scores-100': 7, 'scores-200': 8}[board] - d.tries)
+              - math.floor(d.time / 100));
+      }
+
+      allow read: if updownBoard();
+      allow create: if updownBoard()
         && request.resource.data.keys().hasOnly(['initials', 'score', 'tries', 'time', 'createdAt'])
-        && request.resource.data.initials is string
-        && request.resource.data.initials.matches('^[A-Z]{1,5}$')
+        && allowedName(request.resource.data.initials)
         && request.resource.data.tries is int
         && request.resource.data.tries >= 1
         && request.resource.data.tries <= {'scores-50': 50, 'scores-100': 100, 'scores-200': 200}[board]
         && request.resource.data.time is int
         && request.resource.data.time >= 0
         && request.resource.data.time <= 86400000
-        && request.resource.data.score is int
-        && request.resource.data.score >= 0
-        && (request.resource.data.score == 0
-          || request.resource.data.score <= 1000
-            + 100 * ({'scores-50': 6, 'scores-100': 7, 'scores-200': 8}[board] - request.resource.data.tries)
-            - math.floor(request.resource.data.time / 100))
+        && updownScore(request.resource.data)
         && request.resource.data.createdAt == request.time;
       allow update, delete: if false;
     }
 
-    // 두더지잡기: 순위표 1개 = 문서 1개({ entries: [...] }, 1~10위). 등록은 트랜잭션으로 문서 전체를 다시 쓴다
+    // -------------------------------------------------------------------------------------------------
+    // ■ 게임: 두더지잡기 (hammer)
+    //   경로   games/hammer/rankings/classic · daily-YYYY-MM-DD
+    //   모양   순위표 1개 = 문서 1개 { entries: [{ name, score, date }, ...] } (점수 높은 순 1~10위)
+    //   권한   누구나 읽기. 등록은 트랜잭션으로 문서 전체를 다시 쓰므로 "기존 순위표에 새 기록 1개를 끼운 것"만 받는다
+    //          - 새 기록은 정확히 1개: 이름 금지어 검사, 점수 1~20000(정상 최고 기록은 약 2,600점),
+    //            날짜 형식(오늘의 챌린지는 문서 날짜와 같아야 함)
+    //          - 기존 기록은 지우거나 바꿀 수 없다. 10위가 꽉 찼을 때만 11위로 밀린 꼴찌 1개가 빠지고,
+    //            새 기록은 그 꼴찌보다 높아야 한다
+    //          - 목록은 항상 점수 높은 순. 문서 지우기 금지
+    //   한계   점수 자체를 부풀리는 것(20000점 이하)은 서버에서 게임을 다시 돌려 보지 않는 한 막을 수 없으니,
+    //          그런 기록은 Firebase 콘솔에서 사람이 지운다
+    // -------------------------------------------------------------------------------------------------
     match /games/hammer/rankings/{board} {
+      function hammerBoard() {
+        return board == 'classic' || board.matches('^daily-[0-9]{4}-[0-9]{2}-[0-9]{2}$');
+      }
+      // 순위표 한 줄
+      function hammerEntry(e) {
+        return e is map
+          && e.keys().hasOnly(['name', 'score', 'date'])
+          && allowedName(e.name)
+          && e.score is int && e.score >= 1 && e.score <= 20000
+          && e.date is string && e.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+          && (board == 'classic' || board == 'daily-' + e.date);
+      }
+      // 점수 높은 순인지(규칙에는 반복문이 없어 10칸을 하나씩 비교한다)
+      function hammerSorted(e) {
+        return (e.size() < 2 || e[0].score >= e[1].score)
+          && (e.size() < 3 || e[1].score >= e[2].score)
+          && (e.size() < 4 || e[2].score >= e[3].score)
+          && (e.size() < 5 || e[3].score >= e[4].score)
+          && (e.size() < 6 || e[4].score >= e[5].score)
+          && (e.size() < 7 || e[5].score >= e[6].score)
+          && (e.size() < 8 || e[6].score >= e[7].score)
+          && (e.size() < 9 || e[7].score >= e[8].score)
+          && (e.size() < 10 || e[8].score >= e[9].score);
+      }
+      // old 순위표에 새 기록 1개를 끼운 것이 next 인지
+      function hammerInsert(old, next) {
+        let added = next.removeAll(old);
+        let dropped = old.removeAll(next);
+        return next.size() == (old.size() < 10 ? old.size() + 1 : 10)
+          && added.size() == 1
+          && hammerEntry(added[0])
+          && hammerSorted(next)
+          && (old.size() < 10
+            ? dropped.size() == 0
+            : added[0].score > old[9].score && (dropped.size() == 0 || (dropped.size() == 1 && dropped[0] == old[9])));
+      }
+
       allow read: if true;
-      allow create, update: if (board == 'classic' || board.matches('^daily-[0-9]{4}-[0-9]{2}-[0-9]{2}$'))
+      allow create: if hammerBoard()
         && request.resource.data.keys().hasOnly(['entries'])
         && request.resource.data.entries is list
-        && request.resource.data.entries.size() <= 10;
+        && request.resource.data.entries.size() == 1
+        && hammerEntry(request.resource.data.entries[0]);
+      allow update: if hammerBoard()
+        && request.resource.data.keys().hasOnly(['entries'])
+        && request.resource.data.entries is list
+        && resource.data.entries is list
+        && hammerInsert(resource.data.entries, request.resource.data.entries);
       allow delete: if false;
     }
   }

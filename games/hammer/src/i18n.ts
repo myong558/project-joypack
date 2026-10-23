@@ -155,7 +155,7 @@ const ko = {
 export type MessageKey = keyof typeof ko;
 
 const en: Record<MessageKey, string> = {
-  'app.title': 'Whack-a-Mole',
+  'app.title': 'Mole Bonk',
   'app.tagline': 'Quirky moles, 30 seconds. Whack away!',
   'start.classic': 'Play Classic',
   'start.daily': "Today's Challenge",
