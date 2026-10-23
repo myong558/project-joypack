@@ -394,16 +394,15 @@ export function faceSvg(face: FaceId | SpecialId): string {
   return `<svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">${body}</svg>`;
 }
 
-/** 카드 뒷면: 시계판 무늬(눈금 12개, 바늘 10시 10분). 색은 CSS(currentColor) */
-export const CARD_BACK = `<svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-  <circle cx="32" cy="32" r="19" fill="none" stroke="currentColor" stroke-width="3" opacity=".9"/>
-  ${Array.from({ length: 12 }, (_, i) => {
-    const a = (i * Math.PI) / 6;
-    const r1 = i % 3 ? 14 : 12;
-    return `<line x1="${(32 + Math.cos(a) * r1).toFixed(1)}" y1="${(32 + Math.sin(a) * r1).toFixed(1)}" x2="${(32 + Math.cos(a) * 16).toFixed(1)}" y2="${(32 + Math.sin(a) * 16).toFixed(1)}" stroke="currentColor" stroke-width="${i % 3 ? 1.5 : 2.5}" stroke-linecap="round"/>`;
-  }).join('')}
-  <path d="M32 32l-7-5M32 32l8-6" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-  <circle cx="32" cy="32" r="2.5" fill="currentColor"/>
+/**
+ * 카드 뒷면: 조이팩 로고(레몬 바탕에 게임기 부품 웃는 얼굴 — 왼눈 십자 버튼, 오른눈 동그란 버튼)를 본뜬 얼굴.
+ * 부품 아래 진한 그림자로 툭 튀어나온 장난감 버튼처럼 보이게 한다. 바탕 레몬색·테두리는 CSS(.back)
+ */
+const LOGO_FACE = `<rect x="120" y="198" width="116" height="40" rx="14"/><rect x="158" y="160" width="40" height="116" rx="14"/><circle cx="336" cy="218" r="44"/><path d="M152 318 Q256 428 360 318" fill="none" stroke-width="40" stroke-linecap="round"/>`;
+export const CARD_BACK = `<svg viewBox="60 110 392 330" aria-hidden="true" focusable="false">
+  <g transform="translate(0 16)" fill="#d98f00" stroke="#d98f00">${LOGO_FACE}</g>
+  <circle cx="110" cy="300" r="26" fill="#ff7a3d" opacity="0.9"/><circle cx="402" cy="300" r="26" fill="#ff7a3d" opacity="0.9"/>
+  <g fill="#3d2a00" stroke="#3d2a00">${LOGO_FACE}</g>
 </svg>`;
 
 /**
