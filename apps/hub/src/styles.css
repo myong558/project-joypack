@@ -1203,6 +1203,38 @@ a.card:active .card-play {
   background: var(--surface);
 }
 
+/* 모든 게임에 함께 적용되는 설정(컬러 모드·언어·소리·진동·랭킹 이름)을 한 상자로 묶고 맨 위에 안내 한 줄 */
+.set-shared {
+  margin-bottom: 12px;
+  padding: 10px 8px 0;
+  border-radius: 24px;
+  background: var(--surface-2);
+}
+
+.set-shared .set-group:last-child {
+  margin-bottom: 8px;
+}
+
+.shared-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 6px 10px;
+  color: var(--brand);
+  font-size: 15px;
+}
+
+.shared-label svg {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .set-group h3 {
   margin: 0 0 10px;
   color: var(--muted);

@@ -35,6 +35,8 @@ const teaserGames = () =>
 const newestPublic = () => byNewest(GAMES.filter((g) => isPublic(g)))[0];
 
 const ICON = {
+  // 게임기: 설정에서 "모든 게임에 함께 적용" 묶음 표시
+  games: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 7.5h9a4.5 4.5 0 0 1 4.4 5.4l-.7 3.4a2.4 2.4 0 0 1-4.1 1.1L14 15.5h-4l-2.1 1.9a2.4 2.4 0 0 1-4.1-1.1l-.7-3.4a4.5 4.5 0 0 1 4.4-5.4z"/><path d="M8 10.5v3M6.5 12h3"/><circle cx="15.5" cy="11" r=".6"/><circle cx="17" cy="13" r=".6"/></svg>',
   trophy:
     '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v4a5 5 0 0 1-10 0z"/><path d="M7 6H4.5a2.5 2.5 0 0 0 2.6 3.4M17 6h2.5a2.5 2.5 0 0 1-2.6 3.4M12 13v3.5M8.5 20h7M9.5 16.5h5V20h-5z"/></svg>',
   // 플레이 화살표는 그림 칸에 빈 여백이 없게 딱 맞춰 그린다(여백이 있으면 버튼 안 글자와 함께 한쪽으로 쏠려 보인다)
@@ -650,12 +652,16 @@ function toggle(name: string, on: boolean, label: string): string {
 async function openSettings(): Promise<void> {
   await refreshCached();
   const body = `
-    <p class="sheet-sub">${t('settings.note')}</p>
-    <section class="set-group dev">
+    ${
+      // 톤 미리보기는 개발자 모드에서만. 평소에는 날마다 정해진 톤(index.html)이 자동으로 고정된다
+      previewOn()
+        ? `<section class="set-group dev">
       <h3>${t('settings.skinDev')}</h3>
       ${seg<Skin | 'auto'>('skin', ['auto', ...SKINS], previewSkin(), (v) => (v === 'auto' ? t('skin.auto') : skinName(v)))}
       <p class="hint">${t('settings.skinDevHint', { name: skinName(todaySkin()) })}</p>
-    </section>
+    </section>`
+        : ''
+    }
     <section class="set-group install" data-install-section></section>
     <section class="set-group">
       <h3>${t('share.title')}</h3>
@@ -663,6 +669,8 @@ async function openSettings(): Promise<void> {
       <button class="primary-btn secondary" data-share>${ICON.share}${lbl(t('share.button'))}</button>
       <p class="install-guide" data-share-done role="status" hidden>${t('share.copied')}</p>
     </section>
+    <div class="set-shared">
+    <p class="shared-label">${ICON.games}${t('settings.note')}</p>
     <section class="set-group">
       <h3>${t('settings.theme')}</h3>
       ${seg('theme', THEMES, settings.theme, (v) => t(`theme.${v}`))}
@@ -681,6 +689,7 @@ async function openSettings(): Promise<void> {
       <input id="initials" class="initials" value="${esc(settings.initials)}" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="email" lang="en" placeholder="ABCDE" />
       <p class="hint">${t('settings.initialsHint')}</p>
     </section>
+    </div>
     <section class="set-group">
       <h3>${t('settings.records')}</h3>
       <ul class="storage">${live
@@ -829,7 +838,10 @@ function openPreviewSwitch(settingsDialog: HTMLDialogElement): void {
     </div>`;
   const dialog = openDialog('preview center', body, t('preview.title'));
   dialog.querySelector('[data-preview-apply]')!.addEventListener('click', async () => {
-    setPreview(dialog.querySelector<HTMLInputElement>('[data-preview-toggle]')!.checked);
+    const on = dialog.querySelector<HTMLInputElement>('[data-preview-toggle]')!.checked;
+    setPreview(on);
+    // 개발자 모드를 끄면 미리보기로 고른 톤을 지우고 오늘의 톤으로 돌아간다
+    if (!on) setPreviewSkin('auto', settings.theme);
     live = shownGames();
     await refreshCached();
     dialog.close();

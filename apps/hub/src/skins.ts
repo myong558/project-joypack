@@ -1,7 +1,7 @@
 import { applyTheme, type Theme } from './settings';
 
 /**
- * 허브 톤(스킨) 5개. 날마다 하나가 정해지고(index.html 의 <head> 스크립트) 사용자가 고르는 설정은 없다.
+ * 허브 톤(스킨) 5개. 날마다 하나가 정해지고(index.html 의 <head> 스크립트) 사용자가 고르는 설정은 없다(개발자 모드 미리보기만).
  * 색은 styles.css 의 :root[data-skin='…'] 토큰에 있다.
  */
 export const SKINS = ['grape', 'candy', 'soda', 'lemon', 'mint'] as const;
@@ -21,8 +21,9 @@ export function currentSkin(): Skin {
   return isSkin(skin) ? skin : todaySkin();
 }
 
-// ---------- 개발용 임시: 설정에서 톤 미리보기 ----------
-// TODO(임시): 톤 확인이 끝나면 이 구역과 설정의 "톤 미리보기" 섹션, index.html 의 joypack.hubSkin 읽기를 함께 지운다.
+// ---------- 개발자 모드: 설정에서 톤 미리보기 ----------
+// 개발자 모드(preview.ts)를 켠 기기에서만 설정에 보이고, index.html 도 개발자 모드일 때만 joypack.hubSkin 을 읽는다.
+// 개발자 모드를 끄면 고른 톤을 지운다(main.ts openPreviewSwitch). 평소에는 날마다 정해진 톤으로 고정.
 
 const PREVIEW_KEY = 'joypack.hubSkin';
 
