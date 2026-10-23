@@ -1862,15 +1862,20 @@ h1.lost {
 
 /* 목록 높이는 기록 수와 관계없이 늘 10줄 높이: 난이도 탭을 바꿔도 팝업 크기가 변하지 않는다.
    한 줄 높이는 화면 높이에 따라 32~40px. */
+/* 한 줄 높이: 오른쪽 점수 칸이 두 줄(점수 + 시도·시간)이라 위아래 여백이 남도록 48px.
+   목록 칸은 10줄 높이로 잡되 화면이 낮으면 화면에 맞춰 줄이고(최소 3줄), 넘치는 줄은 목록 안에서 스크롤한다.
+   260px = 팝업 위아래 여백·제목·범위 칩·안내 줄 몫 */
 .ranking-list {
-  --rank-row: clamp(32px, 5 * var(--vh), 40px);
+  --rank-row: 48px;
   display: grid;
   grid-auto-rows: var(--rank-row);
   align-content: start;
   gap: 4px;
-  height: calc(var(--rank-row) * 10 + 4px * 9);
+  height: max(var(--rank-row) * 3 + 4px * 2, min(var(--rank-row) * 10 + 4px * 9, 100 * var(--vh) - 260px));
   margin: 0;
   padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   list-style: none;
 }
 
@@ -1923,13 +1928,16 @@ h1.lost {
 }
 
 .ranking-tries {
+  padding-block: 4px;
   font-weight: 700;
+  line-height: 1.15;
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
 .ranking-tries small {
   display: block;
+  margin-top: 2px;
   color: var(--text-muted);
   font-size: 0.75em;
   font-weight: 400;
