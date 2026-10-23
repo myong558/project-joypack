@@ -582,7 +582,7 @@ function openRanking(): void {
               .map((b) => `<button role="tab" class="chip-btn" data-board="${b.id}" aria-selected="${b.id === board}">${lbl(esc(b.name[getLang()]))}</button>`)
               .join('')}
           </div>
-          <div class="rank-rows" style="--rows:${expanded.has(g.id) ? FULL : TOP}" aria-live="polite"></div>
+          <div class="rank-rows" style="--rows:${TOP}" aria-live="polite"></div>
           <a class="rank-play" href="${g.path}" ${expanded.has(g.id) ? '' : 'hidden'}>${lbl(t('ranking.play'))} ${ICON.play}</a>
         </section>`;
       })
@@ -612,7 +612,6 @@ function openRanking(): void {
       const btn = e.currentTarget as HTMLButtonElement;
       btn.setAttribute('aria-expanded', String(open));
       btn.innerHTML = lbl(t(open ? 'ranking.less' : 'ranking.more'));
-      section.querySelector<HTMLElement>('.rank-rows')!.style.setProperty('--rows', String(open ? FULL : TOP));
       section.querySelector<HTMLElement>('.rank-play')!.hidden = !open;
       show(current);
     });
@@ -626,11 +625,15 @@ async function showBoard(section: HTMLElement, game: GameMeta, board: string): P
   const req = String(Number(section.dataset.req ?? 0) + 1);
   section.dataset.req = req;
   const limit = expanded.has(game.id) ? FULL : TOP;
+  // 칸 높이는 실제 기록 줄 수만큼(펼쳐도 기록이 3개면 3줄). 불러오는 동안은 지금 높이를 그대로 둔다
+  const fit = (rows: Row[]) => target.style.setProperty('--rows', String(Math.max(1, Math.min(rows.length, limit))));
   const early = cachedBoard(game.id, board);
+  if (early) fit(early);
   target.innerHTML = early ? rowsHtml(game, early, limit) : `<p class="rank-empty">${t('ranking.loading')}</p>`;
   try {
     const result = await loadBoard(game.id, board, limit);
     if (section.dataset.req !== req) return;
+    fit(result.rows);
     target.innerHTML = rowsHtml(game, result.rows, limit) + (result.stale ? `<p class="rank-note">${t('ranking.cached')}</p>` : '');
   } catch {
     if (section.dataset.req !== req) return;
