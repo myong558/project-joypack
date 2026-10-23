@@ -50,6 +50,24 @@
     return String(text || '').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 5);
   }
 
+  // 랭킹 이름 금지어(모든 게임 공통, 기준서 10.3). 랭킹 이름은 다른 사람에게 보이는 사용자 생성 콘텐츠라
+  // 구글 플레이 UGC 정책·애플 심사 지침 1.2 에 따라 욕설·혐오·성적 표현을 걸러야 한다.
+  // CONTAINS: 이름 어디에 들어 있어도 막는다. EXACT: 다른 낱말 속에 흔히 들어가 이름 전체가 같을 때만 막는다.
+  const BAD_NAME_CONTAINS = [
+    'FUCK', 'FUK', 'FCK', 'SHIT', 'CUNT', 'COCK', 'DICK', 'PUSSY', 'BITCH', 'BICH', 'SLUT', 'WHORE', 'PENIS', 'VAGIN',
+    'NIGG', 'NIGA', 'FAGG', 'RAPE', 'PORN', 'NAZI', 'HITLR', 'HITLE', 'KKK', 'BOOB', 'DILDO', 'JIZZ', 'TWAT', 'WANK',
+    'SIBAL', 'SSIBA', 'SHIBA', 'SIBBA', 'JOTGA', 'JOTKA', 'BYUNS', 'GAESE', 'GESEK', 'GAESA', 'JIRAL', 'JIRAR', 'NIGMI', 'NIMIR', 'BOJI', 'JAJI',
+  ];
+  const BAD_NAME_EXACT = ['ASS', 'ARSE', 'CUM', 'FAG', 'SEX', 'SEXY', 'TIT', 'TITS', 'ANAL', 'ANUS', 'HOMO', 'GAY', 'JAP', 'SIBA', 'SSIB', 'BYUNG', 'GSAEK', 'SEKI', 'SAEKI', 'SEKKI'];
+
+  // 랭킹 이름으로 써도 되는지(영문 대문자 1~5자이고 금지어가 아님). 등록 버튼·등록 직전에 검사한다
+  function isAllowedName(name) {
+    const clean = cleanInitials(name);
+    if (!clean || clean !== String(name || '').toUpperCase()) return false;
+    if (BAD_NAME_EXACT.indexOf(clean) >= 0) return false;
+    return !BAD_NAME_CONTAINS.some((word) => clean.indexOf(word) >= 0);
+  }
+
   /**
    * 랭킹 이름(이니셜) 입력 칸을 공통 규칙으로 맞춘다: 영문 대문자 A–Z 5자까지만 들어간다.
    * - 휴대폰 키보드: 웹에서는 키보드 언어를 직접 고를 수 없어서, 한국어 키보드도 영문 자판으로 바뀌는
@@ -427,6 +445,7 @@
     get: get,
     set: set,
     cleanInitials: cleanInitials,
+    isAllowedName: isAllowedName,
     initialsInput: initialsInput,
     registerSW: registerSW,
     isGameCached: isGameCached,

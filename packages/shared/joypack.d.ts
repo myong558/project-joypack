@@ -27,6 +27,8 @@ export interface JoypackApi {
   /** 공통 키에 쓰고, legacyKey 를 주면 거기에도 같이 쓴다 */
   set(name: SharedSetting, value: string, legacyKey?: string): void;
   cleanInitials(text: string): string;
+  /** 랭킹 이름으로 써도 되는지: 영문 대문자 1~5자이고 금지어(욕설·혐오·성적 표현)가 아님. 등록 전에 꼭 검사(기준서 10.3) */
+  isAllowedName(name: string): boolean;
   /** 랭킹 이름 입력 칸: 영문 대문자 5자만, 휴대폰은 영문 자판·대문자로 열기. onChange 는 걸러 낸 값이 바뀔 때마다 */
   initialsInput(input: HTMLInputElement | null, onChange?: (clean: string) => void): void;
   registerSW(options?: { root?: string; game?: string }): Promise<ServiceWorkerRegistration | null>;

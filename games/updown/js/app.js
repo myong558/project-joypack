@@ -881,6 +881,12 @@
       input.focus();
       return;
     }
+    // 금지어(욕설 등)는 올리지 않는다(조이팩 공통 Joypack.isAllowedName, 기준서 10.3)
+    if (!Joypack.isAllowedName(initials)) {
+      showToast(t('ranking.badName'));
+      input.focus();
+      return;
+    }
     const button = $('result-rank-submit');
     button.disabled = true;
     try {
@@ -901,6 +907,11 @@
     input.value = initials;
     const entry = pendingFor(rankingTab);
     if (!initials || !entry) return;
+    if (!Joypack.isAllowedName(initials)) {
+      $('ranking-status').textContent = t('ranking.badName');
+      input.focus();
+      return;
+    }
     const button = $('ranking-submit');
     button.disabled = true;
     try {
