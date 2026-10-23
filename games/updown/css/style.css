@@ -1026,11 +1026,55 @@ button:focus-visible {
   flex-wrap: wrap;
 }
 
-.temp {
+/* 온도계 줄: 힌트 아래 한 줄. 버튼(쓰기 전) 또는 온도(쓴 뒤)가 같은 자리에 와서 줄 높이가 바뀌지 않는다 */
+.temp-row {
   flex-basis: 100%;
   display: flex;
   justify-content: center;
+  align-items: center;
+  min-height: 40px;
   margin: 0;
+}
+
+.temp-row[hidden] {
+  display: none;
+}
+
+.temp {
+  display: flex;
+  justify-content: center;
+  margin: 0;
+}
+
+/* 작은 알약 버튼. 누르는 칸은 40px 높이로 넉넉하게 */
+.thermo-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 14px;
+  background: var(--pill-bg);
+  color: var(--text);
+  border: 1px solid var(--pill-line);
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.thermo-open .icon {
+  width: 20px;
+  height: 20px;
+  color: var(--up);
+}
+
+/* 지금은 쓸 수 없음(숫자를 넣기 전·남은 숫자가 적음): 눌러서 이유는 볼 수 있게 흐리게만 */
+.thermo-open.blocked {
+  opacity: 0.5;
+}
+
+.temp-used {
+  color: var(--text-muted);
+  font-size: 0.95rem;
 }
 
 .temp-hot,
@@ -1485,6 +1529,12 @@ h1.lost {
   font-weight: 800;
   text-align: center;
   font-variant-numeric: tabular-nums;
+}
+
+.result-thermo {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
 }
 
 .result-practice {
@@ -2002,6 +2052,62 @@ h1.lost {
   grid-template-columns: 1fr 1fr;
   gap: 8px;
   width: 100%;
+}
+
+/* 온도계 창. 한글이 낱말 중간에서 끊기지 않게 */
+.thermo .settings-body {
+  word-break: keep-all;
+}
+
+.thermo h2 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.thermo h2 .icon {
+  color: var(--up);
+}
+
+.thermo-desc,
+.thermo-scale {
+  margin: 0;
+}
+
+.thermo-scale {
+  padding: 8px 12px;
+  background: var(--pill-bg);
+  border-radius: 12px;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.thermo-rules {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 1.2em;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.thermo-block {
+  margin: 0;
+  color: var(--up);
+  font-weight: 700;
+}
+
+/* 쓸 수 없을 때는 [닫기] 하나만 꽉 차게. 사용 버튼은 글자가 길어 조금 넓게 */
+.thermo .confirm-actions {
+  display: flex;
+}
+
+.thermo .confirm-actions > button {
+  flex: 1;
+}
+
+.thermo .confirm-actions > #thermo-use {
+  flex: 1.5;
 }
 
 /* ── 애니메이션 ───────────────────────── */

@@ -245,17 +245,7 @@
       if (animate) void hint.offsetWidth; // 같은 힌트가 연달아 나와도 애니메이션을 다시 재생한다.
       hint.className = 'hint ' + (animate ? 'pop ' : '') + kind;
     }
-    // 온도 힌트: 정답과의 거리(맞혔으면 숨긴다)
-    const temp = $('temp');
-    temp.hidden = !last || !last.temp;
-    if (last && last.temp) {
-      temp.textContent = t('temp.' + last.temp);
-      temp.className = 'temp temp-' + last.temp;
-      if (animate) {
-        void temp.offsetWidth;
-        temp.classList.add('pop');
-      }
-    }
+    renderThermo(false);
 
     setPick(pick === null ? game.low : pick);
 
@@ -291,6 +281,71 @@
     // 최신 기록은 맨 아래(숫자 상자 바로 위)에 붙으므로, 넘칠 때는 맨 아래가 보이게 스크롤한다.
     history.scrollTo({ top: history.scrollHeight, behavior: animate && !reducedMotion.matches ? 'smooth' : 'auto' });
     updateHistoryFade();
+  }
+
+  // 온도계 자리: 쓰기 전에는 버튼(쓸 수 없는 때는 흐리게, 눌러서 이유를 본다), 쓴 직후에는 그 숫자의 온도,
+  // 그 뒤 숫자를 더 넣으면 "온도계 사용함". 맞힌 뒤에는 숨긴다. pop 이 true 면 온도가 톡 튀어나온다.
+  function renderThermo(pop) {
+    const row = document.querySelector('.temp-row');
+    const button = $('thermo-open');
+    const temp = $('temp');
+    const status = UpDown.thermoStatus(game);
+    row.hidden = game.status !== 'playing';
+    button.hidden = !!game.thermo;
+    temp.hidden = !game.thermo;
+    if (!game.thermo) {
+      const cost = UpDown.thermoCost(game);
+      $('thermo-open-label').textContent = cost ? t('thermo.openCost', { cost: cost }) : t('thermo.open');
+      button.classList.toggle('blocked', status !== 'ready');
+      return;
+    }
+    const used = game.guesses[game.thermo.at];
+    const latest = game.thermo.at === game.guesses.length - 1;
+    temp.textContent = latest ? t('temp.' + used.temp) : t('thermo.used');
+    temp.className = 'temp ' + (latest ? 'temp-' + used.temp : 'temp-used');
+    if (pop) {
+      void temp.offsetWidth;
+      temp.classList.add('pop');
+    }
+  }
+
+  // 온도계 창: 설명(한 번만·차감 점수·남은 숫자가 적으면 못 씀·시간은 흐름)과 [사용하기]. 쓸 수 없으면 이유와 [닫기]만
+  function openThermo() {
+    if (!game || game.status !== 'playing' || game.thermo) return;
+    const status = UpDown.thermoStatus(game);
+    const cost = UpDown.thermoCost(game);
+    const rules = $('thermo-rules');
+    rules.textContent = '';
+    [
+      t('thermo.ruleOnce'),
+      cost ? t('thermo.ruleCost', { cost: cost }) : t('thermo.ruleFree'),
+      t('thermo.ruleFew', { limit: UpDown.thermoLimit(game) }),
+      t('thermo.ruleTime'),
+    ].forEach((text) => {
+      const li = document.createElement('li');
+      li.textContent = text;
+      rules.appendChild(li);
+    });
+    const ready = status === 'ready';
+    const block = $('thermo-block');
+    block.hidden = ready;
+    block.textContent = status === 'noGuess' ? t('thermo.noGuess') : status === 'tooFew' ? t('thermo.tooFew', { n: UpDown.remaining(game) }) : '';
+    $('thermo-use').hidden = !ready;
+    $('thermo-use').textContent = t('thermo.use', { cost: cost });
+    $('thermo-cancel').textContent = ready ? t('thermo.cancel') : t('thermo.close');
+    $('thermo').showModal();
+    $('thermo-cancel').focus(); // 실수로 Enter 를 눌러도 점수가 깎이지 않게 취소에 초점
+  }
+
+  function useThermo() {
+    $('thermo').close();
+    const r = UpDown.useThermo(game);
+    if (!r.ok) return;
+    renderPlay(false);
+    renderThermo(!reducedMotion.matches);
+    // 아주 가까우면(🔥) 두근, 아니면 짧은 확인음
+    UpDownFx.play(r.temp === 'hot' ? 'danger' : 'edge');
+    $('dial').focus();
   }
 
   // 위로 밀려난 기록이 있으면(스크롤이 맨 위가 아니면) 판 위쪽을 흐리게 한다.
@@ -396,6 +451,9 @@
     $('result-score').textContent = t('result.score', { score: fmt(game.score) });
     $('result-detail').textContent = t('result.wonDetail', { tries: game.guesses.length, time: duration(game.time) });
     $('result-practice').hidden = game.ranked;
+    const thermo = $('result-thermo');
+    thermo.hidden = !game.thermo;
+    if (game.thermo) thermo.textContent = game.thermo.cost ? t('result.thermo', { cost: fmt(game.thermo.cost) }) : t('result.thermoFree');
     $('result-best').hidden = !newBest;
     renderResultRank();
   }
@@ -1029,8 +1087,6 @@
     const last = game.guesses[game.guesses.length - 1];
     const isUp = last.result === 'UP';
     UpDownFx.play(isUp ? 'up' : 'down');
-    // 아주 가까우면(🔥) UP/DOWN 진동이 끝난 뒤 두근 한 번 더
-    if (last.temp === 'hot') setTimeout(() => UpDownFx.play('danger'), 360);
     renderPlay(true);
     guessFeedback(isUp);
     $('dial').focus();
@@ -1074,7 +1130,7 @@
 
   function finishGame() {
     const tries = game.guesses.length;
-    game.score = UpDown.score(game.max, tries, game.time);
+    game.score = UpDown.score(game.max, tries, game.time, game.thermo ? game.thermo.cost : 0);
     // 최고 점수는 랭킹 범위만 남긴다(연습 판은 남기지 않음). 랭킹 범위 판은 랭킹 창의 최근 탭으로도 남긴다
     if (game.ranked) Joypack.setRankBoard('updown', game.max);
     newBest = game.ranked && (!best[game.max] || game.score > best[game.max]);
@@ -1282,12 +1338,20 @@
     });
   });
   // 대화상자 바깥(배경)을 누르면 닫는다. 내용은 .settings-body 안에 있어 배경 클릭만 대화상자 자체에 닿는다.
-  ['settings', 'confirm', 'ranking', 'custom'].forEach((id) => {
+  ['settings', 'confirm', 'ranking', 'custom', 'thermo'].forEach((id) => {
     $(id).addEventListener('click', (event) => {
       if (event.target === $(id)) $(id).close();
     });
   });
   $('confirm-cancel').addEventListener('click', () => $('confirm').close('cancel'));
+  $('thermo-open').addEventListener('click', openThermo);
+  $('thermo-close').addEventListener('click', () => $('thermo').close());
+  $('thermo-cancel').addEventListener('click', () => $('thermo').close());
+  $('thermo-use').addEventListener('click', useThermo);
+  // 창을 닫으면 다이얼로 돌아가 바로 숫자를 고를 수 있게
+  $('thermo').addEventListener('close', () => {
+    if (screen === 'play') $('dial').focus();
+  });
   $('confirm-ok').addEventListener('click', () => $('confirm').close('ok'));
   UpDown.PRESETS.forEach((key) => {
     const button = document.createElement('button');

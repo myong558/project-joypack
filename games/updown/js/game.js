@@ -30,8 +30,51 @@
     return Math.ceil(Math.log2(max + 1));
   }
 
-  function score(max, tries, timeMs) {
-    return Math.max(0, BASE + PER_TRY * (optimalTries(max) - tries) - Math.floor(timeMs / MS_PER_POINT));
+  // penalty: 온도계를 쓴 판의 차감 점수(thermoCost). 차감은 점수를 낮추기만 하므로 서버 규칙의 상한 검사와 부딪치지 않는다.
+  function score(max, tries, timeMs, penalty) {
+    return Math.max(0, BASE + PER_TRY * (optimalTries(max) - tries) - Math.floor(timeMs / MS_PER_POINT) - (penalty || 0));
+  }
+
+  // ── 온도계 ──
+  // 한 판에 한 번, 방금 넣은 숫자의 온도(아래 temperature)를 보여 준다. 온도는 이때만 보이고 자동으로는 나오지 않는다.
+  // 시도 1번 = 100점이라, 온도계로 아낄 수 있는 1~2번보다 확실히 크게 뺀다(1~50 은 정석 횟수가 적어 조금 덜).
+  // 연습 판(직접 정하기)은 랭킹이 없으니 빼지 않는다. 남은 숫자가 범위의 10% 이하면 쓸 수 없다.
+  const THERMO_COST = 300;
+  const THERMO_COST_SMALL = 250;
+  const THERMO_LIMIT = 0.1;
+
+  function thermoCost(state) {
+    if (!state.ranked) return 0;
+    return state.max <= 50 ? THERMO_COST_SMALL : THERMO_COST;
+  }
+
+  // 남은 숫자가 이 개수 이하면 쓸 수 없다(1~50: 5, 1~100: 10, 1~200: 20)
+  function thermoLimit(state) {
+    return Math.ceil(state.max * THERMO_LIMIT);
+  }
+
+  function remaining(state) {
+    return state.high - state.low + 1;
+  }
+
+  // 'ready'(쓸 수 있음) · 'used'(이미 씀) · 'finished'(판 끝남) · 'noGuess'(아직 넣은 숫자 없음) · 'tooFew'(남은 숫자가 적음)
+  function thermoStatus(state) {
+    if (state.thermo) return 'used';
+    if (state.status !== 'playing') return 'finished';
+    if (!state.guesses.length) return 'noGuess';
+    if (remaining(state) <= thermoLimit(state)) return 'tooFew';
+    return 'ready';
+  }
+
+  // 마지막으로 넣은 숫자의 온도를 그 기록에 남긴다
+  function useThermo(state) {
+    const status = thermoStatus(state);
+    if (status !== 'ready') return { ok: false, error: status };
+    const index = state.guesses.length - 1;
+    const last = state.guesses[index];
+    last.temp = temperature(state, last.value);
+    state.thermo = { at: index, cost: thermoCost(state) };
+    return { ok: true, temp: last.temp, cost: state.thermo.cost };
   }
 
   // 정답과의 거리로 나눈 온도 힌트: hot(아주 가까움) · warm · cool · cold(멀다). 범위가 커도 비율로 같은 느낌이 나게 한다.
@@ -56,6 +99,7 @@
       low: 1,
       high: end,
       status: 'playing',
+      thermo: null, // 온도계를 쓰면 { at: 기록 번호, cost: 차감 점수 }
     };
   }
 
@@ -73,12 +117,10 @@
     if (error) return { ok: false, error: error };
 
     let result;
-    let temp = null;
     if (value === state.answer) {
       result = 'CORRECT';
       state.status = 'won';
     } else {
-      temp = temperature(state, value);
       if (value < state.answer) {
         result = 'UP';
         state.low = Math.max(state.low, value + 1);
@@ -87,8 +129,9 @@
         state.high = Math.min(state.high, value - 1);
       }
     }
-    state.guesses.push({ value: value, result: result, temp: temp });
-    return { ok: true, result: result, value: value, temp: temp };
+    // temp: 온도계를 이 숫자에 썼을 때만 채워진다
+    state.guesses.push({ value: value, result: result, temp: null });
+    return { ok: true, result: result, value: value };
   }
 
   const api = {
@@ -99,6 +142,11 @@
     clampMax: clampMax,
     optimalTries: optimalTries,
     score: score,
+    thermoCost: thermoCost,
+    thermoLimit: thermoLimit,
+    remaining: remaining,
+    thermoStatus: thermoStatus,
+    useThermo: useThermo,
     createGame: createGame,
     guess: guess,
   };

@@ -182,6 +182,13 @@
         <path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>
       </g>
     </symbol>
+    <symbol id="i-thermo" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10 13.5V5a2 2 0 0 1 4 0v8.5a4 4 0 1 1-4 0z"/>
+      </g>
+      <circle cx="12" cy="17" r="1.8" fill="currentColor"/>
+      <path d="M12 9.5v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
     <symbol id="i-range" viewBox="0 0 24 24">
       <path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M12 3v18M7 8l5-5 5 5M7 16l5 5 5-5"/>
     </symbol>
@@ -281,8 +288,15 @@
       <div class="hint-box" aria-live="polite">
         <p id="hint-value" class="hint-value"></p>
         <p id="hint" class="hint"></p>
-        <!-- 온도 힌트: 정답과 얼마나 가까운지(🔥 아주 가까움 ~ ❄️ 멂) -->
-        <p id="temp" class="temp" hidden></p>
+        <!-- 온도계: 한 판에 한 번, 방금 넣은 숫자가 정답과 얼마나 가까운지(🔥 아주 가까움 ~ ❄️ 멂). 쓰면 점수 차감.
+             누르면 설명과 [사용하기]가 있는 창(#thermo)이 뜨고, 쓴 뒤에는 이 자리에 그 온도가 남는다(app.js 의 renderThermo). -->
+        <p class="temp-row">
+          <button id="thermo-open" type="button" class="thermo-open">
+            <svg class="icon" aria-hidden="true"><use href="#i-thermo"></use></svg>
+            <span id="thermo-open-label"></span>
+          </button>
+          <span id="temp" class="temp" hidden></span>
+        </p>
       </div>
 
       <!-- 시도 기록은 숫자 상자 위에서 위로 쌓인다. 다이얼은 화면 맨 아래에 고정돼 기록이 늘어도 움직이지 않는다. -->
@@ -317,6 +331,7 @@
       <p id="result-answer" class="answer"></p>
       <p id="result-score" class="result-score"></p>
       <p id="result-detail" class="lead"></p>
+      <p id="result-thermo" class="result-thermo" hidden></p>
       <p id="result-practice" class="result-practice" hidden data-i18n="result.practice"></p>
       <p id="result-best" class="new-best" hidden>
         <svg class="icon" aria-hidden="true"><use href="#i-star"></use></svg>
@@ -503,6 +518,26 @@
   </dialog>
 
   <!-- 기록 리셋 확인 팝업. 설정 창 위에 한 겹 더 뜬다. 처음 포커스는 안전한 "취소"에 있다. -->
+  <!-- 온도계 설명·사용 확인. 쓸 수 없을 때(아직 넣은 숫자가 없음·남은 숫자가 적음)는 이유와 [닫기]만 보인다 -->
+  <dialog id="thermo" class="settings thermo" aria-labelledby="thermo-title">
+    <div class="settings-body">
+      <div class="settings-header">
+        <h2 id="thermo-title"><svg class="icon" aria-hidden="true"><use href="#i-thermo"></use></svg><span data-i18n="thermo.title"></span></h2>
+        <button id="thermo-close" type="button" class="icon-button" data-i18n-aria-label="settings.close">
+          <svg class="icon" aria-hidden="true"><use href="#i-close"></use></svg>
+        </button>
+      </div>
+      <p class="thermo-desc" data-i18n="thermo.desc"></p>
+      <p class="thermo-scale" data-i18n="thermo.scale"></p>
+      <ul id="thermo-rules" class="thermo-rules"></ul>
+      <p id="thermo-block" class="thermo-block" role="status" hidden></p>
+      <div class="confirm-actions">
+        <button id="thermo-cancel" type="button" class="secondary"></button>
+        <button id="thermo-use" type="button" class="primary"></button>
+      </div>
+    </div>
+  </dialog>
+
   <dialog id="confirm" class="settings confirm" aria-describedby="confirm-message">
     <div class="settings-body">
       <span class="confirm-icon" aria-hidden="true">

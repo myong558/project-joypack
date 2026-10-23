@@ -39,6 +39,31 @@ export const screens = [
       await guessMiddle(p);
     },
   },
+  // 온도계 창(쓸 수 있는 때): 설명·규칙 목록·[취소][사용하기]가 가장 긴 상태
+  {
+    name: 'thermo',
+    async go(p) {
+      await p.click('.difficulty');
+      await p.wait(600);
+      await guessMiddle(p);
+      await p.wait(300);
+      await p.click('#thermo-open');
+    },
+  },
+  // 온도계를 쓴 뒤의 플레이 화면(온도 표시)
+  {
+    name: 'play-thermo',
+    async go(p) {
+      await p.click('.difficulty');
+      await p.wait(600);
+      await guessMiddle(p);
+      await p.wait(300);
+      await p.click('#thermo-open');
+      await p.wait(300);
+      await p.click('#thermo-use');
+      await p.wait(400);
+    },
+  },
   { name: 'result', reach: 'once', go: finish },
   // TOP 10 에 든 결과: 랭킹 등록 칸이 펼쳐진 가장 긴 결과 화면(온라인 없이 칸만 펼쳐 본다)
   {
