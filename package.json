@@ -1,7 +1,7 @@
 {
   "name": "joypack",
   "private": true,
-  "version": "1.18.0",
+  "version": "1.18.1",
   "author": "Myong Bum Soo",
   "license": "UNLICENSED",
   "description": "조이팩: 미니 게임 모음 웹앱",

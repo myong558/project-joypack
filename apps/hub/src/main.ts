@@ -420,7 +420,10 @@ void document.fonts?.ready.then(fitScreen);
 // 연출 중에 다시 그리면(오프라인 표시·설치 안내 갱신 등) 요소가 새로 만들어져 연출이 처음부터 다시 돌므로,
 // 그동안의 다시 그리기는 연출이 끝난 뒤 한 번으로 모은다.
 // 끝나는 때: 기본 1.9초, 게임이 많으면 "다음 게임" 띠(1.2초 + 카드 수 × 0.11초에 시작, 0.5초)가 다 올라온 뒤까지
-const INTRO_MS = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : Math.max(1900, 1750 + (live.length + teaserGames().length) * 110);
+// 뒤로 가기로 돌아올 때는 짧은 복귀 연출(#app.intro-back, 약 0.6초): 로고 한 번 통통·반짝이, 카드가 거의 한꺼번에 떠오름
+const REDUCED_MOTION = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const introMs = (back: boolean, cards: number): number =>
+  REDUCED_MOTION ? 0 : back ? Math.max(600, 560 + cards * 40) : Math.max(1900, 1750 + cards * 110);
 let introRunning = false;
 let renderWaiting = false;
 
@@ -439,22 +442,24 @@ function startHome(): void {
   playIntro();
 }
 
-/** 첫 진입 연출을 처음부터 돌린다(첫 화면을 새로 그려 애니메이션이 다시 시작됨). 뒤로 가기로 돌아올 때도 쓴다 */
+/** 진입 연출을 처음부터 돌린다(첫 화면을 새로 그려 애니메이션이 다시 시작됨). back: 뒤로 가기로 돌아올 때의 짧은 복귀 연출 */
 let introTimer: ReturnType<typeof setTimeout> | undefined;
-function playIntro(): void {
+function playIntro(back = false): void {
   clearTimeout(introTimer);
-  introRunning = INTRO_MS > 0;
-  app.classList.toggle('intro', introRunning);
+  const ms = introMs(back, live.length + teaserGames().length);
+  introRunning = ms > 0;
+  app.classList.toggle('intro', introRunning && !back);
+  app.classList.toggle('intro-back', introRunning && back);
   renderHome();
   if (!introRunning) return;
   introTimer = setTimeout(() => {
     introRunning = false;
-    app.classList.remove('intro');
+    app.classList.remove('intro', 'intro-back');
     if (renderWaiting) {
       renderWaiting = false;
       requestRender();
     }
-  }, INTRO_MS);
+  }, ms);
 }
 
 // 공개 예약: 다음 공개 시각에 첫 화면을 다시 그려 COMING SOON 카드를 정식 카드로 바꾼다.
@@ -909,7 +914,7 @@ void firstCheck.then(() => app.childElementCount && requestRender());
 void Promise.race([firstCheck, new Promise((r) => setTimeout(r, 300))]).then(startHome);
 
 // 조이팩으로 들어오면 늘 시작 화면: 게임으로 떠날 때 열린 창(랭킹·설정·개발자 모드)을 닫아 두고,
-// 뒤로 가기로 되살아나면(bfcache) 맨 위로 올려 최고 기록·오프라인 표시를 새로 읽고, 처음 들어올 때와 같은 진입 연출을 다시 돌린다
+// 뒤로 가기로 되살아나면(bfcache) 맨 위로 올려 최고 기록·오프라인 표시를 새로 읽고, 짧은 복귀 연출을 돌린다
 // (되살아난 순위는 옛 값이라 보이지 않게)
 const closeDialogs = () => document.querySelectorAll<HTMLDialogElement>('dialog[open]').forEach((d) => d.close());
 window.addEventListener('pagehide', closeDialogs);
@@ -919,7 +924,7 @@ window.addEventListener('pageshow', async (e) => {
   window.scrollTo(0, 0);
   live = shownGames();
   await refreshCached();
-  playIntro();
+  playIntro(true);
 });
 window.addEventListener('online', () => void refreshHome());
 window.addEventListener('offline', () => void refreshHome());
