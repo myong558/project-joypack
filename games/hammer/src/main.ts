@@ -10,7 +10,7 @@ import type { GameEvent, GameResult, MoleKind } from './game/types';
 import { setLang, t } from './i18n';
 import { shareResult } from './share';
 import { fetchBoard, submitEntry } from './online';
-import { boardEntries, clearPending, keepPending, placeOf, type RankEntry } from './ranking';
+import { boardEntries, clearPending, keepPending, pendingScore, placeOf, type RankEntry } from './ranking';
 import { emptyRecords, loadSave, writeSave } from './storage';
 import { applySkin, applyTheme, resolveSkin } from './theme';
 import { Board } from './ui/board';
@@ -50,6 +50,16 @@ function cacheBoard(mode: Mode, today: string, entries: RankEntry[]): void {
   if (mode === 'classic') save.rankings.classic = entries;
   else save.rankings.daily = { date: today, entries };
   writeSave(save);
+  publishPending(today);
+}
+
+/**
+ * 랭킹 탭 공통 기준(Joypack.rankTab)에 쓸 등록 대기 탭 목록을 알린다. 조이팩 전체 랭킹도 같은 값을 읽는다.
+ * 오늘의 챌린지 대기 기록은 그날만 유효하다. 순위표·대기 기록이 바뀔 때마다 부른다
+ */
+function publishPending(today: string): void {
+  const modes = (['classic', 'daily'] as Mode[]).filter((m) => pendingScore(save.rankings, save.pending, m, today) > 0);
+  Joypack.setRankPending('hammer', modes.map((m) => (m === 'daily' ? { board: m, day: today } : m)));
 }
 
 /** 순위표 보기·등록. day는 그 판을 시작한 날로, 오늘의 챌린지 순위표가 어느 날 것인지 정한다 */
@@ -68,12 +78,15 @@ function rankingView(day: Date): RankingView {
         return false;
       }
     },
+    // 판이 끝날 때마다 불린다: 방금 한 모드를 랭킹 창의 최근 탭으로 남기고(조이팩 공통 기준), TOP 10 에 들면 등록 대기로 둔다
     consider(mode, score) {
+      Joypack.setRankBoard('hammer', mode);
       const place = placeOf(boardEntries(save.rankings, mode, today), score);
       if (place >= 0) {
         keepPending(save.pending, mode, today, score);
         writeSave(save);
       }
+      publishPending(today);
       return place;
     },
     async register(mode, name, score) {
@@ -83,6 +96,7 @@ function rankingView(day: Date): RankingView {
       // 그사이 다른 사람들에게 밀려 10위 밖이 됐어도 더 올릴 수 없으므로 대기에서 지운다
       clearPending(save.pending, mode, score);
       writeSave(save);
+      publishPending(today);
       return place;
     },
   };
@@ -90,6 +104,7 @@ function rankingView(day: Date): RankingView {
 
 function showStart(settings?: 'open' | 'reset', settingsFocus?: string, opening = false): void {
   const today = new Date();
+  publishPending(dateKey(today));
   const todaySkin = resolveSkin('auto', today);
   applySkin(resolveSkin(save.skin, today));
   mount(

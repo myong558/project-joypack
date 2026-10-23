@@ -253,7 +253,8 @@ export function startScreen(opts: StartOptions): HTMLElement {
 
   // 등록 대기 기록이 있는 쪽을 먼저 연다. 대기 기록을 모두 올리면 버튼의 점을 지운다
   el.querySelector('[data-ranking]')!.addEventListener('click', () =>
-    openRanking(el, opts.ranking, pendingIn('daily') && !pendingIn('classic') ? 'daily' : 'classic', null, () => {
+    // 처음 탭은 조이팩 공통 기준: 등록 대기 → 최근 모드(방금 한 판·마지막으로 본 탭) → 클래식. 조이팩 전체 랭킹과 같은 값을 쓴다
+    openRanking(el, opts.ranking, Joypack.rankTab('hammer', ['classic', 'daily'], 'classic') as Mode, null, () => {
       if (!pendingIn('classic') && !pendingIn('daily')) el.querySelector('.jp-top-dot')?.remove();
     }),
   );
@@ -683,6 +684,7 @@ function openRanking(host: HTMLElement, view: RankingView, start: Mode, mark: nu
     b.addEventListener('click', () => {
       if (b.dataset.board === mode) return;
       mode = b.dataset.board as Mode;
+      Joypack.setRankBoard('hammer', mode);
       highlight = null;
       if (status[mode] !== 'online') fetchBoard(mode);
       render();

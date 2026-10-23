@@ -507,13 +507,14 @@ async function refreshHome(): Promise<void> {
 
 // ---------- 공통: 대화 상자 ----------
 
-function openDialog(className: string, body: string, title: string): HTMLDialogElement {
+/** sub: 제목 오른쪽에 작게 붙는 보조 설명(따로 줄을 차지하지 않게) */
+function openDialog(className: string, body: string, title: string, sub?: string): HTMLDialogElement {
   const dialog = document.createElement('dialog');
   dialog.className = `sheet ${className}`;
   dialog.setAttribute('aria-label', title);
   dialog.innerHTML = `
     <div class="sheet-head">
-      <h2>${title}</h2>
+      <h2>${title}${sub ? `<span class="head-sub">${sub}</span>` : ''}</h2>
       <button class="icon-btn close" aria-label="${t('close')}">${ICON.close}</button>
     </div>
     <div class="sheet-body">${body}</div>`;
@@ -534,7 +535,14 @@ function openDialog(className: string, body: string, title: string): HTMLDialogE
 
 // ---------- 전체 랭킹 ----------
 
-const boardChoice = new Map<string, string>();
+/**
+ * 게임마다 처음 보일 순위표 탭: 조이팩 공통 기준(Joypack.rankTab) — 등록 대기 → 최근 탭(그 게임에서 방금 한 판·어디서든 마지막으로 본 탭) → games.json 의 default.
+ * 각 게임 랭킹 창과 같은 값을 읽고 써서, 여기서 고른 탭이 게임 랭킹 창에도 이어진다
+ */
+function rankBoardOf(game: GameMeta): string {
+  return Joypack.rankTab(game.id, game.ranking!.boards.map((b) => b.id), game.ranking!.default);
+}
+
 /** TOP 10 으로 펼친 게임 */
 const expanded = new Set<string>();
 
@@ -556,10 +564,9 @@ function openRanking(): void {
   // 첫 화면 카드와 같은 게임: 미리보기를 켠 기기에서만 미리보기 게임 랭킹도 보인다(테스트용)
   const games = live.filter((g) => g.ranking && hasRanking(g.id));
   const body = `
-    <p class="sheet-sub">${t('ranking.sub')}</p>
     ${games
       .map((g) => {
-        const board = boardChoice.get(g.id) ?? g.ranking!.default;
+        const board = rankBoardOf(g);
         return `
         <section class="rank-game" data-game="${g.id}" style="--c:${g.color}">
           <div class="rank-head">
@@ -577,16 +584,23 @@ function openRanking(): void {
         </section>`;
       })
       .join('')}`;
-  const dialog = openDialog('ranking', body, t('ranking.title'));
+  const dialog = openDialog('ranking', body, t('ranking.title'), t('ranking.sub'));
 
   for (const game of games) {
     const section = dialog.querySelector<HTMLElement>(`.rank-game[data-game="${game.id}"]`)!;
+    let current = rankBoardOf(game);
     const show = (board: string) => {
-      boardChoice.set(game.id, board);
+      current = board;
       section.querySelectorAll<HTMLButtonElement>('[data-board]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.board === board)));
       void showBoard(section, game, board);
     };
-    section.querySelectorAll<HTMLButtonElement>('[data-board]').forEach((b) => b.addEventListener('click', () => show(b.dataset.board!)));
+    // 고른 탭은 최근 탭으로 남긴다(게임 랭킹 창에도 이어짐)
+    section.querySelectorAll<HTMLButtonElement>('[data-board]').forEach((b) =>
+      b.addEventListener('click', () => {
+        Joypack.setRankBoard(game.id, b.dataset.board!);
+        show(b.dataset.board!);
+      }),
+    );
     // TOP 10 보기 ↔ 접기: 창을 벗어나지 않고 그 게임 칸만 펼친다(이번 방문 동안 기억)
     section.querySelector<HTMLButtonElement>('[data-more]')!.addEventListener('click', (e) => {
       const open = !expanded.has(game.id);
@@ -597,9 +611,9 @@ function openRanking(): void {
       btn.innerHTML = lbl(t(open ? 'ranking.less' : 'ranking.more'));
       section.querySelector<HTMLElement>('.rank-rows')!.style.setProperty('--rows', String(open ? FULL : TOP));
       section.querySelector<HTMLElement>('.rank-play')!.hidden = !open;
-      show(boardChoice.get(game.id) ?? game.ranking!.default);
+      show(current);
     });
-    show(boardChoice.get(game.id) ?? game.ranking!.default);
+    show(current);
   }
 }
 

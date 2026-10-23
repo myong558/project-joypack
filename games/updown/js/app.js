@@ -604,7 +604,7 @@
   let pending = loadPending(); // { [끝 숫자]: { score, tries, time } } 등록 대기 기록
   let resultEntry = null; // 이번 판 기록 { board, score, tries, time, expected, online }. TOP 10 에 들 때만 생긴다(checkRanking).
   let gameStartedAt = 0; // 걸린 시간(점수에 들어감) 재기: 판 시작 시각
-  let rankingTab = 100;
+  let rankingTab = 100; // 랭킹 창에서 보고 있는 범위. 열 때마다 Joypack.rankTab 으로 다시 고른다
   let rankingMine = null; // 방금 등록한 기록 ID (목록에서 강조)
   let rankingRequest = 0;
   let rankingDone = null; // 이번 판을 등록한 결과 { rank }. 결과 화면 등록 칸이 "N위로 등록했어요"로 바뀐다.
@@ -665,21 +665,21 @@
     return rows.filter((row) => !isBetter(entry, row)).length + 1;
   }
 
-  // 랭킹 버튼은 아이콘만 둔다. 등록할 기록이 남았으면 대표색으로 채우고(공통 .is-on) 이름도 "등록하기"로 읽힌다
+  // 랭킹 버튼은 아이콘만 둔다. 등록할 기록이 남았으면 대표색으로 채우고(공통 .is-on) 이름도 "등록하기"로 읽힌다.
+  // 등록 대기가 바뀔 때마다 여기를 거치므로, 랭킹 탭 공통 기준(Joypack.rankTab)에 쓸 대기 범위 목록도 여기서 알린다(조이팩 전체 랭킹과 같이 씀)
   function renderRankingButton() {
     const button = $('ranking-open');
     const waiting = hasPending();
+    Joypack.setRankPending('updown', UpDown.PRESETS.filter((key) => !!pendingFor(key)));
     const label = t(waiting ? 'ranking.register' : 'ranking.open');
     button.classList.toggle('is-on', waiting);
     button.setAttribute('aria-label', label);
     button.title = label;
   }
 
+  // 처음 탭은 조이팩 공통 기준: 등록 대기 → 최근 범위(방금 한 판·마지막으로 본 탭) → 1~100. 조이팩 전체 랭킹과 같은 값을 쓴다
   function openRanking() {
-    const current = game && game.ranked ? game.max : null;
-    if (resultEntry && !rankingDone && pendingFor(resultEntry.board)) rankingTab = resultEntry.board;
-    else if (current && pendingFor(current)) rankingTab = current;
-    else rankingTab = UpDown.PRESETS.find((key) => pendingFor(key)) || current || rankingTab;
+    rankingTab = Number(Joypack.rankTab('updown', UpDown.PRESETS, 100));
     $('ranking-status').textContent = '';
     renderRanking();
     $('ranking').showModal();
@@ -714,6 +714,7 @@
       button.classList.toggle('has-pending', !!pendingFor(key));
       button.addEventListener('click', () => {
         rankingTab = key;
+        Joypack.setRankBoard('updown', key);
         renderRanking();
         loadRanking();
       });
@@ -1063,7 +1064,8 @@
   function finishGame() {
     const tries = game.guesses.length;
     game.score = UpDown.score(game.max, tries, game.time);
-    // 최고 점수는 랭킹 범위만 남긴다(연습 판은 남기지 않음)
+    // 최고 점수는 랭킹 범위만 남긴다(연습 판은 남기지 않음). 랭킹 범위 판은 랭킹 창의 최근 탭으로도 남긴다
+    if (game.ranked) Joypack.setRankBoard('updown', game.max);
     newBest = game.ranked && (!best[game.max] || game.score > best[game.max]);
     if (newBest) {
       best[game.max] = game.score;

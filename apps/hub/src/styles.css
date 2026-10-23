@@ -980,9 +980,22 @@ a.card:active .card-play {
 }
 
 .sheet-head h2 {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
   margin: 0;
   font-size: 24px;
   font-weight: 400;
+}
+
+/* 제목 오른쪽 보조 설명(전체 랭킹 "게임별 1위" 등): 따로 줄을 차지하지 않게 제목 옆에 작게 */
+.sheet-head .head-sub {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.sheet.ranking .sheet-body {
+  padding-top: 10px;
 }
 
 .sheet-head .icon-btn {

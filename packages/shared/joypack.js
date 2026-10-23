@@ -362,6 +362,56 @@
     return typeof document !== 'undefined' && document.documentElement.hasAttribute('data-jp-preview');
   }
 
+  // ── 랭킹 탭 공통 기준(조이팩 전체 랭킹·모든 게임 랭킹 창, 기준서 1.6) ──
+  // 랭킹 창을 열 때 처음 고를 탭: ① 등록 대기 기록이 있는 탭(여럿이면 최근 탭, 아니면 첫 번째) → ② 최근 탭(방금 한 판 또는 마지막으로 본 탭 중 나중)
+  // → ③ 기본 탭. 한 기기 안에서 조이팩과 모든 게임이 같은 값을 읽고 써서, 어디서 열어도 이어진다.
+  // joypack.rankBoard = { [게임 ID]: { last: 탭 ID, pending: [{ board, day? }] } }. day(YYYY-MM-DD, 기기 날짜)가 있으면 그날만 유효(오늘의 챌린지 등)
+  const RANK_KEY = 'joypack.rankBoard';
+
+  function localDay(d) {
+    d = d || new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  function readRank() {
+    try {
+      const data = JSON.parse(read(RANK_KEY));
+      return data && typeof data === 'object' ? data : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function writeRank(gameId, patch) {
+    const data = readRank();
+    data[gameId] = Object.assign({}, data[gameId], patch);
+    write(RANK_KEY, JSON.stringify(data));
+  }
+
+  // 판을 끝냈을 때, 랭킹 창에서 탭을 골랐을 때 부른다
+  function setRankBoard(gameId, board) {
+    writeRank(gameId, { last: String(board) });
+  }
+
+  // 등록 대기 기록이 있는 탭 목록을 알린다(바뀔 때마다 통째로). 항목은 탭 ID 문자열 또는 { board, day }
+  function setRankPending(gameId, items) {
+    const list = (items || []).map((item) => (typeof item === 'object' ? { board: String(item.board), day: item.day } : { board: String(item) }));
+    writeRank(gameId, { pending: list });
+  }
+
+  // 위 기준으로 고른 탭 ID. boards 는 그 게임의 탭 ID 목록(화면 순서), fallback 은 기본 탭
+  function rankTab(gameId, boards, fallback) {
+    const ids = boards.map(String);
+    const entry = readRank()[gameId] || {};
+    const today = localDay();
+    const pending = (Array.isArray(entry.pending) ? entry.pending : [])
+      .filter((p) => p && ids.indexOf(String(p.board)) >= 0 && (!p.day || p.day === today))
+      .map((p) => String(p.board));
+    const last = ids.indexOf(String(entry.last)) >= 0 ? String(entry.last) : null;
+    if (pending.length) return last && pending.indexOf(last) >= 0 ? last : ids.find((id) => pending.indexOf(id) >= 0);
+    return last || String(fallback);
+  }
+
   // 저작권 표기: 조이팩 설정 → 정보, 각 게임 설정 맨 아래 버전 밑에 그대로 쓴다(기준서 1.4). 바꿀 때는 여기 한 곳만
   var COPYRIGHT = '© 2026 Myong Bum Soo. All rights reserved.';
 
@@ -385,5 +435,8 @@
     shareResult: shareResult,
     readInvite: readInvite,
     inviteBar: inviteBar,
+    setRankBoard: setRankBoard,
+    setRankPending: setRankPending,
+    rankTab: rankTab,
   };
 })(typeof window !== 'undefined' ? window : globalThis);
