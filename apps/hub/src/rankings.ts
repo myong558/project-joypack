@@ -69,31 +69,33 @@ function dateKey(d = new Date()): string {
 type Fetcher = (board: string, limit: number) => Promise<Row[]>;
 
 const FETCHERS: Record<string, { key: (board: string) => string; fetch: Fetcher }> = {
-  // 업다운: 기록 1건 = 문서 1개. 게임과 같은 정렬(시도 횟수 → 걸린 시간 → 먼저 등록)이라 같은 복합 색인을 쓴다
+  // 업다운: 기록 1건 = 문서 1개, 범위(1~50·1~100·1~200)마다 컬렉션이 따로(scores-<끝 숫자>). 게임과 같은 정렬(점수 높은 순 → 먼저 등록)
   updown: {
-    key: (board) => board,
+    key: (board) => `s${board}`,
     async fetch(board, limit) {
       const res = await request('games/updown:runQuery', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           structuredQuery: {
-            from: [{ collectionId: 'scores' }],
-            where: { fieldFilter: { field: { fieldPath: 'difficulty' }, op: 'EQUAL', value: { stringValue: board } } },
-            orderBy: ['tries', 'time', 'createdAt'].map((fieldPath) => ({ field: { fieldPath }, direction: 'ASCENDING' })),
+            from: [{ collectionId: `scores-${board}` }],
+            orderBy: [{ field: { fieldPath: 'score' }, direction: 'DESCENDING' }],
             limit,
           },
         }),
       });
       if (!res.ok) throw new Error(`firestore ${res.status}`);
-      const rows = (await res.json()) as { document?: { fields: Record<string, { stringValue?: string; integerValue?: string }> } }[];
+      type Fields = Record<string, { stringValue?: string; integerValue?: string; timestampValue?: string }>;
+      const rows = (await res.json()) as { document?: { fields: Fields } }[];
       return rows
         .filter((r) => r.document)
         .map(({ document }) => ({
           name: document!.fields.initials.stringValue ?? '',
-          tries: Number(document!.fields.tries.integerValue),
-          time: Number(document!.fields.time.integerValue),
-        }));
+          score: Number(document!.fields.score.integerValue),
+          at: Date.parse(document!.fields.createdAt.timestampValue ?? ''),
+        }))
+        .sort((a, b) => b.score - a.score || a.at - b.at)
+        .map(({ name, score }) => ({ name, score }));
     },
   },
   // 두더지잡기: 순위표 1개 = 문서 1개({ entries: [...] }). 오늘의 챌린지는 날짜마다 새 문서다

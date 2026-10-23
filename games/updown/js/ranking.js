@@ -1,8 +1,9 @@
-// 공유 랭킹: Firebase Firestore(REST API)에 정답 기록을 올리고 난이도별 TOP 10 을 읽는다. SDK 없이 fetch 만 쓴다.
-// 여러 게임이 한 Firebase 프로젝트를 같이 쓰므로 이 게임 기록은 games/updown/scores 아래에 둔다.
-// 기록 형식 검사(이니셜 영문 대문자 1~5자, 난이도, 시도 횟수 1~6, 걸린 시간 ms, 서버 시각)와 고치기·지우기 금지는 Firestore 보안 규칙이 맡는다.
-// 순위: 시도 횟수가 적을수록 → 같으면 빨리 맞힐수록(걸린 시간) → 그것도 같으면 먼저 등록한 기록이 위.
-// 이 순위 쿼리(난이도 같음 + tries → time → createdAt 오름차순)에는 Firestore 복합 색인이 필요하다(README 참고).
+// 공유 랭킹: Firebase Firestore(REST API)에 정답 기록을 올리고 범위별 TOP 10 을 읽는다. SDK 없이 fetch 만 쓴다.
+// 여러 게임이 한 Firebase 프로젝트를 같이 쓰므로 이 게임 기록은 games/updown/scores-<끝 숫자> 아래에 둔다(1~50 → scores-50).
+// 범위마다 컬렉션을 나눠 "점수 내림차순" 한 가지 정렬만 쓰므로 복합 색인이 필요 없다.
+// 기록 형식 검사(이니셜 영문 대문자 1~5자, 점수가 시도 횟수·걸린 시간으로 낸 점수를 넘지 않음, 서버 시각)와
+// 고치기·지우기 금지는 Firestore 보안 규칙이 맡는다.
+// 순위: 점수가 높을수록 → 같으면 먼저 등록한 기록이 위.
 (function (global) {
   'use strict';
 
@@ -18,8 +19,10 @@
   const PARENT = 'games/' + GAME_ID;
   // 응답이 이만큼 늦으면 포기한다(느린 망에서 멈춘 것처럼 보이지 않게, 두더지잡기와 같은 8초).
   const TIMEOUT_MS = 8000;
-  // 마지막으로 받은 난이도별 순위표 { [난이도]: { at, rows } }. 오프라인일 때 보여 주고 TOP 10 판단에 쓴다.
-  const CACHE_KEY = 'updown.rankings';
+  // 마지막으로 받은 범위별 순위표 { [끝 숫자]: { at, rows } }. 오프라인일 때 보여 주고 TOP 10 판단에 쓴다.
+  const CACHE_KEY = 'updown.rankings2';
+
+  const collection = (board) => 'scores-' + board;
 
   async function request(path, body) {
     const controller = typeof AbortController === 'function' ? new AbortController() : null;
@@ -47,36 +50,31 @@
     }
   }
 
-  function writeCache(difficulty, rows) {
+  function writeCache(board, rows) {
     try {
       const data = readCache();
-      data[difficulty] = { at: Date.now(), rows: rows.map((row) => Object.assign({}, row, { createdAt: row.createdAt.toISOString() })) };
+      data[board] = { at: Date.now(), rows: rows.map((row) => Object.assign({}, row, { createdAt: row.createdAt.toISOString() })) };
       localStorage.setItem(CACHE_KEY, JSON.stringify(data));
     } catch (e) {}
   }
 
-  // 마지막으로 받은 그 난이도 순위표 { at, rows }. 받은 적이 없거나 저장 값이 깨졌으면 null.
-  function cached(difficulty) {
-    const board = readCache()[difficulty];
-    if (!board || !Array.isArray(board.rows)) return null;
-    const rows = board.rows
-      .filter((row) => row && typeof row.initials === 'string' && Number.isFinite(row.tries) && Number.isFinite(row.time))
+  // 마지막으로 받은 그 범위 순위표 { at, rows }. 받은 적이 없거나 저장 값이 깨졌으면 null.
+  function cached(board) {
+    const saved = readCache()[board];
+    if (!saved || !Array.isArray(saved.rows)) return null;
+    const rows = saved.rows
+      .filter((row) => row && typeof row.initials === 'string' && Number.isFinite(row.score))
       .map((row) => Object.assign({}, row, { createdAt: new Date(row.createdAt) }))
       .slice(0, LIMIT);
-    return { at: Number(board.at) || 0, rows: rows };
+    return { at: Number(saved.at) || 0, rows: rows };
   }
 
-  // 난이도별 TOP 10
-  async function top(difficulty) {
+  // 범위별 TOP 10. 같은 점수는 먼저 등록한 기록을 위로 다시 늘어놓는다.
+  async function top(board) {
     const rows = await request('/' + PARENT + ':runQuery', {
       structuredQuery: {
-        from: [{ collectionId: 'scores' }],
-        where: { fieldFilter: { field: { fieldPath: 'difficulty' }, op: 'EQUAL', value: { stringValue: difficulty } } },
-        orderBy: [
-          { field: { fieldPath: 'tries' }, direction: 'ASCENDING' },
-          { field: { fieldPath: 'time' }, direction: 'ASCENDING' },
-          { field: { fieldPath: 'createdAt' }, direction: 'ASCENDING' },
-        ],
+        from: [{ collectionId: collection(board) }],
+        orderBy: [{ field: { fieldPath: 'score' }, direction: 'DESCENDING' }],
         limit: LIMIT,
       },
     });
@@ -87,13 +85,15 @@
         return {
           id: row.document.name.split('/').pop(),
           initials: f.initials.stringValue,
+          score: Number(f.score.integerValue),
           tries: Number(f.tries.integerValue),
           time: Number(f.time.integerValue),
           createdAt: new Date(f.createdAt.timestampValue),
         };
-      });
+      })
+      .sort((a, b) => b.score - a.score || a.createdAt - b.createdAt);
     // 받은 순위표는 오프라인 대비로 기기에 남긴다(cached).
-    writeCache(difficulty, result);
+    writeCache(board, result);
     return result;
   }
 
@@ -104,10 +104,10 @@
       writes: [
         {
           update: {
-            name: DOCS + '/' + PARENT + '/scores/' + id,
+            name: DOCS + '/' + PARENT + '/' + collection(entry.board) + '/' + id,
             fields: {
               initials: { stringValue: entry.initials },
-              difficulty: { stringValue: entry.difficulty },
+              score: { integerValue: String(entry.score) },
               tries: { integerValue: String(entry.tries) },
               time: { integerValue: String(entry.time) },
             },
@@ -120,11 +120,10 @@
     return id;
   }
 
-  // 새 기록이 TOP 10 에 들 수 있나: 10명이 안 찼으면 들고, 다 찼으면 10위보다 앞서야 든다(완전히 같으면 기존 기록 유지).
+  // 새 기록이 TOP 10 에 들 수 있나: 10명이 안 찼으면 들고, 다 찼으면 10위보다 높아야 든다(같으면 기존 기록 유지).
   function qualifies(rows, entry) {
     if (rows.length < LIMIT) return true;
-    const last = rows[LIMIT - 1];
-    return entry.tries < last.tries || (entry.tries === last.tries && entry.time < last.time);
+    return entry.score > rows[LIMIT - 1].score;
   }
 
   // 이니셜 정리: 영문만 남기고 대문자로, 최대 5자.

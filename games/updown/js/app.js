@@ -3,7 +3,8 @@
 (function () {
   'use strict';
 
-  const BEST_KEY = 'updown.best';
+  const BEST_KEY = 'updown.scores'; // { [끝 숫자]: 최고 점수 } 랭킹 범위(1~50·1~100·1~200)만
+  const CUSTOM_KEY = 'updown.custom'; // 직접 정하기에서 마지막으로 고른 끝 숫자
   const THEME_KEY = 'updown.theme'; // index.html 의 <head> 스크립트와 같은 키
   const SKIN_KEY = 'updown.skin';
   const t = UpDownI18n.t;
@@ -17,6 +18,12 @@
   let newBest = false;
   let updateReady = false; // 새 버전 서비스 워커가 화면을 넘겨받았다. 홈으로 갈 때 새로 고친다.
   let pick = null; // 다이얼로 고른 숫자. null 이면 다음 렌더링 때 범위 최솟값(왼쪽 끝)에서 시작한다.
+  // 하트·난이도가 있던 예전 버전의 최고 기록·등록 대기·순위표는 점수 방식과 비교할 수 없어 한 번 지운다.
+  ['updown.best', 'updown.pending', 'updown.rankings'].forEach((key) => {
+    try {
+      localStorage.removeItem(key);
+    } catch (e) {}
+  });
   let best = loadBest();
 
   // localStorage 를 못 쓰는 환경에서도 게임은 돌아가야 하므로 실패는 조용히 넘긴다.
@@ -158,77 +165,73 @@
     });
   }
 
-  // 난이도를 별 개수로 보여준다 (쉬움 1개 ~ 최상위 4개).
-  function difficultyStars(key) {
-    const keys = Object.keys(UpDown.DIFFICULTIES);
-    const level = keys.indexOf(key);
-    const stars = document.createElement('span');
-    stars.className = 'difficulty-stars';
-    for (let i = 0; i < keys.length; i++) stars.appendChild(icon('star', i <= level ? 'on' : ''));
-    return stars;
+  // 범위 버튼 색: 1~50 초록, 1~100 파랑, 1~200 빨강(예전 난이도 버튼 색을 그대로 쓴다)
+  const TONES = { 50: 'easy', 100: 'normal', 200: 'hard' };
+  const TEMP_EMOJI = { hot: '🔥', warm: '☀️', cool: '🌊', cold: '❄️' };
+
+  function fmt(n) {
+    return n.toLocaleString(UpDownI18n.getLang() === 'ko' ? 'ko-KR' : 'en-US');
+  }
+
+  // 판 이름: 랭킹 범위는 "1 ~ 100", 직접 정하기는 "연습 · 1 ~ 345"
+  function levelName(g) {
+    return t(g.ranked ? 'board.level' : 'board.practice', { max: g.max });
   }
 
   function renderStart() {
     const list = $('difficulty-list');
     list.textContent = '';
-    Object.keys(UpDown.DIFFICULTIES).forEach((key) => {
-      const config = UpDown.DIFFICULTIES[key];
+    UpDown.PRESETS.forEach((max) => {
       const button = document.createElement('button');
       button.type = 'button';
-      button.className = 'difficulty difficulty-' + key;
+      button.className = 'difficulty difficulty-' + TONES[max];
 
       const label = document.createElement('span');
       label.className = 'difficulty-label';
-      label.append(t('difficulty.' + key), difficultyStars(key));
+      label.textContent = t('board.level', { max: max });
 
-      // 범위와 기회는 아이콘 + 숫자로만 보여준다. 문장은 아래 aria-label 로 화면 읽기 프로그램에 전달한다.
+      // 최고 점수가 있으면 트로피 + 점수, 없으면 "기록 없음"
       const detail = document.createElement('span');
       detail.className = 'difficulty-detail';
-      const range = document.createElement('span');
-      range.className = 'meta';
-      range.append(icon('range'), config.min + ' ~ ' + config.max);
-      const tries = document.createElement('span');
-      tries.className = 'meta meta-tries';
-      tries.append(icon('heart'), String(config.maxTries));
-      detail.append(range, tries);
-
       const record = document.createElement('span');
       record.className = 'difficulty-best';
-      // 기록이 있으면 트로피 + 횟수, 없으면 "기록 없음"
-      if (best[key]) record.append(icon('trophy'), t('difficulty.bestShort', { tries: best[key] }));
-      else record.textContent = t('difficulty.noBest');
+      if (best[max]) record.append(icon('trophy'), t('start.best', { score: fmt(best[max]) }));
+      else record.textContent = t('start.noBest');
+      detail.append(record);
 
-      button.setAttribute('aria-label', [
-        t('difficulty.' + key),
-        t('difficulty.detail', { min: config.min, max: config.max, tries: config.maxTries }),
-        best[key] ? t('difficulty.best', { tries: best[key] }) : t('difficulty.noBest'),
-      ].join(', '));
+      button.setAttribute('aria-label', label.textContent + ', ' + record.textContent);
       // 오른쪽 둥근 시작 표시: 정보 목록이 아니라 누르면 바로 시작하는 버튼으로 보이게 한다
       const go = document.createElement('span');
       go.className = 'difficulty-go';
       go.append(icon('play'));
-      detail.append(record);
       button.append(label, detail, go);
-      button.addEventListener('click', () => startGame(key));
+      button.addEventListener('click', () => startGame(max));
       list.appendChild(button);
     });
+
+    // 직접 정하기(연습): 범위 버튼보다 작은 한 줄 버튼. 누르면 끝 숫자를 고르는 팝업이 뜬다.
+    const custom = document.createElement('button');
+    custom.type = 'button';
+    custom.className = 'custom-start';
+    const name = document.createElement('span');
+    name.className = 'custom-start-name';
+    name.textContent = t('custom.open');
+    const sub = document.createElement('span');
+    sub.className = 'custom-start-sub';
+    sub.textContent = t('custom.sub');
+    custom.append(icon('range'), name, sub);
+    custom.addEventListener('click', openCustom);
+    list.appendChild(custom);
   }
 
   // animate 가 true 면 방금 나온 힌트의 애니메이션을 재생한다. 언어 전환 때는 재생하지 않는다.
   function renderPlay(animate) {
-    const level = $('play-level');
-    level.textContent = '';
-    level.append(difficultyStars(game.difficulty), t('difficulty.' + game.difficulty));
-    $('range').textContent = game.low + ' ~ ' + game.high;
-
-    // 남은 기회는 하트로 보여준다. 채운 하트가 남은 기회, 빈 하트가 쓴 기회다.
-    const left = UpDown.triesLeft(game);
-    const hearts = $('tries-left');
-    hearts.textContent = '';
-    for (let i = 0; i < game.maxTries; i++) hearts.appendChild(icon('heart', i < left ? 'on' : ''));
-    hearts.setAttribute('aria-label', t('play.triesLeft') + ' ' + left);
-    // 마지막 기회: 하트가 두근거리고 화면 테두리가 붉어진다(css 의 .last-chance).
-    screens.play.classList.toggle('last-chance', left === 1);
+    const won = game.status === 'won';
+    $('play-level').textContent = levelName(game);
+    $('range').textContent = won ? String(game.answer) : game.low + ' ~ ' + game.high;
+    // 지금 몇 번째 추측인지(맞힌 뒤에는 맞힌 횟수)
+    $('tries-count').textContent = t('play.tries', { n: game.guesses.length + (won ? 0 : 1) });
+    renderBar(animate);
 
     const hint = $('hint');
     const last = game.guesses[game.guesses.length - 1];
@@ -237,10 +240,21 @@
     // 첫 입력 전에는 문장 대신 물음표 하나만 보여준다. 범위는 위 카드에 있다.
     $('hint-value').textContent = last ? last.value : '?';
     if (last) {
-      const isUp = last.result === 'UP';
-      hint.append(icon(isUp ? 'up' : 'down'), last.result);
+      const kind = last.result === 'UP' ? 'up' : last.result === 'DOWN' ? 'down' : 'correct';
+      hint.append(icon(kind === 'up' ? 'up' : kind === 'down' ? 'down' : 'star'), kind === 'correct' ? t('result.won') : last.result);
       if (animate) void hint.offsetWidth; // 같은 힌트가 연달아 나와도 애니메이션을 다시 재생한다.
-      hint.className = 'hint ' + (animate ? 'pop ' : '') + (isUp ? 'up' : 'down');
+      hint.className = 'hint ' + (animate ? 'pop ' : '') + kind;
+    }
+    // 온도 힌트: 정답과의 거리(맞혔으면 숨긴다)
+    const temp = $('temp');
+    temp.hidden = !last || !last.temp;
+    if (last && last.temp) {
+      temp.textContent = t('temp.' + last.temp);
+      temp.className = 'temp temp-' + last.temp;
+      if (animate) {
+        void temp.offsetWidth;
+        temp.classList.add('pop');
+      }
     }
 
     setPick(pick === null ? game.low : pick);
@@ -250,6 +264,7 @@
     game.guesses.forEach((g, i) => {
       const item = document.createElement('li');
       item.className = g.result.toLowerCase();
+      const kind = g.result === 'UP' ? 'up' : g.result === 'DOWN' ? 'down' : 'correct';
       // "3번째" 대신 동그라미 번호를 붙인다.
       const value = document.createElement('span');
       value.className = 'history-guess';
@@ -258,8 +273,15 @@
       no.textContent = i + 1;
       value.append(no, String(g.value));
       const result = document.createElement('span');
-      result.className = 'history-result ' + g.result.toLowerCase();
-      result.append(icon(g.result === 'UP' ? 'up' : 'down'), g.result);
+      result.className = 'history-result ' + kind;
+      if (g.temp) {
+        const mark = document.createElement('span');
+        mark.className = 'history-temp';
+        mark.textContent = TEMP_EMOJI[g.temp];
+        mark.title = t('temp.' + g.temp);
+        result.append(mark);
+      }
+      result.append(icon(kind === 'up' ? 'up' : kind === 'down' ? 'down' : 'star'), kind === 'correct' ? t('result.won') : g.result);
       item.append(value, result);
       history.appendChild(item);
     });
@@ -275,6 +297,28 @@
   function updateHistoryFade() {
     const history = $('history');
     history.classList.toggle('fade-top', history.scrollTop > 0);
+  }
+
+  // 좁혀지는 숫자 막대: 1~끝 숫자 전체 중 아직 가능한 칸(low~high)만 밝게 남긴다. 추측한 자리에는 UP(빨강)·DOWN(파랑) 눈금.
+  // 맞히면 정답 한 칸으로 모여 터진다(css 의 .range-bar.won). 새 판·언어 전환(animate 아님)은 움직이지 않고 바로 그린다.
+  function renderBar(animate) {
+    const bar = $('range-bar');
+    const live = $('range-bar-live');
+    const won = game.status === 'won';
+    const low = won ? game.answer : game.low;
+    const high = won ? game.answer : game.high;
+    live.classList.toggle('instant', !animate);
+    live.style.left = ((low - 1) / game.max) * 100 + '%';
+    live.style.width = ((high - low + 1) / game.max) * 100 + '%';
+    bar.querySelectorAll('.range-bar-mark').forEach((el) => el.remove());
+    game.guesses.forEach((g) => {
+      if (g.result === 'CORRECT') return;
+      const mark = document.createElement('span');
+      mark.className = 'range-bar-mark ' + g.result.toLowerCase();
+      mark.style.left = ((g.value - 0.5) / game.max) * 100 + '%';
+      bar.appendChild(mark);
+    });
+    bar.classList.toggle('won', won && animate);
   }
 
   // 정답 축하 색종이. big 이면(최고 기록 갱신) 양쪽 아래 모서리에서도 쏘아 올려 더 크게 터진다.
@@ -344,15 +388,14 @@
   }
 
   function renderResult() {
-    const won = game.status === 'won';
-    $('result-art').className = 'result-art ' + (won ? 'won' : 'lost');
-    $('result-icon').firstElementChild.setAttribute('href', won ? '#i-trophy' : '#i-sad');
-    $('result-title').textContent = t(won ? 'result.won' : 'result.lost');
-    $('result-title').className = won ? 'won' : 'lost';
+    $('result-art').className = 'result-art won';
+    $('result-icon').firstElementChild.setAttribute('href', '#i-trophy');
+    $('result-title').textContent = t('result.won');
+    $('result-title').className = 'won';
     $('result-answer').textContent = game.answer;
-    // 실패했을 때는 제목과 정답 숫자로 충분해 설명 문장을 숨긴다.
-    $('result-detail').textContent = won ? t('result.wonDetail', { tries: game.guesses.length }) : '';
-    $('result-detail').hidden = !won;
+    $('result-score').textContent = t('result.score', { score: fmt(game.score) });
+    $('result-detail').textContent = t('result.wonDetail', { tries: game.guesses.length, time: duration(game.time) });
+    $('result-practice').hidden = game.ranked;
     $('result-best').hidden = !newBest;
     renderResultRank();
   }
@@ -421,8 +464,6 @@
     const ctx = canvas.getContext('2d');
     const center = CARD_SIZE / 2;
     const maxWidth = 880;
-    const won = game.status === 'won';
-    const config = UpDown.DIFFICULTIES[game.difficulty];
 
     // 배경: 스킨 배경색 위에 화면처럼 위쪽만 강조색을 옅게 깐다.
     ctx.fillStyle = color('--bg');
@@ -442,8 +483,8 @@
     ctx.strokeStyle = color('--line');
     ctx.stroke();
 
-    // 내용을 카드 세로 가운데에 오게 내린다. 실패하면 성공 문장이 없어 더 내린다.
-    ctx.translate(0, won ? 36 : 60);
+    // 내용을 카드 세로 가운데에 오게 내린다.
+    ctx.translate(0, 36);
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'left';
     ctx.font = font(52);
@@ -456,7 +497,7 @@
 
     ctx.textAlign = 'center';
     ctx.font = font(40);
-    const level = t('difficulty.' + game.difficulty) + ' · ' + config.min + ' ~ ' + config.max;
+    const level = levelName(game);
     const chipWidth = ctx.measureText(level).width + 64;
     roundRect(ctx, center - chipWidth / 2, 240, chipWidth, 72, 36);
     ctx.fillStyle = color('--surface-alt');
@@ -465,23 +506,22 @@
     ctx.fillText(level, center, 278);
 
     ctx.font = font(96);
-    ctx.fillStyle = color(won ? '--success' : '--danger');
-    ctx.fillText(t(won ? 'result.won' : 'result.lost'), center, 404, maxWidth);
+    ctx.fillStyle = color('--success');
+    ctx.fillText(t('result.won') + '  ' + t('result.score', { score: fmt(game.score) }), center, 404, maxWidth);
     ctx.font = font(220);
     ctx.fillStyle = color('--text');
     ctx.fillText(String(game.answer), center, 574);
-    if (won) {
-      ctx.font = font(52);
-      ctx.fillStyle = color('--text-muted');
-      ctx.fillText(t('result.wonDetail', { tries: game.guesses.length }), center, 716, maxWidth);
-    }
+    ctx.font = font(52);
+    ctx.fillStyle = color('--text-muted');
+    ctx.fillText(t('result.wonDetail', { tries: game.guesses.length, time: duration(game.time) }), center, 716, maxWidth);
 
-    // 시도 기록: 추측한 숫자마다 UP(빨강 ▲)·DOWN(파랑 ▼)·정답(초록 ●) 칸.
-    const cellWidth = 124;
+    // 시도 기록: 추측한 숫자마다 UP(빨강 ▲)·DOWN(파랑 ▼)·정답(초록 ●) 칸. 칸이 넘치면 마지막 7개만 그린다.
+    const shown = game.guesses.slice(-7);
     const cellGap = 16;
-    const rowY = won ? 788 : 740; // 실패하면 성공 문장 자리가 비어 기록을 조금 올린다.
-    const rowX = center - (game.guesses.length * (cellWidth + cellGap) - cellGap) / 2;
-    game.guesses.forEach((g, i) => {
+    const cellWidth = Math.min(124, (maxWidth + 40 - cellGap * (shown.length - 1)) / shown.length);
+    const rowY = 788;
+    const rowX = center - (shown.length * (cellWidth + cellGap) - cellGap) / 2;
+    shown.forEach((g, i) => {
       const x = rowX + i * (cellWidth + cellGap);
       const mid = x + cellWidth / 2;
       const tone = color(g.result === 'UP' ? '--up' : g.result === 'DOWN' ? '--down' : '--success');
@@ -492,7 +532,7 @@
       ctx.strokeStyle = tone;
       ctx.stroke();
       ctx.fillStyle = tone;
-      ctx.font = font(44);
+      ctx.font = font(String(g.value).length > 3 ? 34 : 44);
       ctx.fillText(String(g.value), mid, rowY + 36);
       ctx.beginPath();
       if (g.result === 'CORRECT') {
@@ -560,24 +600,24 @@
   // 순위표는 마지막으로 받은 것을 기기에 두어(ranking.js) 오프라인이어도 보여 주고 TOP 10 판단에 쓴다.
   // 마지막으로 쓴 이니셜은 기억해 다음 등록 때 채워 둔다.
   const INITIALS_KEY = 'updown.initials';
-  const PENDING_KEY = 'updown.pending';
-  let pending = loadPending(); // { [난이도]: { tries, time } } 등록 대기 기록
-  let resultEntry = null; // 이번 판 기록 { difficulty, tries, time, expected, online }. TOP 10 에 들 때만 생긴다(checkRanking).
-  let gameStartedAt = 0; // 걸린 시간(동률일 때 순위) 재기: 판 시작 시각
-  let rankingTab = 'easy';
+  const PENDING_KEY = 'updown.pending2'; // 점수 방식 등록 대기(예전 updown.pending 은 지운다)
+  let pending = loadPending(); // { [끝 숫자]: { score, tries, time } } 등록 대기 기록
+  let resultEntry = null; // 이번 판 기록 { board, score, tries, time, expected, online }. TOP 10 에 들 때만 생긴다(checkRanking).
+  let gameStartedAt = 0; // 걸린 시간(점수에 들어감) 재기: 판 시작 시각
+  let rankingTab = 100;
   let rankingMine = null; // 방금 등록한 기록 ID (목록에서 강조)
   let rankingRequest = 0;
   let rankingDone = null; // 이번 판을 등록한 결과 { rank }. 결과 화면 등록 칸이 "N위로 등록했어요"로 바뀐다.
 
-  // 시도 횟수·걸린 시간이 정상인 기록만 남긴다(저장 값이 깨졌거나 예전 형식이어도 쓸 수 있게).
+  // 점수·시도 횟수·걸린 시간이 정상인 기록만 남긴다(저장 값이 깨졌어도 쓸 수 있게).
   function loadPending() {
     const result = {};
     try {
       const raw = JSON.parse(localStorage.getItem(PENDING_KEY)) || {};
-      Object.keys(UpDown.DIFFICULTIES).forEach((key) => {
+      UpDown.PRESETS.forEach((key) => {
         const entry = raw[key];
-        if (entry && Number.isInteger(entry.tries) && entry.tries > 0 && Number.isFinite(entry.time) && entry.time >= 0) {
-          result[key] = { tries: entry.tries, time: entry.time };
+        if (entry && Number.isInteger(entry.score) && entry.score >= 0 && Number.isInteger(entry.tries) && entry.tries > 0 && Number.isFinite(entry.time) && entry.time >= 0) {
+          result[key] = { score: entry.score, tries: entry.tries, time: entry.time };
         }
       });
     } catch (e) {}
@@ -591,21 +631,21 @@
     } catch (e) {}
   }
 
-  // a 가 b 보다 좋은 기록인가: 시도 횟수가 적을수록, 같으면 빨리 맞힐수록
+  // a 가 b 보다 좋은 기록인가: 점수가 높을수록
   function isBetter(a, b) {
-    return a.tries < b.tries || (a.tries === b.tries && a.time < b.time);
+    return a.score > b.score;
   }
 
   function sameRecord(a, b) {
-    return !!a && !!b && a.tries === b.tries && a.time === b.time;
+    return !!a && !!b && a.score === b.score && a.tries === b.tries && a.time === b.time;
   }
 
-  // 그 난이도의 등록 대기 기록. 마지막으로 받은 순위표에서 10위 밖이면 없는 것으로 본다(순위표를 받은 적이 없으면 일단 보여 준다).
-  function pendingFor(difficulty) {
-    const entry = pending[difficulty];
+  // 그 범위의 등록 대기 기록. 마지막으로 받은 순위표에서 10위 밖이면 없는 것으로 본다(순위표를 받은 적이 없으면 일단 보여 준다).
+  function pendingFor(key) {
+    const entry = pending[key];
     if (!entry) return null;
-    const board = UpDownRanking.cached(difficulty);
-    return !board || UpDownRanking.qualifies(board.rows, entry) ? Object.assign({ difficulty: difficulty }, entry) : null;
+    const saved = UpDownRanking.cached(key);
+    return !saved || UpDownRanking.qualifies(saved.rows, entry) ? Object.assign({ board: Number(key) }, entry) : null;
   }
 
   function hasPending() {
@@ -613,14 +653,14 @@
   }
 
   // 새 순위표를 받았을 때: 10위 밖으로 밀린 대기 기록은 지운다. 지웠으면 true.
-  function prunePending(difficulty, rows) {
-    if (!pending[difficulty] || UpDownRanking.qualifies(rows, pending[difficulty])) return false;
-    delete pending[difficulty];
+  function prunePending(key, rows) {
+    if (!pending[key] || UpDownRanking.qualifies(rows, pending[key])) return false;
+    delete pending[key];
     savePending();
     return true;
   }
 
-  // 순위표에서 그 기록이 설 자리(1부터): 나보다 앞서거나 완전히 같은 기록(먼저 등록한 쪽이 위) 수 + 1
+  // 순위표에서 그 기록이 설 자리(1부터): 나보다 앞서거나 같은 점수(먼저 등록한 쪽이 위) 수 + 1
   function expectedRank(rows, entry) {
     return rows.filter((row) => !isBetter(entry, row)).length + 1;
   }
@@ -636,10 +676,10 @@
   }
 
   function openRanking() {
-    const order = Object.keys(UpDown.DIFFICULTIES);
-    if (resultEntry && !rankingDone && pendingFor(resultEntry.difficulty)) rankingTab = resultEntry.difficulty;
-    else if (game && pendingFor(game.difficulty)) rankingTab = game.difficulty;
-    else rankingTab = order.find((key) => pendingFor(key)) || (game ? game.difficulty : rankingTab);
+    const current = game && game.ranked ? game.max : null;
+    if (resultEntry && !rankingDone && pendingFor(resultEntry.board)) rankingTab = resultEntry.board;
+    else if (current && pendingFor(current)) rankingTab = current;
+    else rankingTab = UpDown.PRESETS.find((key) => pendingFor(key)) || current || rankingTab;
     $('ranking-status').textContent = '';
     renderRanking();
     $('ranking').showModal();
@@ -653,7 +693,8 @@
     form.hidden = !entry;
     if (entry) {
       $('ranking-prompt').textContent = t('ranking.prompt', {
-        level: t('difficulty.' + entry.difficulty),
+        level: t('board.level', { max: entry.board }),
+        score: fmt(entry.score),
         tries: entry.tries,
         time: duration(entry.time),
       });
@@ -663,13 +704,13 @@
     }
     const tabs = $('ranking-tabs');
     tabs.textContent = '';
-    Object.keys(UpDown.DIFFICULTIES).forEach((key) => {
+    UpDown.PRESETS.forEach((key) => {
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'chip';
-      button.textContent = t('difficulty.' + key);
+      button.textContent = t('board.level', { max: key });
       button.setAttribute('aria-pressed', String(key === rankingTab));
-      // 등록 대기 기록이 있는 난이도는 점으로 표시한다. 등록 칸은 고른 난이도의 대기 기록을 따라간다.
+      // 등록 대기 기록이 있는 범위는 점으로 표시한다. 등록 칸은 고른 범위의 대기 기록을 따라간다.
       button.classList.toggle('has-pending', !!pendingFor(key));
       button.addEventListener('click', () => {
         rankingTab = key;
@@ -694,16 +735,16 @@
     let rows = null;
     let online = true;
     try {
-      rows = await UpDownRanking.top(entry.difficulty);
+      rows = await UpDownRanking.top(entry.board);
     } catch (e) {
       online = false;
-      const board = UpDownRanking.cached(entry.difficulty);
-      rows = board ? board.rows : [];
+      const saved = UpDownRanking.cached(entry.board);
+      rows = saved ? saved.rows : [];
     }
     if (game !== forGame || !UpDownRanking.qualifies(rows, entry)) return;
-    const record = { tries: entry.tries, time: entry.time };
-    if (!pending[entry.difficulty] || isBetter(record, pending[entry.difficulty])) {
-      pending[entry.difficulty] = record;
+    const record = { score: entry.score, tries: entry.tries, time: entry.time };
+    if (!pending[entry.board] || isBetter(record, pending[entry.board])) {
+      pending[entry.board] = record;
       savePending();
     }
     resultEntry = Object.assign({ expected: expectedRank(rows, entry), online: online }, entry);
@@ -716,8 +757,8 @@
     list.textContent = '';
     let rank = 0;
     rows.forEach((row, i) => {
-      // 시도 횟수와 걸린 시간이 모두 같을 때만 같은 순위(1, 1, 3 …)
-      if (i === 0 || row.tries !== rows[i - 1].tries || row.time !== rows[i - 1].time) rank = i + 1;
+      // 점수가 같으면 같은 순위(1, 1, 3 …)
+      if (i === 0 || row.score !== rows[i - 1].score) rank = i + 1;
       const li = document.createElement('li');
       if (row.id === rankingMine) li.className = 'mine';
       const place = document.createElement('span');
@@ -728,7 +769,10 @@
       name.textContent = row.initials;
       const score = document.createElement('span');
       score.className = 'ranking-tries';
-      score.textContent = t('ranking.score', { tries: row.tries, time: duration(row.time) });
+      score.textContent = t('ranking.score', { score: fmt(row.score) });
+      const detail = document.createElement('small');
+      detail.textContent = t('ranking.detail', { tries: row.tries, time: duration(row.time) });
+      score.append(detail);
       li.append(place, name, score);
       list.appendChild(li);
     });
@@ -766,31 +810,32 @@
   function rankOf(rows, id) {
     let rank = 0;
     for (let i = 0; i < rows.length; i++) {
-      if (i === 0 || rows[i].tries !== rows[i - 1].tries || rows[i].time !== rows[i - 1].time) rank = i + 1;
+      if (i === 0 || rows[i].score !== rows[i - 1].score) rank = i + 1;
       if (rows[i].id === id) return rank;
     }
     return 0;
   }
 
-  // 기록(entry: { difficulty, tries, time })을 올리고 순위를 돌려준다. 결과 화면 등록 칸과 랭킹 팝업이 같이 쓴다.
+  // 기록(entry: { board, score, tries, time })을 올리고 순위를 돌려준다. 결과 화면 등록 칸과 랭킹 팝업이 같이 쓴다.
   // 같은 기록이 등록 대기에 있으면 지우고, 이번 판 기록이면 결과 화면 등록 칸을 "등록했어요"로 바꾼다.
   async function registerRanking(initials, entry) {
     rankingMine = await UpDownRanking.submit({
       initials: initials,
-      difficulty: entry.difficulty,
+      board: entry.board,
+      score: entry.score,
       tries: entry.tries,
       time: entry.time,
     });
     Joypack.set('initials', initials, INITIALS_KEY);
-    rankingTab = entry.difficulty;
-    if (sameRecord(pending[entry.difficulty], entry)) {
-      delete pending[entry.difficulty];
+    rankingTab = entry.board;
+    if (sameRecord(pending[entry.board], entry)) {
+      delete pending[entry.board];
       savePending();
     }
-    const isThisGame = !!resultEntry && resultEntry.difficulty === entry.difficulty && sameRecord(resultEntry, entry);
+    const isThisGame = !!resultEntry && resultEntry.board === entry.board && sameRecord(resultEntry, entry);
     let rank = isThisGame && resultEntry.online ? resultEntry.expected : 0;
     try {
-      rank = rankOf(await UpDownRanking.top(entry.difficulty), rankingMine);
+      rank = rankOf(await UpDownRanking.top(entry.board), rankingMine);
     } catch (e) {} // 순위를 다시 못 읽으면 등록 전에 계산한 예상 순위를 쓴다.
     if (isThisGame) {
       rankingDone = { rank: rank };
@@ -946,11 +991,12 @@
     setPick(Math.round(game.low + ((DIAL_START - angle) / (DIAL_START - DIAL_END)) * (game.high - game.low)));
   }
 
-  function startGame(difficulty) {
+  // practice: 직접 정하기(연습, 랭킹 없음)
+  function startGame(max, practice) {
     resultEntry = null; // 등록하지 않고 새 판을 시작해도 TOP 10 기록은 등록 대기(pending)에 남는다.
     rankingDone = null;
     renderRankingButton();
-    game = UpDown.createGame(difficulty);
+    game = UpDown.createGame(max, null, practice);
     gameStartedAt = Date.now();
     pick = null;
     renderPlay(false);
@@ -965,24 +1011,34 @@
 
     pick = null;
     if (game.status !== 'playing') {
-      finishGame();
+      winGuess();
       return;
     }
-    const isUp = game.guesses[game.guesses.length - 1].result === 'UP';
-    const left = UpDown.triesLeft(game);
+    const last = game.guesses[game.guesses.length - 1];
+    const isUp = last.result === 'UP';
     UpDownFx.play(isUp ? 'up' : 'down');
-    // 마지막 기회에 들어서면 UP/DOWN 진동이 끝난 뒤 두근두근 한 번 더
-    if (left === 1) setTimeout(() => UpDownFx.play('danger'), 360);
+    // 아주 가까우면(🔥) UP/DOWN 진동이 끝난 뒤 두근 한 번 더
+    if (last.temp === 'hot') setTimeout(() => UpDownFx.play('danger'), 360);
     renderPlay(true);
-    guessFeedback(isUp, left);
+    guessFeedback(isUp);
     $('dial').focus();
   }
 
+  // 맞힌 순간: 시간을 멈추고, 막대가 정답 한 칸으로 모여 터지는 걸 잠깐 보여 준 뒤 결과 화면으로 간다.
+  // 그사이 홈으로 나가면 결과 화면은 띄우지 않는다.
+  function winGuess() {
+    game.time = Date.now() - gameStartedAt;
+    const forGame = game;
+    renderPlay(true);
+    UpDownFx.play('edge');
+    setTimeout(() => {
+      if (game === forGame && screen === 'play') finishGame();
+    }, reducedMotion.matches ? 250 : 800);
+  }
+
   // 확인 뒤 손맛 연출: 숫자가 쾅 박히고, UP/DOWN 이 그 방향으로 튀어 나오고, 화면이 그 방향으로 툭 밀렸다 돌아오고,
-  // 좁혀진 범위가 반짝이고, 방금 쓴 하트가 깨진다. 동작 줄이기 설정이면 하트 색만 바뀐다(css).
-  function guessFeedback(isUp, left) {
-    const heart = $('tries-left').children[left];
-    if (heart) heart.classList.add('break');
+  // 좁혀진 범위가 반짝인다. 동작 줄이기 설정이면 움직이지 않는다.
+  function guessFeedback(isUp) {
     if (reducedMotion.matches) return;
     $('hint-value').animate(
       [
@@ -1006,9 +1062,11 @@
 
   function finishGame() {
     const tries = game.guesses.length;
-    newBest = game.status === 'won' && (!best[game.difficulty] || tries < best[game.difficulty]);
+    game.score = UpDown.score(game.max, tries, game.time);
+    // 최고 점수는 랭킹 범위만 남긴다(연습 판은 남기지 않음)
+    newBest = game.ranked && (!best[game.max] || game.score > best[game.max]);
     if (newBest) {
-      best[game.difficulty] = tries;
+      best[game.max] = game.score;
       saveBest();
     }
     renderResult();
@@ -1017,15 +1075,15 @@
     screens.result.classList.add('locked');
     setTimeout(() => screens.result.classList.remove('locked'), 600);
     $('retry').focus();
-    if (game.status === 'won') confetti(newBest);
+    confetti(newBest);
     resultEntry = null;
     rankingMine = null;
     rankingDone = null;
     $('result-rank-initials').value = '';
     renderResultRank();
     renderRankingButton();
-    if (game.status === 'won') checkRanking({ difficulty: game.difficulty, tries: tries, time: Date.now() - gameStartedAt }, game);
-    UpDownFx.play(game.status === 'won' ? 'won' : 'lost');
+    if (game.ranked) checkRanking({ board: game.max, score: game.score, tries: tries, time: game.time }, game);
+    UpDownFx.play('won');
     prepareShareCard().catch(() => {});
   }
 
@@ -1035,6 +1093,7 @@
     renderScreen();
     renderRankingButton();
     if ($('settings').open) renderSettings();
+    if ($('custom').open) renderCustomDesc();
     freezeStartLayout(); // 언어마다 글자 길이가 달라 배치를 다시 잰다
   }
 
@@ -1099,6 +1158,39 @@
     $('app-version').hidden = false;
   }
 
+  // ── 직접 정하기(연습) ──
+  // 시작 숫자는 1 고정, 끝 숫자만 고른다(UpDown.CUSTOM_MIN ~ CUSTOM_MAX). 마지막으로 고른 값을 기억한다.
+  function renderCustomDesc() {
+    $('custom-desc').textContent = t('custom.desc', { min: UpDown.CUSTOM_MIN, max: UpDown.CUSTOM_MAX });
+  }
+
+  function openCustom() {
+    let saved = 0;
+    try {
+      saved = Number(localStorage.getItem(CUSTOM_KEY)) || 0;
+    } catch (e) {}
+    $('custom-max').value = UpDown.clampMax(saved || 500);
+    renderCustomDesc();
+    $('custom').showModal();
+  }
+
+  // 입력 칸 값을 10씩 바꾸거나(±10) 허용 범위로 맞춘다(0)
+  function stepCustom(delta) {
+    const input = $('custom-max');
+    input.value = UpDown.clampMax((Number(input.value) || 0) + delta);
+  }
+
+  function submitCustom(event) {
+    event.preventDefault();
+    const max = UpDown.clampMax($('custom-max').value);
+    try {
+      localStorage.setItem(CUSTOM_KEY, String(max));
+    } catch (e) {}
+    $('custom-max').blur(); // 휴대폰 키보드를 닫는다.
+    $('custom').close();
+    startGame(max, true);
+  }
+
   // 되돌릴 수 없는 동작 전에 띄우는 확인 팝업. "지우기"를 누르면 true, 취소·Esc·바깥 클릭은 false 로 끝난다.
   function confirmDialog(message) {
     const dialog = $('confirm');
@@ -1111,14 +1203,14 @@
   }
 
   async function resetRecord(key) {
-    const level = key === 'all' ? '' : t('difficulty.' + key);
+    const level = key === 'all' ? '' : t('board.level', { max: key });
     const message = key === 'all' ? t('settings.confirmAll') : t('settings.confirmOne', { level: level });
     if (!(await confirmDialog(message))) return;
     if (key === 'all') best = {};
     else delete best[key];
     saveBest();
     renderSettings();
-    renderScreen(); // 시작 화면의 난이도별 최고 기록 표시도 바로 갱신한다.
+    renderScreen(); // 시작 화면의 범위별 최고 기록 표시도 바로 갱신한다.
   }
 
   $('guess-form').addEventListener('submit', submitGuess);
@@ -1151,7 +1243,7 @@
   $('pick-up').addEventListener('click', () => setPick(pick + 1));
   $('history').addEventListener('scroll', updateHistoryFade, { passive: true });
   $('home').addEventListener('click', goToStart);
-  $('retry').addEventListener('click', () => startGame(game.difficulty));
+  $('retry').addEventListener('click', () => startGame(game.max, !game.ranked));
   $('go-home').addEventListener('click', goToStart);
   $('share').addEventListener('click', shareResult);
   $('lang-toggle').addEventListener('click', toggleLang);
@@ -1177,21 +1269,26 @@
     });
   });
   // 대화상자 바깥(배경)을 누르면 닫는다. 내용은 .settings-body 안에 있어 배경 클릭만 대화상자 자체에 닿는다.
-  ['settings', 'confirm', 'ranking'].forEach((id) => {
+  ['settings', 'confirm', 'ranking', 'custom'].forEach((id) => {
     $(id).addEventListener('click', (event) => {
       if (event.target === $(id)) $(id).close();
     });
   });
   $('confirm-cancel').addEventListener('click', () => $('confirm').close('cancel'));
   $('confirm-ok').addEventListener('click', () => $('confirm').close('ok'));
-  Object.keys(UpDown.DIFFICULTIES).forEach((key) => {
+  UpDown.PRESETS.forEach((key) => {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'chip';
     button.dataset.reset = key;
-    button.dataset.i18n = 'difficulty.' + key;
+    button.textContent = '1 ~ ' + key;
     $('reset-row').appendChild(button);
   });
+  $('custom-form').addEventListener('submit', submitCustom);
+  $('custom-close').addEventListener('click', () => $('custom').close());
+  $('custom-minus').addEventListener('click', () => stepCustom(-10));
+  $('custom-plus').addEventListener('click', () => stepCustom(10));
+  $('custom-max').addEventListener('blur', () => stepCustom(0));
   document.querySelectorAll('[data-reset]').forEach((button) => {
     button.addEventListener('click', () => resetRecord(button.dataset.reset));
   });

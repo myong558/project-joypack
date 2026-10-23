@@ -8,19 +8,29 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{db}/documents {
 
-    // 업다운: 기록 1건 = 문서 1개. 누구나 읽기·등록만, 고치기·지우기 금지
-    match /games/updown/scores/{id} {
-      allow read: if true;
-      allow create: if request.resource.data.keys().hasOnly(['initials', 'difficulty', 'tries', 'time', 'createdAt'])
+    // 업다운(v1.11.0~): 범위(1~50·1~100·1~200)마다 컬렉션 scores-<끝 숫자>, 기록 1건 = 문서 1개. 누구나 읽기·등록만, 고치기·지우기 금지.
+    // 점수는 games/updown/js/game.js 의 score() 와 같은 식으로 검사한다:
+    //   1000 + 100 × (정석 횟수 − 시도 횟수) − (걸린 시간 ms ÷ 100, 버림). 그보다 높게 올리면 거부(0점은 항상 허용).
+    //   정석 횟수 = ⌈log2(끝 숫자 + 1)⌉ → 50: 6, 100: 7, 200: 8
+    // 예전 하트·난이도 방식 기록(games/updown/scores)은 더 읽지 않는다. 규칙이 없으니 읽기·쓰기 모두 막힌다.
+    match /games/updown/{board}/{id} {
+      allow read: if board in ['scores-50', 'scores-100', 'scores-200'];
+      allow create: if board in ['scores-50', 'scores-100', 'scores-200']
+        && request.resource.data.keys().hasOnly(['initials', 'score', 'tries', 'time', 'createdAt'])
         && request.resource.data.initials is string
         && request.resource.data.initials.matches('^[A-Z]{1,5}$')
-        && request.resource.data.difficulty in ['easy', 'normal', 'hard', 'extreme']
         && request.resource.data.tries is int
         && request.resource.data.tries >= 1
-        && request.resource.data.tries <= 6
+        && request.resource.data.tries <= {'scores-50': 50, 'scores-100': 100, 'scores-200': 200}[board]
         && request.resource.data.time is int
         && request.resource.data.time >= 0
         && request.resource.data.time <= 86400000
+        && request.resource.data.score is int
+        && request.resource.data.score >= 0
+        && (request.resource.data.score == 0
+          || request.resource.data.score <= 1000
+            + 100 * ({'scores-50': 6, 'scores-100': 7, 'scores-200': 8}[board] - request.resource.data.tries)
+            - math.floor(request.resource.data.time / 100))
         && request.resource.data.createdAt == request.time;
       allow update, delete: if false;
     }

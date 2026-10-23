@@ -24,8 +24,8 @@
 | 배포 | Pages "Deploy from a branch" (`main` / root) | GitHub Actions → `dist/` |
 | 오프라인 | 직접 쓴 `sw.js` (`CACHE_NAME` 수동 증가) | `vite-plugin-pwa` (workbox, autoUpdate) |
 | 랭킹 클라이언트 | Firestore REST + `fetch` (`js/ranking.js`) | Firebase SDK + 트랜잭션 (`src/online.ts`) |
-| 랭킹 경로 | `games/updown/scores/{id}` (기록 1건 = 문서 1개) | `games/hammer/rankings/{board}` (순위표 1개 = 문서 1개, `entries` 배열) |
-| 기기 저장 | `localStorage` `updown.*` (best, theme, skin, lang, sound, vibrate, initials) | `localStorage` `project-hammer:v1` (JSON 한 덩어리) |
+| 랭킹 경로 | `games/updown/scores-<50·100·200>/{id}` (범위별 컬렉션, 기록 1건 = 문서 1개, 점수 하나로 정렬) | `games/hammer/rankings/{board}` (순위표 1개 = 문서 1개, `entries` 배열) |
+| 기기 저장 | `localStorage` `updown.*` (scores, theme, skin, lang, sound, vibrate, initials) | `localStorage` `project-hammer:v1` (JSON 한 덩어리) |
 | 공통 설정 | 컬러 모드, 스킨, 언어(ko/en), 효과음·진동 | 컬러 모드, 스킨, 언어(ko/en), 사운드 |
 | 랭킹 이름 | 영문 대문자 1~5자 | 영문 대문자 A–Z 최대 5자 |
 
@@ -173,10 +173,10 @@ dist/                       → https://myong558.github.io/project-joypack/
 - Firebase 프로젝트 `joypack-c6bd2` 와 게임 ID 는 **그대로**. 데이터 이전은 없습니다.
 - 각 게임의 랭킹 코드는 처음에는 손대지 않습니다(업다운 REST, 두더지잡기 SDK). 두 방식 모두 잘 돌고 있고, 억지로 합치면 위험만 커집니다.
 - 보안 규칙은 지금 콘솔에만 있으므로 **`firestore.rules` 파일 하나로 모아 저장소에서 관리**합니다. 게임을 추가할 때 이 파일에 블록을 더하고 콘솔에 붙여 넣습니다(Firebase CLI `firebase deploy --only firestore:rules` 로 바꿀 수도 있음).
-- 허브에 **전체 랭킹** 화면: 게임별 1위를 한 화면에 보여 주고 "TOP 10 보기"로 그 자리에서 10위까지 펼칩니다(허브 v1.17.1부터, 이전엔 TOP 3)(순위표는 칩으로 고름: 업다운 난이도, 두더지잡기 클래식·오늘의 챌린지).
+- 허브에 **전체 랭킹** 화면: 게임별 1위를 한 화면에 보여 주고 "TOP 10 보기"로 그 자리에서 10위까지 펼칩니다(허브 v1.17.1부터, 이전엔 TOP 3)(순위표는 칩으로 고름: 업다운 범위 1~50·1~100·1~200, 두더지잡기 클래식·오늘의 챌린지).
   - 읽기 횟수를 아끼려고 허브에 들어올 때가 아니라 그 화면을 열 때, 보고 있는 순위표만 읽습니다.
   - 불러온 순위는 기기(`joypack.rankingCache`)에 남겨 두고 5분 안에 다시 열면 서버를 부르지 않습니다. 오프라인·실패 때는 마지막 순위를 보여 줍니다.
-  - 허브는 SDK 없이 REST 로 읽기만 합니다(등록은 각 게임). 업다운 조회는 게임과 같은 정렬이라 기존 복합 색인을 그대로 씁니다.
+  - 허브는 SDK 없이 REST 로 읽기만 합니다(등록은 각 게임). 업다운 조회는 게임과 같은 정렬(범위별 컬렉션의 점수 내림차순)이라 복합 색인이 필요 없습니다.
 - 무료 한도(하루 읽기 5만·쓰기 2만)는 모든 게임이 나눠 씁니다. 게임이 늘면 한도 사용량을 콘솔에서 주기적으로 확인합니다.
 - API 키에 HTTP 리퍼러 제한을 걸어 두었다면 `myong558.github.io/project-joypack/*` 를 추가합니다(같은 도메인이라 `myong558.github.io/*` 로 걸려 있다면 그대로 됨).
 
@@ -195,9 +195,9 @@ dist/                       → https://myong558.github.io/project-joypack/
   "status": "live",
   "added": "2026-10-21",
   "ranking": {
-    "path": "games/updown/scores",
-    "default": "normal",
-    "boards": [{ "id": "easy", "name": { "ko": "쉬움", "en": "Easy" } }, "…"]
+    "path": "games/updown/scores-<끝 숫자>",
+    "default": "100",
+    "boards": [{ "id": "50", "name": { "ko": "1~50", "en": "1~50" } }, "…"]
   }
 }
 ```
@@ -332,6 +332,7 @@ dist/                       → https://myong558.github.io/project-joypack/
 - [x] 조이팩으로 오면 늘 시작 화면(허브 v1.17.2): 랭킹 "게임 하러 가기" 뒤 뒤로 가기를 하면 bfcache 가 떠나기 전 랭킹 팝업(옛 순위)을 그대로 되살리던 것을, 떠날 때(pagehide) 열린 창(랭킹·설정·개발자 모드)을 모두 닫고, 되살아나면(pageshow persisted) 맨 위로 올려 최고 기록·오프라인 표시를 새로 읽어 그리게 함(예전엔 창이 열려 있으면 다시 그리기를 건너뜀). 게임 위 메뉴의 조이팩 버튼으로 오든 뒤로 가기로 오든 같은 시작 화면. TOP 10 펼침·"내 기록 있는 게임만"은 이번 방문 동안·기기에 그대로 기억.
 - [x] 뒤로 가기에도 진입 연출(허브 v1.18.0): 게임에서 뒤로 가기로 돌아와 화면이 되살아나면(pageshow persisted) 처음 들어올 때와 같은 진입 연출(로고·제목·카드·다음 게임 띠)을 다시 돌림(`playIntro`). 동작 줄이기 설정이면 연출 없이 바로. 공개 예약 시각이 지났으면 게임 목록도 이때 다시 계산.
 - [x] 뒤로 가기 복귀 연출 짧게(허브 v1.18.1): 처음 진입 연출(약 1.9초)을 다시 보면 길어서, 돌아올 때는 `playIntro(true)` → `#app.intro-back`(약 0.6초): 로고 상자 한 번 통통·반짝이 한 번, 제목·소개는 그대로, 카드·다음 게임 띠는 0.04초 간격으로 떠오름.
+- [x] 업다운 점수 랭킹으로 개편(업다운 v1.11.0 · 허브 v1.19.0): 난이도·하트를 없애고 범위 1~50·1~100·1~200(랭킹) + 직접 정하기(끝 숫자 10~9999, 연습·랭킹 없음). 맞힐 때까지 계속하고 점수 하나로 순위(1000 + 100 × (정석 횟수 − 시도) − 0.1초마다 1점). 온도 힌트(🔥☀️🌊❄️)와 좁혀지는 숫자 막대 추가. 랭킹은 범위별 새 컬렉션 `games/updown/scores-<끝 숫자>`(예전 `scores` 는 읽지 않음, 복합 색인 불필요), `firestore.rules` 가 점수 상한을 검사. 허브 전체 랭킹·최고 기록 표시도 점수로(`updown.scores`).
   공유 링크로 게임에 바로 들어온 사람에게는 화면 아래 "조이팩 앱으로 설치하기" 띠(`Joypack.inviteBar`)를 보여 주고, 누르면 허브의 설치 안내 카드로 이어진다
   공유 링크는 `?from=share` 가 붙어, 받은 사람이 열면 첫 화면 맨 위에 설치 안내 카드가 뜬다. 카카오톡 등 앱 안 브라우저에서는 설치가 안 되므로 "브라우저로 열기"(카카오톡은 `kakaotalk://web/openExternal`, 그 밖의 안드로이드 앱은 Chrome intent)로 넘긴다. 아이폰의 앱 안 브라우저는 "Safari로 열기" 안내만 한다
 

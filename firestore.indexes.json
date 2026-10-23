@@ -1,15 +1,4 @@
 {
-  "indexes": [
-    {
-      "collectionGroup": "scores",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "difficulty", "order": "ASCENDING" },
-        { "fieldPath": "tries", "order": "ASCENDING" },
-        { "fieldPath": "time", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "ASCENDING" }
-      ]
-    }
-  ],
+  "indexes": [],
   "fieldOverrides": []
 }

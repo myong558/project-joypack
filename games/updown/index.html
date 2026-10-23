@@ -267,8 +267,13 @@
           <svg class="icon status-icon" aria-hidden="true"><use href="#i-range"></use></svg>
           <span id="range" class="status-value"></span>
         </div>
-        <div class="status-item status-tries">
-          <span id="tries-left" class="hearts" role="img"></span>
+        <div class="status-item status-tries" role="group" data-i18n-aria-label="play.triesLabel">
+          <svg class="icon status-icon" aria-hidden="true"><use href="#i-retry"></use></svg>
+          <span id="tries-count" class="status-value"></span>
+        </div>
+        <!-- 좁혀지는 숫자 막대: 처음 범위 전체 중 아직 가능한 칸만 밝게 남고, 추측한 자리에 눈금이 찍힌다(app.js 의 renderBar). -->
+        <div id="range-bar" class="range-bar" aria-hidden="true">
+          <span id="range-bar-live" class="range-bar-live"></span>
         </div>
         <p id="play-level" class="play-level"></p>
       </div>
@@ -276,6 +281,8 @@
       <div class="hint-box" aria-live="polite">
         <p id="hint-value" class="hint-value"></p>
         <p id="hint" class="hint"></p>
+        <!-- 온도 힌트: 정답과 얼마나 가까운지(🔥 아주 가까움 ~ ❄️ 멂) -->
+        <p id="temp" class="temp" hidden></p>
       </div>
 
       <!-- 시도 기록은 숫자 상자 위에서 위로 쌓인다. 다이얼은 화면 맨 아래에 고정돼 기록이 늘어도 움직이지 않는다. -->
@@ -308,7 +315,9 @@
       </div>
       <h1 id="result-title"></h1>
       <p id="result-answer" class="answer"></p>
+      <p id="result-score" class="result-score"></p>
       <p id="result-detail" class="lead"></p>
+      <p id="result-practice" class="result-practice" hidden data-i18n="result.practice"></p>
       <p id="result-best" class="new-best" hidden>
         <svg class="icon" aria-hidden="true"><use href="#i-star"></use></svg>
         <span data-i18n="result.newBest"></span>
@@ -427,7 +436,7 @@
 
       <section class="settings-group">
         <h3 data-i18n="settings.records"></h3>
-        <!-- 난이도별 칩은 app.js 가 js/game.js 의 난이도 목록으로 덧붙인다. -->
+        <!-- 범위별(1~50·1~100·1~200) 칩은 app.js 가 js/game.js 의 PRESETS 로 덧붙인다. -->
         <div id="reset-row" class="chip-row reset-row">
           <button type="button" class="chip" data-reset="all" data-i18n="settings.resetAll"></button>
         </div>
@@ -439,7 +448,32 @@
     </div>
   </dialog>
 
-  <!-- 공유 랭킹(js/ranking.js): 난이도별 TOP 10. 정답을 맞힌 직후에는 맨 위에 이니셜 등록 칸이 나온다. -->
+  <!-- 직접 정하기: 끝 숫자만 고르는 연습 모드(시작 숫자는 1 고정, 랭킹 없음). 마지막으로 고른 값을 기억한다. -->
+  <dialog id="custom" class="settings custom" aria-labelledby="custom-title">
+    <form id="custom-form" class="settings-body" novalidate>
+      <div class="settings-header">
+        <h2 id="custom-title" data-i18n="custom.title"></h2>
+        <button id="custom-close" type="button" class="icon-button" data-i18n-aria-label="settings.close">
+          <svg class="icon" aria-hidden="true"><use href="#i-close"></use></svg>
+        </button>
+      </div>
+      <p id="custom-desc" class="custom-desc"></p>
+      <div class="custom-pick">
+        <button id="custom-minus" type="button" class="pick-step" data-i18n-aria-label="custom.minus"><svg class="icon" aria-hidden="true"><use href="#i-minus"></use></svg></button>
+        <span class="custom-range"><span aria-hidden="true">1 ~</span>
+          <input id="custom-max" class="custom-input" type="number" inputmode="numeric" enterkeyhint="go" data-i18n-aria-label="custom.input">
+        </span>
+        <button id="custom-plus" type="button" class="pick-step" data-i18n-aria-label="custom.plus"><svg class="icon" aria-hidden="true"><use href="#i-plus"></use></svg></button>
+      </div>
+      <p class="custom-note" data-i18n="custom.note"></p>
+      <button type="submit" class="primary">
+        <svg class="icon" aria-hidden="true"><use href="#i-play"></use></svg>
+        <span data-i18n="custom.start"></span>
+      </button>
+    </form>
+  </dialog>
+
+  <!-- 공유 랭킹(js/ranking.js): 범위별 TOP 10. 정답을 맞힌 직후에는 맨 위에 이니셜 등록 칸이 나온다. -->
   <dialog id="ranking" class="settings ranking" aria-labelledby="ranking-title">
     <div class="settings-body">
       <div class="settings-header">

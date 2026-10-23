@@ -9,13 +9,12 @@
     "status": "live",
     "added": "2026-10-21",
     "ranking": {
-      "path": "games/updown/scores",
-      "default": "normal",
+      "path": "games/updown/scores-<끝 숫자>",
+      "default": "100",
       "boards": [
-        { "id": "easy", "name": { "ko": "쉬움", "en": "Easy" } },
-        { "id": "normal", "name": { "ko": "보통", "en": "Normal" } },
-        { "id": "hard", "name": { "ko": "어려움", "en": "Hard" } },
-        { "id": "extreme", "name": { "ko": "최상위", "en": "Extreme" } }
+        { "id": "50", "name": { "ko": "1~50", "en": "1~50" } },
+        { "id": "100", "name": { "ko": "1~100", "en": "1~100" } },
+        { "id": "200", "name": { "ko": "1~200", "en": "1~200" } }
       ]
     }
   },

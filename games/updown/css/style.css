@@ -727,25 +727,6 @@ button:focus-visible {
   font-weight: 700;
 }
 
-.difficulty-stars {
-  display: inline-flex;
-  gap: 1px;
-  font-size: 1rem;
-  color: var(--star-off);
-}
-
-.difficulty-stars .on {
-  color: var(--star);
-}
-
-/* 시작 화면 난이도 카드의 별은 크게. Jua 한글은 글자 모양이 줄 상자 가운데보다 조금 위에 그려져
-   (19px 기준 약 1.2px), 별을 그만큼 올려 난이도 이름과 눈으로 보이는 가운데를 맞춘다. */
-.difficulty .difficulty-stars {
-  gap: 2px;
-  font-size: 1.1rem;
-  transform: translateY(-0.065em);
-}
-
 .difficulty-detail,
 .difficulty-best {
   display: flex;
@@ -757,9 +738,8 @@ button:focus-visible {
   gap: 14px;
 }
 
-/* 최고 기록은 범위·기회 줄 오른쪽 끝(시작 표시 왼쪽)에 */
+/* 최고 점수: 범위 이름 아래 */
 .difficulty-best {
-  margin-left: auto;
   gap: 4px;
 }
 
@@ -768,21 +748,85 @@ button:focus-visible {
   font-size: 1.75rem;
 }
 
-.meta {
+/* 직접 정하기(연습): 범위 버튼보다 낮은 점선 한 줄 버튼 */
+.custom-start {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: calc(var(--space) * 0.3 + 4px) 16px;
+  background: transparent;
+  color: var(--text);
+  border: 2px dashed var(--line);
+  border-radius: 14px;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.custom-start:hover {
+  border-color: var(--primary);
+}
+
+.custom-start .icon {
+  color: var(--icon);
+  font-size: 1.2rem;
+}
+
+.custom-start-sub {
+  margin-left: auto;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+
+/* 직접 정하기 팝업: 1 ~ [끝 숫자] 와 ±10 버튼 */
+.custom-desc,
+.custom-note {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.custom-note {
+  font-size: 0.9rem;
+}
+
+.custom-pick {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.custom-range {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
+  font-size: 1.6rem;
+  font-weight: 700;
 }
 
-.meta .icon {
-  color: var(--icon);
+.custom-input {
+  width: 4.2em;
+  padding: 4px 8px;
+  background: var(--surface-alt);
+  color: var(--text);
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  font: inherit;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield;
 }
 
-/* 하트도 숫자보다 커서 아래로 처져 보이므로 살짝 올려 숫자와 맞춘다. */
-.meta-tries .icon {
-  color: var(--heart);
-  font-size: 1.3rem;
-  transform: translateY(-0.1em);
+.custom-input::-webkit-outer-spin-button,
+.custom-input::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+
+.custom-input:focus {
+  border-color: var(--primary);
+  outline: none;
 }
 
 /* ── 게임 화면 ────────────────────────── */
@@ -809,8 +853,8 @@ button:focus-visible {
 }
 
 .status-tries {
-  background: var(--surface-brick);
-  border-color: var(--line-brick);
+  background: var(--surface-sage);
+  border-color: var(--line-sage);
 }
 
 .status-icon {
@@ -824,21 +868,70 @@ button:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 
-/* 남은 기회 하트(.on = 남은 기회). 좁은 화면에서도 한 줄에 들어가도록 너비에 비례 */
-.hearts {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 2px;
-  font-size: clamp(14px, 4.6vw, 22px);
-  color: var(--heart);
+/* 좁혀지는 숫자 막대(app.js 의 renderBar): 처음 범위 전체 중 아직 가능한 칸만 밝게 남는다. */
+.range-bar {
+  position: relative;
+  grid-column: 1 / -1;
+  height: 12px;
+  overflow: hidden;
+  background: var(--surface-alt);
+  border: 1px solid var(--line);
+  border-radius: 999px;
 }
 
-.hearts .icon:not(.on) {
-  color: var(--star-off);
+.range-bar-live {
+  position: absolute;
+  inset-block: 0;
+  min-width: 6px;
+  background: var(--action);
+  border-radius: 999px;
+  transition:
+    left 0.45s cubic-bezier(0.2, 1.2, 0.4, 1),
+    width 0.45s cubic-bezier(0.2, 1.2, 0.4, 1);
 }
 
-/* 난이도 표시(별 + 이름): 카드 아래 가운데의 알약 모양 */
+.range-bar-live.instant {
+  transition: none;
+}
+
+/* 추측한 자리 눈금: UP 빨강, DOWN 파랑 */
+.range-bar-mark {
+  position: absolute;
+  inset-block: 1px;
+  width: 3px;
+  translate: -50% 0;
+  border-radius: 2px;
+  opacity: 0.9;
+}
+
+.range-bar-mark.up {
+  background: var(--up);
+}
+
+.range-bar-mark.down {
+  background: var(--down);
+}
+
+/* 맞히면 정답 한 칸으로 모여 초록으로 터진다 */
+.range-bar.won .range-bar-live {
+  background: var(--success);
+  animation: bar-hit 0.6s ease-out 0.3s;
+}
+
+@keyframes bar-hit {
+  0% {
+    box-shadow: 0 0 0 0 var(--success);
+  }
+  40% {
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--success) 40%, transparent);
+    transform: scaleY(1.6);
+  }
+  100% {
+    box-shadow: 0 0 0 12px transparent;
+  }
+}
+
+/* 판 이름(1 ~ 100, 연습 · 1 ~ 345): 카드 아래 가운데의 알약 모양 */
 .play-level {
   grid-column: 1 / -1;
   justify-self: center;
@@ -902,6 +995,50 @@ button:focus-visible {
   color: var(--down);
 }
 
+.hint.correct {
+  color: var(--success);
+}
+
+/* 온도 힌트: 힌트 아래 줄의 알약. 가까울수록 따뜻한 색 */
+.hint-box {
+  flex-wrap: wrap;
+}
+
+.temp {
+  flex-basis: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 0;
+}
+
+.temp-hot,
+.temp-warm,
+.temp-cool,
+.temp-cold {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.temp-hot {
+  color: var(--up);
+}
+
+.temp-warm {
+  color: var(--star);
+}
+
+.temp-cool {
+  color: var(--down);
+}
+
+.temp-cold {
+  color: var(--text-muted);
+}
+
+.temp.pop {
+  animation: pop 0.3s ease-out;
+}
+
 .hint.pop {
   animation: pop 0.3s ease-out;
 }
@@ -942,28 +1079,6 @@ button:focus-visible {
   }
   60% {
     transform: scale(0.97);
-  }
-}
-
-/* 방금 쓴 하트: 부풀었다가 기울며 깨지듯 빈 하트로 바뀐다. */
-.hearts .icon.break {
-  animation: heart-break 0.5s ease-out;
-}
-
-@keyframes heart-break {
-  0% {
-    color: var(--heart);
-    transform: scale(1);
-  }
-  30% {
-    color: var(--heart);
-    transform: scale(1.5) rotate(-12deg);
-  }
-  55% {
-    transform: scale(0.8) rotate(14deg);
-  }
-  100% {
-    transform: scale(1) rotate(0);
   }
 }
 
@@ -1068,6 +1183,20 @@ button:focus-visible {
 
 .history-result.down {
   color: var(--down);
+}
+
+.history li.correct {
+  background: color-mix(in srgb, var(--success) 14%, var(--surface));
+  border-color: var(--success);
+}
+
+.history-result.correct {
+  color: var(--success);
+}
+
+.history-temp {
+  margin-right: 2px;
+  font-size: 0.85em;
 }
 
 /* 화면이 낮으면 시도 기록이 먼저 줄고, 그래도 모자라면 다이얼이 줄어 화면 스크롤이 생기지 않게 한다. */
@@ -1324,6 +1453,28 @@ h1.lost {
   margin: 0;
   color: var(--text-muted);
   text-align: center;
+}
+
+/* 점수: 정답 숫자 아래 크게 */
+.result-score {
+  margin: 0;
+  color: var(--success);
+  font-size: min(2.2rem, 7 * var(--vh));
+  font-weight: 800;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.result-practice {
+  justify-self: center;
+  align-self: center;
+  margin: 0 auto;
+  padding: 2px 12px;
+  background: var(--pill-bg);
+  color: var(--text-muted);
+  border: 1px solid var(--pill-line);
+  border-radius: 999px;
+  font-size: 0.9rem;
 }
 
 .new-best {
@@ -1750,8 +1901,16 @@ h1.lost {
 }
 
 .ranking-tries {
-  color: var(--text-muted);
+  font-weight: 700;
+  text-align: right;
   font-variant-numeric: tabular-nums;
+}
+
+.ranking-tries small {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.75em;
+  font-weight: 400;
 }
 
 .ranking-board {
@@ -1872,25 +2031,8 @@ h1.lost {
   --enter: 0.59s;
 }
 
-.intro .difficulty:nth-child(4) {
-  --enter: 0.66s;
-}
-
-.intro .difficulty-stars .on {
-  --star-delay: 0s;
-  animation: star-on 0.25s ease-out calc(var(--enter) + 0.15s + var(--star-delay)) both;
-}
-
-.intro .difficulty-stars .on:nth-child(2) {
-  --star-delay: 0.06s;
-}
-
-.intro .difficulty-stars .on:nth-child(3) {
-  --star-delay: 0.12s;
-}
-
-.intro .difficulty-stars .on:nth-child(4) {
-  --star-delay: 0.18s;
+.intro .custom-start {
+  animation: fade-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.66s both;
 }
 
 /* 로고 삼각형: 삼각형 크기 기준으로 살짝 튀었다 돌아온다(viewBox 512 기준 40 = 로고 높이의 약 8%). */
@@ -1927,45 +2069,6 @@ h1.lost {
   from {
     opacity: 0;
     transform: translateY(12px);
-  }
-}
-
-/* 마지막 기회: 남은 하트가 두근거리고, 화면 가장자리가 붉게 맥박친다. */
-#screen-play.last-chance .hearts .icon.on {
-  animation: heartbeat 0.6s ease-in-out infinite;
-}
-
-#screen-play.last-chance::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 5;
-  pointer-events: none;
-  box-shadow: inset 0 0 0 3px var(--danger), inset 0 0 60px var(--danger-glow);
-  animation: danger-pulse 1.2s ease-in-out infinite;
-}
-
-@keyframes heartbeat {
-  0%,
-  40%,
-  100% {
-    transform: scale(1);
-  }
-  12% {
-    transform: scale(1.3);
-  }
-  26% {
-    transform: scale(1.15);
-  }
-}
-
-@keyframes danger-pulse {
-  0%,
-  100% {
-    opacity: 0.45;
-  }
-  50% {
-    opacity: 1;
   }
 }
 
@@ -2280,15 +2383,14 @@ h1.lost {
   .intro .logo-up,
   .intro .logo-down,
   .intro .difficulty,
-  .intro .difficulty-stars .on,
-  #screen-play.last-chance .hearts .icon.on,
-  #screen-play.last-chance::before,
+  .intro .custom-start,
+  .temp.pop,
+  .range-bar.won .range-bar-live,
   .history li.enter,
   .hint.pop,
   .hint.pop.up,
   .hint.pop.down,
   #range.narrowed,
-  .hearts .icon.break,
   .settings[open],
   .result-art.won .result-icon,
   .result-art.lost .result-icon,
