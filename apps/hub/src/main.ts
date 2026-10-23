@@ -3,7 +3,7 @@ import './styles.css';
 import { GAMES, byNewest, iconUrl, isNew, isPublic, isScheduled, patternOf, type GameMeta } from './games';
 import { LANG_LABEL, LANGS, formatNumber, getLang, t } from './i18n';
 import { FULL, TOP, cachedBoard, hasRanking, loadBoard, type Row } from './rankings';
-import { externalOpenUrl, installState, onInstallChange, promptInstall } from './install';
+import { externalOpenUrl, installState, manualGuide, onInstallChange, promptInstall } from './install';
 import { checkPassword, previewOn, setPreview } from './preview';
 import { bestRecord, canClearRecords, clearRecords } from './records';
 import { THEMES, applySettings, applyTheme, canVibrate, loadSettings, migrateLegacy, saveSetting, watchSystemTheme } from './settings';
@@ -180,8 +180,8 @@ function showInstallCard(): boolean {
 function installGuide(): string {
   const state = installState();
   if (state === 'inapp') return externalOpenUrl() ? t('install.inappGuide') : t('install.inappIosGuide');
-  if (state === 'ios') return t('install.iosGuide');
-  if (state === 'manual') return t('install.manualGuide');
+  // 설치 창을 띄울 수 없는 브라우저: 그 브라우저에 맞는 방법(메뉴 이름·버튼 위치)으로
+  if (state === 'ios' || state === 'manual') return t(`install.guide.${manualGuide()}`);
   return '';
 }
 

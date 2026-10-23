@@ -2,8 +2,10 @@
  * 조이팩 앱 설치(홈 화면에 추가).
  * - 안드로이드 Chrome·Edge·삼성 인터넷 등: 브라우저가 설치 가능하다고 알려 주면(beforeinstallprompt) 그 이벤트를 잡아 두었다가
  *   설정의 "조이팩 다운로드" 버튼으로 설치 창을 띄운다
- * - 아이폰·아이패드 Safari: 설치 창을 띄우는 기능이 없어 "공유 → 홈 화면에 추가" 안내를 보여 준다
- * - 그 밖에 설치 창을 못 받은 경우(이미 설치함, 지원하지 않는 브라우저 등): 브라우저 메뉴의 "앱 설치"·"홈 화면에 추가" 안내
+ * - 설치 창을 띄우는 기능은 Chrome 계열(Chrome·Edge·삼성 인터넷·웨일·오페라)에만 있다. 그 밖의 브라우저는
+ *   브라우저마다 직접 추가하는 방법이 달라 manualGuide() 로 골라 안내한다
+ *   (아이폰 Safari·아이폰 Chrome 등·맥 Safari·안드로이드 Firefox, 설치가 아예 안 되는 PC Firefox)
+ * - 그 밖에 설치 창을 못 받은 경우(이미 설치함 등): 브라우저 메뉴의 "앱 설치"·"홈 화면에 추가" 안내
  */
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -58,6 +60,26 @@ export function externalOpenUrl(): string | null {
     return `intent://${url.replace(/^https?:\/\//, '')}#Intent;scheme=${location.protocol.replace(':', '')};package=com.android.chrome;end`;
   }
   return null;
+}
+
+/**
+ * 설치 창을 띄울 수 없을 때 보여 줄 안내 종류(브라우저마다 메뉴 이름·버튼 위치가 다르다).
+ * - iosSafari: 아래쪽 공유 버튼 → 홈 화면에 추가
+ * - iosOther: 아이폰·아이패드의 Chrome·Edge·Firefox 등(iOS 16.4~). 공유 버튼이 주소창 옆이나 메뉴 안에 있다
+ * - macSafari: 맥 Safari(macOS 14~) 파일 메뉴 → Dock에 추가
+ * - firefoxAndroid: 안드로이드 Firefox 메뉴 → 설치·홈 화면에 추가
+ * - unsupported: 앱 설치 기능이 없는 브라우저(PC Firefox) → Chrome·Edge 로 열기
+ * - menu: 그 밖(Chrome 계열인데 설치 창이 오지 않음 등) → 브라우저 메뉴의 "앱 설치"
+ */
+export type ManualGuide = 'iosSafari' | 'iosOther' | 'macSafari' | 'firefoxAndroid' | 'unsupported' | 'menu';
+
+export function manualGuide(): ManualGuide {
+  const ua = navigator.userAgent;
+  if (isIos()) return /CriOS|EdgiOS|FxiOS|OPiOS|Whale|NAVER/i.test(ua) ? 'iosOther' : 'iosSafari';
+  if (/Firefox\//i.test(ua)) return /android/i.test(ua) ? 'firefoxAndroid' : 'unsupported';
+  // 맥 Safari: Chrome 계열(Chrome·Edg·OPR·Whale)이 아닌 Safari
+  if (/Macintosh/.test(ua) && /Safari\//.test(ua) && !/Chrome|Chromium|Edg\/|OPR\/|Whale/i.test(ua)) return 'macSafari';
+  return 'menu';
 }
 
 export function installState(): InstallState {
