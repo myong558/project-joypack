@@ -1,9 +1,20 @@
 /* 타임 투 플립 화면. 색은 모두 토큰(:root 변수)으로, 스킨(시간대)마다 하늘·강조색, 컬러 모드마다 밝기만 바뀐다 */
 
+/* 글꼴 두 가지(둘 다 SIL OFL 1.1, 상업 이용 가능, 라이선스 파일 public/fonts/ 에 함께 배포)
+ *   DoHyeon  본문·숫자·버튼: 또렷한 굵은 글씨라 타이머·점수 숫자가 잘 읽힌다
+ *   Dongle   제목·띠·팝업·큰 점수: 둥글고 통통한 장난감 느낌. 글자가 작게 그려지는 글꼴이라 size-adjust 로 키워 다른 글꼴과 크기를 맞춘다 */
 @font-face {
   font-family: 'DoHyeon';
   src: url('./fonts/dohyeon-subset.woff2') format('woff2');
   font-display: block;
+}
+@font-face {
+  font-family: 'Dongle';
+  src: url('./fonts/dongle-bold-subset.woff2') format('woff2');
+  font-display: block;
+  size-adjust: 150%;
+  ascent-override: 62%;
+  descent-override: 26%;
 }
 
 :root {
@@ -166,11 +177,27 @@ body::before {
 
 #app {
   position: relative;
+  z-index: 1;
   height: 100%;
   padding: 0 env(safe-area-inset-right, 0px) max(env(safe-area-inset-bottom, 0px), var(--jp-bottom-guard, 0px)) env(safe-area-inset-left, 0px);
 }
 .booting #app {
   visibility: hidden;
+}
+
+/* 장난감 느낌을 내는 큰 글자(제목·띠·팝업·큰 점수)는 둥근 글꼴 */
+h1,
+h2,
+.tagline,
+.banner,
+.popup,
+.message,
+.final b,
+.record,
+.goal,
+.hud-stage,
+.rank-entry-title {
+  font-family: 'Dongle', 'DoHyeon', system-ui, sans-serif;
 }
 
 button {
@@ -1636,5 +1663,116 @@ h1 .word {
   }
   body::before {
     animation: none;
+  }
+  /* 배경은 멈춘 그림으로(애니메이션을 0초로 끝내면 카드가 화면 밖 끝자리로 가 버리므로 아예 끈다) */
+  .scene *,
+  .scene {
+    animation: none !important;
+  }
+}
+
+/* ---------- 움직이는 배경(ui/scene.ts): 먼 빛망울 · 중간 카드 · 가까운 카드 ---------- */
+
+.scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transition: opacity 0.6s;
+}
+/* 게임 중에는 흐리게(카드를 외우는 데 방해되지 않게) */
+body:has(.screen.game) .scene {
+  opacity: 0.4;
+}
+.layer {
+  position: absolute;
+  inset: -40px;
+  /* PC 마우스 시차: 가까운 층일수록(--k 가 클수록) 많이 움직인다 */
+  transform: translate3d(calc(var(--px, 0) * var(--k) * -1px), calc(var(--py, 0) * var(--k) * -1px), 0);
+  transition: transform 0.4s ease-out;
+}
+.bokeh {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--s);
+  height: var(--s);
+  margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2);
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--glow) 70%, transparent), transparent 68%);
+  opacity: 0.55;
+  animation: bokeh var(--d) ease-in-out var(--t) infinite alternate;
+  will-change: transform;
+}
+@keyframes bokeh {
+  from {
+    transform: translate3d(-30px, 20px, 0) scale(0.8);
+  }
+  to {
+    transform: translate3d(40px, -30px, 0) scale(1.15);
+  }
+}
+.fc {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--s);
+  height: calc(var(--s) * 1.28);
+  perspective: 300px;
+  animation: rise var(--d) linear var(--t) infinite;
+  will-change: transform;
+}
+.mid .fc {
+  opacity: 0.35;
+}
+.near .fc {
+  opacity: 0.55;
+}
+@keyframes rise {
+  from {
+    transform: translate3d(0, 75vh, 0) rotate(var(--r));
+  }
+  to {
+    transform: translate3d(0, -75vh, 0) rotate(calc(var(--r) * -1));
+  }
+}
+.fc b {
+  position: absolute;
+  inset: 0;
+  border-radius: 18%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  animation: spin var(--f) linear infinite;
+}
+.fc b:last-child {
+  animation-name: spin-back;
+}
+.fc .back {
+  background:
+    radial-gradient(circle at 34% 40%, #3d2a00 0 8%, transparent 9%),
+    radial-gradient(circle at 66% 40%, #3d2a00 0 8%, transparent 9%),
+    linear-gradient(160deg, #ffc533, #f2a300);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 70%, #fff);
+}
+.fc .face {
+  background:
+    radial-gradient(circle at 50% 50%, var(--accent) 0 22%, transparent 23%),
+    var(--card-front);
+}
+@keyframes spin {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(360deg);
+  }
+}
+@keyframes spin-back {
+  from {
+    transform: rotateY(180deg);
+  }
+  to {
+    transform: rotateY(540deg);
   }
 }

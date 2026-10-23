@@ -407,7 +407,8 @@ pnpm --filter hub icons  # 로고(apps/hub/public/logo.svg)를 바꾼 뒤 앱 �
 | 저작물 | 쓰는 곳 | 출처·라이선스 | 상업 이용 | 함께 배포하는 파일 |
 | --- | --- | --- | --- | --- |
 | Jua 글꼴 | 허브·업다운·두더지잡기 위 메뉴 | SIL OFL 1.1(Reserved Font Name 없음 → 서브셋 허용) | 가능(글꼴만 따로 팔기는 불가) | 허브 `fonts/OFL.txt`(apps/hub/public), 업다운 `games/updown/fonts/OFL.txt`, 두더지잡기 `fonts/LICENSE-Jua.txt` |
-| Do Hyeon 글꼴 | 타임 투 플립 | SIL OFL 1.1(Reserved Font Name 없음 → 서브셋 허용), Google Fonts 저장소 원본 | 가능(글꼴만 따로 팔기는 불가) | 타임 투 플립 `fonts/LICENSE-DoHyeon.txt`(games/timetoflip/public/fonts) |
+| Do Hyeon 글꼴 | 타임 투 플립(본문·숫자) | SIL OFL 1.1(Reserved Font Name 없음 → 서브셋 허용), Google Fonts 저장소 원본 | 가능(글꼴만 따로 팔기는 불가) | 타임 투 플립 `fonts/LICENSE-DoHyeon.txt`(games/timetoflip/public/fonts) |
+| Dongle 글꼴(Bold) | 타임 투 플립(제목·팝업) | SIL OFL 1.1(© The Dongle Project Authors, Reserved Font Name 없음 → 서브셋 허용), Google Fonts 저장소 원본 | 가능(글꼴만 따로 팔기는 불가) | 타임 투 플립 `fonts/LICENSE-Dongle.txt`(games/timetoflip/public/fonts) |
 | 여기어때 잘난체 2·잘난체 고딕 | 두더지잡기 | 여기어때컴퍼니 자체 라이선스 | 가능(출처·전문 동봉 시 임베딩 배포, 글꼴 판매·개작 재배포 불가 → 무손실 WOFF2 변환만) | 두더지잡기 `fonts/LICENSE-Jalnan.txt`(games/hammer/public/fonts) |
 | 아이콘·로고·캐릭터·배경 그림 | 허브·모든 게임 | 직접 제작(코드로 그린 SVG·CSS·캔버스, 그 PNG 사본) | 가능(자체 저작물) | 없음 |
 | 효과음·진동 | 모든 게임 | 직접 제작(Web Audio 로 그 자리에서 합성, 소리 파일 없음) | 가능(자체 저작물) | 없음 |
@@ -428,7 +429,7 @@ pnpm --filter hub icons  # 로고(apps/hub/public/logo.svg)를 바꾼 뒤 앱 �
 
 | 항목 | 상태 |
 | --- | --- |
-| 저작물 | 그림·소리는 모두 직접 제작, 글꼴 3종(Jua·잘난체·Do Hyeon)은 상업 이용 가능(8.1). 외부 CDN 없음 |
+| 저작물 | 그림·소리는 모두 직접 제작, 글꼴 4종(Jua·잘난체·Do Hyeon·Dongle)은 상업 이용 가능(8.1). 외부 CDN 없음 |
 | 랭킹 이름(사용자 글) | 영문 대문자 1~5자, 금지어 필터 `Joypack.isAllowedName`(허브 v1.21.2 · 업다운 v1.13.0 · 두더지잡기 v0.14.0), 서버 규칙 `allowedName` 으로 한 번 더 검사 |
 | 서버에 저장하는 개인정보 | 랭킹 이니셜·점수·시각뿐(로그인·이메일·기기 ID·위치 없음). 나머지는 기기 `localStorage` |
 | 내용 등급 | 전체 이용가 목표(만화 같은 두더지 때리기 수준), 도박처럼 보이는 요소 없음 |

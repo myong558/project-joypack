@@ -8,10 +8,10 @@
 - 모드: 클래식(끝없이 이어지는 판) / 오늘의 챌린지(날짜 시드, 모두 같은 카드 배치)
 - 랭킹: `games/timetoflip/rankings/classic`, `daily-YYYY-MM-DD`(순위표 1개 = 문서 1개, `{ name, score, stage, date }`). 점수 높은 순, 동점은 먼저 올린 기록
 - 손맛: 아래 "손맛" 표
-- 정체성: 째깍째깍 경쾌한 시간 퍼즐 · Do Hyeon · 청록 `#0b7785`(스킨마다 바뀜) · 자명종 마스코트 째깍이 + 시계판 카드 뒷면 · 시간대 스킨(아침·한낮·노을·밤) · 마림바 같은 사인파, 콤보마다 음이 오름 · 3D 뒤집기·콤보 음계·시간 팝업
+- 정체성: 째깍째깍 경쾌한 시간 퍼즐 · 글꼴 Do Hyeon(본문·숫자) + Dongle Bold(제목·팝업) · 청록 `#0b7785`(스킨마다 바뀜) · 자명종 마스코트 째깍이 + 조이팩 로고 얼굴 카드 뒷면 · 배경: 먼 빛망울 + 뒤집히며 떠오르는 카드 층(게임 중 흐리게) · 시간대 스킨(아침·한낮·노을·밤) · 마림바 같은 사인파, 콤보마다 음이 오름 · 3D 뒤집기·콤보 음계·시간 팝업
 - 상업 기준(10장):
   - 이름 검색(2026-10-24, 웹 검색): "Time to Flip"과 똑같은 게임·상표는 찾지 못함. 비슷한 것: USPTO **TIMEFLIP**(시간 기록 기기·소프트웨어, 게임 아님), itch.io 플랫폼 게임 "Time Flip"·퍼즐 데모 "Time Flipper"(장르 다름). 한국어 "타임 투 플립"은 못 찾음. **출시 전에 KIPRIS·USPTO·구글 플레이·앱스토어 검색을 다시 할 것**
-  - 저작물: 카드 그림 48장·특수 카드·마스코트·아이콘 모두 `src/ui/art.ts`·`public/favicon.svg` 에서 코드로 직접 그림. 소리는 Web Audio 합성. 제3자 것은 Do Hyeon 글꼴(SIL OFL 1.1, 예약 글꼴 이름 없음 → 서브셋 허용, `public/fonts/LICENSE-DoHyeon.txt` 함께 배포)
+  - 저작물: 카드 그림 48장·특수 카드·마스코트·아이콘 모두 `src/ui/art.ts`·`public/favicon.svg` 에서 코드로 직접 그림. 소리는 Web Audio 합성. 제3자 것은 Do Hyeon·Dongle 글꼴(둘 다 SIL OFL 1.1, 예약 글꼴 이름 없음 → 서브셋 허용, `public/fonts/LICENSE-DoHyeon.txt`·`LICENSE-Dongle.txt` 함께 배포)
   - 내용: 전체 이용가. 카드 게임이지만 **트럼프 문양·카지노 초록 펠트·칩 모양은 쓰지 않음**(도박처럼 보이지 않게 그림 타일 + 시계판 뒷면). 황금 카드는 무료 플레이 안의 점수 보너스
   - 서버 저장: 랭킹 이니셜·점수·도달한 판·날짜뿐
 - 가정(요청에 없어 정한 것): 시간 수치·판 순서·특수 카드 확률·황금 확률·도감 48장. 모의 플레이(`tests/balance.test.ts`)로 "보통 실력 4~6판, 약 2분"에 맞춤. 기획안의 "자리 바꾸기(6판+)"는 사용자 요청으로 뺌. 동점 처리는 다른 게임과 같게 "먼저 올린 기록 우선"(기획안의 "도달한 판 우선"은 서버 규칙이 복잡해져 뺌)
@@ -69,6 +69,6 @@
 ## 파일
 
 - `src/game/` 규칙(DOM 없음): `engine.ts`(한 게임 상태·이벤트), `stages.ts`(시간·판 숫자), `faces.ts`(카드 목록), `rng.ts`
-- `src/ui/` 그리기: `screens.ts`(시작·설정·랭킹·도감·게임·결과), `board.ts`(카드 판·배치), `art.ts`(카드 그림·째깍이), `effects.ts`, `icons.ts`
+- `src/ui/` 그리기: `screens.ts`(시작·설정·랭킹·도감·게임·결과), `board.ts`(카드 판·배치), `art.ts`(카드 그림·째깍이), `scene.ts`(깊이감 있는 움직이는 배경), `effects.ts`, `icons.ts`
 - `tests/`: `engine.test.ts`(규칙), `balance.test.ts`(모의 플레이로 시간 맞추기), `ranking.test.ts`(순위·서버 점수 상한)
-- 글꼴: `pnpm --filter timetoflip font`(문구를 바꾸면 다시 실행, 원본은 Google Fonts 저장소의 OFL 파일)
+- 글꼴: `pnpm --filter timetoflip font`(두 글꼴 서브셋, 문구를 바꾸면 다시 실행, 원본은 Google Fonts 저장소의 OFL 파일)

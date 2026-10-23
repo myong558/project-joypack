@@ -13,6 +13,7 @@ import { emptyRecords, loadSave, writeSave } from './storage';
 import { applySkin, applyTheme, resolveSkin } from './theme';
 import { Board } from './ui/board';
 import { Effects } from './ui/effects';
+import { mountScene } from './ui/scene';
 import { gameScreen, resultScreen, startScreen, type Goal, type RankingView } from './ui/screens';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
@@ -409,6 +410,7 @@ function showResult(result: GameResult, mode: Mode, date: Date, dexBefore: Reado
 Joypack.guardBottom();
 // 화면 높이를 css(100dvh) 대신 실제 보이는 높이로 잡는다(설치 앱에서 조이팩 → 게임으로 넘어올 때 아래가 잘리던 것)
 Joypack.trackViewport();
+mountScene();
 showStart(undefined, undefined, true);
 document.documentElement.classList.remove('booting');
 
