@@ -30,7 +30,6 @@ export function createMoleEl(kind: MoleKind): HTMLElement {
       <span class="eye l"></span><span class="eye r"></span>
       <span class="cheek l"></span><span class="cheek r"></span>
       <span class="mouth"></span><span class="tongue"></span><span class="teeth"></span><span class="nose"></span>
-      <span class="paw l"></span><span class="paw r"></span>
     </div>
     ${ACCESSORY_ART[kind] ? `<span class="acc">${ACCESSORY_ART[kind]}</span>` : ''}
     <span class="stars">${DIZZY}</span>`;
@@ -98,8 +97,6 @@ export class Board {
 
   spawn(mole: Mole): void {
     const el = createMoleEl(mole.kind);
-    // 판에 나올 때는 두 앞발로 눈을 가린 채 올라와, 다 올라오면 "까꿍" 하고 양옆으로 연다(styles.css .shy)
-    el.classList.add('shy');
     // 열에 넷 정도만 나와 있는 동안 좌우로 두리번거린다. 두더지마다 다른 순간에서 시작하게
     if (Math.random() < LOOKY_CHANCE) el.classList.add('looky');
     el.style.setProperty('--look-delay', `${(-Math.random() * 1.6).toFixed(2)}s`);

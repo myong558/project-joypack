@@ -511,28 +511,6 @@ p {
   75%, 100% { transform: translateY(105%); }
 }
 
-/* 시작 화면 두더지도 오르내릴 때마다 "까꿍": 눈을 가린 채 올라와 활짝 열고, 들어가기 전에 다시 가린다(bob 과 같은 박자) */
-.title-hole .mole.bob .paw {
-  transition: none;
-  animation: peekaboo-l 2.4s ease-in-out infinite;
-}
-
-.title-hole .mole.bob .paw.r {
-  animation-name: peekaboo-r;
-}
-
-@keyframes peekaboo-l {
-  0%, 30% { top: 13%; left: 17%; rotate: 10deg; scale: 1.18; }
-  38%, 60% { top: 60%; left: -4%; rotate: -16deg; scale: 1; }
-  68%, 100% { top: 13%; left: 17%; rotate: 10deg; scale: 1.18; }
-}
-
-@keyframes peekaboo-r {
-  0%, 30% { top: 13%; right: 17%; rotate: -10deg; scale: 1.18; }
-  38%, 60% { top: 60%; right: -4%; rotate: 16deg; scale: 1; }
-  68%, 100% { top: 13%; right: 17%; rotate: -10deg; scale: 1.18; }
-}
-
 .title-text .ch {
   display: inline-block;
 }
@@ -1336,45 +1314,6 @@ button.dex-item:focus-visible {
   background: #ff4d6d;
   transition: height 80ms;
 }
-
-/* 앞발: "Peekaboo Moles"의 표시. 평소에는 몸 아래 양옆에서 구멍 가장자리를 짚고 있다(분홍 발바닥·발가락 셋).
- * 판에 나오는 두더지(.shy)는 다 올라오기 전(엿보기 포함)까지 두 앞발로 눈을 가리고 있다가,
- * 다 올라오면 "까꿍" 하고 양옆으로 활짝 연다. 들어갈 때는 다시 눈을 가린다 */
-.paw {
-  position: absolute;
-  top: 60%;
-  width: 27%;
-  aspect-ratio: 1.15;
-  z-index: 2;
-  border: 1.2cqw solid var(--ol);
-  border-radius: 50% 50% 44% 44% / 58% 58% 42% 42%;
-  background:
-    radial-gradient(circle at 24% 30%, #ff9fb0 0 10%, transparent 11.5%),
-    radial-gradient(circle at 50% 22%, #ff9fb0 0 10%, transparent 11.5%),
-    radial-gradient(circle at 76% 30%, #ff9fb0 0 10%, transparent 11.5%),
-    radial-gradient(ellipse 30% 24% at 50% 66%, #ff9fb0 96%, transparent 100%),
-    var(--mole-belly);
-  box-shadow: inset -1.2cqw -1cqw 0 rgb(0 0 0 / 0.12);
-  transition:
-    top 220ms cubic-bezier(0.3, 1.7, 0.5, 1) 90ms,
-    left 220ms cubic-bezier(0.3, 1.7, 0.5, 1) 90ms,
-    right 220ms cubic-bezier(0.3, 1.7, 0.5, 1) 90ms,
-    rotate 220ms cubic-bezier(0.3, 1.7, 0.5, 1) 90ms,
-    scale 220ms cubic-bezier(0.3, 1.7, 0.5, 1) 90ms;
-}
-
-.paw.l { left: -4%; rotate: -16deg; }
-.paw.r { right: -4%; rotate: 16deg; }
-
-.mole.shy:not(.up) .paw {
-  top: 13%;
-  scale: 1.18;
-  transition-duration: 110ms;
-  transition-delay: 0ms;
-}
-
-.mole.shy:not(.up) .paw.l { left: 17%; rotate: 10deg; }
-.mole.shy:not(.up) .paw.r { right: 17%; rotate: -10deg; }
 
 .acc {
   position: absolute;
@@ -2922,7 +2861,6 @@ button.dex-item:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .title-hammer,
   .title-hole .mole.bob,
-  .title-hole .mole.bob .paw,
   .game.fever,
   .spurt .stage,
   .confetti {
