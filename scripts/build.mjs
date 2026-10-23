@@ -5,6 +5,8 @@
 //   3. 공통 모듈 packages/shared/joypack.js·topbar.css → dist/shared/ (빌드 없는 게임이 불러옴)
 //   4. 게임마다 파일 목록 dist/games/<id>/files.json (경로 + 해시). 처음 열 때 이 목록 전체를 캐시한다
 //   5. 서비스 워커 dist/sw.js: 허브 파일만 미리 캐시, 게임은 처음 열 때 캐시 (scripts/sw-template.js)
+// 게임 하나만 고쳤을 때: pnpm build <id> → 허브와 그 게임만 다시 빌드하고 다른 게임은 지난 dist 를 그대로 쓴다(빠른 확인용).
+// 배포(CI)·커밋 전 최종 확인은 인자 없이 전체 빌드한다
 import { execSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
@@ -29,9 +31,20 @@ function walk(dir) {
 const sitePath = (file) => relative(DIST, file).split(sep).join('/');
 const hashOf = (file) => createHash('sha256').update(readFileSync(file)).digest('hex').slice(0, 12);
 
+const only = process.argv[2];
+if (only && !readJson('games.json').some((g) => g.id === only)) throw new Error(`games.json 에 없는 게임: ${only}`);
+// 다시 빌드하지 않고 지난 결과를 쓸 게임(게임 하나만 빌드할 때, 지난 dist 가 있는 다른 게임)
+const keep = (id) => !!only && id !== only && existsSync(join(DIST, 'games', id, 'index.html'));
+
 // 폴더 자체가 아니라 안의 내용만 지운다(Windows 에서 터미널이 dist 안에 있으면 폴더 삭제가 거부됨)
 mkdirSync(DIST, { recursive: true });
-for (const name of readdirSync(DIST)) rmSync(join(DIST, name), { recursive: true, force: true });
+for (const name of readdirSync(DIST)) {
+  if (name === 'games' && only) {
+    for (const id of readdirSync(join(DIST, name))) if (!keep(id)) rmSync(join(DIST, name, id), { recursive: true, force: true });
+    continue;
+  }
+  rmSync(join(DIST, name), { recursive: true, force: true });
+}
 
 // 1. 허브
 run('pnpm --filter hub build');
@@ -44,6 +57,10 @@ for (const game of games) {
   const dir = join(ROOT, 'games', game.id);
   const pkg = readJson(`games/${game.id}/package.json`);
   const out = join(DIST, 'games', game.id);
+  if (keep(game.id)) {
+    console.log(`games/${game.id}: 지난 빌드 그대로 씀`);
+    continue;
+  }
   mkdirSync(out, { recursive: true });
   if (pkg.scripts?.build) {
     run(`pnpm --filter ${pkg.name} build`);

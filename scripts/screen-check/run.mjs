@@ -1,7 +1,9 @@
 // 화면 크기 점검: 세로·가로(주소창·아래 버튼 포함)·폴드 펼침 크기에서 앱의 모든 화면을 찍고, 잘린 글자·버튼을 찾는다.
 // 쓰는 법(먼저 pnpm build):
 //   pnpm check:screens <앱>            예) pnpm check:screens hammer  /  pnpm check:screens hub
-//   pnpm check:screens <앱> landscape  크기 묶음만: portrait | landscape | fold | pc | all(기본)
+//   pnpm check:screens <앱> quick      대표 4크기만(작은 폰·가장 낮은 가로·폴드·PC). 수정 뒤 확인은 보통 이것으로(기준서 7.1)
+//   pnpm check:screens <앱> landscape  크기 묶음만: quick | portrait | landscape | fold | pc | all(기본)
+//   --motion  첫 진입 연출을 켠 채로 찍는다(기본은 동작 줄이기로 열어 연출을 건너뛰어 빠르게 찍음)
 //   pnpm check:screens <앱> all result,settings  화면 이름에 이 글자가 들어간 것만
 // 화면 목록은 앱 폴더의 screen-check.mjs(apps/hub/screen-check.mjs, games/<id>/screen-check.mjs)에 적는다.
 // 결과: 콘솔에 크기별 한 줄(ok 또는 문제 요소), screen-check/<앱>/ 에 화면별 모음 그림(_<화면>.png)과 낱장.
@@ -13,7 +15,9 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { launch } from './cdp.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
-const [app = '', group = 'all', only = ''] = process.argv.slice(2);
+const args = process.argv.slice(2);
+const motion = args.includes('--motion');
+const [app = '', group = 'all', only = ''] = args.filter((a) => a !== '--motion');
 const appDir = app === 'hub' ? join(ROOT, 'apps/hub') : join(ROOT, 'games', app);
 const defFile = join(appDir, 'screen-check.mjs');
 if (!app || !existsSync(defFile)) {
@@ -32,7 +36,9 @@ export const SIZES = {
   fold: ['720x740', '740x690', '884x1004', '1104x784'], // 폴드 펼침(거의 정사각형)
   pc: ['1366x768'],
 };
-const sizes = (group === 'all' ? Object.values(SIZES).flat() : SIZES[group] ?? group.split(',')).map((s) => s.split('x').map(Number));
+// 대표 크기: 문제는 대부분 가장 작은 세로·가장 낮은 가로·정사각 폴드·PC 에서 드러난다
+const QUICK = ['360x560', '740x260', '884x1004', '1366x768'];
+const sizes = (group === 'all' ? Object.values(SIZES).flat() : group === 'quick' ? QUICK : SIZES[group] ?? group.split(',')).map((s) => s.split('x').map(Number));
 
 const { screens, base = '' } = await import(pathToFileURL(defFile).href);
 const out = join(ROOT, 'screen-check', app);
@@ -73,6 +79,8 @@ const PORT = 4600 + Math.floor(Math.random() * 300);
 const server = spawn(process.execPath, [join(ROOT, 'scripts/preview.mjs')], { cwd: ROOT, env: { ...process.env, PORT: String(PORT) }, stdio: 'ignore' });
 await new Promise((r) => setTimeout(r, 800));
 const page = await launch();
+// 모든 앱은 동작 줄이기면 첫 진입 연출을 건너뛴다(기준서 1.3). 그래서 화면마다 연출이 끝나기를 기다리지 않아도 된다
+if (!motion) await page.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
 const url = `http://localhost:${PORT}/project-joypack/${base}`;
 let problems = 0;
 
@@ -81,7 +89,7 @@ async function open(setup = '') {
   await page.goto(url);
   await page.eval(`localStorage.setItem('joypack.installDismissed', '1'); localStorage.setItem('joypack.lang', 'ko'); ${setup}; true`);
   await page.goto(url);
-  await page.wait(2500); // 첫 진입 연출이 끝날 때까지
+  await page.wait(motion ? 2500 : 500); // 첫 진입 연출이 끝날 때까지(동작 줄이기면 글꼴·첫 배치만 기다림)
 }
 
 async function record(name, w, h) {

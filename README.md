@@ -380,9 +380,9 @@ pnpm install
 pnpm dev                 # 허브 개발 서버 http://localhost:5170/ (업다운도 같은 서버에서 /games/updown/)
 pnpm --filter hammer dev # 두더지잡기만 개발 http://localhost:5173/
 pnpm test                # 모든 게임 테스트
-pnpm build               # 허브 + 모든 게임 → dist/
+pnpm build               # 허브 + 모든 게임 → dist/ (pnpm build hammer: 허브와 그 게임만 다시 빌드)
 pnpm preview             # dist/ 를 http://localhost:4170/project-joypack/ 로 띄워 확인(서비스 워커 포함)
-pnpm check:screens hammer # 가로·주소창·폴드 등 14가지 크기로 모든 화면을 찍어 잘림 점검(기준서 7.1, 먼저 build)
+pnpm check:screens hammer quick # 대표 4크기로 모든 화면을 찍어 잘림 점검(빠름). 14크기 전체는 quick 대신 all(기준서 7.1, 먼저 build)
 pnpm font                # 허브·업다운 웹폰트 서브셋 다시 만들기(화면 문구를 바꾼 뒤)
 pnpm release hammer      # 개발자 모드 게임 정식 공개. --at "2026-11-01 10:00" 공개 예약, --cancel 예약 취소(기준서 7.4)
 pnpm --filter hub icons  # 로고(apps/hub/public/logo.svg)를 바꾼 뒤 앱 아이콘·og-image 다시 만들기
@@ -409,7 +409,7 @@ pnpm --filter hub icons  # 로고(apps/hub/public/logo.svg)를 바꾼 뒤 앱 �
 | Jua 글꼴 | 허브·업다운·두더지잡기 위 메뉴 | SIL OFL 1.1(Reserved Font Name 없음 → 서브셋 허용) | 가능(글꼴만 따로 팔기는 불가) | 허브 `fonts/OFL.txt`(apps/hub/public), 업다운 `games/updown/fonts/OFL.txt`, 두더지잡기 `fonts/LICENSE-Jua.txt` |
 | Do Hyeon 글꼴 | 타임 투 플립(본문·숫자) | SIL OFL 1.1(Reserved Font Name 없음 → 서브셋 허용), Google Fonts 저장소 원본 | 가능(글꼴만 따로 팔기는 불가) | 타임 투 플립 `fonts/LICENSE-DoHyeon.txt`(games/timetoflip/public/fonts) |
 | Dongle 글꼴(Bold) | 타임 투 플립(제목·팝업) | SIL OFL 1.1(© The Dongle Project Authors, Reserved Font Name 없음 → 서브셋 허용), Google Fonts 저장소 원본 | 가능(글꼴만 따로 팔기는 불가) | 타임 투 플립 `fonts/LICENSE-Dongle.txt`(games/timetoflip/public/fonts) |
-| Bagel Fat One 글꼴 | 두더지잡기(제목·버튼·숫자) | SIL OFL 1.1(© The Bagel Fat Project Authors, Reserved Font Name 없음 → 서브셋 허용), Google Fonts 저장소 원본 | 가능(글꼴만 따로 팔기는 불가) | 두더지잡기 `fonts/LICENSE-BagelFatOne.txt`(games/hammer/public/fonts) |
+| Gothic A1 글꼴(Black) | 두더지잡기(제목·버튼·숫자) | SIL OFL 1.1(© HanYang I&C, Reserved Font Name 없음 → 서브셋 허용), Google Fonts 저장소 원본 | 가능(글꼴만 따로 팔기는 불가) | 두더지잡기 `fonts/LICENSE-GothicA1.txt`(games/hammer/public/fonts) |
 | 아이콘·로고·캐릭터·배경 그림 | 허브·모든 게임 | 직접 제작(코드로 그린 SVG·CSS·캔버스, 그 PNG 사본) | 가능(자체 저작물) | 없음 |
 | 효과음·진동 | 모든 게임 | 직접 제작(Web Audio 로 그 자리에서 합성, 소리 파일 없음) | 가능(자체 저작물) | 없음 |
 | 이모지(업다운 온도 힌트 🔥☀️🌊❄️) | 업다운 | 글자로만 쓰고 그림은 기기 글꼴이 그림(파일 포함 안 함) | 가능 | 없음 |
@@ -429,7 +429,7 @@ pnpm --filter hub icons  # 로고(apps/hub/public/logo.svg)를 바꾼 뒤 앱 �
 
 | 항목 | 상태 |
 | --- | --- |
-| 저작물 | 그림·소리는 모두 직접 제작, 글꼴 4종(Jua·Bagel Fat One·Do Hyeon·Dongle, 모두 OFL. 목록 `fonts/catalog.json`)은 상업 이용 가능(8.1). 외부 CDN 없음 |
+| 저작물 | 그림·소리는 모두 직접 제작, 글꼴 4종(Jua·Gothic A1·Do Hyeon·Dongle, 모두 OFL. 목록 `fonts/catalog.json`)은 상업 이용 가능(8.1). 외부 CDN 없음 |
 | 랭킹 이름(사용자 글) | 영문 대문자 1~5자, 금지어 필터 `Joypack.isAllowedName`(허브 v1.21.2 · 업다운 v1.13.0 · 두더지잡기 v0.14.0), 서버 규칙 `allowedName` 으로 한 번 더 검사 |
 | 서버에 저장하는 개인정보 | 랭킹 이니셜·점수·시각뿐(로그인·이메일·기기 ID·위치 없음). 나머지는 기기 `localStorage` |
 | 내용 등급 | 전체 이용가 목표(만화 같은 두더지 때리기 수준), 도박처럼 보이는 요소 없음 |
