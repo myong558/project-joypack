@@ -779,7 +779,7 @@ button:focus-visible {
   font-weight: 400;
 }
 
-/* 직접 정하기 팝업: 1 ~ [끝 숫자] 와 ±10 버튼 */
+/* 직접 정하기 팝업: 1 ~ [끝 숫자] 와 ±1·±10 버튼 */
 .custom-desc,
 .custom-note {
   margin: 0;
@@ -790,17 +790,39 @@ button:focus-visible {
   font-size: 0.9rem;
 }
 
+/* 윗줄: 1 ~ [끝 숫자], 아랫줄: [−10] [−] [+] [+10] (좁은 화면에서도 한 줄이 넘치지 않게 두 줄로) */
 .custom-pick {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  gap: 10px;
+  gap: 12px 8px;
+}
+
+/* 10씩 버튼: 아이콘 대신 "−10/+10" 글자라 원보다 조금 넓은 알약 모양 */
+.custom-pick .pick-step-ten {
+  flex: none;
+  width: auto;
+  min-width: 44px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.custom-pick .pick-step {
+  flex: none;
 }
 
 .custom-range {
+  order: -1;
+  flex-basis: 100%;
   display: inline-flex;
+  justify-content: center;
   align-items: center;
   gap: 8px;
+  white-space: nowrap;
   font-size: 1.6rem;
   font-weight: 700;
 }

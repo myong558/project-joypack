@@ -1174,7 +1174,7 @@
     $('custom').showModal();
   }
 
-  // 입력 칸 값을 10씩 바꾸거나(±10) 허용 범위로 맞춘다(0)
+  // 입력 칸 값을 바꾸거나(±1·±10) 허용 범위로 맞춘다(0)
   function stepCustom(delta) {
     const input = $('custom-max');
     input.value = UpDown.clampMax((Number(input.value) || 0) + delta);
@@ -1286,8 +1286,11 @@
   });
   $('custom-form').addEventListener('submit', submitCustom);
   $('custom-close').addEventListener('click', () => $('custom').close());
-  $('custom-minus').addEventListener('click', () => stepCustom(-10));
-  $('custom-plus').addEventListener('click', () => stepCustom(10));
+  // −/+ 는 1씩, −10/+10 은 10씩
+  $('custom-minus').addEventListener('click', () => stepCustom(-1));
+  $('custom-plus').addEventListener('click', () => stepCustom(1));
+  $('custom-minus10').addEventListener('click', () => stepCustom(-10));
+  $('custom-plus10').addEventListener('click', () => stepCustom(10));
   $('custom-max').addEventListener('blur', () => stepCustom(0));
   document.querySelectorAll('[data-reset]').forEach((button) => {
     button.addEventListener('click', () => resetRecord(button.dataset.reset));
