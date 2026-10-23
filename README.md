@@ -368,6 +368,12 @@ dist/                       → https://myong558.github.io/project-joypack/
 
 ## 7. 개발
 
+새 PC에서 처음 받을 때:
+
+- **Node 22.12 이상**(LTS 권장, `package.json` engines). 낮으면 `pnpm install` 이 멈춘다. Node 를 바꾼 뒤에는 `pnpm install --force` 로 다시 설치한다.
+- **pnpm 12.8.1**(`packageManager`). `corepack enable`, 권한이 없거나 corepack 이 오래돼 안 되면 `npm i -g pnpm@12.8.1`.
+- `pnpm setup:claude` — Claude Code 개인 설정을 이 PC에 깐다(열린 세션은 다시 시작).
+
 ```bash
 pnpm install
 pnpm dev                 # 허브 개발 서버 http://localhost:5170/ (업다운도 같은 서버에서 /games/updown/)

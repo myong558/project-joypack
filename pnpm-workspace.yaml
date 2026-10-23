@@ -3,6 +3,9 @@ packages:
   - games/*
   - packages/*
 
+# Node 가 package.json engines 보다 낮으면 설치를 멈춘다(그냥 두면 rolldown 바이너리 같은 선택 패키지를 말없이 빼고 설치해 test·build 가 엉뚱하게 깨짐)
+engineStrict: true
+
 # 브라우저용 Firebase에는 필요 없는 설치 스크립트라 실행하지 않는다(CI에서 승인 대기로 설치가 멈추지 않게)
 allowBuilds:
   '@firebase/util': false

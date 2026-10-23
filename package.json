@@ -7,6 +7,9 @@
   "description": "조이팩: 미니 게임 모음 웹앱",
   "type": "module",
   "packageManager": "pnpm@12.8.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
     "dev": "pnpm --filter hub dev",
     "test": "pnpm -r --if-present test",
