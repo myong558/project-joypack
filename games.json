@@ -20,7 +20,7 @@
   },
   {
     "id": "hammer",
-    "name": { "ko": "두더지잡기", "en": "Mole Bonk" },
+    "name": { "ko": "두더지잡기", "en": "Peekaboo Moles" },
     "desc": { "ko": "30초 동안 튀어나오는 두더지 잡기", "en": "Whack as many moles as you can in 30 seconds" },
     "path": "games/hammer/",
     "icon": "games/hammer/public/favicon.svg",
