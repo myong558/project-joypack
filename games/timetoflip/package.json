@@ -1,0 +1,26 @@
+{
+  "name": "timetoflip",
+  "private": true,
+  "version": "0.1.0",
+  "author": "Myong Bum Soo",
+  "license": "UNLICENSED",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "font": "node --use-system-ca scripts/build-font.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.4"
+  },
+  "dependencies": {
+    "firebase": "^13.0.0",
+    "html-to-image": "1.11.13",
+    "@joypack/shared": "workspace:*"
+  },
+  "description": "조이팩 미니 게임: 타임 투 플립"
+}

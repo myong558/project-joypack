@@ -208,6 +208,28 @@ importers:
         specifier: ^5.0.4
         version: 5.0.5(@types/node@26.6.5)(vite@8.3.4(@types/node@26.6.5))
 
+  games/timetoflip:
+    dependencies:
+      '@joypack/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      firebase:
+        specifier: ^13.0.0
+        version: 13.0.0
+      html-to-image:
+        specifier: 1.11.13
+        version: 1.11.13
+    devDependencies:
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+      vite:
+        specifier: ^8.3.4
+        version: 8.3.4(@types/node@26.6.5)
+      vitest:
+        specifier: ^5.0.4
+        version: 5.0.5(@types/node@26.6.5)(vite@8.3.4(@types/node@26.6.5))
+
   games/updown: {}
 
   packages/shared: {}

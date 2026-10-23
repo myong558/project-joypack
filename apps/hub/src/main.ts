@@ -933,7 +933,7 @@ window.addEventListener('online', () => void refreshHome());
 window.addEventListener('offline', () => void refreshHome());
 // 다른 탭(게임)에서 바꾼 설정·기록을 따라간다
 window.addEventListener('storage', (e) => {
-  if (!e.key || e.key.startsWith('joypack.') || e.key.startsWith('updown.') || e.key.startsWith('project-hammer')) {
+  if (!e.key || e.key.startsWith('joypack.') || e.key.startsWith('updown.') || e.key.startsWith('project-hammer') || e.key.startsWith('timetoflip')) {
     Object.assign(settings, loadSettings());
     applySettings(settings);
     void refreshHome();

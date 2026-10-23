@@ -69,6 +69,31 @@ function dateKey(d = new Date()): string {
 
 type Fetcher = (board: string, limit: number) => Promise<Row[]>;
 
+/**
+ * 순위표 1개 = 문서 1개 방식(기준서 1.6 새 게임 기본) 게임의 읽기. games/<id>/rankings/classic · daily-YYYY-MM-DD
+ * 새 게임이 이 방식이면 FETCHERS 에 boardDoc('<id>') 한 줄만 더한다
+ */
+function boardDoc(gameId: string): { key: (board: string) => string; fetch: Fetcher } {
+  const doc = (board: string) => (board === 'daily' ? `daily-${dateKey()}` : 'classic');
+  return {
+    key: doc,
+    async fetch(board, limit) {
+      const res = await request(`games/${gameId}/rankings/${doc(board)}`);
+      if (res.status === 404) return []; // 오늘 아직 아무도 안 올림
+      if (!res.ok) throw new Error(`firestore ${res.status}`);
+      type Value = { stringValue?: string; integerValue?: string; mapValue?: { fields: Record<string, Value> } };
+      const data = (await res.json()) as { fields?: { entries?: { arrayValue?: { values?: Value[] } } } };
+      return (data.fields?.entries?.arrayValue?.values ?? [])
+        .map((v) => ({
+          name: v.mapValue?.fields.name?.stringValue ?? '',
+          score: Number(v.mapValue?.fields.score?.integerValue ?? 0),
+        }))
+        .sort((a, b) => b.score - a.score)
+        .slice(0, limit);
+    },
+  };
+}
+
 const FETCHERS: Record<string, { key: (board: string) => string; fetch: Fetcher }> = {
   // 업다운: 기록 1건 = 문서 1개, 범위(1~50·1~100·1~200)마다 컬렉션이 따로(scores-<끝 숫자>). 게임과 같은 정렬(점수 높은 순 → 먼저 등록)
   updown: {
@@ -100,25 +125,9 @@ const FETCHERS: Record<string, { key: (board: string) => string; fetch: Fetcher 
         .map(({ name, score, thermo }) => (thermo ? { name, score, thermo } : { name, score }));
     },
   },
-  // 두더지잡기: 순위표 1개 = 문서 1개({ entries: [...] }). 오늘의 챌린지는 날짜마다 새 문서다
-  hammer: {
-    key: (board) => (board === 'daily' ? `daily-${dateKey()}` : 'classic'),
-    async fetch(board, limit) {
-      const doc = board === 'daily' ? `daily-${dateKey()}` : 'classic';
-      const res = await request(`games/hammer/rankings/${doc}`);
-      if (res.status === 404) return []; // 오늘 아직 아무도 안 올림
-      if (!res.ok) throw new Error(`firestore ${res.status}`);
-      type Value = { stringValue?: string; integerValue?: string; mapValue?: { fields: Record<string, Value> } };
-      const data = (await res.json()) as { fields?: { entries?: { arrayValue?: { values?: Value[] } } } };
-      return (data.fields?.entries?.arrayValue?.values ?? [])
-        .map((v) => ({
-          name: v.mapValue?.fields.name?.stringValue ?? '',
-          score: Number(v.mapValue?.fields.score?.integerValue ?? 0),
-        }))
-        .sort((a, b) => b.score - a.score)
-        .slice(0, limit);
-    },
-  },
+  // 두더지잡기·타임 투 플립: 순위표 1개 = 문서 1개({ entries: [...] }). 오늘의 챌린지는 날짜마다 새 문서다
+  hammer: boardDoc('hammer'),
+  timetoflip: boardDoc('timetoflip'),
 };
 
 export function hasRanking(gameId: string): boolean {

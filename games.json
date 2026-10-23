@@ -35,5 +35,23 @@
         { "id": "daily", "name": { "ko": "오늘의 챌린지", "en": "Daily" } }
       ]
     }
+  },
+  {
+    "id": "timetoflip",
+    "name": { "ko": "타임 투 플립", "en": "Time to Flip" },
+    "desc": { "ko": "시간이 다 가기 전에 카드 짝 맞히기", "en": "Match card pairs before time runs out" },
+    "path": "games/timetoflip/",
+    "icon": "games/timetoflip/favicon.svg",
+    "color": "#0b7785",
+    "status": "preview",
+    "added": "2026-10-24",
+    "ranking": {
+      "path": "games/timetoflip/rankings",
+      "default": "classic",
+      "boards": [
+        { "id": "classic", "name": { "ko": "클래식", "en": "Classic" } },
+        { "id": "daily", "name": { "ko": "오늘의 챌린지", "en": "Daily" } }
+      ]
+    }
   }
 ]

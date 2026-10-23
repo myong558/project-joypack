@@ -18,6 +18,11 @@ const READERS: Record<string, (game: GameMeta) => string | null> = {
     const save = readJson('project-hammer:v1') as { best?: number } | null;
     return save?.best ? t('best.hammer', { score: formatNumber(save.best) }) : null;
   },
+  // timetoflip:v1 = { best: 클래식 최고 점수, bestStage: 그때 도달한 판, ... }
+  timetoflip() {
+    const save = readJson('timetoflip:v1') as { best?: number; bestStage?: number } | null;
+    return save?.best ? t('best.timetoflip', { score: formatNumber(save.best), stage: save.bestStage || 1 }) : null;
+  },
 };
 
 /**
@@ -34,6 +39,12 @@ const CLEARERS: Record<string, () => void> = {
     // 잡은 수(kills)는 비워 두면 게임이 불러올 때 0으로 채운다
     Object.assign(save, { best: 0, daily: null, dex: [], kills: {} });
     localStorage.setItem('project-hammer:v1', JSON.stringify(save));
+  },
+  timetoflip() {
+    const save = readJson('timetoflip:v1') as Record<string, unknown> | null;
+    if (!save) return;
+    Object.assign(save, { best: 0, bestStage: 0, daily: null, dex: [], gold: [], pairs: 0 });
+    localStorage.setItem('timetoflip:v1', JSON.stringify(save));
   },
 };
 
