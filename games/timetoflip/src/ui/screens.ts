@@ -187,24 +187,14 @@ function openDex(host: HTMLElement, save: SaveData): void {
             <ul>${s.faces
               .map((f) =>
                 found.has(f)
-                  ? `<li><button class="dex-item" data-face="${f}" aria-label="${faceName(f)}${gold.has(f) ? ` · ${t('dex.gold')}` : ''}">${miniCard(f, { gold: gold.has(f) })}</button></li>`
+                  ? `<li><span class="dex-item" role="img" aria-label="${faceName(f)}${gold.has(f) ? ` · ${t('dex.gold')}` : ''}">${miniCard(f, { gold: gold.has(f) })}</span></li>`
                   : `<li><span class="dex-item" role="img" aria-label="??? — ${t('dex.locked')}">${miniCard(f, { locked: true })}</span></li>`,
               )
               .join('')}</ul>
           </section>`,
         ).join('')}
       </div>
-      <p class="dex-caption" aria-live="polite">&nbsp;</p>
     </div>`);
-  const caption = box.querySelector<HTMLElement>('.dex-caption')!;
-  box.querySelectorAll<HTMLButtonElement>('[data-face]').forEach((b) =>
-    b.addEventListener('click', () => {
-      const f = b.dataset.face as FaceId;
-      box.querySelectorAll('.dex-item.on').forEach((x) => x.classList.remove('on'));
-      b.classList.add('on');
-      caption.textContent = `${faceName(f)}${gold.has(f) ? ` · ★ ${t('dex.gold')}` : ''}`;
-    }),
-  );
   openModal(host, box, t('dex.title'));
 }
 

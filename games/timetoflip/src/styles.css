@@ -210,8 +210,7 @@ button {
 .icon-btn:focus-visible,
 .chip:focus-visible,
 .seg button:focus-visible,
-.skins button:focus-visible,
-.dex-item:focus-visible {
+.skins button:focus-visible {
   outline: 3px solid var(--accent-ink);
   outline-offset: 3px;
 }
@@ -1485,31 +1484,15 @@ h1 .word {
   grid-template-columns: repeat(8, 1fr);
   gap: 5px;
 }
+/* 도감 칸은 보기만 하는 그림(누르는 동작 없음) */
 .dex-item {
   display: block;
   width: 100%;
-  padding: 0;
-  border: 0;
-  background: none;
-  border-radius: 8px;
-  cursor: pointer;
 }
 .dex-item .mini-card {
   width: 100%;
   height: auto;
   aspect-ratio: 0.78;
-}
-.dex-item.on .mini-card {
-  box-shadow: inset 0 0 0 2px var(--accent), 0 2px 0 var(--depth);
-}
-span.dex-item {
-  cursor: default;
-}
-.dex-caption {
-  margin: 12px 0 0;
-  min-height: 1.4em;
-  text-align: center;
-  font-size: 18px;
 }
 @media (max-width: 380px) {
   .dex ul {
