@@ -555,7 +555,8 @@ function rowsHtml(game: GameMeta, rows: Row[], limit = TOP): string {
     .map((r, i) => {
       const value =
         'score' in r
-          ? t('ranking.score', { score: formatNumber(r.score) })
+          ? t('ranking.score', { score: formatNumber(r.score) }) +
+            (r.thermo ? ` <span class="rank-thermo" title="${t('ranking.thermo')}" aria-label="${t('ranking.thermo')}">🌡️</span>` : '')
           : t('ranking.tries', { tries: r.tries, time: (r.time / 1000).toFixed(1) });
       return `<li class="place-${i + 1}" style="--c:${game.color}"><span class="medal">${i + 1}</span><span class="rank-name">${esc(r.name)}</span><span class="rank-value">${value}</span></li>`;
     })

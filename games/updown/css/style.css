@@ -1939,9 +1939,10 @@ h1.lost {
   border-radius: 10px;
 }
 
+/* 방금 올린 기록: 테두리를 두 겹으로. 목록이 스크롤 상자(overflow)라 바깥 그림자는 좌우·위아래가 잘리므로 안쪽 그림자로 */
 .ranking-list li.mine {
   border-color: var(--action-line);
-  box-shadow: 0 0 0 1px var(--action-line);
+  box-shadow: inset 0 0 0 1px var(--action-line);
 }
 
 .ranking-place {

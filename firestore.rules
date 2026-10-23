@@ -34,11 +34,12 @@ service cloud.firestore {
     // -------------------------------------------------------------------------------------------------
     // ■ 게임: 업다운 (updown)
     //   경로   games/updown/scores-50 · scores-100 · scores-200 / {자동 ID}
-    //   모양   기록 1건 = 문서 1개 { initials, score, tries, time, createdAt }
+    //   모양   기록 1건 = 문서 1개 { initials, score, tries, time, thermo, createdAt }
+    //          thermo: 온도계를 쓴 판이면 true(업다운 v1.15.0~, 랭킹에 🌡️). 그 전 기록·예전 버전 화면이 올린 기록에는 없다(= 안 씀)
     //   권한   누구나 읽기·등록만. 고치기·지우기 금지
     //   점수   games/updown/js/game.js 의 score() 와 같은 식으로 상한을 검사한다(0점은 항상 허용)
-    //          1000 + 100 × (정석 횟수 − 시도 횟수) − (걸린 시간 ms ÷ 100, 버림)
-    //          온도계(한 판에 한 번)를 쓰면 게임이 250~300점을 더 빼므로 상한 검사만으로 충분하다
+    //          1000 + 100 × (정석 횟수 − 시도 횟수) − (걸린 시간 ms ÷ 100, 버림) − 온도계 차감
+    //          온도계 차감: thermo 가 true 면 50: 250, 100·200: 300 (game.js 의 thermoCost 와 같게)
     //          정석 횟수 = ⌈log2(끝 숫자 + 1)⌉ → 50: 6, 100: 7, 200: 8
     //   참고   예전 하트·난이도 방식 기록(games/updown/scores)은 규칙이 없어 읽기·쓰기 모두 막힌다
     // -------------------------------------------------------------------------------------------------
@@ -52,12 +53,18 @@ service cloud.firestore {
           && (d.score == 0
             || d.score <= 1000
               + 100 * ({'scores-50': 6, 'scores-100': 7, 'scores-200': 8}[board] - d.tries)
-              - math.floor(d.time / 100));
+              - math.floor(d.time / 100)
+              - updownThermoCost(d));
+      }
+      // 온도계를 쓴 판의 차감 점수(thermo 가 없으면 안 쓴 것으로 본다)
+      function updownThermoCost(d) {
+        return d.get('thermo', false) == true ? {'scores-50': 250, 'scores-100': 300, 'scores-200': 300}[board] : 0;
       }
 
       allow read: if updownBoard();
       allow create: if updownBoard()
-        && request.resource.data.keys().hasOnly(['initials', 'score', 'tries', 'time', 'createdAt'])
+        && request.resource.data.keys().hasOnly(['initials', 'score', 'tries', 'time', 'thermo', 'createdAt'])
+        && request.resource.data.get('thermo', false) is bool
         && allowedName(request.resource.data.initials)
         && request.resource.data.tries is int
         && request.resource.data.tries >= 1

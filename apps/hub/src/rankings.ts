@@ -21,7 +21,8 @@ const FRESH_MS = 5 * 60 * 1000;
 const TIMEOUT_MS = 8000;
 const CACHE_KEY = 'joypack.rankingCache';
 
-export type Row = { name: string; tries: number; time: number } | { name: string; score: number };
+/** thermo: 업다운에서 온도계를 쓴 기록(🌡️ 표시, 순위에는 영향 없음) */
+export type Row = { name: string; tries: number; time: number } | { name: string; score: number; thermo?: boolean };
 
 export interface BoardResult {
   rows: Row[];
@@ -85,7 +86,7 @@ const FETCHERS: Record<string, { key: (board: string) => string; fetch: Fetcher 
         }),
       });
       if (!res.ok) throw new Error(`firestore ${res.status}`);
-      type Fields = Record<string, { stringValue?: string; integerValue?: string; timestampValue?: string }>;
+      type Fields = Record<string, { stringValue?: string; integerValue?: string; timestampValue?: string; booleanValue?: boolean }>;
       const rows = (await res.json()) as { document?: { fields: Fields } }[];
       return rows
         .filter((r) => r.document)
@@ -93,9 +94,10 @@ const FETCHERS: Record<string, { key: (board: string) => string; fetch: Fetcher 
           name: document!.fields.initials.stringValue ?? '',
           score: Number(document!.fields.score.integerValue),
           at: Date.parse(document!.fields.createdAt.timestampValue ?? ''),
+          thermo: document!.fields.thermo?.booleanValue === true,
         }))
         .sort((a, b) => b.score - a.score || a.at - b.at)
-        .map(({ name, score }) => ({ name, score }));
+        .map(({ name, score, thermo }) => (thermo ? { name, score, thermo } : { name, score }));
     },
   },
   // 두더지잡기: 순위표 1개 = 문서 1개({ entries: [...] }). 오늘의 챌린지는 날짜마다 새 문서다

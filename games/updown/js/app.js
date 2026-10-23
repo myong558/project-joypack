@@ -659,8 +659,8 @@
   // 마지막으로 쓴 이니셜은 기억해 다음 등록 때 채워 둔다.
   const INITIALS_KEY = 'updown.initials';
   const PENDING_KEY = 'updown.pending2'; // 점수 방식 등록 대기(예전 updown.pending 은 지운다)
-  let pending = loadPending(); // { [끝 숫자]: { score, tries, time } } 등록 대기 기록
-  let resultEntry = null; // 이번 판 기록 { board, score, tries, time, expected, online }. TOP 10 에 들 때만 생긴다(checkRanking).
+  let pending = loadPending(); // { [끝 숫자]: { score, tries, time, thermo } } 등록 대기 기록
+  let resultEntry = null; // 이번 판 기록 { board, score, tries, time, thermo, expected, online }. TOP 10 에 들 때만 생긴다(checkRanking).
   let gameStartedAt = 0; // 걸린 시간(점수에 들어감) 재기: 판 시작 시각
   let rankingTab = 100; // 랭킹 창에서 보고 있는 범위. 열 때마다 Joypack.rankTab 으로 다시 고른다
   let rankingMine = null; // 방금 등록한 기록 ID (목록에서 강조)
@@ -675,7 +675,7 @@
       UpDown.PRESETS.forEach((key) => {
         const entry = raw[key];
         if (entry && Number.isInteger(entry.score) && entry.score >= 0 && Number.isInteger(entry.tries) && entry.tries > 0 && Number.isFinite(entry.time) && entry.time >= 0) {
-          result[key] = { score: entry.score, tries: entry.tries, time: entry.time };
+          result[key] = { score: entry.score, tries: entry.tries, time: entry.time, thermo: entry.thermo === true };
         }
       });
     } catch (e) {}
@@ -695,7 +695,7 @@
   }
 
   function sameRecord(a, b) {
-    return !!a && !!b && a.score === b.score && a.tries === b.tries && a.time === b.time;
+    return !!a && !!b && a.score === b.score && a.tries === b.tries && a.time === b.time && !!a.thermo === !!b.thermo;
   }
 
   // 그 범위의 등록 대기 기록. 마지막으로 받은 순위표에서 10위 밖이면 없는 것으로 본다(순위표를 받은 적이 없으면 일단 보여 준다).
@@ -801,7 +801,7 @@
       rows = saved ? saved.rows : [];
     }
     if (game !== forGame || !UpDownRanking.qualifies(rows, entry)) return;
-    const record = { score: entry.score, tries: entry.tries, time: entry.time };
+    const record = { score: entry.score, tries: entry.tries, time: entry.time, thermo: !!entry.thermo };
     if (!pending[entry.board] || isBetter(record, pending[entry.board])) {
       pending[entry.board] = record;
       savePending();
@@ -831,6 +831,15 @@
       score.textContent = t('ranking.score', { score: fmt(row.score) });
       const detail = document.createElement('small');
       detail.textContent = t('ranking.detail', { tries: row.tries, time: duration(row.time) });
+      // 온도계를 쓴 기록: 횟수·시간 뒤에 🌡️ (순위는 차감된 점수로 이미 정해져 있다)
+      if (row.thermo) {
+        const mark = document.createElement('span');
+        mark.className = 'ranking-thermo';
+        mark.textContent = ' 🌡️';
+        mark.title = t('ranking.thermo');
+        mark.setAttribute('aria-label', t('ranking.thermo'));
+        detail.append(mark);
+      }
       score.append(detail);
       li.append(place, name, score);
       list.appendChild(li);
@@ -884,6 +893,7 @@
       score: entry.score,
       tries: entry.tries,
       time: entry.time,
+      thermo: !!entry.thermo,
     });
     Joypack.set('initials', initials, INITIALS_KEY);
     rankingTab = entry.board;
@@ -1151,7 +1161,7 @@
     $('result-rank-initials').value = '';
     renderResultRank();
     renderRankingButton();
-    if (game.ranked) checkRanking({ board: game.max, score: game.score, tries: tries, time: game.time }, game);
+    if (game.ranked) checkRanking({ board: game.max, score: game.score, tries: tries, time: game.time, thermo: !!game.thermo }, game);
     UpDownFx.play('won');
     prepareShareCard().catch(() => {});
   }

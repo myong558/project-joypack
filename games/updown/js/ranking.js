@@ -4,6 +4,7 @@
 // 기록 형식 검사(이니셜 영문 대문자 1~5자, 점수가 시도 횟수·걸린 시간으로 낸 점수를 넘지 않음, 서버 시각)와
 // 고치기·지우기 금지는 Firestore 보안 규칙이 맡는다.
 // 순위: 점수가 높을수록 → 같으면 먼저 등록한 기록이 위.
+// thermo: 온도계를 쓴 판이면 true(v1.15.0~). 순위에는 영향이 없고 목록에 🌡️ 로만 보인다. 그 전 기록에는 없다(= 안 씀).
 (function (global) {
   'use strict';
 
@@ -88,6 +89,7 @@
           score: Number(f.score.integerValue),
           tries: Number(f.tries.integerValue),
           time: Number(f.time.integerValue),
+          thermo: !!(f.thermo && f.thermo.booleanValue),
           createdAt: new Date(f.createdAt.timestampValue),
         };
       })
@@ -110,6 +112,7 @@
               score: { integerValue: String(entry.score) },
               tries: { integerValue: String(entry.tries) },
               time: { integerValue: String(entry.time) },
+              thermo: { booleanValue: !!entry.thermo },
             },
           },
           updateTransforms: [{ fieldPath: 'createdAt', setToServerValue: 'REQUEST_TIME' }],

@@ -49,6 +49,7 @@ const ko = {
   'ranking.play': '게임 하러 가기',
   'ranking.tries': '{tries}회 · {time}초',
   'ranking.score': '{score}점',
+  'ranking.thermo': '온도계 사용',
 
   'settings.open': '설정',
   'settings.title': '설정',
@@ -147,6 +148,7 @@ const en: Record<keyof typeof ko, string> = {
   'ranking.play': 'Play this game',
   'ranking.tries': '{tries} tries · {time}s',
   'ranking.score': '{score} pts',
+  'ranking.thermo': 'Thermometer used',
 
   'settings.open': 'Settings',
   'settings.title': 'Settings',
