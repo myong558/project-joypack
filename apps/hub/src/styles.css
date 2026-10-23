@@ -1206,13 +1206,14 @@ a.card:active .card-play {
 /* 모든 게임에 함께 적용되는 설정(컬러 모드·언어·소리·진동·랭킹 이름)을 한 상자로 묶고 맨 위에 안내 한 줄 */
 .set-shared {
   margin-bottom: 12px;
-  padding: 10px 8px 0;
+  /* 아래 여백은 padding 으로(안쪽 칸의 margin 은 상자 밖으로 새어 나가 여백이 사라진다) */
+  padding: 10px 8px 8px;
   border-radius: 24px;
   background: var(--surface-2);
 }
 
 .set-shared .set-group:last-child {
-  margin-bottom: 8px;
+  margin-bottom: 0;
 }
 
 .shared-label {
