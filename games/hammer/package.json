@@ -1,7 +1,7 @@
 {
   "name": "hammer",
   "private": true,
-  "version": "0.14.2",
+  "version": "0.15.1",
   "author": "Myong Bum Soo",
   "license": "UNLICENSED",
   "type": "module",
@@ -21,5 +21,5 @@
     "html-to-image": "1.11.13",
     "@joypack/shared": "workspace:*"
   },
-  "description": "조이팩 미니 게임: 두더지잡기"
+  "description": "조이팩 미니 게임: 까꿍 두더지"
 }

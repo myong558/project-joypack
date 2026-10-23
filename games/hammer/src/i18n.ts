@@ -4,7 +4,7 @@ export type Lang = 'ko' | 'en';
 export const LANGS: Lang[] = ['ko', 'en'];
 
 const ko = {
-  'app.title': '두더지잡기',
+  'app.title': '까꿍 두더지',
   'app.tagline': '30초 동안, 성격 다른 두더지들과 손맛 대결!',
   'start.classic': '클래식 시작',
   'start.daily': '오늘의 챌린지',
