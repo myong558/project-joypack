@@ -420,10 +420,10 @@ void document.fonts?.ready.then(fitScreen);
 // 연출 중에 다시 그리면(오프라인 표시·설치 안내 갱신 등) 요소가 새로 만들어져 연출이 처음부터 다시 돌므로,
 // 그동안의 다시 그리기는 연출이 끝난 뒤 한 번으로 모은다.
 // 끝나는 때: 기본 1.9초, 게임이 많으면 "다음 게임" 띠(1.2초 + 카드 수 × 0.11초에 시작, 0.5초)가 다 올라온 뒤까지
-// 뒤로 가기로 돌아올 때는 짧은 복귀 연출(#app.intro-back, 약 0.6초): 로고 한 번 통통·반짝이, 카드가 거의 한꺼번에 떠오름
+// 뒤로 가기·게임 위 조이팩 버튼으로 돌아올 때는 짧은 복귀 연출(#app.intro-back, 약 1초): 로고 얼굴 부품 콩콩·반짝이 크게, 카드가 거의 한꺼번에 떠오름
 const REDUCED_MOTION = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const introMs = (back: boolean, cards: number): number =>
-  REDUCED_MOTION ? 0 : back ? Math.max(600, 560 + cards * 40) : Math.max(1900, 1750 + cards * 110);
+  REDUCED_MOTION ? 0 : back ? Math.max(1000, 560 + cards * 40) : Math.max(1900, 1750 + cards * 110);
 let introRunning = false;
 let renderWaiting = false;
 
@@ -439,7 +439,22 @@ function requestRender(): void {
 function startHome(): void {
   mountDeco();
   scheduleOpen();
-  playIntro();
+  playIntro(cameFromGame());
+}
+
+/**
+ * 미니 게임 위 메뉴의 조이팩 버튼(링크)으로 넘어왔나: 뒤로 가기와 같은 짧은 복귀 연출을 쓴다.
+ * 같은 사이트의 games/ 아래 페이지에서 새로 들어온 경우만(새로 고침·앞뒤 이동은 제외). 게임마다 따로 고칠 것이 없다
+ */
+function cameFromGame(): boolean {
+  try {
+    const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+    if (nav && nav.type !== 'navigate') return false;
+    const ref = new URL(document.referrer);
+    return ref.origin === location.origin && ref.pathname.startsWith(new URL('games/', location.href).pathname);
+  } catch {
+    return false;
+  }
 }
 
 /** 진입 연출을 처음부터 돌린다(첫 화면을 새로 그려 애니메이션이 다시 시작됨). back: 뒤로 가기로 돌아올 때의 짧은 복귀 연출 */
@@ -522,15 +537,6 @@ function openDialog(className: string, body: string, title: string): HTMLDialogE
 const boardChoice = new Map<string, string>();
 /** TOP 10 으로 펼친 게임 */
 const expanded = new Set<string>();
-/** "내 기록 있는 게임만": 이 기기에 내 최고 기록이 있는 게임만 보인다(기기에 기억) */
-const MINE_KEY = 'joypack.rankingMine';
-let mineOnly = (() => {
-  try {
-    return localStorage.getItem(MINE_KEY) === '1';
-  } catch {
-    return false;
-  }
-})();
 
 function rowsHtml(game: GameMeta, rows: Row[], limit = TOP): string {
   if (!rows.length) return `<p class="rank-empty">${t('ranking.empty')}</p>`;
@@ -550,11 +556,7 @@ function openRanking(): void {
   // 첫 화면 카드와 같은 게임: 미리보기를 켠 기기에서만 미리보기 게임 랭킹도 보인다(테스트용)
   const games = live.filter((g) => g.ranking && hasRanking(g.id));
   const body = `
-    <div class="rank-top">
-      <p class="sheet-sub">${t('ranking.sub')}</p>
-      <button class="chip-btn mine-btn" data-mine aria-pressed="${mineOnly}">${ICON.check}${lbl(t('ranking.mine'))}</button>
-    </div>
-    <p class="rank-empty mine-empty" hidden>${t('ranking.mineEmpty')}</p>
+    <p class="sheet-sub">${t('ranking.sub')}</p>
     ${games
       .map((g) => {
         const board = boardChoice.get(g.id) ?? g.ranking!.default;
@@ -577,34 +579,6 @@ function openRanking(): void {
       .join('')}`;
   const dialog = openDialog('ranking', body, t('ranking.title'));
 
-  // 순위는 보이는 게임 칸만 읽는다(숨긴 칸은 다시 보일 때 처음 읽음)
-  const loaders = new Map<string, () => void>();
-  const loaded = new Set<string>();
-  const applyMine = () => {
-    let visible = 0;
-    for (const game of games) {
-      const section = dialog.querySelector<HTMLElement>(`.rank-game[data-game="${game.id}"]`)!;
-      section.hidden = mineOnly && bestRecord(game) === null;
-      if (section.hidden) continue;
-      visible++;
-      if (!loaded.has(game.id)) {
-        loaded.add(game.id);
-        loaders.get(game.id)!();
-      }
-    }
-    dialog.querySelector<HTMLElement>('.mine-empty')!.hidden = visible > 0;
-  };
-  dialog.querySelector<HTMLButtonElement>('[data-mine]')!.addEventListener('click', (e) => {
-    mineOnly = !mineOnly;
-    (e.currentTarget as HTMLButtonElement).setAttribute('aria-pressed', String(mineOnly));
-    try {
-      localStorage.setItem(MINE_KEY, mineOnly ? '1' : '0');
-    } catch {
-      // 저장소를 못 쓰는 환경
-    }
-    applyMine();
-  });
-
   for (const game of games) {
     const section = dialog.querySelector<HTMLElement>(`.rank-game[data-game="${game.id}"]`)!;
     const show = (board: string) => {
@@ -625,9 +599,8 @@ function openRanking(): void {
       section.querySelector<HTMLElement>('.rank-play')!.hidden = !open;
       show(boardChoice.get(game.id) ?? game.ranking!.default);
     });
-    loaders.set(game.id, () => show(boardChoice.get(game.id) ?? game.ranking!.default));
+    show(boardChoice.get(game.id) ?? game.ranking!.default);
   }
-  applyMine();
 }
 
 async function showBoard(section: HTMLElement, game: GameMeta, board: string): Promise<void> {

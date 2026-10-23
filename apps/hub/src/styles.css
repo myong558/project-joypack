@@ -1003,51 +1003,6 @@ a.card:active .card-play {
   font-size: 15px;
 }
 
-/* 랭킹 창 위: 안내 + "내 기록 있는 게임만" 토글 */
-.rank-top {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin: 0 0 14px;
-}
-
-.rank-top .sheet-sub {
-  margin: 0 4px;
-}
-
-.mine-btn {
-  --c: var(--brand);
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.mine-btn svg {
-  width: 14px;
-  height: 14px;
-  stroke-width: 3;
-  opacity: 0.35;
-}
-
-.mine-btn[aria-pressed='true'] {
-  border-color: var(--c);
-  background: var(--c);
-  color: #fff;
-}
-
-.mine-btn[aria-pressed='true'] svg {
-  opacity: 1;
-}
-
-.mine-empty {
-  padding: 28px 12px;
-}
-
-.rank-game[hidden] {
-  display: none;
-}
 
 /* 랭킹 */
 /* 게임이 늘어도 한 화면에 여러 게임이 보이게 칸을 작게(1위 한 줄) */
@@ -1736,13 +1691,15 @@ a.primary-btn {
   animation: shine 600ms ease-out calc(1000ms + var(--n, 0) * 110ms);
 }
 
-/* 뒤로 가기 복귀 연출(#app.intro-back, 약 0.6초): 로고 상자 한 번 통통 + 반짝이 한 번, 제목·소개는 그대로, 카드는 0.04초 간격으로 떠오름 */
-.intro-back .logo-box {
-  animation: box-hop 460ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
+/* 복귀 연출(#app.intro-back, 약 1초): 뒤로 가기·게임 위 조이팩 버튼으로 돌아올 때.
+   로고 얼굴 부품(십자·버튼·입·볼)이 차례로 한 번씩 콩콩(로고를 누를 때와 같은 움직임) → 반짝이가 크게 한 번 터짐.
+   제목·소개는 그대로, 카드는 0.04초 간격으로 떠오름 */
+.intro-back .logo-tile {
+  animation: tile-jump 460ms cubic-bezier(0.3, 1.6, 0.5, 1) calc(80ms + var(--i) * 70ms);
 }
 
 .intro-back .burst i {
-  animation: burst 560ms cubic-bezier(0.2, 0.7, 0.3, 1) calc(140ms + var(--d) * 30ms) both;
+  animation: burst-big 700ms cubic-bezier(0.2, 0.7, 0.3, 1) calc(300ms + var(--d) * 40ms) both;
 }
 
 .intro-back .games > .card {
@@ -1751,12 +1708,6 @@ a.primary-btn {
 
 .intro-back .next-strip {
   animation: fade-up 380ms ease-out calc(160ms + var(--n, 0) * 40ms) both;
-}
-
-@keyframes box-hop {
-  40% {
-    transform: translateY(-10%) scale(1.08);
-  }
 }
 
 @keyframes card-back {
@@ -1788,6 +1739,18 @@ a.primary-btn {
 @keyframes tile-jump {
   40% {
     transform: translateY(-18%) scale(1.12);
+  }
+}
+
+/* 복귀 연출용: 처음 연출보다 멀리(약 1.4배), 크게 퍼진다 */
+@keyframes burst-big {
+  0% {
+    opacity: 1;
+    transform: rotate(var(--a)) translateY(0) scale(0.5);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--a)) translateY(-128px) scale(1.35) rotate(180deg);
   }
 }
 
