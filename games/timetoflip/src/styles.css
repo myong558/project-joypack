@@ -1920,14 +1920,40 @@ h1 .word:nth-child(2) .tc-in {
   border-radius: 14px;
   box-shadow: 0 4px 0 var(--depth), 0 10px 22px rgb(42 36 51 / 0.2);
 }
-/* 큰 카드는 그림을 크게(앞면 여백을 얇게) */
-.dex-big .front .art {
-  width: 93%;
-  height: 94%;
-  border-radius: 10px;
+/* 큰 카드 앞면 = 고풍스러운 금빛 엔틱 액자. 그림은 액자 안을 여백 없이 꽉 채운다.
+ * 틀: 금박 그라데이션 + 비스듬한 결 + 빛 받는 쪽 밝게, 안쪽 가장자리에 어두운 홈·밝은 금선·어두운 선(몰딩) */
+.dex-big .front {
+  --fw: calc(var(--cw) * 0.075);
+  padding: var(--fw);
+  border-radius: 6px;
+  background:
+    linear-gradient(135deg, rgb(255 250 225 / 0.45), transparent 35%, transparent 65%, rgb(40 25 0 / 0.28)),
+    repeating-linear-gradient(115deg, rgb(255 238 180 / 0.14) 0 1.5px, transparent 1.5px 4px),
+    linear-gradient(160deg, #f1d68a, #c99a3a 28%, #8d6420 52%, #d8b058 74%, #7a5418);
+  box-shadow:
+    inset 0 0 0 1px #4a3210,
+    inset 0 0 0 2.5px #f3dc96,
+    inset 0 1px 2px rgb(255 248 220 / 0.7),
+    0 4px 0 var(--depth),
+    0 10px 22px rgb(42 36 51 / 0.25);
 }
-.dex-big .front svg:not(.art) {
-  width: 92%;
+.dex-big .front .art,
+.dex-big .front svg {
+  width: 100%;
+  height: 100%;
+  border-radius: 2px;
+  /* 그림 둘레 몰딩: 어두운 홈 → 밝은 금선 → 어두운 선 */
+  box-shadow:
+    0 0 0 1.5px #4a3210,
+    0 0 0 3px #f0d48a,
+    0 0 0 4px #6b4a14;
+}
+.dex-big .front .art {
+  object-fit: cover;
+}
+/* 도형·팝아트(그림 파일이 아닌 그림)는 액자 안을 카드 바탕색으로 채운다 */
+.dex-big .front svg {
+  background: var(--card-front);
 }
 /* 설명 칸 높이는 고정: 제목·작가 한 줄씩 + 설명 두 줄(설명은 카드마다 두 줄 길이로 맞춰 씀). 글이 바뀌어도 아래 목록이 움직이지 않는다 */
 .dex-info {
