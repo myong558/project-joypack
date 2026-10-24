@@ -68,8 +68,9 @@ export const TEASER_BACKDROPS = [
 ];
 
 /**
- * 예약 게임 아이콘(SVG)과 잘 구분되는 COMING SOON 그림판 번호. 앞에서부터 기준을 넘는 첫 후보, 없으면 가장 대비가 큰 후보.
- * ok 가 false 면 어느 후보도 기준을 넘지 못한 것(빌드 경고)
+ * 예약 게임 아이콘(SVG)과 가장 잘 구분되는 COMING SOON 그림판 번호: 밝기 대비가 가장 큰 후보(같으면 앞 후보).
+ * 기준만 겨우 넘는 같은 계열 색(예: 남보라 아이콘 + 보라 그림판, 대비 1.84)보다 눈에 띄게 다른 색을 고른다.
+ * ok 가 false 면 고른 후보도 기준을 넘지 못한 것(빌드 경고)
  */
 export function teaserBackdrop(svg) {
   const bg = iconBackground(svg);
@@ -78,9 +79,8 @@ export function teaserBackdrop(svg) {
     const stops = pair.map(hexRgb);
     return distinct(bg, [0, 1, 2].map((i) => Math.round((stops[0][i] + stops[1][i]) / 2)));
   });
-  const first = scores.findIndex((s) => s.ok);
-  if (first >= 0) return { index: first, ok: true };
-  return { index: scores.reduce((best, s, i) => (s.contrast > scores[best].contrast ? i : best), 0), ok: false };
+  const index = scores.reduce((best, s, i) => (s.contrast > scores[best].contrast ? i : best), 0);
+  return { index, ok: scores[index].ok };
 }
 
 export function checkIcons() {

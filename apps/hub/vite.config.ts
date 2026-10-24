@@ -60,7 +60,7 @@ export default defineConfig({
     __APP_VERSION__: JSON.stringify(readJson('package.json').version),
     // 개발자 모드에서 게임 카드 그림판 오른쪽 아래에 보이는 게임 버전(각 게임 package.json)
     __GAME_VERSIONS__: JSON.stringify(Object.fromEntries(games.map((g) => [g.id, readJson(`games/${g.id}/package.json`).version]))),
-    // COMING SOON 카드 그림판 번호(게임 id → TEASER_BACKDROPS 번호): 아이콘 바탕색과 잘 구분되는 후보(scripts/check-icons.mjs)
+    // COMING SOON 카드 그림판 번호(게임 id → TEASER_BACKDROPS 번호): 아이콘 바탕색과 가장 잘 구분되는 후보(scripts/check-icons.mjs)
     __TEASER_BACKDROP__: JSON.stringify(
       Object.fromEntries(
         games
