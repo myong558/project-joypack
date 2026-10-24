@@ -861,30 +861,15 @@ a.card:active .card-play {
   }
 }
 
-/* 공개 72시간 전부터: 실제 게임 아이콘을 흐리게(72~48시간 많이, 48~24시간 약간), 24시간 전부터 또렷하게.
- * 흐린 동안은 아이콘 위에 작은 금빛 ? 를 겹쳐 "아직 비밀"을 남긴다. 그림판 색은 공개 전까지 보라색 그대로(색이 먼저 단서가 되지 않게) */
+/* 공개 72시간 전부터: 실제 게임 아이콘을 색 그대로 흐리게(72~48시간 3.5px, 48~24시간 1.8px), 24시간 전부터 또렷하게.
+ * 첫 단계에서도 배치·색이 단서로 보일 만큼만 흐린다(너무 흐리면 의미가 없음). 흐림 자체가 "아직 비밀"이라 ? 는 겹치지 않는다.
+ * 그림판 색은 공개 전까지 보라색 그대로(색이 먼저 단서가 되지 않게) */
 .teaser-icon[data-veil='heavy'] {
-  filter: blur(9px) saturate(0.5) brightness(0.9);
+  filter: blur(3.5px);
 }
 
 .teaser-icon[data-veil='light'] {
-  filter: blur(3.5px) saturate(0.85);
-}
-
-.teaser-q {
-  position: absolute;
-  z-index: 2;
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: linear-gradient(160deg, #ffd84d, #f5a300);
-  box-shadow: 0 3px 0 #b86f00;
-  color: #fff;
-  font-size: 20px;
-  line-height: 1;
-  text-shadow: 0 1px 0 #b86f00;
+  filter: blur(1.8px);
 }
 
 /* 미리보기 게임(TEST): NEW 와 같은 자리, 검정 바탕으로 구분 */
