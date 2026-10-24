@@ -1,7 +1,7 @@
 {
   "name": "timetoflip",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": "Myong Bum Soo",
   "license": "UNLICENSED",
   "type": "module",
@@ -10,7 +10,7 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "font": "node --use-system-ca ../../scripts/font-subset.mjs dohyeon=src/fonts/dohyeon-subset.woff2 dongle-bold=src/fonts/dongle-bold-subset.woff2"
+    "font": "node --use-system-ca ../../scripts/font-subset.mjs dohyeon=src/fonts/dohyeon-subset.woff2 dongle-bold=src/fonts/dongle-bold-subset.woff2 jua=src/fonts/jua-topbar-subset.woff2=한국어"
   },
   "devDependencies": {
     "typescript": "^7.0.2",

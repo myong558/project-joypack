@@ -406,7 +406,7 @@ pnpm --filter hub icons  # 로고(apps/hub/public/logo.svg)를 바꾼 뒤 앱 �
 
 | 저작물 | 쓰는 곳 | 출처·라이선스 | 상업 이용 | 함께 배포하는 파일 |
 | --- | --- | --- | --- | --- |
-| Jua 글꼴 | 허브·업다운·두더지잡기(전체) | SIL OFL 1.1(Reserved Font Name 없음 → 서브셋 허용) | 가능(글꼴만 따로 팔기는 불가) | 허브 `fonts/LICENSE-Jua.txt`(apps/hub/public), 업다운 `games/updown/fonts/LICENSE-Jua.txt`, 두더지잡기 `fonts/LICENSE-Jua.txt` |
+| Jua 글꼴 | 허브·업다운·두더지잡기(전체), 타임 투 플립(위 메뉴 언어 단추) | SIL OFL 1.1(Reserved Font Name 없음 → 서브셋 허용) | 가능(글꼴만 따로 팔기는 불가) | 허브 `fonts/LICENSE-Jua.txt`(apps/hub/public), 업다운 `games/updown/fonts/LICENSE-Jua.txt`, 두더지잡기 `fonts/LICENSE-Jua.txt`, 타임 투 플립 `fonts/LICENSE-Jua.txt` |
 | Do Hyeon 글꼴 | 타임 투 플립(본문·숫자) | SIL OFL 1.1(Reserved Font Name 없음 → 서브셋 허용), Google Fonts 저장소 원본 | 가능(글꼴만 따로 팔기는 불가) | 타임 투 플립 `fonts/LICENSE-DoHyeon.txt`(games/timetoflip/public/fonts) |
 | Dongle 글꼴(Bold) | 타임 투 플립(제목·팝업) | SIL OFL 1.1(© The Dongle Project Authors, Reserved Font Name 없음 → 서브셋 허용), Google Fonts 저장소 원본 | 가능(글꼴만 따로 팔기는 불가) | 타임 투 플립 `fonts/LICENSE-Dongle.txt`(games/timetoflip/public/fonts) |
 | 아이콘·로고·캐릭터·배경 그림 | 허브·모든 게임 | 직접 제작(코드로 그린 SVG·CSS·캔버스, 그 PNG 사본) | 가능(자체 저작물) | 없음 |

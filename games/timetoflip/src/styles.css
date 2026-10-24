@@ -2,7 +2,14 @@
 
 /* 글꼴 두 가지(둘 다 SIL OFL 1.1, 상업 이용 가능, 라이선스 파일 public/fonts/ 에 함께 배포)
  *   DoHyeon  본문·숫자·버튼: 또렷한 굵은 글씨라 타이머·점수 숫자가 잘 읽힌다
- *   Dongle   제목·띠·팝업·큰 점수: 둥글고 통통한 장난감 느낌. 글자가 작게 그려지는 글꼴이라 size-adjust 로 키워 다른 글꼴과 크기를 맞춘다 */
+ *   Dongle   제목·띠·팝업·큰 점수: 둥글고 통통한 장난감 느낌. 글자가 작게 그려지는 글꼴이라 size-adjust 로 키워 다른 글꼴과 크기를 맞춘다.
+ *            Do Hyeon 에 없는 기호(· … – — −)도 이 글꼴이 대신 그린다
+ *   Jua      공용 위 메뉴(topbar.css)의 언어 단추 글자만: 모든 앱 위 메뉴가 같은 글꼴이 되도록. "한국어"·ASCII 만 담아 가볍다 */
+@font-face {
+  font-family: 'Jua';
+  src: url('./fonts/jua-topbar-subset.woff2') format('woff2');
+  font-display: swap;
+}
 @font-face {
   font-family: 'DoHyeon';
   src: url('./fonts/dohyeon-subset.woff2') format('woff2');
@@ -134,7 +141,7 @@ body {
 }
 
 body {
-  font-family: 'DoHyeon', system-ui, sans-serif;
+  font-family: 'DoHyeon', 'Dongle', system-ui, sans-serif;
   color: var(--ink);
   background: linear-gradient(170deg, var(--sky-a), var(--sky-b)) fixed;
   -webkit-tap-highlight-color: transparent;

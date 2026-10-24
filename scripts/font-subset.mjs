@@ -3,6 +3,8 @@
 //   node ../../scripts/font-subset.mjs <글꼴 id>=<출력 woff2> [<글꼴 id>=<출력 woff2> ...]
 //   예) node ../../scripts/font-subset.mjs jua=src/fonts/jua-subset.woff2 bagel-fat-one=src/fonts/bagel-subset.woff2
 // - 글자는 src/ 아래 .ts 와 index.html 에서 모은다(출력 가능한 ASCII 는 모두 넣음: 숫자·이름 A–Z).
+// - 몇 글자에만 쓰는 글꼴은 세 번째 칸에 글자를 적으면 그 글자(+ ASCII)만 넣는다.
+//   예) jua=src/fonts/jua-topbar-subset.woff2=한국어 → 공용 위 메뉴(Jua)의 언어 단추 "한국어 / English" 용
 // - 라이선스 전문을 public/fonts/LICENSE-<글꼴 이름>.txt 로 복사한다(배포본에 함께 들어감).
 // - 목록에 없는 글꼴은 만들지 않는다. 새 글꼴은 라이선스를 검증한 뒤 catalog.json 에 먼저 더한다.
 import { existsSync } from 'node:fs';
@@ -17,7 +19,7 @@ const CACHE = join(ROOT, 'node_modules/.cache/fonts');
 const catalog = JSON.parse(await readFile(join(ROOT, 'fonts/catalog.json'), 'utf8'));
 
 const jobs = process.argv.slice(2).map((arg) => {
-  const [id, output] = arg.split('=');
+  const [id, output, only] = arg.split('=');
   const font = catalog.fonts.find((f) => f.id === id);
   if (!font || !output) {
     console.error(`글꼴 목록(fonts/catalog.json)에 없는 id 이거나 출력 경로가 없어요: ${arg}\n있는 id: ${catalog.fonts.map((f) => f.id).join(', ')}`);
@@ -29,7 +31,7 @@ const jobs = process.argv.slice(2).map((arg) => {
     console.error(`${font.family}: 상업 이용 무료 글꼴 조건을 갖추지 않아 쓸 수 없어요 — ${problems.join(', ')}`);
     process.exit(1);
   }
-  return { font, output };
+  return { font, output, only };
 });
 if (!jobs.length) {
   console.error('쓰는 법: node ../../scripts/font-subset.mjs <글꼴 id>=<출력 woff2> ...');
@@ -70,12 +72,16 @@ async function files(dir) {
   return out;
 }
 
-let text = '…·—–−×→←↑↓★☆';
-for (let code = 0x20; code < 0x7f; code++) text += String.fromCharCode(code);
+// 기본 기호 + 공용 모듈이 그리는 글자(© 저작권 줄)
+let ascii = '';
+for (let code = 0x20; code < 0x7f; code++) ascii += String.fromCharCode(code);
+let text = '…·—–−×→←↑↓★☆©' + ascii;
 for (const file of [...(existsSync('index.html') ? ['index.html'] : []), ...(await files('src'))]) text += await readFile(file, 'utf8');
-const chars = [...new Set(text)].filter((c) => c >= ' ').join('');
+const uniq = (s) => [...new Set(s)].filter((c) => c >= ' ').join('');
+const allChars = uniq(text);
 
-for (const { font, output } of jobs) {
+for (const { font, output, only } of jobs) {
+  const chars = only ? uniq(ascii + only) : allChars;
   const { ttf, license } = await source(font);
   // 받은 라이선스 원문도 다시 본다: OFL 이 맞고 예약 글꼴 이름이 없어야 서브셋(수정본)을 만들 수 있다
   if (!/SIL Open Font License/i.test(license) || declaresReservedName(license)) {
