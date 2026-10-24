@@ -17,7 +17,9 @@ export interface JoypackApi {
   /** 개발자 모드에서 "출시 모드 보기"를 켰는지(출시 전 확인 기능을 숨기고 실제 출시 화면으로 봄) */
   releaseView(): boolean;
   setReleaseView(on: boolean): void;
-  /** 출시 전 확인 기능(판별 바로 시작·도감 전부 열기 등)을 보일지: 개발자 모드이고 출시 모드 보기가 꺼져 있을 때 */
+  /** 출시 전 확인 단계인지: 개발자 모드이고 아직 미리보기(preview)로 배포된 게임일 때. 정식 공개하면 false("출시 화면" 단추도 사라짐) */
+  prerelease(): boolean;
+  /** 출시 전 확인 기능(판별 바로 시작·도감 전부 열기 등)을 보일지: 출시 전 확인 단계이고 "출시 화면" 보기가 꺼져 있을 때 */
   devTools(): boolean;
   /** 공통 상단 메뉴 아이콘 SVG 문자열 */
   topIcon(name: TopIcon): string;

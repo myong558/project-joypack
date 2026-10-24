@@ -122,7 +122,7 @@ function heroDemo(): string {
 }
 
 /**
- * 출시 전 확인용: 조이팩 개발자 모드를 켠 기기에서만 시작 화면 로고 위에 "N판부터 바로 시작" 단추(클래식, 기록·랭킹에 안 남음)
+ * 출시 전 확인용(Joypack.devTools: 개발자 모드 + 미리보기 배포, 정식 공개하면 사라짐): 시작 화면 로고 위에 "N판부터 바로 시작" 단추(클래식, 기록·랭킹에 안 남음)
  */
 const STAGE_JUMP = () => Joypack.devTools();
 
@@ -146,7 +146,7 @@ export function startScreen(opts: StartOptions): HTMLElement {
       </nav>
       <div class="col main-col">
         ${
-          Joypack.devMode()
+          Joypack.prerelease()
             ? `<div class="stage-jump" role="group" aria-label="${t('test.jump')}">${STAGE_JUMP() ? `<span>TEST</span>${[2, 3, 4, 5, 6, 7, 8].map((n) => `<button type="button" data-from="${n}">${n}</button>`).join('')}` : ''}<button type="button" class="dev-toggle" data-release aria-pressed="${Joypack.releaseView()}">${Joypack.releaseView() ? t('test.devView') : t('test.releaseView')}</button></div>`
             : ''
         }
@@ -211,7 +211,7 @@ export function startScreen(opts: StartOptions): HTMLElement {
  * 큰 카드·설명 칸은 크기를 고정해(설명은 최대 4줄) 글 길이가 달라도 화면이 덜컥이지 않는다
  */
 /**
- * 출시 전 확인용: 조이팩 개발자 모드를 켠 기기에서만 도감 48장을 모두 연 것처럼 보여 준다(저장된 기록은 그대로)
+ * 출시 전 확인용: 개발자 모드 + 미리보기 배포일 때만(정식 공개하면 사라짐) 도감 48장을 모두 연 것처럼 보여 준다(저장된 기록은 그대로)
  */
 const DEX_ALL_OPEN = () => Joypack.devTools();
 

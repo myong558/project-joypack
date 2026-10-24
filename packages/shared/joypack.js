@@ -404,9 +404,14 @@
       else localStorage.removeItem(RELEASE_VIEW_KEY);
     } catch (e) {}
   }
-  // 출시 전 확인 기능을 보일지: 개발자 모드이고 출시 모드 보기가 꺼져 있을 때만
+  // 출시 전 확인 단계인지: 개발자 모드를 켠 기기에서, 아직 미리보기(games.json status "preview")로 배포된 게임일 때만.
+  // 정식 공개(pnpm release → live)하면 개발자 모드여도 출시 전 확인 기능과 "출시 화면" 단추가 모두 사라진다
+  function prerelease() {
+    return devMode() && isPreview();
+  }
+  // 출시 전 확인 기능(판별 바로 시작·도감 전부 열기 등)을 보일지: 출시 전 확인 단계이고 "출시 화면" 보기가 꺼져 있을 때만
   function devTools() {
-    return devMode() && !releaseView();
+    return prerelease() && !releaseView();
   }
 
   // ── 랭킹 탭 공통 기준(조이팩 전체 랭킹·모든 게임 랭킹 창, 기준서 1.6) ──
@@ -495,6 +500,7 @@
     devMode: devMode,
     releaseView: releaseView,
     setReleaseView: setReleaseView,
+    prerelease: prerelease,
     devTools: devTools,
     topIcon: topIcon,
     deviceLang: deviceLang,
