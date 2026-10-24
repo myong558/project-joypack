@@ -56,6 +56,8 @@ export default defineConfig({
   base: './',
   define: {
     __APP_VERSION__: JSON.stringify(readJson('package.json').version),
+    // 개발자 모드에서 게임 카드 그림판 오른쪽 아래에 보이는 게임 버전(각 게임 package.json)
+    __GAME_VERSIONS__: JSON.stringify(Object.fromEntries(games.map((g) => [g.id, readJson(`games/${g.id}/package.json`).version]))),
   },
   server: { port: 5170, open: false, fs: { allow: [ROOT] } },
   build: { outDir: 'dist', emptyOutDir: true },

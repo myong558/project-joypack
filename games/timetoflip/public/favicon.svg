@@ -1,9 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- 타임 투 플립 아이콘: 청록 둥근 네모 위에 뒤집히는 카드 두 장(조이팩 얼굴 뒷면 + 달 앞면)과 남은 시간 막대 -->
+  <!-- 타임 투 플립 아이콘: 진한 남보라 둥근 네모(시작 화면 제목 카드와 같은 색, 허브 카드 청록 그림판과 구분) 위에
+       뒤집히는 카드 두 장(조이팩 얼굴 뒷면 + 달 앞면)과 남은 시간 막대 -->
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#14a3b5"/>
-      <stop offset="1" stop-color="#0a5c67"/>
+      <stop offset="0" stop-color="#2f2a4a"/>
+      <stop offset="1" stop-color="#15121f"/>
     </linearGradient>
     <linearGradient id="back" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#ffc533"/>
@@ -25,5 +26,5 @@
     <path d="M45.5 20.5a8 8 0 1 0 2.8 12.4 7 7 0 0 1-2.8-12.4z" fill="#fbbf24"/>
   </g>
   <rect x="12" y="51" width="40" height="4" rx="2" fill="#fff" opacity=".25"/>
-  <rect x="12" y="51" width="29" height="4" rx="2" fill="#fff"/>
+  <rect x="12" y="51" width="29" height="4" rx="2" fill="#2ad4e6"/>
 </svg>

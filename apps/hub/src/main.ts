@@ -259,7 +259,7 @@ function gameCard(game: GameMeta): string {
   return `
     <a class="card${blocked ? ' blocked' : ''}" href="${game.path}" style="--c:${game.color}" data-game="${game.id}"
        ${blocked ? 'aria-disabled="true"' : ''} aria-label="${test ? `${t('game.testLabel')} · ` : fresh ? `${t('game.newLabel')} · ` : ''}${esc(name)} — ${t('game.play')}">
-      <span class="card-art" data-pat="${patternOf(game)}">${test ? `<span class="card-new test" aria-hidden="true">${t('game.test')}</span>` : fresh ? `<span class="card-new" aria-hidden="true">${t('game.new')}</span>` : ''}<img class="card-icon" src="${iconUrl(game)}" alt="" width="72" height="72" /></span>
+      <span class="card-art" data-pat="${patternOf(game)}">${test ? `<span class="card-new test" aria-hidden="true">${t('game.test')}</span>` : fresh ? `<span class="card-new" aria-hidden="true">${t('game.new')}</span>` : ''}<img class="card-icon" src="${iconUrl(game)}" alt="" width="72" height="72" />${previewOn() && __GAME_VERSIONS__[game.id] ? `<span class="card-ver" aria-hidden="true">v${__GAME_VERSIONS__[game.id]}</span>` : ''}</span>
       <span class="card-body">
         <strong class="card-name">${esc(name)}</strong>
         <span class="card-desc">${esc(game.desc[getLang()])}</span>

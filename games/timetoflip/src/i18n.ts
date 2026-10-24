@@ -22,8 +22,8 @@ const ko = {
   'dex.gold': '황금으로 맞힌 카드',
   'dex.from': '{n}판부터',
   'dex.pickTitle': '어떤 그림일까요?',
-  'dex.pick': '아래 카드를 누르면 큰 카드가 뒤집히며 그림 이야기가 나와요. 뒤쪽 묶음일수록 멀리 가야 만나요.',
-  'dex.lockedDesc': '{n}판부터 나오는 카드예요. 짝을 맞히면 그림과 이야기가 열려요.',
+  'dex.pick': '아래 카드를 누르면 큰 카드가 뒤집히며 그림 이야기가 나와요.',
+  'dex.lockedDesc': '{n}판부터 나와요. 짝을 맞히면 그림과 이야기가 열려요.',
   'dex.goldCount': '황금 ★ {n}',
 
   'lang.label': '언어 선택',
@@ -156,7 +156,7 @@ const en: Record<MessageKey, string> = {
   'dex.gold': 'Matched in gold',
   'dex.from': 'From stage {n}',
   'dex.pickTitle': 'What could it be?',
-  'dex.pick': 'Tap a card below to flip the big card and read its story. Later sets show up only further in.',
+  'dex.pick': 'Tap a card below to flip the big card and read its story.',
   'dex.lockedDesc': 'Appears from stage {n}. Match it to unlock its picture and story.',
   'dex.goldCount': 'Gold ★ {n}',
 

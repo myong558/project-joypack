@@ -143,7 +143,10 @@ body {
 body {
   font-family: 'DoHyeon', 'Dongle', system-ui, sans-serif;
   color: var(--ink);
-  background: linear-gradient(170deg, var(--sky-a), var(--sky-b)) fixed;
+  /* 위쪽 밝은 빛 + 스킨 하늘색 + 아래로 갈수록 강조색이 스며 깊어짐 */
+  background:
+    radial-gradient(120% 70% at 50% -10%, color-mix(in srgb, var(--sky-a) 70%, #fff), transparent 60%) fixed,
+    linear-gradient(170deg, var(--sky-a), var(--sky-b) 55%, color-mix(in srgb, var(--sky-b) 62%, var(--accent)) 100%) fixed;
   -webkit-tap-highlight-color: transparent;
   -webkit-user-select: none;
   user-select: none;
@@ -1686,11 +1689,11 @@ h1 .word:last-child .tc:last-child .tc-in {
   border-bottom: 1px solid var(--line);
 }
 .dex-big {
-  --cw: 112px;
+  --cw: 150px;
   flex: none;
   position: relative;
-  width: 112px;
-  height: 144px;
+  width: 150px;
+  height: 192px;
   perspective: 800px;
 }
 .dex-big.pop {
@@ -1742,10 +1745,10 @@ h1 .word:last-child .tc:last-child .tc-in {
   opacity: 1;
   scale: 1;
 }
-/* 설명 칸 높이는 고정: 제목·작가 한 줄씩 + 설명 최대 4줄. 글이 바뀌어도 아래 목록이 움직이지 않는다 */
+/* 설명 칸 높이는 고정: 제목·작가 한 줄씩 + 설명 두 줄(설명은 카드마다 두 줄 길이로 맞춰 씀). 글이 바뀌어도 아래 목록이 움직이지 않는다 */
 .dex-info {
   width: 100%;
-  height: 7.6rem;
+  height: 5.9rem;
   text-align: center;
 }
 .dex-info.swap {
@@ -1782,8 +1785,8 @@ h1 .word:last-child .tc:last-child .tc-in {
   color: var(--muted);
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
-  line-clamp: 4;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 .dex-sets {
   flex: 1;
@@ -1833,24 +1836,22 @@ h1 .word:last-child .tc:last-child .tc-in {
 /* 키가 낮은 휴대폰: 큰 카드·설명을 줄여 목록 자리를 남긴다 */
 @media (max-height: 700px) and (orientation: portrait) {
   .dex-big {
-    --cw: 80px;
-    width: 80px;
-    height: 103px;
+    --cw: 112px;
+    width: 112px;
+    height: 144px;
   }
   .dex-stage {
     gap: 6px;
     padding-bottom: 8px;
   }
   .dex-info {
-    height: 5.6rem;
+    height: 5.4rem;
   }
   .dex-title {
     font-size: 18px;
   }
   .dex-desc {
     font-size: 13px;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
   }
 }
 @media (max-width: 380px) {
@@ -1879,16 +1880,12 @@ h1 .word:last-child .tc:last-child .tc-in {
     gap: 6px;
   }
   .dex-big {
-    --cw: 70px;
-    width: 70px;
-    height: 90px;
+    --cw: 92px;
+    width: 92px;
+    height: 118px;
   }
   .dex-info {
     height: auto;
-  }
-  .dex-desc {
-    -webkit-line-clamp: 5;
-    line-clamp: 5;
   }
   .dex-sets {
     min-height: 0;
@@ -2031,6 +2028,7 @@ h1 .word:last-child .tc:last-child .tc-in {
   /* 배경은 멈춘 그림으로(애니메이션을 0초로 끝내면 카드가 화면 밖 끝자리로 가 버리므로 아예 끈다) */
   .scene *,
   .scene,
+  .scene::after,
   .demo *,
   .demo-timer i {
     animation: none !important;
@@ -2045,7 +2043,7 @@ h1 .word:last-child .tc:last-child .tc-in {
   }
 }
 
-/* ---------- 움직이는 배경(ui/scene.ts): 먼 빛망울 · 중간 카드 · 가까운 카드 ---------- */
+/* ---------- 움직이는 배경(ui/scene.ts): 오로라·빛줄기 · 먼 빛망울 · 중간 카드 · 가까운 카드 ---------- */
 
 .scene {
   position: fixed;
@@ -2055,16 +2053,85 @@ h1 .word:last-child .tc:last-child .tc-in {
   pointer-events: none;
   transition: opacity 0.6s;
 }
+/* 가장자리를 살짝 어둡게(비네트): 가운데가 앞으로 나와 보인다 */
+.scene::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 90% at 50% 45%, transparent 55%, color-mix(in srgb, var(--accent) 22%, rgb(20 16 40 / 0.35)) 100%);
+  opacity: 0.55;
+}
 /* 게임 중에는 흐리게(카드를 외우는 데 방해되지 않게) */
 body:has(.screen.game) .scene {
-  opacity: 0.4;
+  opacity: 0.45;
 }
+body:has(.screen.game) .scene .layer {
+  opacity: 0.6;
+}
+
+/* 오로라: 스킨 색이 번진 큰 덩어리 셋이 서로 다른 속도로 흐르며 겹친다 */
+.aurora i {
+  position: absolute;
+  width: 80vmax;
+  height: 80vmax;
+  border-radius: 50%;
+  filter: blur(10px);
+  will-change: transform;
+}
+.aurora .a1 {
+  left: -30vmax;
+  top: -30vmax;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 38%, transparent), transparent);
+  animation: aurora-a 38s ease-in-out infinite alternate;
+}
+.aurora .a2 {
+  right: -35vmax;
+  top: 10vh;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--glow) 55%, transparent), transparent);
+  animation: aurora-b 46s ease-in-out infinite alternate;
+}
+.aurora .a3 {
+  left: -10vmax;
+  bottom: -45vmax;
+  background: radial-gradient(closest-side, color-mix(in srgb, #ff6fa8 30%, transparent), transparent);
+  animation: aurora-a 54s ease-in-out -20s infinite alternate-reverse;
+}
+@keyframes aurora-a {
+  to {
+    transform: translate3d(25vw, 18vh, 0) scale(1.2) rotate(40deg);
+  }
+}
+@keyframes aurora-b {
+  to {
+    transform: translate3d(-30vw, 25vh, 0) scale(0.85) rotate(-30deg);
+  }
+}
+/* 빛줄기: 위쪽 가운데에서 부채꼴로 퍼지는 옅은 빛이 아주 느리게 돈다(미술관 조명) */
+.rays {
+  position: absolute;
+  left: 50%;
+  top: -60vmax;
+  width: 120vmax;
+  height: 120vmax;
+  margin-left: -60vmax;
+  background: repeating-conic-gradient(from 0deg, rgb(255 255 255 / 0.16) 0deg 6deg, transparent 6deg 22deg);
+  mask-image: radial-gradient(closest-side, #000 20%, transparent 75%);
+  -webkit-mask-image: radial-gradient(closest-side, #000 20%, transparent 75%);
+  animation: rays 140s linear infinite;
+  will-change: transform;
+}
+@keyframes rays {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .layer {
   position: absolute;
   inset: -40px;
   /* PC 마우스 시차: 가까운 층일수록(--k 가 클수록) 많이 움직인다 */
   transform: translate3d(calc(var(--px, 0) * var(--k) * -1px), calc(var(--py, 0) * var(--k) * -1px), 0);
-  transition: transform 0.4s ease-out;
+  transition: transform 0.4s ease-out, opacity 0.6s;
 }
 .bokeh {
   position: absolute;
@@ -2087,21 +2154,43 @@ body:has(.screen.game) .scene {
     transform: translate3d(40px, -30px, 0) scale(1.15);
   }
 }
-.fc {
+/* 작은 반짝이: 십자 빛이 켜졌다 꺼짐 */
+.spark {
   position: absolute;
   left: var(--x);
   top: var(--y);
+  width: 10px;
+  height: 10px;
+  background:
+    linear-gradient(90deg, transparent 45%, #fff 45% 55%, transparent 55%),
+    linear-gradient(0deg, transparent 45%, #fff 45% 55%, transparent 55%);
+  border-radius: 50%;
+  opacity: 0;
+  animation: spark var(--d) ease-in-out var(--t) infinite;
+}
+@keyframes spark {
+  50% {
+    opacity: 0.85;
+    transform: scale(1.3) rotate(45deg);
+  }
+}
+
+/* 떠다니는 카드: 떠오르기(.fc) · 좌우 흔들림(.sway) · 뒤집기(.flip)를 따로 움직여 겹친다 */
+.fc {
+  position: absolute;
+  left: var(--x);
+  top: 50%;
   width: var(--s);
   height: calc(var(--s) * 1.28);
-  perspective: 300px;
   animation: rise var(--d) linear var(--t) infinite;
   will-change: transform;
 }
 .mid .fc {
-  opacity: 0.35;
+  opacity: 0.5;
 }
 .near .fc {
-  opacity: 0.55;
+  opacity: 0.6;
+  filter: blur(1.5px);
 }
 @keyframes rise {
   from {
@@ -2111,42 +2200,72 @@ body:has(.screen.game) .scene {
     transform: translate3d(0, -75vh, 0) rotate(calc(var(--r) * -1));
   }
 }
-.fc b {
-  position: absolute;
-  inset: 0;
-  border-radius: 18%;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  animation: spin var(--f) linear infinite;
+.sway {
+  display: block;
+  width: 100%;
+  height: 100%;
+  perspective: 400px;
+  animation: sway var(--sw) ease-in-out var(--t) infinite alternate;
 }
-.fc b:last-child {
-  animation-name: spin-back;
-}
-.fc .back {
-  background:
-    radial-gradient(circle at 34% 40%, #3d2a00 0 8%, transparent 9%),
-    radial-gradient(circle at 66% 40%, #3d2a00 0 8%, transparent 9%),
-    linear-gradient(160deg, #ffc533, #f2a300);
-  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 70%, #fff);
-}
-.fc .face {
-  background:
-    radial-gradient(circle at 50% 50%, var(--accent) 0 22%, transparent 23%),
-    var(--card-front);
-}
-@keyframes spin {
+@keyframes sway {
   from {
-    transform: rotateY(0deg);
+    transform: translateX(calc(var(--w) * -1)) rotate(-6deg);
   }
   to {
+    transform: translateX(var(--w)) rotate(6deg);
+  }
+}
+.fc .flip {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  animation: card-flip var(--f) cubic-bezier(0.5, 0, 0.3, 1) var(--ft) infinite;
+}
+/* 엎어진 채로 떠오르다 → 뒤집혀 그림을 잠깐 보이고 → 다시 덮인다 */
+@keyframes card-flip {
+  0%,
+  35% {
+    transform: rotateY(0deg);
+  }
+  45%,
+  80% {
+    transform: rotateY(180deg);
+  }
+  90%,
+  100% {
     transform: rotateY(360deg);
   }
 }
-@keyframes spin-back {
-  from {
-    transform: rotateY(180deg);
-  }
-  to {
-    transform: rotateY(540deg);
-  }
+.fc .side {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 14%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  box-shadow: 0 6px 14px rgb(20 16 40 / 0.18);
+}
+.fc .back {
+  background: #ffb703;
+}
+.fc .back svg {
+  width: 100%;
+  height: 100%;
+}
+.fc .front {
+  transform: rotateY(180deg);
+  background: var(--card-front);
+}
+.fc .front svg {
+  width: 84%;
+}
+.fc .front .art {
+  width: 86%;
+  height: 89%;
+  object-fit: cover;
+  border-radius: 10%;
 }

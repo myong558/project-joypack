@@ -1,5 +1,5 @@
 import type { GameResult } from '../game/engine';
-import { FACE_SETS, type FaceId } from '../game/faces';
+import { ALL_FACES, FACE_SETS, type FaceId } from '../game/faces';
 import { cardInfo, faceName, setName } from '../cards';
 import { LANGS, getLang, t, type Lang } from '../i18n';
 import type { SaveData } from '../storage';
@@ -192,8 +192,14 @@ export function startScreen(opts: StartOptions): HTMLElement {
  * 작은 카드를 누르면 큰 카드가 뒤집혀 그 그림으로 바뀌고 제목·작가·설명이 나온다.
  * 큰 카드·설명 칸은 크기를 고정해(설명은 최대 4줄) 글 길이가 달라도 화면이 덜컥이지 않는다
  */
+/**
+ * 출시 전 확인용: true 면 도감에서 48장을 모두 연 것처럼 보여 준다(저장된 기록은 그대로).
+ * 사용자가 원복을 지시하면 false 로 되돌린다
+ */
+const DEX_ALL_OPEN = true;
+
 function openDex(host: HTMLElement, save: SaveData): void {
-  const found = new Set(save.dex);
+  const found = new Set<FaceId>(DEX_ALL_OPEN ? ALL_FACES : save.dex);
   const gold = new Set(save.gold);
   const box = html(`
     <div class="dex">
