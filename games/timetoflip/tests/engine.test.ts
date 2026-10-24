@@ -48,7 +48,7 @@ describe('판 구성', () => {
     }
   });
 
-  it('1판은 특수·황금 카드 없이 과일만', () => {
+  it('1판은 특수·황금 카드 없이 보통 카드만', () => {
     for (let seed = 1; seed < 30; seed++) {
       const cards = buildCards(1, stageDef(1), mulberry32(seed));
       expect(cards.some((c) => c.special || c.gold)).toBe(false);

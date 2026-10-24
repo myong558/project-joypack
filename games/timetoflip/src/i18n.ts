@@ -128,8 +128,6 @@ const ko = {
   'toast.saved': '결과 이미지를 저장하고 조이팩 링크를 복사했어요',
   'toast.copied': '조이팩 링크를 복사했어요',
 
-  'special.clock': '시계: 맞히면 +5초',
-  'special.peek': '엿보기: 맞히면 남은 카드를 잠깐 보여 줘요',
 
   'face.clock': '시계',
   'face.peek': '돋보기',
@@ -264,8 +262,6 @@ const en: Record<MessageKey, string> = {
   'toast.saved': 'Result image saved and Joypack link copied',
   'toast.copied': 'Joypack link copied',
 
-  'special.clock': 'Clock: +5 seconds when matched',
-  'special.peek': 'Peek: shows the remaining cards for a moment',
 
   'face.clock': 'Clock',
   'face.peek': 'Magnifier',

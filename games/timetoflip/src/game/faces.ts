@@ -25,7 +25,3 @@ export const ALL_FACES: FaceId[] = FACE_SETS.flatMap((s) => [...s.faces]);
 export function setsOpen(stage: number): number {
   return Math.min(FACE_SETS.length, Math.max(1, stage));
 }
-
-export function setOf(face: FaceId): SetId {
-  return FACE_SETS.find((s) => (s.faces as readonly string[]).includes(face))!.id;
-}
