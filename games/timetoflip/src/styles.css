@@ -1897,6 +1897,8 @@ h1 .word:nth-child(2) .tc-in {
 }
 .dex-stage {
   flex: none;
+  /* 큰 카드가 뒤집히며 다시 그려져도 아래 목록까지 번지지 않게 그리는 영역을 나눈다 */
+  contain: layout paint;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1910,14 +1912,6 @@ h1 .word:nth-child(2) .tc-in {
   height: 192px;
   perspective: 800px;
 }
-.dex-big.pop {
-  animation: dex-pop 0.32s cubic-bezier(0.3, 1.5, 0.5, 1);
-}
-@keyframes dex-pop {
-  40% {
-    scale: 1.06;
-  }
-}
 .dex-flip {
   position: relative;
   display: block;
@@ -1926,6 +1920,8 @@ h1 .word:nth-child(2) .tc-in {
   border-radius: 14px;
   transform-style: preserve-3d;
   transition: transform 0.42s cubic-bezier(0.3, 1.3, 0.5, 1);
+  /* 처음부터 제 층에 둔다(뒤집을 때마다 층이 생겼다 없어지며 휴대폰에서 깜박이던 것 방지) */
+  will-change: transform;
 }
 .dex-flip.up {
   transform: rotateY(180deg);
@@ -1974,15 +1970,6 @@ h1 .word:nth-child(2) .tc-in {
   height: 5.9rem;
   text-align: center;
 }
-.dex-info.swap {
-  animation: dex-text 0.3s ease-out;
-}
-@keyframes dex-text {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-}
 .dex-info p {
   margin: 0;
   overflow: hidden;
@@ -2013,6 +2000,7 @@ h1 .word:nth-child(2) .tc-in {
 }
 /* 카드 목록은 한 단계 더 진한 판 위에(카드 가장자리가 또렷하게) */
 .dex-sets {
+  contain: paint;
   flex: 1;
   min-height: 0;
   overflow-y: auto;
@@ -2281,6 +2269,12 @@ h1 .word:nth-child(2) .tc-in {
   opacity: 0.55;
 }
 /* 게임 중에는 흐리게(카드를 외우는 데 방해되지 않게) */
+/* 대화상자(도감·설정·랭킹)가 열려 있는 동안 뒤 배경 움직임을 멈춘다: 휴대폰 GPU 가 창 뒤를 계속 다시 그리다
+ * 도감 글자가 겹쳐 보이거나 깜박이던 것을 막고 배터리도 아낀다 */
+body:has(.modal-backdrop) .scene,
+body:has(.modal-backdrop) .scene * {
+  animation-play-state: paused !important;
+}
 body:has(.screen.game) .scene {
   opacity: 0.45;
 }

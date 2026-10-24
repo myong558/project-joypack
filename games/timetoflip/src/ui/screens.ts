@@ -275,9 +275,6 @@ function openDex(host: HTMLElement, save: SaveData): void {
       title.textContent = text ? text.title : '???';
       by.textContent = text ? text.by : t('dex.locked');
       desc.textContent = text ? text.desc : t('dex.lockedDesc', { n: Number(item.dataset.stage) });
-      info.classList.remove('swap');
-      void info.offsetWidth;
-      info.classList.add('swap');
     };
     const run = () => {
       // 그림을 준비하는 사이 다른 카드를 눌렀으면 이 차례는 버린다
@@ -298,9 +295,6 @@ function openDex(host: HTMLElement, save: SaveData): void {
         else setTimeout(apply, wasUp ? 130 : 0);
         flip.classList.toggle('up', open);
       }
-      big.classList.remove('pop');
-      void big.offsetWidth;
-      big.classList.add('pop');
     };
     if (img) img.decode().then(run, run);
     else run();
