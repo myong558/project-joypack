@@ -7,6 +7,7 @@ import { NAME_MAX, RANK_SIZE, boardEntries, cleanName, isValidName, pendingRecor
 import { SKIN_SETTINGS, THEMES, type Skin, type SkinSetting, type Theme } from '../theme';
 import { captureResult, type ShareOutcome } from '../share';
 import { CARD_BACK, MASCOT, faceSvg } from './art';
+import { ANTIQUE_FRAME } from './frame';
 import { confetti, countUp, reducedMotion } from './effects';
 import { ICONS, SKIN_ICONS, THEME_ICONS } from './icons';
 
@@ -224,6 +225,7 @@ function openDex(host: HTMLElement, save: SaveData): void {
       <div class="dex-stage">
         <div class="dex-big" aria-hidden="true">
           <span class="dex-flip"><span class="side back">${CARD_BACK}</span><span class="side front"></span></span>
+          ${ANTIQUE_FRAME}
         </div>
         <div class="dex-info" aria-live="polite">
           <p class="dex-title">${t('dex.pickTitle')}</p>
