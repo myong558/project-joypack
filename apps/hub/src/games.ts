@@ -45,7 +45,7 @@ export function isScheduled(game: GameMeta, now = Date.now()): boolean {
 }
 
 /** 공개한 날(added)부터 NEW 를 붙여 두는 날 수 */
-const NEW_DAYS = 14;
+const NEW_DAYS = 7;
 
 /** 최근에 추가한 게임부터. 날짜가 같으면 games.json 에서 뒤에 적힌 게임이 앞에 온다 */
 export function byNewest(games: GameMeta[]): GameMeta[] {

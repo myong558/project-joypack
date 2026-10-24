@@ -78,7 +78,7 @@ if (cancel) {
   setField('status', 'live');
   setField('added', kstDate(openedAt ?? now));
   removeField('open');
-  summary = `정식 공개: ${id} (added ${kstDate(openedAt ?? now)}, 그날부터 14일 NEW)`;
+  summary = `정식 공개: ${id} (added ${kstDate(openedAt ?? now)}, 그날부터 7일 NEW)`;
 }
 
 text = text.slice(0, start) + block + text.slice(end);

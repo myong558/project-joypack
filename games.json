@@ -7,7 +7,7 @@
     "icon": "games/updown/images/icon.svg",
     "color": "#0f66ff",
     "status": "live",
-    "added": "2026-10-21",
+    "added": "2026-10-16",
     "ranking": {
       "path": "games/updown/scores-<끝 숫자>",
       "default": "100",
