@@ -1,4 +1,5 @@
-// 명화 → 카드 그림(200×256 webp). 중심(cx, cy)·세로 비율(hf)로 잘라 낸다. pop 은 4단 포스터(팔레트), ink 는 흑백·대비 늘림
+// 명화 → 카드 그림(200×256 webp). 중심(cx, cy)·세로 비율(hf)로 잘라 낸다.
+// box [왼쪽, 위, 폭, 높이](원본 화소)가 있으면 족자 테두리·종이 여백을 빼고 그 안(그림 부분)에서만 자른다. pop 은 4단 포스터(팔레트), ink 는 흑백·대비 늘림
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 const sharp = (await import(new URL('../../../node_modules/.pnpm/sharp@0.34.5/node_modules/sharp/lib/index.js', import.meta.url).href)).default;
 const [rawDir, outDir, specFile] = process.argv.slice(2);
@@ -8,12 +9,13 @@ const W = 200, H = 256;
 const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
 for (const s of spec) {
   const img = sharp(`${rawDir}/${s.id}.jpg`);
-  const { width, height } = await img.metadata();
+  const meta = await img.metadata();
+  const [bx, by, width, height] = s.box ?? [0, 0, meta.width, meta.height];
   let ch = Math.round(height * s.hf), cw = Math.round(ch * (W / H));
   if (cw > width) { cw = width; ch = Math.round(cw * (H / W)); }
   const left = Math.max(0, Math.min(width - cw, Math.round(width * s.cx - cw / 2)));
   const top = Math.max(0, Math.min(height - ch, Math.round(height * s.cy - ch / 2)));
-  let p = sharp(`${rawDir}/${s.id}.jpg`).extract({ left, top, width: cw, height: ch }).resize(W, H);
+  let p = sharp(`${rawDir}/${s.id}.jpg`).extract({ left: bx + left, top: by + top, width: cw, height: ch }).resize(W, H);
   if (s.mode === 'ink') p = p.grayscale().normalise({ lower: 1, upper: 72 }).sharpen();
   if (s.mode === 'pop') {
     const { data } = await p.clone().grayscale().normalise().blur(0.8).raw().toBuffer({ resolveWithObject: true });
