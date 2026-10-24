@@ -1733,11 +1733,25 @@ h1 .word:nth-child(2) .tc-in {
     opacity: 0;
   }
 }
+/* 창 닫기: 창 바탕(--sheet)과 같은 흰 동그라미면 X 만 떠 보여 작고 흐리므로, 글자색을 살짝 섞은 바탕 + 굵고 큰 X */
 .modal-x {
   position: absolute;
   top: 10px;
   right: 10px;
-  box-shadow: none;
+  z-index: 2;
+  background: color-mix(in srgb, var(--ink) 9%, var(--sheet));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 12%, transparent);
+}
+.modal-x .icon {
+  width: 22px;
+  height: 22px;
+  stroke-width: 2.6;
+}
+.modal-x:hover {
+  background: color-mix(in srgb, var(--ink) 15%, var(--sheet));
+}
+.modal-x:active {
+  transform: scale(0.94);
 }
 .modal h2 {
   margin: 0 0 12px;
