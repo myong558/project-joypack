@@ -772,11 +772,36 @@ h1 .word:nth-child(2) .tc-in {
 .game.peeking .mascot .sw-watch {
   display: none;
 }
-.game.peeking .timer-text {
-  color: #b77900;
+/* 시간 칸: 외우는 동안은 레몬색 카드 뒷면으로 덮였다가, 미리 보기가 끝나면 카드처럼 뒤집혀 게임 시간이 나타난다 */
+.time-card {
+  position: relative;
+  display: grid;
+  perspective: 240px;
+  transform-style: preserve-3d;
 }
-:root[data-theme='dark'] .game.peeking .timer-text {
-  color: #ffd84d;
+.time-card > * {
+  grid-area: 1 / 1;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transition: transform 0.42s cubic-bezier(0.3, 1.35, 0.5, 1);
+}
+.time-back {
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: linear-gradient(160deg, #ffd84f, #ffb703 60%, #e48c00);
+  box-shadow: inset 0 0 0 1.5px #fff3c4, 0 2px 0 rgb(150 90 0 / 0.35);
+  transform: rotateY(-180deg);
+}
+.time-back svg {
+  width: 2.2em;
+  height: 1.1em;
+}
+.game.peeking .time-back {
+  transform: none;
+}
+.game.peeking .timer-text {
+  transform: rotateY(180deg);
 }
 /* 점수: 작은 이름표 위에 큰 숫자(자릿수가 바뀌어도 폭이 흔들리지 않게 고정폭 숫자) */
 .hud-score {

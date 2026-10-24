@@ -199,6 +199,7 @@ function play(mode: Mode, from = 1): void {
       }
       case 'peekEnd':
         board.endPeek();
+        sound.play('flip');
         view.hud.note.className = 'hud-note';
         break;
       case 'flip':
@@ -300,7 +301,8 @@ function play(mode: Mode, from = 1): void {
       view.el.classList.remove('over');
       hud.bar.style.transform = `scaleX(${pr.toFixed(4)})`;
       hud.mascot.style.setProperty('--at', pr.toFixed(4));
-      hud.time.textContent = (left / 1000).toFixed(1);
+      // 숫자 칸은 카드 뒷면으로 덮여 있다가 미리 보기가 끝나면 뒤집혀 게임 시간이 나타난다(styles.css .time-card)
+      hud.time.textContent = String(Math.ceil(game.remaining / 1000));
       return;
     }
     // 막대는 시작 시간(40초)이 꽉 찬 상태. 그보다 많이 모으면 가득 찬 채로 금빛(.over)이 되고 숫자로 남은 시간을 본다

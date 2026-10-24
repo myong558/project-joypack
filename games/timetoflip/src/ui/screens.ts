@@ -656,7 +656,10 @@ export function gameScreen(opts: { daily: boolean; onPause: () => void; onResume
             <div class="timer-track"><div class="timer-bar"></div></div>
             <span class="mascot">${MASCOT}</span>
           </div>
-          <b class="timer-text"></b>
+          <span class="time-card">
+            <b class="timer-text"></b>
+            <span class="time-back" aria-hidden="true"><svg viewBox="0 0 40 20" focusable="false"><path d="M12 7.5h5M14.5 5v5" stroke="#3d2a00" stroke-width="1.8" stroke-linecap="round"/><circle cx="26" cy="7.5" r="1.8" fill="#3d2a00"/><path d="M14 12.5q6 5 12 0" fill="none" stroke="#3d2a00" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+          </span>
         </div>
       </div>
       <div class="stage">
