@@ -508,10 +508,19 @@ button {
   width: 100%;
   height: 100%;
   overflow: visible;
+  /* 진한 몸이 어두운 화면에 묻히지 않게 글자색(어두우면 밝음)으로 얇은 테 */
+  filter: drop-shadow(0 0 0.8px color-mix(in srgb, var(--ink) 70%, transparent));
 }
-.mascot .sweat {
-  opacity: 0;
-  transition: opacity 0.3s;
+/* 스톱워치 바늘: 남은 시간(--at, 1=가득)만큼 시계 방향으로 돈다. 40초를 넘게 모으면 금색, 5초 아래면 빨강 */
+.mascot .sw-hand {
+  fill: var(--accent);
+  stroke: var(--accent);
+  transform-origin: 20px 22px;
+  rotate: calc((1 - var(--at, 1)) * 360deg);
+}
+.game.over .mascot .sw-hand {
+  fill: #e2a400;
+  stroke: #e2a400;
 }
 
 /* 제목: 같은 모양의 진한 카드에 한 글자씩. 두 단어를 잇는 가운데 말만 작은 금색 카드. 누르면 한 바퀴 뒤집힌다 */
@@ -865,8 +874,9 @@ h1 .word:nth-child(2) .tc-in {
 :root[data-theme='dark'] .game.over .timer-text {
   color: #ffd84d;
 }
-.game.low .mascot .sweat {
-  opacity: 1;
+.game.danger .mascot .sw-hand {
+  fill: var(--danger);
+  stroke: var(--danger);
 }
 .game.danger .timer-bar {
   background: var(--danger);

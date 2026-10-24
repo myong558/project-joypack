@@ -1,7 +1,7 @@
 import { FACE_SETS, type FaceId, type SpecialId } from '../game/faces';
 
 /**
- * 카드 그림 48장 + 특수 카드 2장 + 카드 뒷면 + 마스코트 째깍이.
+ * 카드 그림 48장 + 특수 카드 2장 + 카드 뒷면 + 시간 막대 스톱워치.
  * 도형·팝아트 16장과 특수 카드·뒷면·마스코트는 이 파일에서 코드로 그린 SVG,
  * 명화 32장은 메트로폴리탄 미술관 Open Access(CC0) 이미지를 잘라 만든 src/art/*.webp(만드는 법·출처는 art-src/)
  */
@@ -11,10 +11,6 @@ const INK = '#2b2233';
 const eye = (x: number, y: number, r = 2.6) =>
   `<circle cx="${x}" cy="${y}" r="${r}" fill="${INK}"/><circle cx="${x + r * 0.35}" cy="${y - r * 0.35}" r="${r * 0.35}" fill="#fff"/>`;
 const eyes = (x1: number, x2: number, y: number, r?: number) => eye(x1, y, r) + eye(x2, y, r);
-const smile = (x: number, y: number, w = 4) =>
-  `<path d="M${x - w} ${y}q${w} ${w * 0.9} ${w * 2} 0" fill="none" stroke="${INK}" stroke-width="2.2" stroke-linecap="round"/>`;
-const cheeks = (x1: number, x2: number, y: number) =>
-  `<ellipse cx="${x1}" cy="${y}" rx="3" ry="2" fill="#ff8fab" opacity=".7"/><ellipse cx="${x2}" cy="${y}" rx="3" ry="2" fill="#ff8fab" opacity=".7"/>`;
 const shine = (x: number, y: number, rx = 3, ry = 5, rot = -25) =>
   `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="#fff" opacity=".45" transform="rotate(${rot} ${x} ${y})"/>`;
 const line = (d: string, color: string, w = 3) =>
@@ -151,15 +147,14 @@ export const CARD_BACK = `<svg class="back-art" viewBox="0 0 100 128" preserveAs
 </svg>`;
 
 /**
- * 마스코트 째깍이: 다리 달린 빨간 자명종. 시간이 모자라면 땀(.sweat)이 나고 몸을 떤다(styles.css .mascot)
+ * 시간 막대 끝 스톱워치: 진한 테 + 흰 판 + 강조색 바늘 하나. 바늘은 남은 시간(--at)만큼 돌고,
+ * 5초 아래면 바늘이 빨개지고 몸을 떤다(styles.css .mascot)
  */
-export const MASCOT = `<svg class="mascot-svg" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-  <path d="M22 54l-5 6M42 54l5 6" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>
-  <circle cx="15" cy="13" r="7" fill="#ffb703"/><circle cx="49" cy="13" r="7" fill="#ffb703"/>
-  <rect x="30" y="4" width="4" height="7" rx="2" fill="${INK}"/>
-  <circle cx="32" cy="34" r="23" fill="#ff5d5d"/>
-  <circle cx="32" cy="34" r="17" fill="#fffaf0"/>
-  <g class="m-face">${eyes(25, 39, 31, 2.8)}${smile(32, 38, 4)}${cheeks(21, 43, 38)}</g>
-  <path class="m-hand" d="M32 34V22" stroke="${INK}" stroke-width="2" stroke-linecap="round" opacity=".35"/>
-  <path class="sweat" d="M52 20c-2 3-3 5-3 6.5a3 3 0 0 0 6 0c0-1.5-1-3.5-3-6.5z" fill="#7dd3fc"/>
+export const MASCOT = `<svg class="mascot-svg" viewBox="0 0 40 40" aria-hidden="true" focusable="false">
+  <rect x="17" y="1" width="6" height="4" rx="1.5" fill="${INK}"/>
+  <path d="M30.5 7.5l2.5-2.5" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="20" cy="22" r="16" fill="${INK}"/>
+  <circle cx="20" cy="22" r="12.5" fill="#fff"/>
+  <path d="M20 9.5L20 12M32.5 22L30 22M20 34.5L20 32M7.5 22L10 22" stroke="${INK}" stroke-width="1.6" opacity=".4"/>
+  <g class="sw-hand"><path d="M20 22V12" stroke-width="2.6" stroke-linecap="round"/><circle cx="20" cy="22" r="2.2"/></g>
 </svg>`;

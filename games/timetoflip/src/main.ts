@@ -282,7 +282,7 @@ function play(mode: Mode, from = 1): void {
   };
   const off = game.on(handle);
 
-  // HUD: 판·점수·콤보·시간 막대. 째깍이는 막대 끝을 따라 걷고, 5초 아래면 땀을 흘리며 떤다
+  // HUD: 판·점수·콤보·시간 막대. 스톱워치는 막대 끝을 따라가며 바늘이 남은 시간을 가리키고, 5초 아래면 빨개져 떤다
   let lastSecond = -1;
   let warned = false;
   let shown = { score: -1, stage: -1, combo: -1 };
