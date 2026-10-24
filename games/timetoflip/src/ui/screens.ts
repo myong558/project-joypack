@@ -749,6 +749,7 @@ export function resultScreen(opts: {
       <div class="col main-col">
         <p class="mode">${opts.daily ? t('start.daily') : t('mode.classic')}</p>
         <div class="hero result-logo" aria-hidden="true">${heroDemo()}</div>
+        <h1 class="result-title" aria-label="${t('app.title')}"><span aria-hidden="true">${titleCards(t('app.title'))}</span></h1>
         <p class="final">${t('result.final')}</p>
         ${opts.isRecord ? `<p class="record">${t('result.record')}</p>` : ''}
         <dl class="numbers">

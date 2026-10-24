@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { Game, buildCards, type GameEvent } from '../src/game/engine';
 import { mulberry32 } from '../src/game/rng';
-import { DEAL_MS, MAX_MS, START_MS, comboMultiplier, stageDef } from '../src/game/stages';
+import { DEAL_MS, MAX_MS, MIN_MATCH_GAIN, START_MS, comboMultiplier, stageDef } from '../src/game/stages';
 
 function setup(seed = 1) {
   const game = new Game(mulberry32(seed));
@@ -95,6 +95,13 @@ describe('뒤집기', () => {
     expect(perCard(4)).toBeLessThan(perCard(1));
     expect(perCard(6)).toBeLessThan(perCard(4));
     expect(perCard(8)).toBeLessThan(perCard(6));
+  });
+
+  it('9판부터 짝 시간이 판마다 줄어 13판에서 바닥에 닿고 그 아래로는 내려가지 않는다', () => {
+    expect(stageDef(8).matchGain).toBe(500);
+    expect(stageDef(9).matchGain).toBe(450);
+    expect(stageDef(13).matchGain).toBe(MIN_MATCH_GAIN);
+    expect(stageDef(40).matchGain).toBe(MIN_MATCH_GAIN);
   });
 
   it('짝을 맞히면 점수·시간이 오르고 콤보가 쌓인다', () => {

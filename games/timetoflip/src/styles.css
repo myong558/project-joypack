@@ -1407,23 +1407,10 @@ h1 .word:nth-child(2) .tc-in {
   font-size: 17px;
   color: var(--muted);
 }
-/* 결과 화면 위 로고: 시작 화면 카드 세 장 시연을 작게. 공유 이미지(.capturing)는 짝 맞춘 장면으로 멈춘다 */
-.result-logo {
-  --cw: 40px;
-  --ch: 52px;
-  gap: 8px;
-}
-.result-logo .demo {
-  gap: 6px;
-}
-.result-logo .demo-timer {
-  width: calc(var(--cw) * 3 + 12px);
-  height: 5px;
-}
-.result-logo .demo-pop {
-  top: -14px;
-  right: -20px;
-  font-size: 20px;
+/* 결과 화면 위 로고: 시작 화면과 같은 크기의 카드 세 장 시연 + 게임 이름(공유 이미지에도 이름이 찍힘).
+ * 키 낮은 휴대폰은 작게·이름 없이, 가로 낮은 화면은 숨긴다(아래 @media). 공유 이미지(.capturing)는 짝 맞춘 장면으로 멈춘다 */
+.result-title {
+  margin-top: 4px;
 }
 .capturing .demo *,
 .capturing .demo-timer i {
@@ -2116,6 +2103,22 @@ h1 .word:nth-child(2) .tc-in {
   .result-logo {
     --cw: 30px;
     --ch: 39px;
+    gap: 8px;
+  }
+  .result-logo .demo {
+    gap: 6px;
+  }
+  .result-logo .demo-timer {
+    width: calc(var(--cw) * 3 + 12px);
+    height: 5px;
+  }
+  .result-logo .demo-pop {
+    top: -14px;
+    right: -20px;
+    font-size: 20px;
+  }
+  .result-title {
+    display: none;
   }
   .dex-big {
     --cw: 112px;
@@ -2224,7 +2227,8 @@ h1 .word:nth-child(2) .tc-in {
     min-height: 52px;
     font-size: 21px;
   }
-  .result-logo {
+  .result-logo,
+  .result-title {
     display: none;
   }
   .final b {

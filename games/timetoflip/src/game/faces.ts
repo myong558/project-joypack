@@ -2,14 +2,14 @@
  * 카드 그림 목록(도감). 묶음 6개 × 8장 = 48장. 그림은 ui/art.ts(도형·팝아트는 SVG, 명화는 src/art/*.webp),
  * 이름·작가·설명은 cards.ts.
  * 묶음은 판이 올라갈수록 하나씩 열리고 뒤로 갈수록 구분이 어렵다:
- * 도형(색·모양이 뚜렷) → 팝아트 → 명화 팝 → 서양화 풍경 → 서양화 인물·정물 → 동양화 수묵(색이 없어 가장 어려움)
+ * 도형(색·모양이 뚜렷) → 팝아트 → 명화 팝 → 서양화 인물·정물(대상이 뚜렷) → 서양화 풍경(초록 들판·하늘이 서로 닮음) → 동양화 수묵(색이 없어 가장 어려움)
  */
 export const FACE_SETS = [
   { id: 'shape', faces: ['circle', 'triangle', 'square', 'diamond', 'hexagon', 'ring', 'plus', 'moon'] },
   { id: 'pop', faces: ['lips', 'bolt', 'eye', 'pow', 'heart', 'shades', 'cone', 'crown'] },
   { id: 'popart', faces: ['berceuse', 'strawhat', 'rembrandt', 'madamex', 'arlesienne', 'wave', 'baby', 'sunflowers'] },
-  { id: 'landscape', faces: ['cypress', 'olive', 'orchard', 'harvest', 'gulfstream', 'matterhorn', 'boating', 'oxbow'] },
   { id: 'life', faces: ['apples', 'roses', 'oleanders', 'shoes', 'dancers', 'cardplayers', 'tahiti', 'garden'] },
+  { id: 'landscape', faces: ['cypress', 'olive', 'orchard', 'harvest', 'gulfstream', 'matterhorn', 'boating', 'oxbow'] },
   { id: 'ink', faces: ['bamboo', 'plum', 'orchid', 'lotus', 'eagles', 'riverbank', 'peaks', 'huangshan'] },
 ] as const;
 

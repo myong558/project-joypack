@@ -57,10 +57,15 @@ const TABLE: Omit<StageDef, 'peekMs'>[] = [
   { pairs: 15, cols: 5, rows: 6, viewMs: 2800, matchGain: 700, twins: 3 },
 ];
 
-/** n판(1부터)의 규칙. 6판부터는 같은 크기로 계속되고, 8판부터 닮은 짝이 하나 더 늘고 얻는 시간·미리 보기가 조금 줄어든다 */
+/** 9판부터 판마다 짝 시간을 이만큼 줄이고, MIN_MATCH_GAIN 아래로는 내리지 않는다(높은 판이 같은 난이도로 늘어지지 않게) */
+export const MATCH_GAIN_STEP = 50;
+export const MIN_MATCH_GAIN = 250;
+
+/** n판(1부터)의 규칙. 6판부터는 같은 크기로 계속되고, 8판부터 닮은 짝이 하나 더 늘고 얻는 시간·미리 보기가 조금 줄어든다.
+ * 9판부터는 짝 시간이 판마다 MATCH_GAIN_STEP 씩 줄어 13판에서 바닥(MIN_MATCH_GAIN)에 닿는다 */
 export function stageDef(n: number): StageDef {
   const base = TABLE[Math.min(n, TABLE.length) - 1];
-  const def = n < 8 ? base : { ...base, twins: 4, matchGain: 500, viewMs: 2600 };
+  const def = n < 8 ? base : { ...base, twins: 4, matchGain: Math.max(MIN_MATCH_GAIN, 500 - (n - 8) * MATCH_GAIN_STEP), viewMs: 2600 };
   return { ...def, peekMs: DEAL_MS + def.viewMs };
 }
 
