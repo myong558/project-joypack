@@ -58,8 +58,10 @@ export function loadSave(): SaveData {
     const raw = localStorage.getItem(KEY);
     if (!raw) return withShared(base);
     const data = { ...base, ...(JSON.parse(raw) as Partial<SaveData>) } as SaveData;
-    data.dex = (Array.isArray(data.dex) ? data.dex : []).filter((f) => ALL_FACES.includes(f));
-    data.gold = (Array.isArray(data.gold) ? data.gold : []).filter((f) => ALL_FACES.includes(f));
+    // v0.9.0 에서 도형 '반원(arch)'을 '초승달(moon)'로 바꿨다. 모은 도감은 그대로 이어지게 옮긴다
+    const renamed = (list: unknown) => (Array.isArray(list) ? list : []).map((f) => (f === 'arch' ? 'moon' : f)) as FaceId[];
+    data.dex = renamed(data.dex).filter((f) => ALL_FACES.includes(f));
+    data.gold = renamed(data.gold).filter((f) => ALL_FACES.includes(f));
     for (const k of ['best', 'bestStage', 'pairs'] as const) if (!Number.isFinite(data[k])) data[k] = 0;
     data.rankings = sanitizeRankings(data.rankings);
     data.pending = sanitizePending(data.pending);

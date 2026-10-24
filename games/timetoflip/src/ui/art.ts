@@ -24,11 +24,12 @@ const SHAPES: Record<string, string> = {
   circle: floor + `<circle cx="32" cy="31" r="20" fill="#374151"/>` + glint('M20 25a14 14 0 0 1 9-8'),
   triangle: floor + `<path d="M32 9 54 50H10z" fill="#2563eb" stroke="#2563eb" stroke-width="5" stroke-linejoin="round"/>` + glint('M27 22l-6 11'),
   square: floor + `<rect x="13" y="12" width="38" height="38" rx="6" fill="#16a34a"/>` + glint('M19 20v9'),
-  diamond: floor + `<path d="M32 7 55 31 32 55 9 31z" fill="#eab308" stroke="#eab308" stroke-width="4" stroke-linejoin="round"/>` + glint('M27 17l-7 8'),
+  diamond: floor + `<path d="M32 7 55 31 32 55 9 31z" fill="#dc2626" stroke="#dc2626" stroke-width="4" stroke-linejoin="round"/>` + glint('M27 17l-7 8'),
   hexagon: floor + `<path d="M32 9 51 20v22L32 53 13 42V20z" fill="#9333ea" stroke="#9333ea" stroke-width="4" stroke-linejoin="round"/>` + glint('M18 24v8'),
   ring: floor + `<circle cx="32" cy="31" r="15" fill="none" stroke="#ec4899" stroke-width="11"/>` + glint('M19 24a14 14 0 0 1 6-6'),
   plus: floor + `<path d="M25 10h14v14h14v14H39v14H25V38H11V24h14z" fill="#0d9488" stroke="#0d9488" stroke-width="4" stroke-linejoin="round"/>` + glint('M29 15v6'),
-  arch: floor + `<path d="M10 48a22 22 0 0 1 44 0z" fill="#f97316" stroke="#f97316" stroke-width="4" stroke-linejoin="round"/>` + glint('M19 38a15 15 0 0 1 7-8'),
+  // 초승달: 조이팩 허브의 타임 투 플립 아이콘(public/favicon.svg) 앞면 카드의 달과 같은 모양
+  moon: floor + `<path d="M38.4 11.6a19.6 19.6 0 1 0 6.9 30.4 17.2 17.2 0 0 1-6.9-30.4z" fill="#fbbf24"/>` + glint('M19 25a15 15 0 0 1 6-9'),
 };
 
 /* ---------- 팝아트(2판): 굵은 검은 외곽선 + 망점(벤데이 점) 바탕. 카드마다 바탕색이 달라 멀리서도 구분된다(50×64) ---------- */

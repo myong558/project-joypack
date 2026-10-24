@@ -38,11 +38,11 @@ const CARDS: Record<FaceId, Entry> = {
   circle: joke('먹색 동그라미', '모서리가 없어 굴러다니다 작가를 잃어버린 전설의 작품.', 'Charcoal Circle', 'Not one corner. It rolled away and lost its artist, they say.'),
   triangle: joke('파란 세모', '세 변이 서로 자기가 밑변이라며 아직도 다투는 중.', 'Blue Triangle', 'All three sides still argue over which one is the bottom.'),
   square: joke('초록 네모', '네 변이 똑같아 자를 든 비평가들이 눈물을 흘렸다.', 'Green Square', 'Four equal sides. Critics with rulers wept openly.'),
-  diamond: joke('노란 마름모', '네모가 고개를 45도 갸웃했을 뿐인데 몸값이 두 배.', 'Yellow Diamond', 'A square tilted its head 45° and doubled its price.'),
+  diamond: joke('빨간 마름모', '네모가 고개를 45도 갸웃했을 뿐인데 몸값이 두 배.', 'Red Diamond', 'A square tilted its head 45° and doubled its price.'),
   hexagon: joke('보라 육각형', '벌들이 "우리 집 설계도를 베꼈다"며 소송 준비 중.', 'Purple Hexagon', 'The bees are suing. They say it copied their floor plan.'),
   ring: joke('분홍 고리', '가운데가 비었다. 작가는 도넛을 먹다 멈췄다고 해명.', 'Pink Ring', 'The middle is empty. The artist says they stopped mid-donut.'),
   plus: joke('청록 더하기', '더하기 같지만 작가는 빼기를 두 번 그렸을 뿐이라 주장.', 'Teal Plus', 'Looks like a plus. The artist insists it is two minuses.'),
-  arch: joke('주황 반원', '해가 뜨는 건지 지는 건지 작가 본인도 아직 모른다.', 'Orange Arch', 'Sunrise or sunset? Even the artist hasn’t decided yet.'),
+  moon: joke('노란 초승달', '보름달이 되려다 누가 한 입 베어 먹었다. 범인은 아직 안 잡혔다.', 'Yellow Crescent', 'It was on its way to full moon until someone took a bite.'),
 
   /* ---------- 팝아트: 작가 미상 우스개 ---------- */
   lips: joke('쪽!', '키스 자국을 가장 많이 받은 그림. 대부분 관람객 것.', 'Smack!', 'The most-kissed painting in the gallery. Mostly by visitors.'),

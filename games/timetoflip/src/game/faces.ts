@@ -5,7 +5,7 @@
  * 도형(색·모양이 뚜렷) → 팝아트 → 명화 팝 → 서양화 풍경 → 서양화 인물·정물 → 동양화 수묵(색이 없어 가장 어려움)
  */
 export const FACE_SETS = [
-  { id: 'shape', faces: ['circle', 'triangle', 'square', 'diamond', 'hexagon', 'ring', 'plus', 'arch'] },
+  { id: 'shape', faces: ['circle', 'triangle', 'square', 'diamond', 'hexagon', 'ring', 'plus', 'moon'] },
   { id: 'pop', faces: ['lips', 'bolt', 'eye', 'pow', 'heart', 'shades', 'cone', 'crown'] },
   { id: 'popart', faces: ['berceuse', 'strawhat', 'rembrandt', 'madamex', 'arlesienne', 'wave', 'baby', 'sunflowers'] },
   { id: 'landscape', faces: ['cypress', 'olive', 'orchard', 'harvest', 'gulfstream', 'matterhorn', 'boating', 'oxbow'] },

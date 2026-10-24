@@ -2351,3 +2351,12 @@ body:has(.screen.game) .scene .near {
   object-fit: cover;
   border-radius: 10%;
 }
+
+/* 도감 아이콘: 펼친 카드 세 장 그림이라 조금 크게, 그림자로 띄운다 */
+.icon-album {
+  width: 1.55em;
+  height: 1.55em;
+  margin: -0.15em 0.05em -0.15em -0.1em;
+  overflow: visible;
+  filter: drop-shadow(0 1.5px 1.5px rgb(20 16 40 / 0.25));
+}
