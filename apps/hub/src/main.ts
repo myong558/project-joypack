@@ -302,13 +302,17 @@ function teaserCard(game: GameMeta): string {
     minute: '2-digit',
   });
   const opens = esc(t('teaser.opens', { when }));
+  // 화면에는 날짜 / 시각 두 줄로 나눠 "오후 / 12:00"처럼 어색한 자리에서 줄이 바뀌지 않게 한다
+  const locale = getLang() === 'ko' ? 'ko-KR' : 'en-US';
+  const date = open.toLocaleDateString(locale, { month: 'short', day: 'numeric', weekday: 'short' });
+  const time = open.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' });
   return `
     <div class="card teaser" aria-disabled="true" aria-label="Coming soon · ${opens}">
       <span class="card-art" data-pat="${patternOf(game)}">${teaserArt(game)}</span>
       <span class="card-body">
         <span class="card-play" aria-hidden="true">${ICON.lock}</span>
         <strong class="card-name">COMING SOON</strong>
-        <span class="card-desc">${opens}</span>
+        <span class="card-desc teaser-when" aria-hidden="true"><span>${esc(t('teaser.date', { date }))}</span> <span>${esc(t('teaser.time', { time }))}</span></span>
       </span>
       <span class="card-foot">
         <span class="chip">${days > 0 ? `D-${days}` : 'D-DAY'}</span>

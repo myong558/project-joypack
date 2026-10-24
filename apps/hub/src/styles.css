@@ -836,6 +836,14 @@ a.card:active .card-play {
   white-space: nowrap;
 }
 
+/* 공개 일시: 날짜 / 시각 두 줄, 줄마다 한 덩어리로(좁은 카드에서 "오후 / 12:00"처럼 갈라지지 않게). 넘치면 끝을 … */
+.teaser-when > span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .card.teaser .card-play {
   background: var(--surface-2);
   color: var(--muted);
