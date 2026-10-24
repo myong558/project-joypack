@@ -643,6 +643,7 @@ a.card:hover .card-icon {
 }
 
 .card-body {
+  position: relative;
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -667,14 +668,12 @@ a.card:hover .card-icon {
   -webkit-box-orient: vertical;
 }
 
-/* 맨 아래 한 줄: 왼쪽 최고 기록(없으면 "첫 기록에 도전!"), 오른쪽 작은 ▶. 기록 유무와 관계없이 높이가 같아 카드 크기가 모두 같다 */
+/* 맨 아래 한 줄: 최고 기록(없으면 "첫 기록에 도전!")이 폭을 다 쓴다. 기록 유무와 관계없이 높이가 같아 카드 크기가 모두 같다 */
 .card-foot {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  min-height: 34px;
-  margin: 10px 12px 12px 14px;
+  min-height: 26px;
+  margin: 8px 12px 13px 14px;
 }
 
 .card-foot .chip {
@@ -720,13 +719,18 @@ a.card:hover .card-icon {
   color: var(--warn);
 }
 
-/* 작은 ▶ 동그라미: 게임 색을 어둡게 섞고 아래 두께를 줘 "누르는 카드"임을 알린다(카드 전체가 링크) */
+/* 작은 ▶ 동그라미: 그림판 오른쪽 아래 경계에 걸쳐(본문 위 여백 안으로 8px만 내려옴 → 이름과 안 겹침) 띄운다.
+ * 게임 색을 어둡게 섞고 아래 두께를 줘 "누르는 카드"임을 알린다(카드 전체가 링크) */
 .card-play {
+  position: absolute;
+  top: -26px;
+  right: 10px;
+  z-index: 2;
   display: grid;
-  flex: none;
   place-items: center;
   width: 34px;
   height: 34px;
+  border: 2.5px solid var(--surface);
   border-radius: 50%;
   background: color-mix(in srgb, var(--c, var(--brand)) 72%, #000);
   color: #fff;
@@ -763,10 +767,11 @@ a.card:active .card-play {
 
 /* NEW 표시: 가장 최근에 추가한 게임 그림판 왼쪽 위에 붙는 작은 리본 */
 /* 개발자 모드: 그림판 오른쪽 아래 게임 버전(게임에 들어가지 않고 배포 버전 확인) */
+/* 개발자 모드 버전 표시: 오른쪽 아래는 ▶ 자리라 오른쪽 위 */
 .card-ver {
   position: absolute;
+  top: 9px;
   right: 8px;
-  bottom: 7px;
   z-index: 2;
   padding: 2px 7px 1px;
   border-radius: 999px;

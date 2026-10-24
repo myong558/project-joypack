@@ -253,7 +253,8 @@ function gameCard(game: GameMeta): string {
   const blocked = !navigator.onLine && !ready;
   const test = !isPublic(game);
   const fresh = !test && isNew(game, newestPublic());
-  // 게임 카드 = 장난감 버튼: 위는 게임 색 그림판(아이콘이 둥실), 아래는 이름·설명, 맨 아래 한 줄(왼쪽 최고 기록 또는 "첫 기록에 도전!", 오른쪽 작은 ▶).
+  // 게임 카드 = 장난감 버튼: 위는 게임 색 그림판(아이콘이 둥실), 아래는 이름·설명, 맨 아래 한 줄은 최고 기록(없으면 "첫 기록에 도전!")이 폭을 다 쓰고,
+  // 작은 ▶ 는 그림판 오른쪽 아래 경계에 걸쳐 띄운다(기록이 잘리지 않게).
   // 카드 전체가 링크라 큰 플레이 버튼 대신 ▶ 로 누를 수 있음만 알리고, 아래 줄은 늘 같은 높이라 카드 크기가 모두 같다.
   // 오프라인 가능 표시는 카드마다 달지 않는다(대부분 늘 가능이라 정보가 안 됨). 인터넷이 없고 아직 저장 안 된 게임만 흐리게 + 안내
   // 게임이 계속 늘어나므로 휴대폰 두 칸, 넓은 화면은 칸 수가 늘어나는 바둑판으로 쌓는다(styles.css .games)
@@ -262,12 +263,12 @@ function gameCard(game: GameMeta): string {
        ${blocked ? 'aria-disabled="true"' : ''} aria-label="${test ? `${t('game.testLabel')} · ` : fresh ? `${t('game.newLabel')} · ` : ''}${esc(name)} — ${t('game.play')}">
       <span class="card-art" data-pat="${patternOf(game)}">${test ? `<span class="card-new test" aria-hidden="true">${t('game.test')}</span>` : fresh ? `<span class="card-new" aria-hidden="true">${t('game.new')}</span>` : ''}<img class="card-icon" src="${iconUrl(game)}" alt="" width="72" height="72" />${previewOn() && __GAME_VERSIONS__[game.id] ? `<span class="card-ver" aria-hidden="true">v${__GAME_VERSIONS__[game.id]}</span>` : ''}</span>
       <span class="card-body">
+        <span class="card-play" aria-hidden="true">${ICON.play}</span>
         <strong class="card-name">${esc(name)}</strong>
         <span class="card-desc">${esc(game.desc[getLang()])}</span>
       </span>
       <span class="card-foot">
         ${blocked ? `<span class="chip warn">${t('game.needsOnline')}</span>` : best ? `<span class="chip best">${ICON.trophy}${esc(best)}</span>` : `<span class="chip first">${t('game.firstTry')}</span>`}
-        <span class="card-play" aria-hidden="true">${ICON.play}</span>
       </span>
     </a>`;
 }
@@ -292,12 +293,12 @@ function teaserCard(game: GameMeta): string {
     <div class="card teaser" aria-disabled="true" aria-label="Coming soon · ${opens}">
       <span class="card-art" data-pat="${patternOf(game)}"><span class="teaser-box" aria-hidden="true">?</span></span>
       <span class="card-body">
+        <span class="card-play" aria-hidden="true">${ICON.lock}</span>
         <strong class="card-name">COMING SOON</strong>
         <span class="card-desc">${opens}</span>
       </span>
       <span class="card-foot">
         <span class="chip">${days > 0 ? `D-${days}` : 'D-DAY'}</span>
-        <span class="card-play" aria-hidden="true">${ICON.lock}</span>
       </span>
     </div>`;
 }
