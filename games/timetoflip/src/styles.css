@@ -143,46 +143,11 @@ body {
 body {
   font-family: 'DoHyeon', 'Dongle', system-ui, sans-serif;
   color: var(--ink);
-  /* 위쪽 밝은 빛 + 스킨 하늘색 + 아래로 갈수록 강조색이 스며 깊어짐 */
-  background:
-    radial-gradient(120% 70% at 50% -10%, color-mix(in srgb, var(--sky-a) 70%, #fff), transparent 60%) fixed,
-    linear-gradient(170deg, var(--sky-a), var(--sky-b) 55%, color-mix(in srgb, var(--sky-b) 62%, var(--accent)) 100%) fixed;
+  /* 하늘(위쪽 빛 + 스킨 하늘색 + 아래로 강조색)은 배경 캔버스(ui/scene.ts)가 그린다. 이 색은 캔버스가 뜨기 전 바탕 */
+  background: var(--sky-b);
   -webkit-tap-highlight-color: transparent;
   -webkit-user-select: none;
   user-select: none;
-}
-
-/* 배경 빛 입자: 아침·한낮은 햇살 방울, 노을은 따뜻한 빛, 밤은 별이 반짝인다 */
-body::before {
-  content: '';
-  position: fixed;
-  inset: -10%;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 12% 18%, var(--glow) 0 3px, transparent 4px),
-    radial-gradient(circle at 78% 12%, var(--glow) 0 2px, transparent 3px),
-    radial-gradient(circle at 64% 70%, var(--glow) 0 3px, transparent 4px),
-    radial-gradient(circle at 30% 84%, var(--glow) 0 2px, transparent 3px),
-    radial-gradient(circle at 90% 52%, var(--glow) 0 2px, transparent 3px);
-  background-size: 340px 340px;
-  opacity: 0.55;
-  animation: drift 40s linear infinite;
-}
-:root[data-skin='night'] body::before {
-  animation: drift 60s linear infinite, twinkle 3s ease-in-out infinite alternate;
-}
-@keyframes drift {
-  to {
-    transform: translate3d(-340px, 120px, 0);
-  }
-}
-@keyframes twinkle {
-  from {
-    opacity: 0.25;
-  }
-  to {
-    opacity: 0.8;
-  }
 }
 
 #app {
@@ -704,11 +669,9 @@ h1 .word:nth-child(2) .tc-in {
   flex: none;
   padding: 8px 10px 10px;
   border-radius: 20px;
-  background: color-mix(in srgb, var(--panel) 72%, transparent);
+  background: var(--panel);
   border: 1px solid rgb(255 255 255 / 0.4);
   box-shadow: 0 10px 26px rgb(20 16 40 / 0.12), inset 0 1px 0 rgb(255 255 255 / 0.5);
-  backdrop-filter: blur(12px) saturate(1.2);
-  -webkit-backdrop-filter: blur(12px) saturate(1.2);
 }
 :root[data-theme='dark'] .hud {
   border-color: rgb(255 255 255 / 0.1);
@@ -2239,13 +2202,9 @@ h1 .word:nth-child(2) .tc-in {
   .inner {
     transition-duration: 0.12s;
   }
-  body::before {
-    animation: none;
-  }
   /* 배경은 멈춘 그림으로(애니메이션을 0초로 끝내면 카드가 화면 밖 끝자리로 가 버리므로 아예 끈다) */
   .scene *,
   .scene,
-  .scene::after,
   .demo *,
   .demo-timer i {
     animation: none !important;
@@ -2270,145 +2229,35 @@ h1 .word:nth-child(2) .tc-in {
   pointer-events: none;
   transition: opacity 0.6s;
 }
-/* 가장자리를 살짝 어둡게(비네트): 가운데가 앞으로 나와 보인다 */
-.scene::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(120% 90% at 50% 45%, transparent 55%, color-mix(in srgb, var(--accent) 22%, rgb(20 16 40 / 0.35)) 100%);
-  opacity: 0.55;
-}
-/* 게임 중에는 흐리게(카드를 외우는 데 방해되지 않게) */
 /* 대화상자(도감·설정·랭킹)가 열려 있는 동안 뒤 배경 움직임을 멈춘다: 휴대폰 GPU 가 창 뒤를 계속 다시 그리다
  * 도감 글자가 겹쳐 보이거나 깜박이던 것을 막고 배터리도 아낀다 */
 body:has(.modal-backdrop) .scene,
 body:has(.modal-backdrop) .scene * {
   animation-play-state: paused !important;
 }
-body:has(.screen.game) .scene {
-  opacity: 0.45;
-}
-body:has(.screen.game) .scene .layer {
-  opacity: 0.6;
-}
 /* 게임 중에는 떠다니는 카드 층을 아예 숨긴다(외우는 데 방해되고, 3D 로 도는 층이 휴대폰에서 깜박임을 일으킴) */
 body:has(.screen.game) .scene .mid,
-body:has(.screen.game) .scene .near,
-body:has(.screen.game) .scene .beams {
+body:has(.screen.game) .scene .near {
   display: none;
 }
 
-/* 오로라: 스킨 색이 번진 큰 덩어리 셋이 서로 다른 속도로 흐르며 겹친다 */
-.aurora i {
+/* 하늘·오로라·빛 띠·빛망울·반짝이·별·비네트를 그리는 캔버스 한 장(ui/scene.ts paintSky).
+ * 화면보다 큰 움직이는 층 여러 장 대신 한 장이라 휴대폰 GPU 메모리가 모자라 깜박이지 않는다 */
+.scene .sky {
   position: absolute;
-  width: 80vmax;
-  height: 80vmax;
-  border-radius: 50%;
-  will-change: transform;
-}
-.aurora .a1 {
-  left: -30vmax;
-  top: -30vmax;
-  background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 38%, transparent), transparent);
-  animation: aurora-a 38s ease-in-out infinite alternate;
-}
-.aurora .a2 {
-  right: -35vmax;
-  top: 10vh;
-  background: radial-gradient(closest-side, color-mix(in srgb, var(--glow) 55%, transparent), transparent);
-  animation: aurora-b 46s ease-in-out infinite alternate;
-}
-.aurora .a3 {
-  left: -10vmax;
-  bottom: -45vmax;
-  background: radial-gradient(closest-side, color-mix(in srgb, #ff6fa8 30%, transparent), transparent);
-  animation: aurora-a 54s ease-in-out -20s infinite alternate-reverse;
-}
-@keyframes aurora-a {
-  to {
-    transform: translate3d(25vw, 18vh, 0) scale(1.2) rotate(40deg);
-  }
-}
-@keyframes aurora-b {
-  to {
-    transform: translate3d(-30vw, 25vh, 0) scale(0.85) rotate(-30deg);
-  }
-}
-/* 비스듬한 빛 띠 두 줄: 서로 나란히(한 점에서 퍼지지 않게) 화면을 천천히 가로지른다. 미술관 창으로 드는 햇살 */
-.beams i {
-  position: absolute;
-  top: -30vh;
-  left: 0;
-  width: 26vmax;
-  height: 160vh;
-  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.22) 45%, rgb(255 255 255 / 0.22) 55%, transparent);
-  transform: translate3d(-40vw, 0, 0) rotate(18deg);
-  animation: beam 26s ease-in-out infinite;
-  will-change: transform;
-}
-.beams i:last-child {
-  width: 12vmax;
-  animation-duration: 34s;
-  animation-delay: -14s;
-}
-@keyframes beam {
-  50% {
-    transform: translate3d(110vw, 0, 0) rotate(18deg);
-  }
-  100% {
-    transform: translate3d(-40vw, 0, 0) rotate(18deg);
-  }
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .layer {
   position: absolute;
   inset: -40px;
   /* PC 마우스 시차: 가까운 층일수록(--k 가 클수록) 많이 움직인다 */
-  transform: translate3d(calc(var(--px, 0) * var(--k) * -1px), calc(var(--py, 0) * var(--k) * -1px), 0);
-  transition: transform 0.4s ease-out, opacity 0.6s;
+  translate: calc(var(--px, 0) * var(--k) * -1px) calc(var(--py, 0) * var(--k) * -1px);
+  transition: translate 0.4s ease-out, opacity 0.6s;
 }
-.bokeh {
-  position: absolute;
-  left: var(--x);
-  top: var(--y);
-  width: var(--s);
-  height: var(--s);
-  margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2);
-  border-radius: 50%;
-  background: radial-gradient(circle, color-mix(in srgb, var(--glow) 70%, transparent), transparent 68%);
-  opacity: 0.55;
-  animation: bokeh var(--d) ease-in-out var(--t) infinite alternate;
-  will-change: transform;
-}
-@keyframes bokeh {
-  from {
-    transform: translate3d(-30px, 20px, 0) scale(0.8);
-  }
-  to {
-    transform: translate3d(40px, -30px, 0) scale(1.15);
-  }
-}
-/* 작은 반짝이: 십자 빛이 켜졌다 꺼짐 */
-.spark {
-  position: absolute;
-  left: var(--x);
-  top: var(--y);
-  width: 10px;
-  height: 10px;
-  background:
-    linear-gradient(90deg, transparent 45%, #fff 45% 55%, transparent 55%),
-    linear-gradient(0deg, transparent 45%, #fff 45% 55%, transparent 55%);
-  border-radius: 50%;
-  opacity: 0;
-  animation: spark var(--d) ease-in-out var(--t) infinite;
-}
-@keyframes spark {
-  50% {
-    opacity: 0.85;
-    transform: scale(1.3) rotate(45deg);
-  }
-}
-
 /* 떠다니는 카드: 떠오르기(.fc) · 좌우 흔들림(.sway) · 뒤집기(.flip)를 따로 움직여 겹친다 */
 .fc {
   position: absolute;
