@@ -44,6 +44,7 @@
     "icon": "games/timetoflip/public/favicon.svg",
     "color": "#0b7785",
     "status": "preview",
+    "open": "2026-10-24T23:35:00+09:00",
     "added": "2026-10-24",
     "ranking": {
       "path": "games/timetoflip/rankings",
