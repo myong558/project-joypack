@@ -1,23 +1,29 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- 타임 투 플립 아이콘: 청록 둥근 네모 위에 뒤집히는 카드 두 장(시계판 뒷면 + 별 앞면) -->
+  <!-- 타임 투 플립 아이콘: 청록 둥근 네모 위에 뒤집히는 카드 두 장(조이팩 얼굴 뒷면 + 달 앞면)과 남은 시간 막대 -->
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#14a3b5"/>
-      <stop offset="1" stop-color="#0a6672"/>
+      <stop offset="1" stop-color="#0a5c67"/>
     </linearGradient>
-    <linearGradient id="back" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#ff7a7a"/>
-      <stop offset="1" stop-color="#e04848"/>
+    <linearGradient id="back" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffc533"/>
+      <stop offset="1" stop-color="#f2a300"/>
     </linearGradient>
   </defs>
   <rect width="64" height="64" rx="14" fill="url(#bg)"/>
-  <g transform="rotate(-12 22 32)">
-    <rect x="9" y="15" width="26" height="34" rx="5" fill="url(#back)"/>
-    <circle cx="22" cy="32" r="8" fill="none" stroke="#fff" stroke-width="2.2"/>
-    <path d="M22 32l-3-3M22 32l4-2.5" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+  <g transform="rotate(-10 21 29)">
+    <rect x="9" y="13" width="24" height="32" rx="5" fill="url(#back)"/>
+    <g fill="#3d2a00">
+      <rect x="13.5" y="24" width="7" height="2.6" rx="1"/>
+      <rect x="15.7" y="21.8" width="2.6" height="7" rx="1"/>
+      <circle cx="27" cy="25.3" r="2.6"/>
+    </g>
+    <path d="M15 32q6 6 12 0" fill="none" stroke="#3d2a00" stroke-width="2.6" stroke-linecap="round"/>
   </g>
-  <g transform="rotate(10 42 32)">
-    <rect x="29" y="14" width="26" height="34" rx="5" fill="#fffaf0"/>
-    <path d="M42 22l3 6.4 7 .8-5.2 4.8 1.4 7-6.2-3.6-6.2 3.6 1.4-7-5.2-4.8 7-.8z" fill="#fbbf24" stroke="#fbbf24" stroke-width="2" stroke-linejoin="round"/>
+  <g transform="rotate(9 42 28)">
+    <rect x="30" y="12" width="24" height="32" rx="5" fill="#fffaf0"/>
+    <path d="M45.5 20.5a8 8 0 1 0 2.8 12.4 7 7 0 0 1-2.8-12.4z" fill="#fbbf24"/>
   </g>
+  <rect x="12" y="51" width="40" height="4" rx="2" fill="#fff" opacity=".25"/>
+  <rect x="12" y="51" width="29" height="4" rx="2" fill="#fff"/>
 </svg>

@@ -311,41 +311,117 @@ button {
 
 /* ---------- 시작 화면 ---------- */
 
+/* 로고 위 시연: 실제 게임 카드(.card .inner .side) 세 장이 7초마다 한 번
+ * 뒤집기 → 틀림(빨간 테두리) → 짝(강조 테두리·+1.5) → 시간 막대 차오름 → 다시 엎기를 보여 준다 */
 .hero {
-  position: relative;
-  height: 104px;
+  --cw: 46px;
+  --ch: 60px;
   display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 4px;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }
-.hero-card {
-  width: 54px;
-  height: 70px;
-  border-radius: 10px;
-  background: var(--card-front);
-  display: grid;
-  place-items: center;
-  box-shadow: 0 3px 0 var(--depth);
+.demo {
+  position: relative;
+  display: flex;
+  gap: 8px;
 }
-.hero-card svg {
-  width: 82%;
+.demo-card {
+  display: block;
+  pointer-events: none;
 }
-.hero-card.c1 {
-  transform: rotate(-14deg) translateY(-6px);
+.demo .inner {
+  transition: none;
 }
-.hero-card.c2 {
-  transform: rotate(12deg) translateY(-6px);
+.demo .d1 .inner {
+  animation: demo-a 7s ease-in-out infinite;
+}
+.demo .d2 .inner {
+  animation: demo-b 7s ease-in-out infinite;
+}
+.demo .d3 .inner {
+  animation: demo-c 7s ease-in-out infinite;
+}
+@keyframes demo-a {
+  0%, 8% { transform: rotateY(0); }
+  12%, 57% { transform: rotateY(180deg) scale(1); }
+  61% { transform: rotateY(180deg) scale(1.12); }
+  66%, 76% { transform: rotateY(180deg) scale(1); }
+  82%, 100% { transform: rotateY(0); }
+}
+@keyframes demo-b {
+  0%, 20% { transform: rotateY(0); }
+  24%, 38% { transform: rotateY(180deg); }
+  31% { transform: rotateY(180deg) translateX(3px); }
+  33% { transform: rotateY(180deg) translateX(-3px); }
+  42%, 100% { transform: rotateY(0); }
+}
+@keyframes demo-c {
+  0%, 44% { transform: rotateY(0); }
+  48%, 57% { transform: rotateY(180deg) scale(1); }
+  61% { transform: rotateY(180deg) scale(1.12); }
+  66%, 76% { transform: rotateY(180deg) scale(1); }
+  82%, 100% { transform: rotateY(0); }
+}
+.demo .d2 .front {
+  animation: demo-wrong 7s infinite;
+}
+.demo .d1 .front,
+.demo .d3 .front {
+  animation: demo-match 7s infinite;
+}
+@keyframes demo-wrong {
+  0%, 27%, 39%, 100% { box-shadow: 0 3px 0 var(--depth); }
+  29%, 37% { box-shadow: inset 0 0 0 3px var(--danger), 0 3px 0 var(--depth); }
+}
+@keyframes demo-match {
+  0%, 57%, 78%, 100% { box-shadow: 0 3px 0 var(--depth); }
+  60%, 74% { box-shadow: inset 0 0 0 3px var(--accent), 0 0 14px var(--glow), 0 3px 0 var(--depth); }
+}
+.demo-pop {
+  position: absolute;
+  top: -16px;
+  right: -14px;
+  font-family: 'Dongle', 'DoHyeon', system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--accent-ink);
+  opacity: 0;
+  animation: demo-pop 7s infinite;
+}
+@keyframes demo-pop {
+  0%, 58% { opacity: 0; transform: translateY(6px) scale(0.8); }
+  62% { opacity: 1; transform: none; }
+  72% { opacity: 1; transform: translateY(-6px); }
+  78%, 100% { opacity: 0; transform: translateY(-10px); }
+}
+.demo-timer {
+  width: calc(var(--cw, 46px) * 3 + 16px);
+  height: 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 12%, transparent);
+  overflow: hidden;
+}
+.demo-timer i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transform-origin: left;
+  animation: demo-time 7s linear infinite;
+}
+@keyframes demo-time {
+  0% { transform: scaleX(0.84); }
+  58% { transform: scaleX(0.5); }
+  62% { transform: scaleX(0.92); }
+  66% { transform: scaleX(0.9); }
+  100% { transform: scaleX(0.84); }
 }
 .mascot {
   display: block;
   width: 44px;
   height: 44px;
-}
-.mascot.big {
-  width: 96px;
-  height: 96px;
-  animation: bob 2.4s ease-in-out infinite;
 }
 .mascot-svg {
   width: 100%;
@@ -356,42 +432,40 @@ button {
   opacity: 0;
   transition: opacity 0.3s;
 }
-@keyframes bob {
-  50% {
-    transform: translateY(-6px) rotate(-3deg);
-  }
-}
 
+/* 제목: 같은 모양의 진한 카드에 한 글자씩. 마지막 글자만 강조색으로, 뒤집히는 중처럼 살짝 기울인다. 누르면 한 바퀴 뒤집힌다 */
 h1 {
   margin: 0;
   font-weight: 400;
-  font-size: clamp(30px, 9.4vw, 44px);
+  font-size: clamp(26px, 8.2vw, 38px);
   line-height: 1;
   text-align: center;
 }
 h1 .word {
   display: inline-flex;
-  gap: 4px;
+  gap: 0.12em;
   white-space: nowrap;
 }
 .tc {
   display: inline-block;
   perspective: 300px;
+  cursor: pointer;
 }
 .tc-in {
   display: grid;
   place-items: center;
-  min-width: 1.05em;
-  height: 1.3em;
-  padding: 0 0.08em;
-  border-radius: 0.2em;
-  background: var(--card-front);
-  color: #2a2433;
-  box-shadow: 0 0.09em 0 var(--depth);
-}
-.tc:nth-child(odd) .tc-in {
-  background: var(--accent);
+  min-width: 1.18em;
+  height: 1.4em;
+  padding: 0 0.1em;
+  border-radius: 0.16em;
+  font-family: 'DoHyeon', 'Dongle', system-ui, sans-serif;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 34%, #1d1b27), color-mix(in srgb, var(--accent) 20%, #14121c));
   color: #fff;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.14), 0 0.07em 0 rgb(0 0 0 / 0.28), 0 0.18em 0.4em rgb(20 16 30 / 0.16);
+}
+h1 .word:last-child .tc:last-child .tc-in {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 82%, #fff), var(--accent));
+  transform: rotateY(-22deg) rotateZ(4deg);
 }
 .opening .tc-in {
   animation: tc-flip 0.5s cubic-bezier(0.3, 1.5, 0.5, 1) both;
@@ -401,6 +475,14 @@ h1 .word {
   from {
     transform: rotateY(90deg) scale(0.6);
     opacity: 0;
+  }
+}
+.tc.spin .tc-in {
+  animation: tc-spin 0.5s cubic-bezier(0.3, 1.3, 0.5, 1);
+}
+@keyframes tc-spin {
+  from {
+    transform: rotateY(-360deg);
   }
 }
 .opening .hero {
@@ -1543,12 +1625,12 @@ h1 .word {
     flex-direction: row;
     gap: 48px;
   }
-  .mascot.big {
-    width: 120px;
-    height: 120px;
-  }
   .hero {
-    height: 130px;
+    --cw: 56px;
+    --ch: 72px;
+  }
+  h1 {
+    font-size: 40px;
   }
   .hud-score {
     font-size: 32px;
@@ -1574,15 +1656,9 @@ h1 .word {
     gap: 8px;
   }
   .hero {
-    height: 72px;
-  }
-  .mascot.big {
-    width: 66px;
-    height: 66px;
-  }
-  .hero-card {
-    width: 40px;
-    height: 52px;
+    --cw: 32px;
+    --ch: 42px;
+    gap: 6px;
   }
   .btn.big {
     min-height: 52px;
@@ -1673,8 +1749,18 @@ h1 .word {
   }
   /* 배경은 멈춘 그림으로(애니메이션을 0초로 끝내면 카드가 화면 밖 끝자리로 가 버리므로 아예 끈다) */
   .scene *,
-  .scene {
+  .scene,
+  .demo *,
+  .demo-timer i {
     animation: none !important;
+  }
+  /* 시작 화면 시연은 짝을 맞춘 장면에 멈춰 둔다 */
+  .demo .d1 .inner,
+  .demo .d3 .inner {
+    transform: rotateY(180deg);
+  }
+  .demo-timer i {
+    transform: scaleX(0.84);
   }
 }
 

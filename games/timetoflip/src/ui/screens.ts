@@ -108,6 +108,16 @@ function titleCards(title: string): string {
     .join(' ');
 }
 
+/**
+ * 시작 화면 로고 위 작은 시연: 엎어진 카드 세 장이 실제 게임처럼 뒤집힌다
+ * (첫 장 → 다른 그림이라 틀림 → 셋째 장이 짝 → 시간 막대가 다시 차오름). 애니메이션은 CSS(.demo)
+ */
+function heroDemo(): string {
+  const card = (n: number, face: FaceId) =>
+    `<span class="card demo-card d${n}"><span class="inner"><span class="side back">${CARD_BACK}</span><span class="side front">${faceSvg(face)}</span></span></span>`;
+  return `<div class="demo">${card(1, 'moon')}${card(2, 'sun')}${card(3, 'moon')}<b class="demo-pop">+1.5</b></div><div class="demo-timer"><i></i></div>`;
+}
+
 export function startScreen(opts: StartOptions): HTMLElement {
   const { save } = opts;
   const dailyBest = save.daily?.date === opts.today ? save.daily.best : 0;
@@ -127,11 +137,7 @@ export function startScreen(opts: StartOptions): HTMLElement {
         </div>
       </nav>
       <div class="col main-col">
-        <div class="hero" aria-hidden="true">
-          <span class="hero-card c1">${faceSvg('cherry')}</span>
-          <span class="mascot big">${MASCOT}</span>
-          <span class="hero-card c2">${faceSvg('star')}</span>
-        </div>
+        <div class="hero" aria-hidden="true">${heroDemo()}</div>
         <h1 aria-label="${t('app.title')}"><span aria-hidden="true">${titleCards(t('app.title'))}</span></h1>
         <p class="tagline">${t('app.tagline')}</p>
       </div>
@@ -155,6 +161,14 @@ export function startScreen(opts: StartOptions): HTMLElement {
     el.addEventListener('pointerdown', () => el.classList.remove('opening'), { once: true });
   }
 
+  // 제목 글자 카드는 눌러서 뒤집어 볼 수 있다(장식, 점수 없음)
+  el.querySelectorAll<HTMLElement>('.tc').forEach((tc) =>
+    tc.addEventListener('pointerdown', () => {
+      tc.classList.remove('spin');
+      void tc.offsetWidth;
+      tc.classList.add('spin');
+    }),
+  );
   el.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((b) => b.addEventListener('click', () => opts.onPlay(b.dataset.mode as Mode)));
   el.querySelector('.top-lang')!.addEventListener('click', () => opts.onLang(otherLang));
   el.querySelector('[data-dex]')!.addEventListener('click', () => openDex(el, save));
