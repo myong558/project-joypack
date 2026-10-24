@@ -213,16 +213,17 @@ svg {
   --jp-top-accent: var(--brand);
 }
 
-/* 스크롤하면(main.ts html.scrolled) 고정된 위 메뉴 뒤에 흐린 띠를 깔아 아래로 지나가는 카드와 겹쳐 보이지 않게 한다.
+/* 스크롤하면(main.ts html.scrolled) 고정된 위 메뉴 뒤에 흐린 띠를 깔아 아래로 지나가는 카드와 겹쳐 보이지 않게 한다(아래 가장자리는 부드럽게 사라짐).
    맨 위에서는 지금처럼 버튼만 떠 있다 */
 .top::before {
   content: '';
   position: absolute;
-  inset: 0 0 -10px;
+  inset: 0 0 -34px;
   z-index: -1;
-  border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
-  background: color-mix(in srgb, var(--bg) 74%, transparent);
-  box-shadow: 0 6px 18px -12px rgb(0 0 0 / 0.35);
+  /* 경계선·그림자 없이 아래 34px 동안 배경색·흐림이 서서히 사라져, 카드가 칼로 자른 듯 잘리지 않고 안개 속으로 들어가듯 보인다 */
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--bg) 80%, transparent) 55%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent);
+  mask-image: linear-gradient(to bottom, #000 55%, transparent);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   opacity: 0;
@@ -1875,7 +1876,12 @@ a.primary-btn {
   }
 }
 
+/* 카드 아이콘이 위로만 뜨지 않고 아래로도 내려앉게: 쉬는 자리를 가운데로 두고 위 −6px ~ 아래 +5px */
 @keyframes bob {
+  0%,
+  100% {
+    transform: translateY(5px) rotate(1.5deg);
+  }
   50% {
     transform: translateY(-6px) rotate(-3deg);
   }

@@ -1,30 +1,38 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- 타임 투 플립 아이콘: 진한 남보라 둥근 네모(시작 화면 제목 카드와 같은 색, 허브 카드 청록 그림판과 구분) 위에
-       뒤집히는 카드 두 장(조이팩 얼굴 뒷면 + 달 앞면)과 남은 시간 막대 -->
+  <!-- 타임 투 플립 아이콘: 게임 안 로고(시작·결과 화면의 카드 세 장 시연)를 그대로 줄인 모양.
+       진한 남보라 둥근 네모(시작 화면 제목 카드와 같은 색, 허브 카드 청록 그림판과 구분) 위에
+       보라 육각형 짝(강조 테두리) · 가운데 조이팩 얼굴 뒷면 · 아래 남은 시간 막대 -->
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#2f2a4a"/>
       <stop offset="1" stop-color="#15121f"/>
     </linearGradient>
     <linearGradient id="back" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#ffc533"/>
+      <stop offset="0" stop-color="#ffd84f"/>
       <stop offset="1" stop-color="#f2a300"/>
     </linearGradient>
+    <symbol id="hex" viewBox="0 0 64 64">
+      <path d="M32 9 51 20v22L32 53 13 42V20z" fill="#9333ea" stroke="#9333ea" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M18 24v8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".45"/>
+    </symbol>
   </defs>
   <rect width="64" height="64" rx="14" fill="url(#bg)"/>
-  <g transform="rotate(-10 21 29)">
-    <rect x="9" y="13" width="24" height="32" rx="5" fill="url(#back)"/>
-    <g fill="#3d2a00">
-      <rect x="13.5" y="24" width="7" height="2.6" rx="1"/>
-      <rect x="15.7" y="21.8" width="2.6" height="7" rx="1"/>
-      <circle cx="27" cy="25.3" r="2.6"/>
-    </g>
-    <path d="M15 32q6 6 12 0" fill="none" stroke="#3d2a00" stroke-width="2.6" stroke-linecap="round"/>
+  <!-- 짝 맞춘 1번·3번(앞면, 강조 테두리) -->
+  <g stroke="#2ad4e6" stroke-width="1.6">
+    <rect x="5.5" y="15" width="16" height="21" rx="3.4" fill="#fffaf0"/>
+    <rect x="42.5" y="15" width="16" height="21" rx="3.4" fill="#fffaf0"/>
   </g>
-  <g transform="rotate(9 42 28)">
-    <rect x="30" y="12" width="24" height="32" rx="5" fill="#fffaf0"/>
-    <path d="M45.5 20.5a8 8 0 1 0 2.8 12.4 7 7 0 0 1-2.8-12.4z" fill="#fbbf24"/>
+  <use href="#hex" x="6.5" y="18.5" width="14" height="14"/>
+  <use href="#hex" x="43.5" y="18.5" width="14" height="14"/>
+  <!-- 가운데 2번: 조이팩 얼굴 뒷면 -->
+  <rect x="24" y="15" width="16" height="21" rx="3.4" fill="url(#back)"/>
+  <g fill="#3d2a00">
+    <rect x="26.6" y="22.2" width="5" height="1.9" rx=".8"/>
+    <rect x="28.15" y="20.65" width="1.9" height="5" rx=".8"/>
+    <circle cx="35.4" cy="23.1" r="1.9"/>
   </g>
-  <rect x="12" y="51" width="40" height="4" rx="2" fill="#fff" opacity=".25"/>
-  <rect x="12" y="51" width="29" height="4" rx="2" fill="#2ad4e6"/>
+  <path d="M27.4 28.4q4.6 4.4 9.2 0" fill="none" stroke="#3d2a00" stroke-width="1.9" stroke-linecap="round"/>
+  <!-- 남은 시간 막대 -->
+  <rect x="8" y="43" width="48" height="4" rx="2" fill="#fff" opacity=".22"/>
+  <rect x="8" y="43" width="40" height="4" rx="2" fill="#2ad4e6"/>
 </svg>
