@@ -1,13 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { Game, buildCards, type GameEvent } from '../src/game/engine';
 import { mulberry32 } from '../src/game/rng';
-import { MAX_MS, START_MS, comboMultiplier, stageDef } from '../src/game/stages';
+import { DEAL_MS, MAX_MS, START_MS, comboMultiplier, stageDef } from '../src/game/stages';
 
 function setup(seed = 1) {
   const game = new Game(mulberry32(seed));
   const events: GameEvent[] = [];
   game.on((e) => events.push(e));
   game.start();
+  // 카드가 다 깔릴 때까지(그 전의 누름은 무시된다)
+  game.tick(DEAL_MS);
   return { game, events };
 }
 
@@ -70,6 +72,29 @@ describe('뒤집기', () => {
     expect(game.phase).toBe('playing');
     expect(events.some((e) => e.type === 'peekEnd')).toBe(true);
     expect(game.cards[0].state).toBe('up');
+  });
+
+  it('카드가 깔리는 동안의 누름은 무시하고 미리 보기를 이어 간다', () => {
+    const game = new Game(mulberry32(1));
+    game.start();
+    game.tick(DEAL_MS - 100);
+    game.flip(0);
+    expect(game.phase).toBe('peek');
+    expect(game.cards[0].state).toBe('down');
+  });
+
+  it('미리 보기는 판이 올라도 짧아지지 않고(높은 판 2.6초 이상), 카드 한 장에 주는 시간은 줄어든다', () => {
+    const perCard = (n: number) => stageDef(n).viewMs / (stageDef(n).pairs * 2);
+    for (let n = 1; n <= 9; n++) {
+      const def = stageDef(n);
+      expect(def.viewMs).toBeGreaterThanOrEqual(2000);
+      if (n >= 6) expect(def.viewMs).toBeGreaterThanOrEqual(2600);
+      expect(def.peekMs).toBe(DEAL_MS + def.viewMs);
+    }
+    // 닮은 카드가 처음 나오는 5판만 조금 더 주고, 큰 흐름은 1판 → 4판 → 6판 → 8판으로 줄어든다
+    expect(perCard(4)).toBeLessThan(perCard(1));
+    expect(perCard(6)).toBeLessThan(perCard(4));
+    expect(perCard(8)).toBeLessThan(perCard(6));
   });
 
   it('짝을 맞히면 점수·시간이 오르고 콤보가 쌓인다', () => {

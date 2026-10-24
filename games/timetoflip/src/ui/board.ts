@@ -1,5 +1,5 @@
 import type { Card } from '../game/engine';
-import type { StageDef } from '../game/stages';
+import { DEAL_MS, type StageDef } from '../game/stages';
 import { faceName } from '../cards';
 import { t } from '../i18n';
 import { CARD_BACK, faceSvg } from './art';
@@ -51,6 +51,8 @@ export class Board {
       }),
     );
     this.cards = [...this.el.children] as HTMLButtonElement[];
+    // 카드가 몇 장이든 DEAL_MS 안에 다 깔리게 간격을 맞춘다(마지막 카드 = 간격 × 장수 + 깔리는 움직임 0.36초)
+    this.el.style.setProperty('--deal-gap', `${Math.min(22, (DEAL_MS - 360) / cards.length).toFixed(1)}ms`);
     cards.forEach((c) => this.label(c));
     this.el.classList.remove('dealt');
     void this.el.offsetWidth;

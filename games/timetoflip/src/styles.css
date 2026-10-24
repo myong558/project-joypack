@@ -1076,7 +1076,7 @@ h1 .word:nth-child(2) .tc-in {
 }
 .board.dealt .card {
   animation: deal 0.36s cubic-bezier(0.3, 1.4, 0.5, 1) backwards;
-  animation-delay: calc(var(--i) * 22ms);
+  animation-delay: calc(var(--i) * var(--deal-gap, 22ms));
 }
 @keyframes deal {
   from {

@@ -20,7 +20,9 @@ export const MISTAKE_FROM_STAGE = 2;
 /** 틀린 두 장을 보여 주는 시간. 그사이 다른 카드를 누르면 바로 덮고 넘어간다 */
 export const HIDE_DELAY = 650;
 /** 엿보기 카드: 남은 카드를 모두 보여 주는 시간 */
-export const PEEK_REVEAL = 900;
+export const PEEK_REVEAL = 1_300;
+/** 카드가 날아와 깔리는 시간(ui/board.ts 가 카드 수와 관계없이 이 안에 다 깔리게 간격을 맞춤). 미리 보기는 이 뒤부터 센다 */
+export const DEAL_MS = 600;
 /** 판을 깬 뒤 다음 판을 놓기까지(시간은 멈춤) */
 export const CLEAR_PAUSE = 1_100;
 /** 마지막 경고(째깍 소리·경고 진동)를 시작하는 남은 시간 */
@@ -32,7 +34,9 @@ export interface StageDef {
   /** 휴대폰 세로 기준 배치. 가로 화면에서는 UI 가 행·열을 바꾼다 */
   cols: number;
   rows: number;
-  /** 판을 놓은 뒤 모든 카드를 보여 주는 시간(시간은 멈춤, 누르면 건너뜀) */
+  /** 카드가 다 깔린 뒤 모든 카드를 보여 주는 시간(시간은 멈춤, 누르면 건너뜀) */
+  viewMs: number;
+  /** 판을 놓은 뒤 미리 보기가 끝나기까지 = DEAL_MS + viewMs */
   peekMs: number;
   /** 짝 하나를 맞히면 더하는 시간 */
   matchGain: number;
@@ -40,20 +44,24 @@ export interface StageDef {
   twins: number;
 }
 
-const TABLE: StageDef[] = [
-  { pairs: 6, cols: 3, rows: 4, peekMs: 1500, matchGain: 1500, twins: 0 },
-  { pairs: 8, cols: 4, rows: 4, peekMs: 1200, matchGain: 1500, twins: 0 },
-  { pairs: 10, cols: 4, rows: 5, peekMs: 1000, matchGain: 1200, twins: 0 },
-  { pairs: 12, cols: 4, rows: 6, peekMs: 800, matchGain: 1000, twins: 0 },
-  { pairs: 12, cols: 4, rows: 6, peekMs: 600, matchGain: 900, twins: 2 },
-  { pairs: 15, cols: 5, rows: 6, peekMs: 500, matchGain: 700, twins: 3 },
+/**
+ * 미리 보기(viewMs)는 카드가 늘수록 조금씩 길어지지만 카드 한 장에 주는 시간은 판마다 줄어 점점 어려워진다
+ * (1판 12장 2.0초 = 장당 0.17초 → 6판 30장 2.8초 = 장당 0.09초). 높은 판도 2.6초 아래로는 내려가지 않는다
+ */
+const TABLE: Omit<StageDef, 'peekMs'>[] = [
+  { pairs: 6, cols: 3, rows: 4, viewMs: 2000, matchGain: 1500, twins: 0 },
+  { pairs: 8, cols: 4, rows: 4, viewMs: 2200, matchGain: 1500, twins: 0 },
+  { pairs: 10, cols: 4, rows: 5, viewMs: 2400, matchGain: 1200, twins: 0 },
+  { pairs: 12, cols: 4, rows: 6, viewMs: 2500, matchGain: 1000, twins: 0 },
+  { pairs: 12, cols: 4, rows: 6, viewMs: 2600, matchGain: 900, twins: 2 },
+  { pairs: 15, cols: 5, rows: 6, viewMs: 2800, matchGain: 700, twins: 3 },
 ];
 
-/** n판(1부터)의 규칙. 6판부터는 같은 크기로 계속되고, 8판부터 닮은 짝이 하나 더 늘고 얻는 시간이 줄어든다 */
+/** n판(1부터)의 규칙. 6판부터는 같은 크기로 계속되고, 8판부터 닮은 짝이 하나 더 늘고 얻는 시간·미리 보기가 조금 줄어든다 */
 export function stageDef(n: number): StageDef {
   const base = TABLE[Math.min(n, TABLE.length) - 1];
-  if (n < 8) return base;
-  return { ...base, twins: 4, matchGain: 500, peekMs: 400 };
+  const def = n < 8 ? base : { ...base, twins: 4, matchGain: 500, viewMs: 2600 };
+  return { ...def, peekMs: DEAL_MS + def.viewMs };
 }
 
 /** 특수 카드(시계·엿보기) 짝 수. 1판은 없음, 2~3판은 70% 확률로 1쌍, 4판부터 1쌍 + 40% 확률로 1쌍 더 */

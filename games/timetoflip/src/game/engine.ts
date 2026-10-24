@@ -4,6 +4,7 @@ import {
   CLEAR_GAIN,
   CLEAR_PAUSE,
   CLOCK_GAIN,
+  DEAL_MS,
   COMBO_GAIN,
   GOLD_CHANCE,
   HIDE_DELAY,
@@ -182,9 +183,12 @@ export class Game {
     this.emit({ type: 'hide', cards: [a, b] });
   }
 
-  /** 카드를 누름. 미리 보기 중에 누르면 미리 보기를 건너뛰고 바로 뒤집는다 */
+  /** 카드를 누름. 미리 보기 중에 누르면 미리 보기를 건너뛰고 바로 뒤집는다(카드가 깔리는 동안의 누름은 실수로 보고 무시) */
   flip(index: number): void {
-    if (this.phase === 'peek') this.endPeek();
+    if (this.phase === 'peek') {
+      if (this.def.peekMs - this.phaseLeft < DEAL_MS) return;
+      this.endPeek();
+    }
     if (this.phase !== 'playing') return;
     // 틀린 두 장을 보여 주는 중에 다음 카드를 누르면 기다리지 않고 바로 덮는다(손이 빠른 사람이 막히지 않게)
     if (this.wrong) this.hideWrong();
