@@ -11,7 +11,7 @@
 > | 조이팩 | `https://myong558.github.io/project-joypack/` |
 > | 업다운 | `https://myong558.github.io/project-joypack/games/updown/` |
 > | 두더지잡기 | `https://myong558.github.io/project-joypack/games/hammer/` |
-> | 타임 투 플립 | `https://myong558.github.io/project-joypack/games/timetoflip/` (2026-10-24 23:35 정식 공개) |
+> | 타임 투 플립 | `https://myong558.github.io/project-joypack/games/timetoflip/` (2026-10-26 12:00 정식 공개 예약) |
 
 ---
 
