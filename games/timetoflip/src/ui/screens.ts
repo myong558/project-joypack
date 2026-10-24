@@ -116,7 +116,7 @@ function titleCards(title: string): string {
 function heroDemo(): string {
   const card = (n: number, face: FaceId) =>
     `<span class="card demo-card d${n}"><span class="inner"><span class="side back">${CARD_BACK}</span><span class="side front">${faceSvg(face)}</span></span></span>`;
-  return `<div class="demo">${card(1, 'wave')}${card(2, 'strawhat')}${card(3, 'wave')}<b class="demo-pop">+1.5</b></div><div class="demo-timer"><i></i></div>`;
+  return `<div class="demo">${card(1, 'circle')}${card(2, 'triangle')}${card(3, 'circle')}<b class="demo-pop">+1.5</b></div><div class="demo-timer"><i></i></div>`;
 }
 
 export function startScreen(opts: StartOptions): HTMLElement {
@@ -219,7 +219,7 @@ function openDex(host: HTMLElement, save: SaveData): void {
       <div class="dex-sets">
         ${FACE_SETS.map(
           (s, i) => `<section>
-            <h3>${setName(s.id)} <small>${t('dex.from', { n: i + 1 })}</small></h3>
+            <h3>${s.faces.some((f) => found.has(f)) ? setName(s.id) : '???'} <small>${t('dex.from', { n: i + 1 })}</small></h3>
             <ul>${s.faces
               .map((f) => {
                 const label = found.has(f) ? `${faceName(f)}${gold.has(f) ? ` · ${t('dex.gold')}` : ''}` : `??? — ${t('dex.locked')}`;
