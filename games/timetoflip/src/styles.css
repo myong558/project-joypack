@@ -522,6 +522,14 @@ h1 {
   line-height: 1;
   text-align: center;
 }
+/* 단어 카드 묶음을 줄바꿈 가능한 한 줄로: 좁은 화면에서 두 줄이 되면(영어 "Time to / Flip") 줄 사이를 띄운다 */
+h1 > span {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.22em 0.28em;
+}
 h1 .word {
   display: inline-flex;
   gap: 0.12em;
