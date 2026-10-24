@@ -1382,6 +1382,8 @@ h1 .word:last-child .tc:last-child .tc-in {
 }
 .rank-entry.done {
   justify-content: center;
+  padding: 18px 16px;
+  gap: 14px;
 }
 .rank-view {
   width: 100%;

@@ -403,7 +403,8 @@ function rankEntryForm(opts: {
       return;
     }
     el.classList.add('done');
-    el.style.height = `${height}px`;
+    // 등록 칸이 줄어 아래 버튼이 튀지 않게 높이는 최소로만 지킨다(완료 글·버튼은 여백을 넉넉히)
+    el.style.minHeight = `${height}px`;
     el.innerHTML = `<p class="rank-entry-title" role="status">${ICONS.trophy}<span>${place < 0 ? t('ranking.missed') : t('ranking.done', { n: place + 1 })}</span></p>`;
     if (opts.onView) el.insertAdjacentHTML('beforeend', `<button class="btn primary rank-view" type="button" data-view>${ICONS.trophy}<span>${t('ranking.open')}</span></button>`);
     const view = el.querySelector<HTMLButtonElement>('[data-view]');
