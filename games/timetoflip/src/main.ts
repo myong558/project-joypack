@@ -143,7 +143,8 @@ function showStart(settings?: 'open' | 'reset', settingsFocus?: string, opening 
   );
 }
 
-function play(mode: Mode): void {
+/** from 판부터 시작한다. 1이 아니면 출시 전 확인용 바로 시작이라 최고 기록·랭킹에 남기지 않는다 */
+function play(mode: Mode, from = 1): void {
   sound.unlock();
   const daily = mode === 'daily';
   const today = new Date();
@@ -153,7 +154,7 @@ function play(mode: Mode): void {
     daily,
     onPause: () => game.pause(),
     onResume: () => game.resume(),
-    onRestart: () => play(mode),
+    onRestart: () => play(mode, from),
     onQuit: () => showStart(),
   });
   mount(view.el);
@@ -274,7 +275,7 @@ function play(mode: Mode): void {
         view.el.classList.remove('hot', 'danger');
         view.showMessage(t('countdown.end'), 'end');
         fx.shake('big');
-        later(1500, () => showResult(e.result, mode, today, dexBefore));
+        later(1500, () => showResult(e.result, mode, today, dexBefore, from));
         break;
     }
   };
@@ -347,7 +348,7 @@ function play(mode: Mode): void {
     document.removeEventListener('visibilitychange', onVisibility);
   };
 
-  game.start();
+  game.start(from);
   // 키보드로 바로 고를 수 있게 첫 카드에 초점
   board.cards[0]?.focus({ preventScroll: true });
 }
@@ -360,11 +361,12 @@ function nextGoal(result: GameResult, prevBest: number, isRecord: boolean): Goal
   return { type: 'dex', n: save.dex.length };
 }
 
-function showResult(result: GameResult, mode: Mode, date: Date, dexBefore: ReadonlySet<FaceId>): void {
+function showResult(result: GameResult, mode: Mode, date: Date, dexBefore: ReadonlySet<FaceId>, from = 1): void {
+  const test = from > 1;
   const daily = mode === 'daily';
   const today = dateKey(date);
   const prevBest = daily ? (save.daily?.date === today ? save.daily.best : 0) : save.best;
-  const isRecord = result.score > prevBest && result.score > 0;
+  const isRecord = !test && result.score > prevBest && result.score > 0;
   if (isRecord) {
     if (daily) save.daily = { date: today, best: result.score };
     else {
@@ -381,7 +383,8 @@ function showResult(result: GameResult, mode: Mode, date: Date, dexBefore: Reado
       isRecord,
       newFaces,
       goal: nextGoal(result, prevBest, isRecord),
-      onRetry: () => play(mode),
+      test,
+      onRetry: () => play(mode, from),
       onHome: () => showStart(),
       onShare: shareResult,
       ranking: rankingView(date),

@@ -16,6 +16,7 @@ const ko = {
   'vibrate.on': '진동 켜짐',
   'vibrate.off': '진동 꺼짐',
 
+  'test.jump': '출시 전 확인: 판 골라 바로 시작',
   'dex.title': '카드 도감',
   'dex.open': '카드 도감 열기',
   'dex.locked': '아직 못 맞혔어요',
@@ -150,6 +151,7 @@ const en: Record<MessageKey, string> = {
   'vibrate.on': 'Vibration on',
   'vibrate.off': 'Vibration off',
 
+  'test.jump': 'Pre-release check: start at a stage',
   'dex.title': 'Card Album',
   'dex.open': 'Open card album',
   'dex.locked': 'Not matched yet',

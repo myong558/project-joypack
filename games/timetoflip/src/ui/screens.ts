@@ -86,7 +86,7 @@ export interface StartOptions {
   today: string;
   todayLabel: string;
   todaySkin: Skin;
-  onPlay: (mode: Mode) => void;
+  onPlay: (mode: Mode, from?: number) => void;
   onToggle: (key: Toggle) => void;
   onLang: (lang: Lang) => void;
   onTheme: (theme: Theme) => void;
@@ -119,6 +119,12 @@ function heroDemo(): string {
   return `<div class="demo">${card(1, 'circle')}${card(2, 'triangle')}${card(3, 'circle')}<b class="demo-pop">+1.5</b></div><div class="demo-timer"><i></i></div>`;
 }
 
+/**
+ * 출시 전 확인용: true 면 시작 화면 로고 위에 "N판부터 바로 시작" 단추(클래식, 기록·랭킹에 안 남음).
+ * 사용자가 원복을 지시하면 false 로 되돌린다
+ */
+const STAGE_JUMP = true;
+
 export function startScreen(opts: StartOptions): HTMLElement {
   const { save } = opts;
   const dailyBest = save.daily?.date === opts.today ? save.daily.best : 0;
@@ -138,6 +144,7 @@ export function startScreen(opts: StartOptions): HTMLElement {
         </div>
       </nav>
       <div class="col main-col">
+        ${STAGE_JUMP ? `<div class="stage-jump" role="group" aria-label="${t('test.jump')}"><span>TEST</span>${[2, 3, 4, 5, 6, 7, 8].map((n) => `<button type="button" data-from="${n}">${n}</button>`).join('')}</div>` : ''}
         <div class="hero" aria-hidden="true">${heroDemo()}</div>
         <h1 aria-label="${t('app.title')}"><span aria-hidden="true">${titleCards(t('app.title'))}</span></h1>
         <p class="tagline">${t('app.tagline')}</p>
@@ -170,6 +177,7 @@ export function startScreen(opts: StartOptions): HTMLElement {
       tc.classList.add('spin');
     }),
   );
+  el.querySelectorAll<HTMLButtonElement>('[data-from]').forEach((b) => b.addEventListener('click', () => opts.onPlay('classic', Number(b.dataset.from))));
   el.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((b) => b.addEventListener('click', () => opts.onPlay(b.dataset.mode as Mode)));
   el.querySelector('.top-lang')!.addEventListener('click', () => opts.onLang(otherLang));
   el.querySelector('[data-dex]')!.addEventListener('click', () => openDex(el, save));
@@ -691,6 +699,8 @@ export function resultScreen(opts: {
   isRecord: boolean;
   newFaces: FaceId[];
   goal: Goal;
+  /** 출시 전 확인용 바로 시작으로 한 판(랭킹 등록 안 받음) */
+  test?: boolean;
   onRetry: () => void;
   onHome: () => void;
   onShare: (image: Blob | null) => Promise<ShareOutcome>;
@@ -758,8 +768,11 @@ export function resultScreen(opts: {
     el.classList.toggle('has-entry', !!entryForm);
     if (hadFocus) (entryForm?.querySelector<HTMLButtonElement>('[type="submit"]:not(:disabled)') ?? q('[data-act="retry"]')).focus();
   };
-  showEntry(opts.ranking.consider(mode, result.score, result.stage));
-  void opts.ranking.refresh(mode).then((ok) => ok && el.isConnected && showEntry(opts.ranking.consider(mode, result.score, result.stage)));
+  // 출시 전 확인용 바로 시작 판은 랭킹 등록을 받지 않는다
+  if (!opts.test) {
+    showEntry(opts.ranking.consider(mode, result.score, result.stage));
+    void opts.ranking.refresh(mode).then((ok) => ok && el.isConnected && showEntry(opts.ranking.consider(mode, result.score, result.stage)));
+  }
 
   q('[data-act="retry"]').addEventListener('click', opts.onRetry);
   q('[data-act="home"]').addEventListener('click', opts.onHome);

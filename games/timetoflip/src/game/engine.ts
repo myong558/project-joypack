@@ -121,8 +121,9 @@ export class Game {
     this.listeners.forEach((fn) => fn(e));
   }
 
-  start(): void {
-    this.deal(1);
+  /** from: 시작할 판(출시 전 확인용 바로 시작, 보통은 1) */
+  start(from = 1): void {
+    this.deal(from);
   }
 
   get pairsLeft(): number {

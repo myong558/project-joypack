@@ -314,6 +314,52 @@ button {
 
 /* ---------- 시작 화면 ---------- */
 
+/* 출시 전 확인용 "N판부터 바로 시작"(screens.ts STAGE_JUMP). 레이아웃에 자리를 차지하지 않게 로고 위에 띄운다 */
+.main-col {
+  position: relative;
+}
+.stage-jump {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  border-radius: 999px;
+  background: rgb(20 16 30 / 0.88);
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.stage-jump span {
+  padding: 0 4px;
+  color: #ffd166;
+  font-size: 12px;
+}
+.stage-jump button {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.16);
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+}
+/* 키가 낮은 화면: 위 메뉴와 겹치지 않게 로고 시연 카드 위에 겹쳐 띄운다(시연은 장식이라 가려도 됨) */
+@media (max-height: 640px) {
+  .stage-jump {
+    top: 0;
+    bottom: auto;
+  }
+}
+.stage-jump button:hover,
+.stage-jump button:focus-visible {
+  background: var(--accent);
+}
+
 /* 로고 위 시연: 실제 게임 카드(.card .inner .side) 세 장이 7초마다 한 번
  * 뒤집기 → 틀림(빨간 테두리) → 짝(강조 테두리·+1.5) → 시간 막대 차오름 → 다시 엎기를 보여 준다 */
 .hero {
