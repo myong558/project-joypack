@@ -276,7 +276,7 @@ function gameCard(game: GameMeta): string {
  * 그 시각이 되면 scheduleOpen 이 첫 화면을 다시 그려 정식 카드(NEW)로 바뀐다
  */
 /**
- * 공개 예약 카드 그림판: 공개 72시간 전까지는 물음표 상자, 72~48시간 흐린 아이콘, 48~24시간 살짝 흐린 아이콘,
+ * 공개 예약 카드 그림판: 공개 72시간 전까지는 물음표 상자, 72~48시간 흐린 아이콘, 48~24시간 살짝 흐린 아이콘(둘 다 가운데 작은 ?),
  * 24시간 전부터 또렷한 아이콘(흐림 정도는 styles.css .teaser-icon). 이름·설명은 공개 전까지 숨긴다. 기기 시계 기준(공개 시각과 같음)
  */
 const VEIL_HOURS = [72, 48, 24];
@@ -287,7 +287,8 @@ function teaserVeil(game: GameMeta, now = Date.now()): 'box' | 'heavy' | 'light'
 function teaserArt(game: GameMeta): string {
   const veil = teaserVeil(game);
   if (veil === 'box') return '<span class="teaser-box" aria-hidden="true">?</span>';
-  return `<img class="card-icon teaser-icon" data-veil="${veil}" src="${iconUrl(game)}" alt="" width="72" height="72" />`;
+  const mark = veil === 'clear' ? '' : '<span class="teaser-q" aria-hidden="true">?</span>';
+  return `<img class="card-icon teaser-icon" data-veil="${veil}" src="${iconUrl(game)}" alt="" width="72" height="72" />${mark}`;
 }
 
 function teaserCard(game: GameMeta): string {
