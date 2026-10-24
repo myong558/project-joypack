@@ -1943,6 +1943,13 @@ h1 .word:nth-child(2) .tc-in {
     radial-gradient(120% 60% at 50% 0%, color-mix(in srgb, var(--accent) 16%, var(--sheet)), transparent 70%),
     color-mix(in srgb, var(--accent) 9%, var(--sheet));
 }
+/* 닫기 버튼도 설정·랭킹 창처럼 "창 바탕보다 한 톤 진하게": 흰 창 기준 색을 그대로 두면 파란 기가 도는 도감 창에서 혼자 누렇게 떠 보인다 */
+.modal:has(.dex) .modal-x {
+  background: color-mix(in srgb, var(--ink) 9%, color-mix(in srgb, var(--accent) 16%, var(--sheet)));
+}
+.modal:has(.dex) .modal-x:hover {
+  background: color-mix(in srgb, var(--ink) 15%, color-mix(in srgb, var(--accent) 16%, var(--sheet)));
+}
 .dex {
   flex: 1;
   min-height: 0;
