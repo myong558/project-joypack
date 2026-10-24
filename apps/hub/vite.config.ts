@@ -2,12 +2,14 @@ import { createReadStream, existsSync, readFileSync, statSync } from 'node:fs';
 import { extname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig, type Plugin } from 'vite';
+// @ts-expect-error 빌드 스크립트(.mjs, 타입 없음)의 아이콘 색 계산을 그대로 쓴다
+import { teaserBackdrop } from '../../scripts/check-icons.mjs';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const readJson = (path: string) => JSON.parse(readFileSync(join(ROOT, path), 'utf8'));
 
 // 개발 서버가 게임 주소를 이어 줄 게임 목록. 설정 → 정보에는 조이팩 버전(루트 package.json)만 보인다(게임 버전은 각 게임 설정 맨 아래)
-const games: { id: string }[] = readJson('games.json');
+const games: { id: string; icon?: string }[] = readJson('games.json');
 
 const TYPES: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
@@ -58,6 +60,14 @@ export default defineConfig({
     __APP_VERSION__: JSON.stringify(readJson('package.json').version),
     // 개발자 모드에서 게임 카드 그림판 오른쪽 아래에 보이는 게임 버전(각 게임 package.json)
     __GAME_VERSIONS__: JSON.stringify(Object.fromEntries(games.map((g) => [g.id, readJson(`games/${g.id}/package.json`).version]))),
+    // COMING SOON 카드 그림판 번호(게임 id → TEASER_BACKDROPS 번호): 아이콘 바탕색과 잘 구분되는 후보(scripts/check-icons.mjs)
+    __TEASER_BACKDROP__: JSON.stringify(
+      Object.fromEntries(
+        games
+          .filter((g) => g.icon?.endsWith('.svg') && existsSync(join(ROOT, g.icon)))
+          .map((g) => [g.id, teaserBackdrop(readFileSync(join(ROOT, g.icon!), 'utf8')).index]),
+      ),
+    ),
   },
   server: { port: 5170, open: false, fs: { allow: [ROOT] } },
   build: { outDir: 'dist', emptyOutDir: true },

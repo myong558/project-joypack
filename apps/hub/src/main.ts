@@ -309,7 +309,7 @@ function teaserCard(game: GameMeta): string {
   const time = open.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' });
   return `
     <div class="card teaser" aria-disabled="true" aria-label="Coming soon · ${opens}">
-      <span class="card-art" data-pat="${patternOf(game)}">${teaserArt(game)}</span>
+      <span class="card-art" data-pat="${patternOf(game)}" data-backdrop="${__TEASER_BACKDROP__[game.id] ?? 0}">${teaserArt(game)}</span>
       <span class="card-body">
         <span class="card-play" aria-hidden="true">${ICON.lock}</span>
         <strong class="card-name">COMING SOON</strong>

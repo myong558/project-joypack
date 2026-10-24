@@ -14,7 +14,7 @@ import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statS
 import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkFonts } from './check-fonts.mjs';
-import { checkIcons } from './check-icons.mjs';
+import { checkIcons, teaserWarnings } from './check-icons.mjs';
 import { LIMITS, checkSize } from './check-size.mjs';
 import { checkSounds } from './check-sounds.mjs';
 
@@ -41,6 +41,8 @@ if (only && !readJson('games.json').some((g) => g.id === only)) throw new Error(
 // 허브 카드 아이콘: 파일이 있고, 바탕색이 카드 그림판 색과 충분히 달라야 한다(scripts/check-icons.mjs, 기준서 6장 1번)
 const iconErrors = checkIcons();
 if (iconErrors.length) throw new Error(`허브 카드 아이콘 검사 실패:\n- ${iconErrors.join('\n- ')}`);
+// 공개 예약 게임: COMING SOON 카드 그림판 후보 모두와 비슷하면 경고만(그림판은 허브 빌드가 가장 잘 구분되는 것으로 고름)
+for (const warning of teaserWarnings()) console.warn(`! COMING SOON 카드: ${warning}`);
 // 다시 빌드하지 않고 지난 결과를 쓸 게임(게임 하나만 빌드할 때, 지난 dist 가 있는 다른 게임)
 const keep = (id) => !!only && id !== only && existsSync(join(DIST, 'games', id, 'index.html'));
 

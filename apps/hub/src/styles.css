@@ -803,8 +803,18 @@ a.card:active .card-play {
   cursor: default;
 }
 
+/* COMING SOON 그림판: 게임 색과 상관없는 고정 색 세 가지 중, 허브 빌드가 아이콘 바탕색과 잘 구분되는 것을 고른다
+ * (data-backdrop, scripts/check-icons.mjs TEASER_BACKDROPS 와 같은 순서·색). 0 보라(기본) · 1 청록 · 2 버건디 */
 .card.teaser .card-art {
   background: radial-gradient(circle at 28% 18%, #6d5bd0, #2a2052 72%);
+}
+
+.card.teaser .card-art[data-backdrop='1'] {
+  background: radial-gradient(circle at 28% 18%, #2aa198, #0b3d44 72%);
+}
+
+.card.teaser .card-art[data-backdrop='2'] {
+  background: radial-gradient(circle at 28% 18%, #c2456e, #4a1430 72%);
 }
 
 /* 가운데 물음표 상자: 금빛 상자가 살짝 흔들린다 */
