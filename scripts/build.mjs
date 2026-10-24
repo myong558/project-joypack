@@ -34,6 +34,10 @@ const hashOf = (file) => createHash('sha256').update(readFileSync(file)).digest(
 
 const only = process.argv[2];
 if (only && !readJson('games.json').some((g) => g.id === only)) throw new Error(`games.json 에 없는 게임: ${only}`);
+// 허브 카드 아이콘: games.json 의 icon 은 저장소 안 실제 파일 경로여야 한다(없으면 허브 카드 그림이 빈칸)
+for (const g of readJson('games.json')) {
+  if (g.icon && !existsSync(join(ROOT, g.icon))) throw new Error(`games.json ${g.id} 아이콘 파일이 없습니다: ${g.icon}`);
+}
 // 다시 빌드하지 않고 지난 결과를 쓸 게임(게임 하나만 빌드할 때, 지난 dist 가 있는 다른 게임)
 const keep = (id) => !!only && id !== only && existsSync(join(DIST, 'games', id, 'index.html'));
 
