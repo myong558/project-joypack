@@ -67,8 +67,7 @@ const ko = {
   'pause.restart': '다시 시작',
   'pause.quit': '메인으로',
 
-  'banner.stage': '{n}판',
-  'banner.ready': '외워 두세요!',
+  'hud.peekHint': '위치를 기억하세요',
   'banner.twins': '닮은 카드 주의!',
   'banner.clear': '{n}판 클리어!',
   'banner.perfect': '퍼펙트! +{s}초',
@@ -203,8 +202,7 @@ const en: Record<MessageKey, string> = {
   'pause.restart': 'Restart',
   'pause.quit': 'Main menu',
 
-  'banner.stage': 'Stage {n}',
-  'banner.ready': 'Memorize!',
+  'hud.peekHint': 'Remember the positions',
   'banner.twins': 'Watch for look-alikes!',
   'banner.clear': 'Stage {n} clear!',
   'banner.perfect': 'Perfect! +{s}s',

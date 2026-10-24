@@ -149,13 +149,21 @@ export const CARD_BACK = `<svg class="back-art" viewBox="0 0 100 128" preserveAs
 
 /**
  * 시간 막대 끝 스톱워치: 진한 테 + 흰 판 + 강조색 바늘 하나. 바늘은 남은 시간(--at)만큼 돌고,
- * 5초 아래면 바늘이 빨개지고 몸을 떤다(styles.css .mascot)
+ * 5초 아래면 바늘이 빨개지고 몸을 떤다. 미리 보기(외우는 시간) 동안은 스톱워치 대신 눈(.sw-eye)이 보인다(styles.css .mascot)
  */
 export const MASCOT = `<svg class="mascot-svg" viewBox="0 0 40 40" aria-hidden="true" focusable="false">
+  <g class="sw-watch">
   <rect x="17" y="1" width="6" height="4" rx="1.5" fill="${INK}"/>
   <path d="M30.5 7.5l2.5-2.5" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
   <circle cx="20" cy="22" r="16" fill="${INK}"/>
   <circle cx="20" cy="22" r="12.5" fill="#fff"/>
   <path d="M20 9.5L20 12M32.5 22L30 22M20 34.5L20 32M7.5 22L10 22" stroke="${INK}" stroke-width="1.6" opacity=".4"/>
   <g class="sw-hand"><path d="M20 22V12" stroke-width="2.6" stroke-linecap="round"/><circle cx="20" cy="22" r="2.2"/></g>
+  </g>
+  <g class="sw-eye">
+    <path d="M2 21C8 11 14 7 20 7s12 4 18 14C32 31 26 35 20 35S8 31 2 21z" fill="#fff" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
+    <circle cx="20" cy="21" r="8.5" fill="#f2a300"/>
+    <circle cx="20" cy="21" r="4.4" fill="${INK}"/>
+    <circle cx="22.6" cy="18.4" r="1.9" fill="#fff"/>
+  </g>
 </svg>`;

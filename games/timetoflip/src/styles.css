@@ -737,6 +737,47 @@ h1 .word:nth-child(2) .tc-in {
   opacity: 1;
   transform: none;
 }
+/* 미리 보기 동안 위 가운데 짧은 안내(콤보 자리를 빌려 씀: 미리 보기 동안은 콤보가 없다) */
+.hud-note {
+  grid-area: combo;
+  justify-self: center;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  font-size: 15px;
+  color: var(--accent-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.hud-note.on {
+  opacity: 1;
+}
+.hud-note.warn {
+  color: var(--danger-ink);
+}
+/* 미리 보기(외우는 시간): 시간 막대가 레몬색으로 줄어들고, 스톱워치 대신 눈 */
+.game.peeking .timer-bar {
+  background: linear-gradient(90deg, #f2a300, #ffd84f);
+  box-shadow: 0 0 10px rgb(255 190 40 / 0.6);
+}
+.mascot .sw-eye {
+  display: none;
+}
+.game.peeking .mascot .sw-eye {
+  display: inline;
+}
+.game.peeking .mascot .sw-watch {
+  display: none;
+}
+.game.peeking .timer-text {
+  color: #b77900;
+}
+:root[data-theme='dark'] .game.peeking .timer-text {
+  color: #ffd84d;
+}
 /* 점수: 작은 이름표 위에 큰 숫자(자릿수가 바뀌어도 폭이 흔들리지 않게 고정폭 숫자) */
 .hud-score {
   grid-area: score;
@@ -1247,41 +1288,6 @@ h1 .word:nth-child(2) .tc-in {
 }
 .message.warn {
   color: var(--danger-ink);
-}
-/* 미리 보기 남은 시간: 띠 아래쪽 얇은 게이지가 꽉 찼다가 0으로 줄어든다. 마지막 0.5초는 주황(곧 덮임).
- * 띠는 화면 위에 떠 있어 게이지를 넣어도 배치가 움직이지 않는다 */
-.message.timed {
-  padding-bottom: 0.5em;
-}
-.message.timed::after {
-  content: '';
-  position: absolute;
-  left: 0.9em;
-  right: 0.9em;
-  bottom: 0.22em;
-  height: 4px;
-  border-radius: 99px;
-  background: var(--accent);
-  transform-origin: left;
-  animation:
-    peek-drain var(--peek-ms, 2000ms) linear var(--peek-delay, 0ms) both,
-    peek-warn 1ms linear var(--peek-warn, 1500ms) forwards;
-}
-.game.paused .message.timed::after {
-  animation-play-state: paused;
-}
-@keyframes peek-drain {
-  from {
-    transform: scaleX(1);
-  }
-  to {
-    transform: scaleX(0);
-  }
-}
-@keyframes peek-warn {
-  to {
-    background: #f08c00;
-  }
 }
 .message.bonus {
   top: 45%;

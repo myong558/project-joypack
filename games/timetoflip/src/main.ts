@@ -4,7 +4,7 @@ import { Sound } from './audio';
 import { Game, type GameEvent, type GameResult } from './game/engine';
 import { FACE_SETS, type FaceId } from './game/faces';
 import { dateKey, dateSeed, mulberry32, randomSeed } from './game/rng';
-import { START_MS, WARN_MS, DEAL_MS } from './game/stages';
+import { START_MS, WARN_MS } from './game/stages';
 import { setName } from './cards';
 import { preloadFaces } from './ui/art';
 import { setLang, t } from './i18n';
@@ -188,18 +188,18 @@ function play(mode: Mode, from = 1): void {
       case 'deal': {
         board.deal(e.cards, e.def);
         sound.play('deal');
-        // 판 이름(새 묶음이 열리면 그 이름)과 "외워 두세요!"를 한 줄로. 닮은 카드가 처음 나오거나(5판) 늘어나는 판(8판)은 경고로
+        // 미리 보기 동안 위 가운데 짧은 안내: 닮은 카드가 처음 나오거나(5판) 늘어나는 판(8판)은 경고,
+        // 새 묶음이 열리는 판은 그 이름, 1판은 "위치를 기억하세요". 남은 외울 시간은 시간 막대가 보여 준다(renderHud)
         const open = FACE_SETS[e.stage - 1];
-        const label = e.stage > 1 && open ? t('banner.newSet', { set: setName(open.id) }) : t('banner.stage', { n: e.stage });
         const twinsUp = e.stage === 5 || e.stage === 8;
-        view.showMessage(`${label} · ${t(twinsUp ? 'banner.twins' : 'banner.ready')}`, twinsUp ? 'ready warn' : 'ready');
-        // 카드가 다 깔린 뒤부터 미리 보기가 끝날 때까지 줄어드는 게이지(남은 외울 시간)
-        view.peekGauge(DEAL_MS, e.def.viewMs);
+        const note = twinsUp ? t('banner.twins') : e.stage > 1 && open ? t('banner.newSet', { set: setName(open.id) }) : e.stage === 1 ? t('hud.peekHint') : '';
+        view.hud.note.textContent = note;
+        view.hud.note.className = `hud-note${note ? ' on' : ''}${twinsUp ? ' warn' : ''}`;
         break;
       }
       case 'peekEnd':
         board.endPeek();
-        view.showMessage(null);
+        view.hud.note.className = 'hud-note';
         break;
       case 'flip':
         sound.play('flip');
@@ -291,6 +291,18 @@ function play(mode: Mode, from = 1): void {
       hud.combo.classList.toggle('on', game.combo >= 2);
     }
     shown = { score: game.score, stage: game.stage, combo: game.combo };
+    // 미리 보기 동안 시간 막대는 "외우는 시간": 카드가 다 깔린 뒤 미리 보기 시간만큼 노랗게 줄어들고 눈 아이콘·남은 초를 보인다
+    const peeking = game.phase === 'peek';
+    view.el.classList.toggle('peeking', peeking);
+    if (peeking) {
+      const left = Math.max(0, Math.min(game.phaseLeft, game.def.viewMs));
+      const pr = left / game.def.viewMs;
+      view.el.classList.remove('over');
+      hud.bar.style.transform = `scaleX(${pr.toFixed(4)})`;
+      hud.mascot.style.setProperty('--at', pr.toFixed(4));
+      hud.time.textContent = (left / 1000).toFixed(1);
+      return;
+    }
     // 막대는 시작 시간(40초)이 꽉 찬 상태. 그보다 많이 모으면 가득 찬 채로 금빛(.over)이 되고 숫자로 남은 시간을 본다
     const ratio = Math.max(0, Math.min(1, game.remaining / START_MS));
     view.el.classList.toggle('over', game.remaining > START_MS);

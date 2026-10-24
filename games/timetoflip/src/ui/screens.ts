@@ -631,14 +631,14 @@ export interface GameView {
     stage: HTMLElement;
     score: HTMLElement;
     combo: HTMLElement;
+    /** 미리 보기 동안 위 가운데 짧은 안내(위치를 기억하세요 · 새 묶음 · 닮은 카드 주의) */
+    note: HTMLElement;
     bar: HTMLElement;
     time: HTMLElement;
     mascot: HTMLElement;
   };
   showPause(show: boolean): void;
   showMessage(text: string | null, variant?: string): void;
-  /** 미리 보기 안내 띠 아래쪽에 남은 미리 보기 시간 게이지(delay 뒤 ms 동안 줄어듦) */
-  peekGauge(delay: number, ms: number): void;
 }
 
 export function gameScreen(opts: { daily: boolean; onPause: () => void; onResume: () => void; onRestart: () => void; onQuit: () => void }): GameView {
@@ -648,6 +648,7 @@ export function gameScreen(opts: { daily: boolean; onPause: () => void; onResume
         <button class="pause-btn hud-btn" aria-label="${t('hud.pause')}" title="${t('hud.pause')}">${ICONS.pause}</button>
         <p class="hud-stage" aria-live="polite"></p>
         <p class="hud-combo" aria-hidden="true"></p>
+        <p class="hud-note" aria-live="polite"></p>
         <p class="hud-score" aria-label="${t('hud.score')}"><small aria-hidden="true">${t('hud.score')}</small><b>0</b></p>
         <button class="restart-btn hud-btn" data-act="quick-restart" aria-label="${t('hud.restart')}" title="${t('hud.restart')}">${ICONS.restart}</button>
         <div class="timer" role="timer" aria-label="${t('hud.time')}">
@@ -688,6 +689,7 @@ export function gameScreen(opts: { daily: boolean; onPause: () => void; onResume
       stage: q('.hud-stage'),
       score: q('.hud-score b'),
       combo: q('.hud-combo'),
+      note: q('.hud-note'),
       bar: q('.timer-bar'),
       time: q('.timer-text'),
       mascot: q('.timer .mascot'),
@@ -705,12 +707,6 @@ export function gameScreen(opts: { daily: boolean; onPause: () => void; onResume
       message.classList.remove('pop');
       void message.offsetWidth;
       message.classList.add('pop');
-    },
-    peekGauge(delay, ms) {
-      message.style.setProperty('--peek-delay', `${delay}ms`);
-      message.style.setProperty('--peek-ms', `${ms}ms`);
-      message.style.setProperty('--peek-warn', `${delay + Math.max(0, ms - 500)}ms`);
-      message.classList.add('timed');
     },
   };
 }
