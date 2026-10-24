@@ -42,7 +42,6 @@ const ICON = {
   // 플레이 화살표는 그림 칸에 빈 여백이 없게 딱 맞춰 그린다(여백이 있으면 버튼 안 글자와 함께 한쪽으로 쏠려 보인다)
   play: '<svg viewBox="0 0 14 16" aria-hidden="true"><path d="M1.5 1.5v13l11-6.5z"/></svg>',
   close: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>',
-  cloud: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18h10a4 4 0 0 0 .6-8 6 6 0 0 0-11.4 1.6A3.3 3.3 0 0 0 7 18z"/><path d="m9.5 13.5 2 2 3.5-3.5"/></svg>',
   download: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10.5l5 5 5-5M5 19.5h14"/></svg>',
   check: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
   share: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="m8.2 10.8 7.6-4.1M8.2 13.2l7.6 4.1"/></svg>',
@@ -254,7 +253,9 @@ function gameCard(game: GameMeta): string {
   const blocked = !navigator.onLine && !ready;
   const test = !isPublic(game);
   const fresh = !test && isNew(game, newestPublic());
-  // 게임 카드 = 장난감 버튼: 위는 게임 색 그림판(아이콘이 둥실), 아래는 이름·설명·기록, 맨 아래 "플레이" 버튼.
+  // 게임 카드 = 장난감 버튼: 위는 게임 색 그림판(아이콘이 둥실), 아래는 이름·설명, 맨 아래 한 줄(왼쪽 최고 기록 또는 "첫 기록에 도전!", 오른쪽 작은 ▶).
+  // 카드 전체가 링크라 큰 플레이 버튼 대신 ▶ 로 누를 수 있음만 알리고, 아래 줄은 늘 같은 높이라 카드 크기가 모두 같다.
+  // 오프라인 가능 표시는 카드마다 달지 않는다(대부분 늘 가능이라 정보가 안 됨). 인터넷이 없고 아직 저장 안 된 게임만 흐리게 + 안내
   // 게임이 계속 늘어나므로 휴대폰 두 칸, 넓은 화면은 칸 수가 늘어나는 바둑판으로 쌓는다(styles.css .games)
   return `
     <a class="card${blocked ? ' blocked' : ''}" href="${game.path}" style="--c:${game.color}" data-game="${game.id}"
@@ -263,13 +264,11 @@ function gameCard(game: GameMeta): string {
       <span class="card-body">
         <strong class="card-name">${esc(name)}</strong>
         <span class="card-desc">${esc(game.desc[getLang()])}</span>
-        <span class="card-meta">
-          ${best ? `<span class="chip best">${ICON.trophy}${esc(best)}</span>` : ''}
-          ${ready ? `<span class="chip ok">${ICON.cloud}${t('game.offlineReady')}</span>` : ''}
-          ${blocked ? `<span class="chip warn">${t('game.needsOnline')}</span>` : ''}
-        </span>
       </span>
-      <span class="card-play" aria-hidden="true">${ICON.play}${lbl(t('game.play'))}</span>
+      <span class="card-foot">
+        ${blocked ? `<span class="chip warn">${t('game.needsOnline')}</span>` : best ? `<span class="chip best">${ICON.trophy}${esc(best)}</span>` : `<span class="chip first">${t('game.firstTry')}</span>`}
+        <span class="card-play" aria-hidden="true">${ICON.play}</span>
+      </span>
     </a>`;
 }
 
@@ -296,7 +295,10 @@ function teaserCard(game: GameMeta): string {
         <strong class="card-name">COMING SOON</strong>
         <span class="card-desc">${opens}</span>
       </span>
-      <span class="card-play" aria-hidden="true">${ICON.lock}${lbl(days > 0 ? `D-${days}` : 'D-DAY')}</span>
+      <span class="card-foot">
+        <span class="chip">${days > 0 ? `D-${days}` : 'D-DAY'}</span>
+        <span class="card-play" aria-hidden="true">${ICON.lock}</span>
+      </span>
     </div>`;
 }
 

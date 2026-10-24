@@ -667,15 +667,18 @@ a.card:hover .card-icon {
   -webkit-box-orient: vertical;
 }
 
-.card-meta {
+/* 맨 아래 한 줄: 왼쪽 최고 기록(없으면 "첫 기록에 도전!"), 오른쪽 작은 ▶. 기록 유무와 관계없이 높이가 같아 카드 크기가 모두 같다 */
+.card-foot {
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-top: 6px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 34px;
+  margin: 10px 12px 12px 14px;
 }
 
-.card-meta:empty {
-  display: none;
+.card-foot .chip {
+  min-width: 0;
 }
 
 .chip {
@@ -707,43 +710,43 @@ a.card:hover .card-icon {
   color: var(--gold);
 }
 
-.chip.ok {
-  color: var(--ok);
+/* 기록이 아직 없을 때: 바탕 없이 흐린 글자만(빈칸처럼 보이지 않게 자리만 채움) */
+.chip.first {
+  padding-inline: 2px;
+  background: none;
 }
 
 .chip.warn {
   color: var(--warn);
-  white-space: normal;
 }
 
-/* 맨 아래 "플레이" 버튼: 게임 색을 어둡게 섞어 흰 글자가 잘 읽히게 하고, 아래 두께를 준다 */
+/* 작은 ▶ 동그라미: 게임 색을 어둡게 섞고 아래 두께를 줘 "누르는 카드"임을 알린다(카드 전체가 링크) */
 .card-play {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  margin: 12px 14px 14px;
-  padding: 9px 0;
-  border-radius: 14px;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
   background: color-mix(in srgb, var(--c, var(--brand)) 72%, #000);
   color: #fff;
-  font-size: 17px;
-  box-shadow: 0 4px 0 color-mix(in srgb, var(--c, var(--brand)) 45%, #000);
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--c, var(--brand)) 45%, #000);
   transition:
     transform 140ms ease,
     box-shadow 140ms ease;
 }
 
-/* 둥근 모서리 삼각형. 그림 칸에 여백 없이 꽉 차게 그려 글자와의 간격이 gap 그대로 보인다 */
+/* 둥근 모서리 삼각형. 동그라미 가운데에서 눈으로 보기에 맞게 오른쪽으로 살짝 */
 .card-play svg {
   width: 11px;
   height: 12.5px;
+  margin-left: 2px;
   fill: currentColor;
   stroke-width: 2.4;
 }
 
 a.card:active .card-play {
-  transform: translateY(3px);
+  transform: translateY(2px);
   box-shadow: 0 1px 0 color-mix(in srgb, var(--c) 45%, #000);
 }
 
@@ -837,6 +840,7 @@ a.card:active .card-play {
 .card.teaser .card-play svg {
   width: 15px;
   height: 15px;
+  margin-left: 0;
   fill: none;
 }
 
@@ -879,18 +883,20 @@ a.card:active .card-play {
   color: var(--warn);
 }
 
-/* 다음 게임 안내: 게임 목록 아래 점선 띠 한 줄. 카드가 아니라 목록 순서에 끼지 않는다 */
+/* 다음 게임 안내: 게임 목록 아래 점선 띠 한 줄. 카드가 아니라 목록 순서에 끼지 않는다.
+ * 옅은 금빛 바탕·금빛 점선으로 눈에 띄게 하되, 카드(공개 날짜가 정해진 COMING SOON)보다는 약하게 둔다 */
 .next-strip {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   margin: 18px 0 0;
-  padding: 10px 14px;
-  border: 2px dashed var(--line);
+  padding: 11px 16px;
+  border: 2px dashed color-mix(in srgb, var(--gold) 60%, var(--line));
   border-radius: 16px;
-  color: var(--muted);
-  font-size: 14px;
+  background: color-mix(in srgb, var(--gold) 12%, var(--surface));
+  color: var(--text);
+  font-size: 15px;
   line-height: 1.35;
   text-align: center;
 }
@@ -906,8 +912,8 @@ a.card:active .card-play {
 
 .next-strip svg {
   flex: none;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   fill: var(--gold);
 }
 
