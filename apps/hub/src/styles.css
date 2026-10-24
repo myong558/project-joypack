@@ -842,11 +842,13 @@ a.card:active .card-play {
   box-shadow: none;
 }
 
+/* 자물쇠: ▶ 동그라미(34px) 안에서 잘 보이게 크게 */
 .card.teaser .card-play svg {
-  width: 15px;
-  height: 15px;
+  width: 20px;
+  height: 20px;
   margin-left: 0;
   fill: none;
+  stroke-width: 2.3;
 }
 
 @keyframes teaser-wobble {
