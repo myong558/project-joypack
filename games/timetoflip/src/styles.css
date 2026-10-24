@@ -1446,10 +1446,6 @@ h1 .word:nth-child(2) .tc-in {
   width: 100%;
   height: 100%;
 }
-.mini-card.gold {
-  background: linear-gradient(160deg, #fff7cc, #ffd970);
-  box-shadow: inset 0 0 0 2px var(--gold), 0 2px 0 var(--depth);
-}
 .mini-card em {
   position: absolute;
   top: -6px;
@@ -1932,31 +1928,6 @@ h1 .word:nth-child(2) .tc-in {
 }
 .dex-big .front svg:not(.art) {
   width: 92%;
-}
-.dex-big.gold .front {
-  background: linear-gradient(160deg, #fff7cc, #ffd970);
-  box-shadow: inset 0 0 0 3px var(--gold), 0 4px 0 var(--depth), 0 10px 22px rgb(42 36 51 / 0.2);
-}
-.dex-star {
-  position: absolute;
-  top: -8px;
-  right: -10px;
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--gold);
-  color: #fff;
-  font-weight: 400;
-  box-shadow: 0 2px 0 var(--depth);
-  opacity: 0;
-  scale: 0.4;
-  transition: opacity 0.2s, scale 0.25s cubic-bezier(0.3, 1.6, 0.5, 1);
-}
-.dex-big.gold .dex-star {
-  opacity: 1;
-  scale: 1;
 }
 /* 설명 칸 높이는 고정: 제목·작가 한 줄씩 + 설명 두 줄(설명은 카드마다 두 줄 길이로 맞춰 씀). 글이 바뀌어도 아래 목록이 움직이지 않는다 */
 .dex-info {

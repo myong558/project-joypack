@@ -14,7 +14,6 @@ export interface SaveData {
   daily: { date: string; best: number } | null;
   /** 도감: 한 번이라도 맞힌 그림, 황금으로 맞힌 그림 */
   dex: FaceId[];
-  gold: FaceId[];
   /** 지금까지 맞힌 짝 수 */
   pairs: number;
   /** 이 기기의 순위표 사본(클래식·오늘의 챌린지) */
@@ -48,8 +47,8 @@ function defaults(): SaveData {
  * "내 기록 지우기"로 지워지는 부분: 이 기기의 최고 기록·도감·맞힌 짝 수.
  * 온라인 순위표 사본(rankings)과 아직 올리지 않은 등록 대기 기록(pending)은 남긴다(조이팩 허브의 "내 기록 지우기"도 같은 범위)
  */
-export function emptyRecords(): Pick<SaveData, 'best' | 'bestStage' | 'daily' | 'dex' | 'gold' | 'pairs'> {
-  return { best: 0, bestStage: 0, daily: null, dex: [], gold: [], pairs: 0 };
+export function emptyRecords(): Pick<SaveData, 'best' | 'bestStage' | 'daily' | 'dex' | 'pairs'> {
+  return { best: 0, bestStage: 0, daily: null, dex: [], pairs: 0 };
 }
 
 export function loadSave(): SaveData {
@@ -59,9 +58,10 @@ export function loadSave(): SaveData {
     if (!raw) return withShared(base);
     const data = { ...base, ...(JSON.parse(raw) as Partial<SaveData>) } as SaveData;
     // v0.9.0 에서 도형 '반원(arch)'을 '초승달(moon)'로 바꿨다. 모은 도감은 그대로 이어지게 옮긴다
-    const renamed = (list: unknown) => (Array.isArray(list) ? list : []).map((f) => (f === 'arch' ? 'moon' : f)) as FaceId[];
-    data.dex = renamed(data.dex).filter((f) => ALL_FACES.includes(f));
-    data.gold = renamed(data.gold).filter((f) => ALL_FACES.includes(f));
+    data.dex = (Array.isArray(data.dex) ? (data.dex as string[]) : []).map((f) => (f === 'arch' ? 'moon' : f)) as FaceId[];
+    data.dex = data.dex.filter((f) => ALL_FACES.includes(f));
+    // v0.11.0 에서 도감의 황금 ★ 기록을 없앴다(예전 저장의 gold 는 버림)
+    delete (data as { gold?: unknown }).gold;
     for (const k of ['best', 'bestStage', 'pairs'] as const) if (!Number.isFinite(data[k])) data[k] = 0;
     data.rankings = sanitizeRankings(data.rankings);
     data.pending = sanitizePending(data.pending);

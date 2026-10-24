@@ -30,9 +30,9 @@ function pressed(on: boolean): string {
 }
 
 /** 작은 카드 그림(도감·결과 화면) */
-function miniCard(face: FaceId, opts: { gold?: boolean; locked?: boolean; isNew?: boolean } = {}): string {
+function miniCard(face: FaceId, opts: { locked?: boolean; isNew?: boolean } = {}): string {
   if (opts.locked) return `<span class="mini-card locked" aria-hidden="true">${CARD_BACK}</span>`;
-  return `<span class="mini-card${opts.gold ? ' gold' : ''}" aria-hidden="true">${faceSvg(face)}${opts.isNew ? '<em>NEW</em>' : ''}</span>`;
+  return `<span class="mini-card" aria-hidden="true">${faceSvg(face)}${opts.isNew ? '<em>NEW</em>' : ''}</span>`;
 }
 
 /**
@@ -217,15 +217,13 @@ const DEX_ALL_OPEN = () => Joypack.devTools();
 
 function openDex(host: HTMLElement, save: SaveData): void {
   const found = new Set<FaceId>(DEX_ALL_OPEN() ? ALL_FACES : save.dex);
-  const gold = new Set(save.gold);
   const box = html(`
     <div class="dex">
       ${closeButton()}
-      <h2>${ICONS.album} ${t('dex.title')} <small>${found.size}/${DEX_TOTAL} · ${t('dex.goldCount', { n: gold.size })}</small></h2>
+      <h2>${ICONS.album} ${t('dex.title')} <small>${found.size}/${DEX_TOTAL}</small></h2>
       <div class="dex-stage">
         <div class="dex-big" aria-hidden="true">
           <span class="dex-flip"><span class="side back">${CARD_BACK}</span><span class="side front"></span></span>
-          <b class="dex-star">★</b>
         </div>
         <div class="dex-info" aria-live="polite">
           <p class="dex-title">${t('dex.pickTitle')}</p>
@@ -239,8 +237,8 @@ function openDex(host: HTMLElement, save: SaveData): void {
             <h3>${s.faces.some((f) => found.has(f)) ? setName(s.id) : '???'} <small>${t('dex.from', { n: i + 1 })}</small></h3>
             <ul>${s.faces
               .map((f) => {
-                const label = found.has(f) ? `${faceName(f)}${gold.has(f) ? ` · ${t('dex.gold')}` : ''}` : `??? — ${t('dex.locked')}`;
-                return `<li><button class="dex-item" type="button" data-face="${f}" data-stage="${i + 1}" aria-pressed="false" aria-label="${label}">${miniCard(f, found.has(f) ? { gold: gold.has(f) } : { locked: true })}</button></li>`;
+                const label = found.has(f) ? faceName(f) : `??? — ${t('dex.locked')}`;
+                return `<li><button class="dex-item" type="button" data-face="${f}" data-stage="${i + 1}" aria-pressed="false" aria-label="${label}">${miniCard(f, found.has(f) ? {} : { locked: true })}</button></li>`;
               })
               .join('')}</ul>
           </section>`,
@@ -248,7 +246,6 @@ function openDex(host: HTMLElement, save: SaveData): void {
       </div>
     </div>`);
 
-  const big = box.querySelector<HTMLElement>('.dex-big')!;
   const flip = box.querySelector<HTMLElement>('.dex-flip')!;
   const front = flip.querySelector<HTMLElement>('.front')!;
   const info = box.querySelector<HTMLElement>('.dex-info')!;
@@ -270,7 +267,6 @@ function openDex(host: HTMLElement, save: SaveData): void {
     const turn = ++turns;
     const apply = () => {
       front.replaceChildren(next.content);
-      big.classList.toggle('gold', open && gold.has(face));
       const text = open ? cardInfo(face) : null;
       title.textContent = text ? text.title : '???';
       by.textContent = text ? text.by : t('dex.locked');
@@ -737,7 +733,6 @@ export function resultScreen(opts: {
   ranking: RankingView;
 }): HTMLElement {
   const { result } = opts;
-  const golds = new Set(result.golds);
   const shown = [...opts.newFaces, ...result.faces.filter((f) => !opts.newFaces.includes(f))].slice(0, 8);
   const el = html(`
     <main class="screen result">
@@ -755,7 +750,7 @@ export function resultScreen(opts: {
         </dl>
       </div>
       <div class="col side-col">
-        ${shown.length ? `<ul class="faces" aria-label="${t('result.newCards')}">${shown.map((f) => `<li aria-label="${faceName(f)}">${miniCard(f, { gold: golds.has(f), isNew: opts.newFaces.includes(f) })}</li>`).join('')}</ul>` : ''}
+        ${shown.length ? `<ul class="faces" aria-label="${t('result.newCards')}">${shown.map((f) => `<li aria-label="${faceName(f)}">${miniCard(f, { isNew: opts.newFaces.includes(f) })}</li>`).join('')}</ul>` : ''}
         <p class="goal">${goalText(opts.goal)}</p>
         <div class="actions">
           <button class="btn primary big" data-act="retry">${t('result.retry')}</button>

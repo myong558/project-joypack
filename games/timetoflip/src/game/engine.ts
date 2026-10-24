@@ -55,9 +55,8 @@ export interface GameResult {
   mistakes: number;
   /** 시간이 다 됐을 때 그 판에 남은 짝 */
   pairsLeft: number;
-  /** 이번 판에 맞힌 그림(도감)과 황금으로 맞힌 그림 */
+  /** 이번 판에 맞힌 그림(도감) */
   faces: FaceId[];
-  golds: FaceId[];
 }
 
 export type GameEvent =
@@ -108,7 +107,6 @@ export class Game {
   private stageMistakes = 0;
   private stats = { pairs: 0, misses: 0, mistakes: 0, perfects: 0 };
   private faces = new Set<FaceId>();
-  private golds = new Set<FaceId>();
   private listeners = new Set<Listener>();
 
   constructor(private readonly rng: Rng) {}
@@ -222,10 +220,7 @@ export class Game {
     if (a.special === 'clock') gain += CLOCK_GAIN;
     this.score += points;
     this.addTime(gain);
-    if (!a.special) {
-      this.faces.add(a.face as FaceId);
-      if (a.gold) this.golds.add(a.face as FaceId);
-    }
+    if (!a.special) this.faces.add(a.face as FaceId);
     this.emit({ type: 'match', a, b, points, gain, combo: this.combo, multiplier, bonus });
     if (a.special === 'peek') this.emit({ type: 'reveal', ms: PEEK_REVEAL });
     if (this.pairsLeft === 0) this.clearStage();
@@ -297,7 +292,6 @@ export class Game {
       mistakes,
       pairsLeft: this.pairsLeft,
       faces: [...this.faces],
-      golds: [...this.golds],
     };
   }
 }

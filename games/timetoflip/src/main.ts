@@ -174,19 +174,13 @@ function play(mode: Mode, from = 1): void {
   const dexBefore = new Set(save.dex);
 
   // 맞힌 그림은 그 자리에서 도감에 남긴다(판 도중에 나가도 사라지지 않게)
-  const record = (face: FaceId, gold: boolean, el: HTMLElement) => {
+  const record = (face: FaceId, el: HTMLElement) => {
     save.pairs++;
-    let changed = false;
-    if (gold && !save.gold.includes(face)) {
-      save.gold.push(face);
-      changed = true;
-    }
     if (!save.dex.includes(face)) {
       save.dex.push(face);
-      changed = true;
       fx.popup(el, t('popup.new'), 'new', 380);
+      writeSave(save);
     }
-    if (changed) writeSave(save);
   };
 
   const handle = (e: GameEvent) => {
@@ -233,7 +227,7 @@ function play(mode: Mode, from = 1): void {
         if (a.gold) fx.popup(cardEl(a.index), t('popup.gold'), 'gold', 200);
         if (e.combo >= 3) fx.banner(t('banner.combo', { n: e.combo, m: e.multiplier }), 'combo');
         fx.shake(strong ? 'small' : 'tiny');
-        if (!a.special) record(a.face as FaceId, a.gold, el);
+        if (!a.special) record(a.face as FaceId, el);
         view.el.classList.toggle('hot', e.combo >= 5);
         break;
       }
