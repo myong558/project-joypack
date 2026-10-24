@@ -44,7 +44,7 @@ export function isScheduled(game: GameMeta, now = Date.now()): boolean {
   return game.status === 'preview' && !!game.open && now < Date.parse(game.open);
 }
 
-/** 가장 최근에 추가한 게임에 NEW 를 붙여 두는 날 수 */
+/** 공개한 날(added)부터 NEW 를 붙여 두는 날 수 */
 const NEW_DAYS = 14;
 
 /** 최근에 추가한 게임부터. 날짜가 같으면 games.json 에서 뒤에 적힌 게임이 앞에 온다 */
@@ -63,9 +63,8 @@ export function patternOf(game: GameMeta): number {
   return byNewest(GAMES).reverse().indexOf(game) % PATTERNS;
 }
 
-/** NEW 표시: 가장 최근에 추가한 게임 하나만, 추가한 날부터 NEW_DAYS 동안 */
-export function isNew(game: GameMeta, newest: GameMeta | undefined, now = Date.now()): boolean {
-  if (game !== newest) return false;
+/** NEW 표시: 공개한 게임마다 공개한 날(added)부터 NEW_DAYS 동안. 새 게임이 나와도 앞서 나온 게임의 NEW 는 그대로(같은 날 여러 게임을 내도 모두 NEW) */
+export function isNew(game: GameMeta, now = Date.now()): boolean {
   const added = Date.parse(game.added + 'T00:00:00');
   return now - added < NEW_DAYS * 86_400_000;
 }

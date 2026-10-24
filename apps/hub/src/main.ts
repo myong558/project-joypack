@@ -32,7 +32,6 @@ live = shownGames();
 const teaserGames = () =>
   previewOn() ? [] : GAMES.filter((g) => isScheduled(g)).sort((a, b) => Date.parse(a.open!) - Date.parse(b.open!));
 /** NEW 를 붙일 게임: 모두에게 공개된 게임 중 가장 최근 것(미리보기 게임은 TEST 표시) */
-const newestPublic = () => byNewest(GAMES.filter((g) => isPublic(g)))[0];
 
 const ICON = {
   // 게임기: 설정에서 "모든 게임에 함께 적용" 묶음 표시
@@ -252,7 +251,7 @@ function gameCard(game: GameMeta): string {
   const ready = cached.get(game.id) ?? false;
   const blocked = !navigator.onLine && !ready;
   const test = !isPublic(game);
-  const fresh = !test && isNew(game, newestPublic());
+  const fresh = !test && isNew(game);
   // 게임 카드 = 장난감 버튼: 위는 게임 색 그림판(아이콘이 둥실), 아래는 이름·설명, 맨 아래 한 줄은 최고 기록(없으면 "첫 기록에 도전!")이 폭을 다 쓰고,
   // 작은 ▶ 는 그림판 오른쪽 아래 경계에 걸쳐 띄운다(기록이 잘리지 않게).
   // 카드 전체가 링크라 큰 플레이 버튼 대신 ▶ 로 누를 수 있음만 알리고, 아래 줄은 늘 같은 높이라 카드 크기가 모두 같다.
