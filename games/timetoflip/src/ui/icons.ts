@@ -14,12 +14,12 @@ export const ICONS = {
   gear: svg('<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1L7 17M17 7l2.1-2.1"/>'),
   check: svg('<path d="M5 12l5 5 9-10"/>'),
   arrow: svg('<path d="M5 12h14M13 6l6 6-6 6"/>'),
-  /** 도감: 부채꼴로 펼친 카드 세 장(레몬 뒷면 · 강조색 카드 · 초승달 앞면). 선 아이콘이 아니라 색이 든 작은 그림 */
+  /** 도감: 부채꼴로 펼친 카드 세 장. 왼쪽 카드가 맨 위(레몬 뒷면 위에, 아래로 강조색 카드 · 초승달 앞면). 선 아이콘이 아니라 색이 든 작은 그림 */
   album: `<svg class="icon icon-album" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
     <defs><linearGradient id="alb-l" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd54a"/><stop offset="1" stop-color="#f2a300"/></linearGradient></defs>
+    <g transform="rotate(32 12 20)"><rect x="8" y="4" width="10" height="14" rx="2.2" fill="#fffaf0" stroke="#2a2433" stroke-opacity=".35" stroke-width=".8"/><path d="M16 8a3.3 3.3 0 1 0 1.2 5.1 2.8 2.8 0 0 1-1.2-5.1z" fill="#fbbf24"/></g>
+    <g transform="rotate(8 12 20)"><rect x="7" y="3.5" width="10" height="14" rx="2.2" fill="var(--accent)" stroke="rgb(0 0 0 / .25)" stroke-width=".8"/><path d="M9.3 6.2h5.4" stroke="#fff" stroke-width="1" stroke-linecap="round" opacity=".45"/></g>
     <g transform="rotate(-18 12 20)"><rect x="6.5" y="4" width="10" height="14" rx="2.2" fill="url(#alb-l)" stroke="#b77900" stroke-width=".8"/><circle cx="11.5" cy="11" r="2.4" fill="none" stroke="#fff" stroke-width="1.1" opacity=".9"/></g>
-    <g transform="rotate(2 12 20)"><rect x="7" y="3.5" width="10" height="14" rx="2.2" fill="var(--accent)" stroke="rgb(0 0 0 / .25)" stroke-width=".8"/><path d="M9.3 6.2h5.4" stroke="#fff" stroke-width="1" stroke-linecap="round" opacity=".45"/></g>
-    <g transform="rotate(20 12 20)"><rect x="8" y="4" width="10" height="14" rx="2.2" fill="#fffaf0" stroke="#2a2433" stroke-opacity=".35" stroke-width=".8"/><path d="M13.9 7.6a3.6 3.6 0 1 0 1.3 5.6 3.1 3.1 0 0 1-1.3-5.6z" fill="#fbbf24"/></g>
   </svg>`,
   soundOn: svg('<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/>'),
   soundOff: svg('<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 10l4 4M21 10l-4 4"/>'),
