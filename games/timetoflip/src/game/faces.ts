@@ -1,14 +1,16 @@
 /**
- * 카드 그림 목록(도감). 묶음 6개 × 8장 = 48장. 그림 자체는 ui/art.ts 가 SVG 로 그린다.
- * 묶음은 판이 올라갈수록 하나씩 열린다(1판 과일 → 6판 장난감). 뒤쪽 묶음은 멀리 가야만 만난다
+ * 카드 그림 목록(도감). 묶음 6개 × 8장 = 48장. 그림은 ui/art.ts(도형·팝아트는 SVG, 명화는 src/art/*.webp),
+ * 이름·작가·설명은 cards.ts.
+ * 묶음은 판이 올라갈수록 하나씩 열리고 뒤로 갈수록 구분이 어렵다:
+ * 도형(색·모양이 뚜렷) → 팝아트 → 명화 팝 → 서양화 풍경 → 서양화 인물·정물 → 동양화 수묵(색이 없어 가장 어려움)
  */
 export const FACE_SETS = [
-  { id: 'fruit', faces: ['apple', 'cherry', 'grape', 'lemon', 'strawberry', 'watermelon', 'pear', 'orange'] },
-  { id: 'animal', faces: ['cat', 'dog', 'bear', 'rabbit', 'frog', 'chick', 'pig', 'panda'] },
-  { id: 'sea', faces: ['fish', 'octopus', 'whale', 'crab', 'shell', 'starfish', 'jellyfish', 'turtle'] },
-  { id: 'sky', faces: ['sun', 'moon', 'star', 'cloud', 'rainbow', 'bolt', 'snow', 'drop'] },
-  { id: 'sweet', faces: ['cupcake', 'donut', 'icecream', 'candy', 'cookie', 'pudding', 'cake', 'lollipop'] },
-  { id: 'toy', faces: ['ball', 'kite', 'rocket', 'robot', 'balloon', 'top', 'blocks', 'car'] },
+  { id: 'shape', faces: ['circle', 'triangle', 'square', 'diamond', 'hexagon', 'ring', 'plus', 'arch'] },
+  { id: 'pop', faces: ['lips', 'bolt', 'eye', 'pow', 'heart', 'shades', 'cone', 'crown'] },
+  { id: 'popart', faces: ['berceuse', 'strawhat', 'rembrandt', 'madamex', 'arlesienne', 'wave', 'baby', 'sunflowers'] },
+  { id: 'landscape', faces: ['cypress', 'olive', 'orchard', 'harvest', 'gulfstream', 'matterhorn', 'boating', 'oxbow'] },
+  { id: 'life', faces: ['apples', 'roses', 'oleanders', 'shoes', 'dancers', 'cardplayers', 'tahiti', 'garden'] },
+  { id: 'ink', faces: ['bamboo', 'plum', 'orchid', 'grapes', 'swallows', 'mist', 'peaks', 'tiger'] },
 ] as const;
 
 export type SetId = (typeof FACE_SETS)[number]['id'];

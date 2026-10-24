@@ -1,6 +1,7 @@
 import type { Card } from '../game/engine';
 import type { StageDef } from '../game/stages';
-import { faceName, t } from '../i18n';
+import { faceName } from '../cards';
+import { t } from '../i18n';
 import { CARD_BACK, faceSvg } from './art';
 
 /** 카드 폭 ÷ 높이 */

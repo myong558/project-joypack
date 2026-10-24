@@ -1,0 +1,290 @@
+{
+  "berceuse": {
+    "metId": 437984,
+    "title": "La Berceuse (Woman Rocking a Cradle; Augustine-Alix Pellicot Roulin, 1851–1930)",
+    "artist": "Vincent van Gogh",
+    "date": "1889",
+    "url": "https://www.metmuseum.org/art/collection/search/437984",
+    "image": "https://images.metmuseum.org/CRDImages/ep/web-large/DP-19279-001.jpg",
+    "credit": "The Walter H. and Leonore Annenberg Collection, Gift of Walter H. and Leonore Annenberg, 1996, Bequest of Walter H. Annenberg, 2002"
+  },
+  "strawhat": {
+    "metId": 436532,
+    "title": "Self-Portrait with a Straw Hat (obverse: The Potato Peeler)",
+    "artist": "Vincent van Gogh",
+    "date": "1887",
+    "url": "https://www.metmuseum.org/art/collection/search/436532",
+    "image": "https://images.metmuseum.org/CRDImages/ep/web-large/DT1502_cropped2.jpg",
+    "credit": "Bequest of Miss Adelaide Milton de Groot (1876-1967), 1967"
+  },
+  "rembrandt": {
+    "metId": 437397,
+    "title": "Self-Portrait",
+    "artist": "Rembrandt (Rembrandt van Rijn)",
+    "date": "1660",
+    "url": "https://www.metmuseum.org/art/collection/search/437397",
+    "image": "https://images.metmuseum.org/CRDImages/ep/web-large/DP-16323-001.jpg",
+    "credit": "Bequest of Benjamin Altman, 1913"
+  },
+  "madamex": {
+    "metId": 12127,
+    "title": "Madame X (Virginie Amélie Avegno Gautreau)",
+    "artist": "John Singer Sargent",
+    "date": "1883–84",
+    "url": "https://www.metmuseum.org/art/collection/search/12127",
+    "image": "https://images.metmuseum.org/CRDImages/ad/web-large/DP-29006-001.jpg",
+    "credit": "Arthur Hoppock Hearn Fund, 1916"
+  },
+  "arlesienne": {
+    "metId": 436529,
+    "title": "L'Arlésienne: Madame Joseph-Michel Ginoux (Marie Julien, 1848–1911)",
+    "artist": "Vincent van Gogh",
+    "date": "1888–89",
+    "url": "https://www.metmuseum.org/art/collection/search/436529",
+    "image": "https://images.metmuseum.org/CRDImages/ep/web-large/DT1396.jpg",
+    "credit": "Bequest of Sam A. Lewisohn, 1951"
+  },
+  "wave": {
+    "metId": 45434,
+    "title": "Under the Wave off Kanagawa (Kanagawa oki nami ura), also known as The Great Wave, from the series Thirty-six Views of Mount Fuji (Fugaku sanjūrokkei)",
+    "artist": "Katsushika Hokusai",
+    "date": "ca. 1830–32",
+    "url": "https://www.metmuseum.org/art/collection/search/45434",
+    "image": "https://images.metmuseum.org/CRDImages/as/web-large/DP130155.jpg",
+    "credit": "H. O. Havemeyer Collection, Bequest of Mrs. H. O. Havemeyer, 1929"
+  },
+  "baby": {
+    "metId": 459123,
+    "title": "Madame Roulin and Her Baby",
+    "artist": "Vincent van Gogh",
+    "date": "1888",
+    "url": "https://www.metmuseum.org/art/collection/search/459123",
+    "image": "https://images.metmuseum.org/CRDImages/rl/web-large/DT3154.jpg",
+    "credit": "Robert Lehman Collection, 1975"
+  },
+  "sunflowers": {
+    "metId": 436524,
+    "title": "Sunflowers",
+    "artist": "Vincent van Gogh",
+    "date": "1887",
+    "url": "https://www.metmuseum.org/art/collection/search/436524",
+    "image": "https://images.metmuseum.org/CRDImages/ep/web-large/DP-41223-001.jpg",
+    "credit": "Rogers Fund, 1949"
+  },
+  "cypress": {
+    "metId": 436535,
+    "title": "Wheat Field with Cypresses",
+    "artist": "Vincent van Gogh",
+    "date": "1889",
+    "url": "https://www.metmuseum.org/art/collection/search/436535",
+    "image": "https://images.metmuseum.org/CRDImages/ep/web-large/DP-42549-001.jpg",
+    "credit": "Purchase, The Annenberg Foundation Gift, 1993"
+  },
+  "olive": {
+    "metId": 437998,
+    "title": "Olive Trees",
+    "artist": "Vincent van Gogh",
+    "date": "1889",
+    "url": "https://www.metmuseum.org/art/collection/search/437998",
+    "image": "https://images.metmuseum.org/CRDImages/ep/web-large/DT1946.jpg",
+    "credit": "The Walter H. and Leonore Annenberg Collection, Gift of Walter H. and Leonore Annenberg, 1998, Bequest of Walter H. Annenberg, 2002"
+  },
+  "orchard": {
+    "metId": 436527,
+    "title": "The Flowering Orchard",
+    "artist": "Vincent van Gogh",
+    "date": "1888",
+    "url": "https://www.metmuseum.org/art/collection/search/436527",
+    "image": "https://images.metmuseum.org/CRDImages/ep/web-large/DP-14936-045.jpg",
+    "credit": "The Mr. and Mrs. Henry Ittleson Jr. Purchase Fund, 1956"
+  },
+  "harvest": {
+    "metId": 435809,
+    "title": "The Harvesters",
+    "artist": "Pieter Bruegel the Elder",
+    "date": "1565",
+    "url": "https://www.metmuseum.org/art/collection/search/435809",
+    "image": "https://images.metmuseum.org/CRDImages/ep/web-large/DP119115.jpg",
+    "credit": "Rogers Fund, 1919"
+  },
+  "gulfstream": {
+    "metId": 11122,
+    "title": "The Gulf Stream",
+    "artist": "Winslow Homer",
+    "date": "1899; reworked by 1906",
+    "url": "https://www.metmuseum.org/art/collection/search/11122",
+    "image": "https://images.metmuseum.org/CRDImages/ad/web-large/DP-20821-001.jpg",
+    "credit": "Catharine Lorillard Wolfe Collection, Wolfe Fund, 1906"
+  },
+  "matterhorn": {
+    "metId": 10158,
+    "title": "Sunrise on the Matterhorn",
+    "artist": "Albert Bierstadt",
+    "date": "after 1875",
+    "url": "https://www.metmuseum.org/art/collection/search/10158",
+    "image": "https://images.metmuseum.org/CRDImages/ad/web-large/DT218107.jpg",
+    "credit": "Gift of Mrs. Karl W. Koeniger, 1966"
+  },
+  "boating": {
+    "metId": 436947,
+    "title": "Boating",
+    "artist": "Edouard Manet",
+    "date": "1874",
+    "url": "https://www.metmuseum.org/art/collection/search/436947",
+    "image": "https://images.metmuseum.org/CRDImages/ep/web-large/DP-25466-001.jpg",
+    "credit": "H. O. Havemeyer Collection, Bequest of Mrs. H. O. Havemeyer, 1929"
+  },
+  "oxbow": {
+    "metId": 10497,
+    "title": "View from Mount Holyoke, Northampton, Massachusetts, after a Thunderstorm—The Oxbow",
+    "artist": "Thomas Cole",
+    "date": "1836",
+    "url": "https://www.metmuseum.org/art/collection/search/10497",
+    "image": "https://images.metmuseum.org/CRDImages/ad/web-large/DP-12550-001.jpg",
+    "credit": "Gift of Mrs. Russell Sage, 1908"
+  },
+  "apples": {
+    "metId": 435882,
+    "title": "Still Life with Apples and a Pot of Primroses",
+    "artist": "Paul Cézanne",
+    "date": "ca. 1890",
+    "url": "https://www.metmuseum.org/art/collection/search/435882",
+    "image": "https://images.metmuseum.org/CRDImages/ep/web-large/DT47.jpg",
+    "credit": "Bequest of Sam A. Lewisohn, 1951"
+  },
+  "roses": {
+    "metId": 436534,
+    "title": "Roses",
+    "artist": "Vincent van Gogh",
+    "date": "1890",
+    "url": "https://www.metmuseum.org/art/collection/search/436534",
+    "image": "https://images.metmuseum.org/CRDImages/ep/web-large/DP346475.jpg",
+    "credit": "The Walter H. and Leonore Annenberg Collection, Gift of Walter H. and Leonore Annenberg, 1993, Bequest of Walter H. Annenberg, 2002"
+  },
+  "oleanders": {
+    "metId": 436530,
+    "title": "Oleanders",
+    "artist": "Vincent van Gogh",
+    "date": "1888",
+    "url": "https://www.metmuseum.org/art/collection/search/436530",
+    "image": "https://images.metmuseum.org/CRDImages/ep/web-large/DT1494.jpg",
+    "credit": "Gift of Mr. and Mrs. John L. Loeb, 1962"
+  },
+  "shoes": {
+    "metId": 436533,
+    "title": "Shoes",
+    "artist": "Vincent van Gogh",
+    "date": "1888",
+    "url": "https://www.metmuseum.org/art/collection/search/436533",
+    "image": "https://images.metmuseum.org/CRDImages/ep/web-large/DT1947.jpg",
+    "credit": "Purchase, The Annenberg Foundation Gift, 1992"
+  },
+  "dancers": {
+    "metId": 438817,
+    "title": "The Dance Class",
+    "artist": "Edgar Degas",
+    "date": "1874",
+    "url": "https://www.metmuseum.org/art/collection/search/438817",
+    "image": "https://images.metmuseum.org/CRDImages/ep/web-large/DP-20101-001.jpg",
+    "credit": "Bequest of Mrs. Harry Payne Bingham, 1986"
+  },
+  "cardplayers": {
+    "metId": 435868,
+    "title": "The Card Players",
+    "artist": "Paul Cézanne",
+    "date": "1890–92",
+    "url": "https://www.metmuseum.org/art/collection/search/435868",
+    "image": "https://images.metmuseum.org/CRDImages/ep/web-large/DP231550.jpg",
+    "credit": "Bequest of Stephen C. Clark, 1960"
+  },
+  "tahiti": {
+    "metId": 438821,
+    "title": "Ia Orana Maria (Hail Mary)",
+    "artist": "Paul Gauguin",
+    "date": "1891",
+    "url": "https://www.metmuseum.org/art/collection/search/438821",
+    "image": "https://images.metmuseum.org/CRDImages/ep/web-large/DT1025.jpg",
+    "credit": "Bequest of Sam A. Lewisohn, 1951"
+  },
+  "garden": {
+    "metId": 436965,
+    "title": "The Monet Family in Their Garden at Argenteuil",
+    "artist": "Edouard Manet",
+    "date": "1874",
+    "url": "https://www.metmuseum.org/art/collection/search/436965",
+    "image": "https://images.metmuseum.org/CRDImages/ep/web-large/DP-25465-001.jpg",
+    "credit": "Bequest of Joan Whitney Payson, 1975"
+  },
+  "bamboo": {
+    "metId": 48890,
+    "title": "Bamboo",
+    "artist": "Katsushika Hokusai",
+    "date": "18th–19th century",
+    "url": "https://www.metmuseum.org/art/collection/search/48890",
+    "image": "https://images.metmuseum.org/CRDImages/as/web-large/DP-24985-001.jpg",
+    "credit": "Gift of Annette Young, in memory of her brother, Innis Young, 1956"
+  },
+  "plum": {
+    "metId": 36432,
+    "title": "Plum blossoms",
+    "artist": "Jin Nong",
+    "date": "dated 1757",
+    "url": "https://www.metmuseum.org/art/collection/search/36432",
+    "image": "https://images.metmuseum.org/CRDImages/as/web-large/DP160540.jpg",
+    "credit": "Edward Elliott Family Collection, Gift of Douglas Dillon, 1986"
+  },
+  "orchid": {
+    "metId": 48932,
+    "title": "Orchid and rock",
+    "artist": "Ma Shouzhen",
+    "date": "dated 1572",
+    "url": "https://www.metmuseum.org/art/collection/search/48932",
+    "image": "https://images.metmuseum.org/CRDImages/as/web-large/DT8794.jpg",
+    "credit": "Edward Elliott Family Collection, Purchase, The Dillon Fund Gift, 1982"
+  },
+  "grapes": {
+    "metId": 853192,
+    "title": "Grapes",
+    "artist": "Motsurin Jōtō (Bokusai)",
+    "date": "ca. 1480–92",
+    "url": "https://www.metmuseum.org/art/collection/search/853192",
+    "image": "https://images.metmuseum.org/CRDImages/as/web-large/DP-24855-002.jpg",
+    "credit": "Mary and Cheney Cowles Collection, Gift of Mary and Cheney Cowles, 2022"
+  },
+  "swallows": {
+    "metId": 54745,
+    "title": "Small Birds and Bamboo",
+    "artist": "Kawabata Gyokushō",
+    "date": "1887–92",
+    "url": "https://www.metmuseum.org/art/collection/search/54745",
+    "image": "https://images.metmuseum.org/CRDImages/as/web-large/DP211874.jpg",
+    "credit": "Charles Stewart Smith Collection, Gift of Mrs. Charles Stewart Smith, Charles Stewart Smith Collection, Gift of Mrs. Charles Stewart Smith, Charles Stewart Smith Jr., and Howard Caswell Smith, in memory of Charles Stewart Smith, 1914"
+  },
+  "mist": {
+    "metId": 45070,
+    "title": "Landscape",
+    "artist": "Kano Motonobu",
+    "date": "16th century",
+    "url": "https://www.metmuseum.org/art/collection/search/45070",
+    "image": "https://images.metmuseum.org/CRDImages/as/web-large/DP-41805-002.jpg",
+    "credit": "Fletcher Fund,1951"
+  },
+  "peaks": {
+    "metId": 45072,
+    "title": "Landscape",
+    "artist": "Sesson Shūkei",
+    "date": "16th century",
+    "url": "https://www.metmuseum.org/art/collection/search/45072",
+    "image": "https://images.metmuseum.org/CRDImages/as/web-large/LC-1982_244_16_cc-001.jpg",
+    "credit": "Bequest of Hope Skillman Schary, 1981"
+  },
+  "tiger": {
+    "metId": 57300,
+    "title": "Tiger",
+    "artist": "Hokusai School",
+    "date": "19th century",
+    "url": "https://www.metmuseum.org/art/collection/search/57300",
+    "image": "https://images.metmuseum.org/CRDImages/as/web-large/DP-1310-001.jpg",
+    "credit": "Fletcher Fund, 1938"
+  }
+}

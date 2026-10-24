@@ -774,15 +774,42 @@ h1 .word:last-child .tc:last-child .tc-in {
 .side svg {
   display: block;
 }
-/* 뒷면: 조이팩 로고처럼 레몬 바탕 + 웃는 얼굴. 안쪽 테두리만 스킨 강조색으로 그 게임 느낌을 남긴다 */
+/* 뒷면: 조이팩 로고 얼굴을 새긴 메달(그림은 art.ts CARD_BACK, 카드를 꽉 채움).
+ * ::before 는 스킨 강조색 안쪽 테두리, ::after 는 카드마다 시차를 두고 지나가는 빛줄기(심심하지 않게) */
 .back {
-  background:
-    radial-gradient(circle at 30% 20%, rgb(255 255 255 / 0.35), transparent 48%),
-    linear-gradient(160deg, #ffc533, #ffb703 55%, #f2a300);
-  box-shadow: inset 0 0 0 calc(var(--cw, 64px) * 0.045) color-mix(in srgb, var(--accent) 80%, #fff), 0 3px 0 var(--depth), 0 5px 10px rgb(42 36 51 / 0.12);
+  overflow: hidden;
+  background: #ffb703;
 }
-.back svg {
-  width: 74%;
+.back .back-art {
+  width: 100%;
+  height: 100%;
+}
+.back::before,
+.back::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.back::before {
+  box-shadow: inset 0 0 0 calc(var(--cw, 64px) * 0.04) color-mix(in srgb, var(--accent) 80%, #fff);
+}
+.back::after {
+  background: linear-gradient(110deg, transparent 38%, rgb(255 255 255 / 0.5) 50%, transparent 62%) no-repeat;
+  background-size: 260% 100%;
+  background-position: 160% 0;
+  animation: sheen 7s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * 0.23s);
+}
+@keyframes sheen {
+  0%,
+  78% {
+    background-position: 160% 0;
+  }
+  100% {
+    background-position: -60% 0;
+  }
 }
 .front {
   transform: rotateY(180deg);
@@ -790,6 +817,14 @@ h1 .word:last-child .tc:last-child .tc-in {
 }
 .front svg {
   width: 84%;
+}
+/* 팝아트·명화 그림은 카드 안에 액자처럼(가장자리 여백에 황금·틀림·짝 테두리가 보이게) */
+.front .art {
+  width: 86%;
+  height: 89%;
+  object-fit: cover;
+  border-radius: calc(var(--cw, 64px) * 0.08);
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.08);
 }
 .card:hover:not(.up):not(.gone) .back {
   filter: brightness(1.08);
@@ -804,8 +839,12 @@ h1 .word:last-child .tc:last-child .tc-in {
 .card.special .front {
   background: linear-gradient(160deg, #e6fbff, #b5edf4);
 }
-.card.twin .front svg {
+/* 닮은 카드: 색 있는 그림은 색만 바꾸고, 색이 없는 수묵화(.ink)는 좌우를 뒤집는다 */
+.card.twin .front > :not(.ink) {
   filter: hue-rotate(150deg) saturate(1.15);
+}
+.card.twin .front > .ink {
+  transform: scaleX(-1);
 }
 .card.gone {
   pointer-events: none;
@@ -1204,13 +1243,20 @@ h1 .word:last-child .tc:last-child .tc-in {
 .mini-card svg {
   width: 86%;
 }
+.mini-card .art {
+  width: 86%;
+  height: 89%;
+  object-fit: cover;
+  border-radius: 5px;
+}
 .mini-card.locked {
-  background: linear-gradient(160deg, #ffc533, #ffb703 55%, #f2a300);
-  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 80%, #fff), 0 2px 0 var(--depth);
+  overflow: hidden;
+  background: #ffb703;
   opacity: 0.6;
 }
 .mini-card.locked svg {
-  width: 74%;
+  width: 100%;
+  height: 100%;
 }
 .mini-card.gold {
   background: linear-gradient(160deg, #fff7cc, #ffd970);
@@ -1615,7 +1661,138 @@ h1 .word:last-child .tc:last-child .tc-in {
   text-align: center;
 }
 
-/* 도감 */
+/* 도감: 큰 카드 + 설명(고정 크기) 아래로 묶음별 카드 목록만 스크롤된다 */
+.modal:has(.dex) {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.dex {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.dex h2 {
+  flex: none;
+}
+.dex-stage {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+.dex-big {
+  --cw: 112px;
+  flex: none;
+  position: relative;
+  width: 112px;
+  height: 144px;
+  perspective: 800px;
+}
+.dex-big.pop {
+  animation: dex-pop 0.32s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+@keyframes dex-pop {
+  40% {
+    scale: 1.06;
+  }
+}
+.dex-flip {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 14px;
+  transform-style: preserve-3d;
+  transition: transform 0.42s cubic-bezier(0.3, 1.3, 0.5, 1);
+}
+.dex-flip.up {
+  transform: rotateY(180deg);
+}
+.dex-flip .side {
+  border-radius: 14px;
+  box-shadow: 0 4px 0 var(--depth), 0 10px 22px rgb(42 36 51 / 0.2);
+}
+.dex-big.gold .front {
+  background: linear-gradient(160deg, #fff7cc, #ffd970);
+  box-shadow: inset 0 0 0 3px var(--gold), 0 4px 0 var(--depth), 0 10px 22px rgb(42 36 51 / 0.2);
+}
+.dex-star {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: #fff;
+  font-weight: 400;
+  box-shadow: 0 2px 0 var(--depth);
+  opacity: 0;
+  scale: 0.4;
+  transition: opacity 0.2s, scale 0.25s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.dex-big.gold .dex-star {
+  opacity: 1;
+  scale: 1;
+}
+/* 설명 칸 높이는 고정: 제목·작가 한 줄씩 + 설명 최대 4줄. 글이 바뀌어도 아래 목록이 움직이지 않는다 */
+.dex-info {
+  width: 100%;
+  height: 7.6rem;
+  text-align: center;
+}
+.dex-info.swap {
+  animation: dex-text 0.3s ease-out;
+}
+@keyframes dex-text {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+.dex-info p {
+  margin: 0;
+  overflow: hidden;
+}
+.dex-title {
+  font-size: 20px;
+  line-height: 1.3;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--ink);
+}
+.dex-by {
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--accent-ink);
+}
+.dex-desc {
+  margin-top: 4px !important;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--muted);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+}
+.dex-sets {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: 0 -6px;
+  padding: 0 6px 4px;
+}
 .dex section {
   margin-top: 12px;
 }
@@ -1627,20 +1804,97 @@ h1 .word:last-child .tc:last-child .tc-in {
   grid-template-columns: repeat(8, 1fr);
   gap: 5px;
 }
-/* 도감 칸은 보기만 하는 그림(누르는 동작 없음) */
 .dex-item {
   display: block;
   width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.dex-item:active {
+  transform: scale(0.94);
+}
+.dex-item[aria-pressed='true'] {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.dex-item:focus-visible {
+  outline: 3px solid var(--accent-ink);
+  outline-offset: 2px;
 }
 .dex-item .mini-card {
   width: 100%;
   height: auto;
   aspect-ratio: 0.78;
 }
+/* 키가 낮은 휴대폰: 큰 카드·설명을 줄여 목록 자리를 남긴다 */
+@media (max-height: 700px) and (orientation: portrait) {
+  .dex-big {
+    --cw: 80px;
+    width: 80px;
+    height: 103px;
+  }
+  .dex-stage {
+    gap: 6px;
+    padding-bottom: 8px;
+  }
+  .dex-info {
+    height: 5.6rem;
+  }
+  .dex-title {
+    font-size: 18px;
+  }
+  .dex-desc {
+    font-size: 13px;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+}
 @media (max-width: 380px) {
   .dex ul {
     grid-template-columns: repeat(4, 1fr);
     gap: 6px;
+  }
+}
+/* 가로로 눕힌 휴대폰: 큰 카드·설명은 왼쪽, 목록은 오른쪽 */
+@media (orientation: landscape) and (max-height: 559px) {
+  .dex {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    grid-template-rows: auto 1fr;
+    column-gap: 14px;
+  }
+  .dex h2 {
+    grid-column: 1 / -1;
+    margin-bottom: 6px;
+  }
+  .dex-stage {
+    min-height: 0;
+    overflow-y: auto;
+    padding-bottom: 0;
+    border-bottom: 0;
+    gap: 6px;
+  }
+  .dex-big {
+    --cw: 70px;
+    width: 70px;
+    height: 90px;
+  }
+  .dex-info {
+    height: auto;
+  }
+  .dex-desc {
+    -webkit-line-clamp: 5;
+    line-clamp: 5;
+  }
+  .dex-sets {
+    min-height: 0;
+  }
+  .dex section:first-child {
+    margin-top: 0;
   }
 }
 

@@ -1,0 +1,290 @@
+[
+ {
+  "face": "berceuse",
+  "id": 437984,
+  "cx": 0.5,
+  "cy": 0.4,
+  "hf": 0.66,
+  "mode": "pop",
+  "palette": [
+   "#1b1340",
+   "#ff3d8b",
+   "#ffd23f",
+   "#fff6e0"
+  ]
+ },
+ {
+  "face": "strawhat",
+  "id": 436532,
+  "cx": 0.5,
+  "cy": 0.5,
+  "hf": 0.72,
+  "mode": "pop",
+  "palette": [
+   "#0b2a5b",
+   "#00b3a4",
+   "#ff8a00",
+   "#fff3b0"
+  ]
+ },
+ {
+  "face": "rembrandt",
+  "id": 437397,
+  "cx": 0.52,
+  "cy": 0.3,
+  "hf": 0.48,
+  "mode": "pop",
+  "palette": [
+   "#2a0a3d",
+   "#e8442e",
+   "#3ec1ff",
+   "#ffe8f2"
+  ]
+ },
+ {
+  "face": "madamex",
+  "id": 12127,
+  "cx": 0.5,
+  "cy": 0.28,
+  "hf": 0.4,
+  "mode": "pop",
+  "palette": [
+   "#101010",
+   "#7b2ff7",
+   "#ff61c6",
+   "#f8f8f8"
+  ]
+ },
+ {
+  "face": "arlesienne",
+  "id": 436529,
+  "cx": 0.45,
+  "cy": 0.33,
+  "hf": 0.55,
+  "mode": "pop",
+  "palette": [
+   "#123b1f",
+   "#ff4f4f",
+   "#ffd400",
+   "#e9fff4"
+  ]
+ },
+ {
+  "face": "wave",
+  "id": 45434,
+  "cx": 0.3,
+  "cy": 0.5,
+  "hf": 0.95,
+  "mode": "pop",
+  "palette": [
+   "#071d49",
+   "#ff5a1f",
+   "#21d4fd",
+   "#fffbea"
+  ]
+ },
+ {
+  "face": "baby",
+  "id": 459123,
+  "cx": 0.42,
+  "cy": 0.38,
+  "hf": 0.62,
+  "mode": "pop",
+  "palette": [
+   "#3a0d0d",
+   "#2563eb",
+   "#a3e635",
+   "#fff7ed"
+  ]
+ },
+ {
+  "face": "sunflowers",
+  "id": 436524,
+  "cx": 0.3,
+  "cy": 0.5,
+  "hf": 0.9,
+  "mode": "pop",
+  "palette": [
+   "#1e1b4b",
+   "#db2777",
+   "#fb923c",
+   "#fef08a"
+  ]
+ },
+ {
+  "face": "cypress",
+  "id": 436535,
+  "cx": 0.68,
+  "cy": 0.5,
+  "hf": 0.92
+ },
+ {
+  "face": "olive",
+  "id": 437998,
+  "cx": 0.5,
+  "cy": 0.5,
+  "hf": 1
+ },
+ {
+  "face": "orchard",
+  "id": 436527,
+  "cx": 0.5,
+  "cy": 0.5,
+  "hf": 0.9
+ },
+ {
+  "face": "harvest",
+  "id": 435809,
+  "cx": 0.62,
+  "cy": 0.5,
+  "hf": 1
+ },
+ {
+  "face": "gulfstream",
+  "id": 11122,
+  "cx": 0.5,
+  "cy": 0.55,
+  "hf": 0.9
+ },
+ {
+  "face": "matterhorn",
+  "id": 10158,
+  "cx": 0.55,
+  "cy": 0.38,
+  "hf": 0.72
+ },
+ {
+  "face": "boating",
+  "id": 436947,
+  "cx": 0.62,
+  "cy": 0.45,
+  "hf": 0.95
+ },
+ {
+  "face": "oxbow",
+  "id": 10497,
+  "cx": 0.7,
+  "cy": 0.55,
+  "hf": 0.9
+ },
+ {
+  "face": "apples",
+  "id": 435882,
+  "cx": 0.4,
+  "cy": 0.62,
+  "hf": 0.72
+ },
+ {
+  "face": "roses",
+  "id": 436534,
+  "cx": 0.5,
+  "cy": 0.45,
+  "hf": 0.8
+ },
+ {
+  "face": "oleanders",
+  "id": 436530,
+  "cx": 0.5,
+  "cy": 0.4,
+  "hf": 0.8
+ },
+ {
+  "face": "shoes",
+  "id": 436533,
+  "cx": 0.5,
+  "cy": 0.55,
+  "hf": 0.9
+ },
+ {
+  "face": "dancers",
+  "id": 438817,
+  "cx": 0.3,
+  "cy": 0.6,
+  "hf": 0.6
+ },
+ {
+  "face": "cardplayers",
+  "id": 435868,
+  "cx": 0.5,
+  "cy": 0.55,
+  "hf": 0.85
+ },
+ {
+  "face": "tahiti",
+  "id": 438821,
+  "cx": 0.78,
+  "cy": 0.4,
+  "hf": 0.6
+ },
+ {
+  "face": "garden",
+  "id": 436965,
+  "cx": 0.6,
+  "cy": 0.6,
+  "hf": 0.75
+ },
+ {
+  "face": "bamboo",
+  "id": 48890,
+  "cx": 0.4,
+  "cy": 0.4,
+  "hf": 0.6,
+  "mode": "ink"
+ },
+ {
+  "face": "plum",
+  "id": 36432,
+  "cx": 0.45,
+  "cy": 0.35,
+  "hf": 0.6,
+  "mode": "ink"
+ },
+ {
+  "face": "orchid",
+  "id": 48932,
+  "cx": 0.5,
+  "cy": 0.72,
+  "hf": 0.45,
+  "mode": "ink"
+ },
+ {
+  "face": "grapes",
+  "id": 853192,
+  "cx": 0.38,
+  "cy": 0.6,
+  "hf": 0.45,
+  "mode": "ink"
+ },
+ {
+  "face": "swallows",
+  "id": 54745,
+  "cx": 0.45,
+  "cy": 0.35,
+  "hf": 0.55,
+  "mode": "ink"
+ },
+ {
+  "face": "mist",
+  "id": 45070,
+  "cx": 0.45,
+  "cy": 0.45,
+  "hf": 0.6,
+  "mode": "ink"
+ },
+ {
+  "face": "peaks",
+  "id": 45072,
+  "cx": 0.55,
+  "cy": 0.55,
+  "hf": 0.65,
+  "mode": "ink"
+ },
+ {
+  "face": "tiger",
+  "id": 57300,
+  "cx": 0.3,
+  "cy": 0.45,
+  "hf": 0.78,
+  "mode": "ink"
+ }
+]

@@ -5,7 +5,9 @@ import { Game, type GameEvent, type GameResult } from './game/engine';
 import { FACE_SETS, type FaceId } from './game/faces';
 import { dateKey, dateSeed, mulberry32, randomSeed } from './game/rng';
 import { MAX_MS, WARN_MS } from './game/stages';
-import { setLang, setName, t } from './i18n';
+import { setName } from './cards';
+import { preloadFaces } from './ui/art';
+import { setLang, t } from './i18n';
 import { fetchBoard, submitEntry } from './online';
 import { boardEntries, clearPending, keepPending, pendingRecord, placeOf, type Mode, type RankEntry } from './ranking';
 import { shareResult } from './share';
@@ -416,6 +418,8 @@ document.documentElement.classList.remove('booting');
 
 // 조이팩 서비스 워커(사이트에 하나)를 등록하고, 이 게임 파일 전체를 캐시하라고 알린다
 window.addEventListener('load', () => {
+  // 명화 카드 그림을 미리 받아 둔다(뒤집는 순간 빈칸이 보이지 않게)
+  preloadFaces();
   void Joypack.registerSW({ root: '../../', game: 'timetoflip' });
   // 공유 링크로 바로 들어온 사람에게 조이팩 앱 설치 안내 띠
   Joypack.inviteBar({ root: '../../' });

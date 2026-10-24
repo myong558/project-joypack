@@ -1,12 +1,13 @@
 import type { GameResult } from '../game/engine';
 import { FACE_SETS, type FaceId } from '../game/faces';
-import { LANGS, faceName, getLang, setName, t, type Lang } from '../i18n';
+import { cardInfo, faceName, setName } from '../cards';
+import { LANGS, getLang, t, type Lang } from '../i18n';
 import type { SaveData } from '../storage';
 import { NAME_MAX, RANK_SIZE, boardEntries, cleanName, isValidName, pendingRecord, placeOf, type Mode } from '../ranking';
 import { SKIN_SETTINGS, THEMES, type Skin, type SkinSetting, type Theme } from '../theme';
 import { captureResult, type ShareOutcome } from '../share';
 import { CARD_BACK, MASCOT, faceSvg } from './art';
-import { confetti, countUp } from './effects';
+import { confetti, countUp, reducedMotion } from './effects';
 import { ICONS, SKIN_ICONS, THEME_ICONS } from './icons';
 
 export type { Mode };
@@ -115,7 +116,7 @@ function titleCards(title: string): string {
 function heroDemo(): string {
   const card = (n: number, face: FaceId) =>
     `<span class="card demo-card d${n}"><span class="inner"><span class="side back">${CARD_BACK}</span><span class="side front">${faceSvg(face)}</span></span></span>`;
-  return `<div class="demo">${card(1, 'moon')}${card(2, 'sun')}${card(3, 'moon')}<b class="demo-pop">+1.5</b></div><div class="demo-timer"><i></i></div>`;
+  return `<div class="demo">${card(1, 'wave')}${card(2, 'strawhat')}${card(3, 'wave')}<b class="demo-pop">+1.5</b></div><div class="demo-timer"><i></i></div>`;
 }
 
 export function startScreen(opts: StartOptions): HTMLElement {
@@ -186,6 +187,11 @@ export function startScreen(opts: StartOptions): HTMLElement {
 
 /* ---------- 도감 ---------- */
 
+/**
+ * 도감: 위 가운데 큰 카드(처음엔 뒷면) + 그 아래 설명, 아래쪽에 묶음별 작은 카드.
+ * 작은 카드를 누르면 큰 카드가 뒤집혀 그 그림으로 바뀌고 제목·작가·설명이 나온다.
+ * 큰 카드·설명 칸은 크기를 고정해(설명은 최대 4줄) 글 길이가 달라도 화면이 덜컥이지 않는다
+ */
 function openDex(host: HTMLElement, save: SaveData): void {
   const found = new Set(save.dex);
   const gold = new Set(save.gold);
@@ -193,22 +199,75 @@ function openDex(host: HTMLElement, save: SaveData): void {
     <div class="dex">
       ${closeButton()}
       <h2>${ICONS.album} ${t('dex.title')} <small>${found.size}/${DEX_TOTAL} · ${t('dex.goldCount', { n: gold.size })}</small></h2>
-      <p class="note">${t('dex.hint')}</p>
+      <div class="dex-stage">
+        <div class="dex-big" aria-hidden="true">
+          <span class="dex-flip"><span class="side back">${CARD_BACK}</span><span class="side front"></span></span>
+          <b class="dex-star">★</b>
+        </div>
+        <div class="dex-info" aria-live="polite">
+          <p class="dex-title">${t('dex.pickTitle')}</p>
+          <p class="dex-by">&nbsp;</p>
+          <p class="dex-desc">${t('dex.pick')}</p>
+        </div>
+      </div>
       <div class="dex-sets">
         ${FACE_SETS.map(
           (s, i) => `<section>
             <h3>${setName(s.id)} <small>${t('dex.from', { n: i + 1 })}</small></h3>
             <ul>${s.faces
-              .map((f) =>
-                found.has(f)
-                  ? `<li><span class="dex-item" role="img" aria-label="${faceName(f)}${gold.has(f) ? ` · ${t('dex.gold')}` : ''}">${miniCard(f, { gold: gold.has(f) })}</span></li>`
-                  : `<li><span class="dex-item" role="img" aria-label="??? — ${t('dex.locked')}">${miniCard(f, { locked: true })}</span></li>`,
-              )
+              .map((f) => {
+                const label = found.has(f) ? `${faceName(f)}${gold.has(f) ? ` · ${t('dex.gold')}` : ''}` : `??? — ${t('dex.locked')}`;
+                return `<li><button class="dex-item" type="button" data-face="${f}" data-stage="${i + 1}" aria-pressed="false" aria-label="${label}">${miniCard(f, found.has(f) ? { gold: gold.has(f) } : { locked: true })}</button></li>`;
+              })
               .join('')}</ul>
           </section>`,
         ).join('')}
       </div>
     </div>`);
+
+  const big = box.querySelector<HTMLElement>('.dex-big')!;
+  const flip = box.querySelector<HTMLElement>('.dex-flip')!;
+  const front = flip.querySelector<HTMLElement>('.front')!;
+  const info = box.querySelector<HTMLElement>('.dex-info')!;
+  const [title, by, desc] = [...info.children] as HTMLElement[];
+  let selected: HTMLButtonElement | null = null;
+
+  const show = (item: HTMLButtonElement) => {
+    if (item === selected) return;
+    selected?.setAttribute('aria-pressed', 'false');
+    item.setAttribute('aria-pressed', 'true');
+    selected = item;
+    const face = item.dataset.face as FaceId;
+    const open = found.has(face);
+    const apply = () => {
+      front.innerHTML = open ? faceSvg(face) : '';
+      big.classList.toggle('gold', open && gold.has(face));
+      const text = open ? cardInfo(face) : null;
+      title.textContent = text ? text.title : '???';
+      by.textContent = text ? text.by : t('dex.locked');
+      desc.textContent = text ? text.desc : t('dex.lockedDesc', { n: Number(item.dataset.stage) });
+      info.classList.remove('swap');
+      void info.offsetWidth;
+      info.classList.add('swap');
+    };
+    const wasUp = flip.classList.contains('up');
+    // 앞면끼리 바꿀 때는 옆으로 세워(90°) 안 보이는 순간에 그림을 갈아 끼우고 다시 펼친다
+    if (wasUp && open && !reducedMotion.matches) {
+      flip.animate([{ transform: 'rotateY(180deg)' }, { transform: 'rotateY(270deg)' }], { duration: 120, easing: 'ease-in' }).onfinish = () => {
+        apply();
+        flip.animate([{ transform: 'rotateY(90deg)' }, { transform: 'rotateY(180deg)' }], { duration: 180, easing: 'cubic-bezier(.3,1.4,.5,1)' });
+      };
+    } else {
+      // 뒷면 ↔ 앞면은 CSS 전환으로 뒤집는다(잠긴 카드는 뒷면으로 돌아감)
+      if (open) apply();
+      else setTimeout(apply, wasUp ? 130 : 0);
+      flip.classList.toggle('up', open);
+    }
+    big.classList.remove('pop');
+    void big.offsetWidth;
+    big.classList.add('pop');
+  };
+  box.querySelectorAll<HTMLButtonElement>('.dex-item').forEach((b) => b.addEventListener('click', () => show(b)));
   openModal(host, box, t('dex.title'));
 }
 
