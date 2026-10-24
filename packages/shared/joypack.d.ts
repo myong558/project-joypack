@@ -43,6 +43,10 @@ export interface JoypackApi {
   registerSW(options?: { root?: string; game?: string }): Promise<ServiceWorkerRegistration | null>;
   isGameCached(id: string): Promise<boolean>;
   clearGameCache(id: string): Promise<boolean>;
+  /** 오래 안 한 게임 자동 정리: IDLE_DAYS 동안 열지 않은 게임의 파일 캐시를 지우고 지운 id 를 돌려준다(오프라인이면 아무것도 안 함) */
+  cleanupIdleGames(ids: string[]): Promise<string[]>;
+  /** 이 날 수 동안 열지 않은 게임은 저장본을 자동으로 비운다 */
+  IDLE_DAYS: number;
   /** 공유할 배포 주소(+ ?from=share). gameId 를 주면 그 게임 주소, 없으면 조이팩 첫 화면 */
   shareUrl(gameId?: string): string;
   /**

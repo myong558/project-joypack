@@ -125,6 +125,7 @@
           if (document.visibilityState === 'visible') registration.update().catch(() => {});
         });
         if (game) {
+          markPlayed(game);
           navigator.serviceWorker.ready.then((ready) => {
             if (ready.active) ready.active.postMessage({ type: 'cache-game', id: game });
           });
@@ -275,6 +276,46 @@
   function clearGameCache(id) {
     if (!('caches' in global)) return Promise.resolve(false);
     return caches.delete(GAME_CACHE_PREFIX + id).catch(() => false);
+  }
+
+  // ── 오래 안 한 게임 자동 정리(기준서 1.11) ──
+  // 게임이 계속 늘어나므로, 게임을 마지막으로 연 날을 적어 두고 IDLE_DAYS 동안 열지 않은 게임의 파일 캐시를 허브가 지운다.
+  // 다음에 열면(인터넷 연결 시) 다시 받는다. 최고 기록·설정은 그대로
+  const PLAYED_KEY = 'joypack.played'; // { 게임 id: 마지막으로 연 시각(ms) }
+  const IDLE_DAYS = 60;
+
+  function readPlayed() {
+    try {
+      return JSON.parse(read(PLAYED_KEY) || '{}') || {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function markPlayed(id) {
+    const played = readPlayed();
+    played[id] = Date.now();
+    write(PLAYED_KEY, JSON.stringify(played));
+  }
+
+  // 오프라인이면 아무것도 지우지 않는다(지운 게임을 바로 다시 받을 수 없으므로).
+  // 마지막으로 연 날이 적혀 있지 않은 저장본(이 기능 전에 받은 것)은 지우지 않고 오늘부터 센다. 지운 게임 id 목록을 돌려준다
+  function cleanupIdleGames(ids) {
+    if (!('caches' in global) || !navigator.onLine) return Promise.resolve([]);
+    const played = readPlayed();
+    const limit = Date.now() - IDLE_DAYS * 86400000;
+    return Promise.all(
+      ids.map((id) =>
+        isGameCached(id).then((cached) => {
+          if (!cached) return null;
+          if (!played[id]) {
+            markPlayed(id);
+            return null;
+          }
+          return played[id] < limit ? clearGameCache(id).then(() => id) : null;
+        }),
+      ),
+    ).then((list) => list.filter(Boolean));
   }
 
   // 공통 상단 메뉴 아이콘(topbar.css 의 .jp-top-btn 안에 넣는다). 24 격자 선 그림 + 안쪽 옅은 채움(.jp-fill).
@@ -515,6 +556,8 @@
     registerSW: registerSW,
     isGameCached: isGameCached,
     clearGameCache: clearGameCache,
+    cleanupIdleGames: cleanupIdleGames,
+    IDLE_DAYS: IDLE_DAYS,
     shareUrl: shareUrl,
     shareResult: shareResult,
     readInvite: readInvite,

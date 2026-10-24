@@ -917,6 +917,10 @@ function renderInstall(section: HTMLElement, showGuide = false): void {
 const firstCheck = refreshCached();
 // 0.3초 안에 끝나지 않았으면 끝난 뒤 한 번 더 그린다(아직 그리기 전이면 건너뜀)
 void firstCheck.then(() => app.childElementCount && requestRender());
+// 게임이 계속 늘어나므로 오래(Joypack.IDLE_DAYS) 안 한 게임의 저장본은 비운다(기준서 1.11). 지운 게 있으면 카드·설정 표시를 새로
+void firstCheck
+  .then(() => Joypack.cleanupIdleGames(GAMES.map((g) => g.id)))
+  .then((removed) => (removed.length ? refreshHome() : undefined));
 void Promise.race([firstCheck, new Promise((r) => setTimeout(r, 300))]).then(startHome);
 
 // 조이팩으로 들어오면 늘 시작 화면: 게임으로 떠날 때 열린 창(랭킹·설정·개발자 모드)을 닫아 두고,

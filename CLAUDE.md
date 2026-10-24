@@ -14,6 +14,7 @@
 
 - **글꼴은 상업적 사용이 가능한 무료 글꼴만**(예외 없음): `fonts/catalog.json` 목록에 `free`·`commercial` 이 true, 허용 라이선스(SIL OFL 1.1), 예약 글꼴 이름 없음으로 검증된 것만 쓴다. 유료·비상업용·개인 사용 무료·자체 약관 글꼴은 넣지 않는다. `pnpm build` 가 `scripts/check-fonts.mjs` 로 검사해 어기면 빌드가 실패한다(기준서 1.10).
 - **효과음·진동은 `sounds/catalog.json` 목록에서 고른다**(견본 페이지 `/sounds/`). 소리는 직접 합성 또는 CC0 파일만, 더 좋은 효과를 만들면 목록에 더해 쓴다. `pnpm build` 가 `scripts/check-sounds.mjs` 로 검사한다(기준서 1.7).
+- **용량 상한**: 게임 하나 1MB 경고·2MB 실패, 허브 400KB 경고·600KB 실패. `pnpm build` 가 `scripts/check-size.mjs` 로 검사한다. 새 게임은 `Joypack.registerSW` 에 `game` id 를 꼭 넘긴다(60일 안 연 게임 자동 정리에 씀, 기준서 1.11).
 - **저작물**: 그림·소리·글꼴·문구는 직접 만든 것(코드로 그린 SVG·CSS, Web Audio 합성) 또는 상업 이용이 명시된 라이선스만 쓴다. 출처·라이선스를 모르면 쓰지 않는다. 외부 CDN 금지. 제3자 것을 쓰면 같은 커밋에서 README 8.1·`LICENSE`·`dist` 라이선스 파일에 기록한다.
 - **이름·상표**: 유명 게임·상표와 같거나 비슷한 이름·캐릭터·로고를 만들지 않는다. 새 게임 이름은 상표 검색 결과를 README 기획에 적는다.
 - **사용자 글**: 랭킹 이름은 등록 전에 `Joypack.isAllowedName`(금지어)로 거른다. 자유 입력 글(채팅·댓글)은 만들지 않는다.

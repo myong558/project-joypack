@@ -5,6 +5,7 @@
 //   3. 공통 모듈 packages/shared/joypack.js·topbar.css → dist/shared/ (빌드 없는 게임이 불러옴)
 //   4. 게임마다 파일 목록 dist/games/<id>/files.json (경로 + 해시). 처음 열 때 이 목록 전체를 캐시한다
 //   5. 서비스 워커 dist/sw.js: 허브 파일만 미리 캐시, 게임은 처음 열 때 캐시 (scripts/sw-template.js)
+//   6~8. 검사: 글꼴·효과음 상업 이용, 용량(게임 하나·허브 크기 상한, scripts/check-size.mjs)
 // 게임 하나만 고쳤을 때: pnpm build <id> → 허브와 그 게임만 다시 빌드하고 다른 게임은 지난 dist 를 그대로 쓴다(빠른 확인용).
 // 배포(CI)·커밋 전 최종 확인은 인자 없이 전체 빌드한다
 import { execSync } from 'node:child_process';
@@ -14,6 +15,7 @@ import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkFonts } from './check-fonts.mjs';
 import { checkIcons } from './check-icons.mjs';
+import { LIMITS, checkSize } from './check-size.mjs';
 import { checkSounds } from './check-sounds.mjs';
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
@@ -101,6 +103,7 @@ cpSync(join(ROOT, 'sounds/catalog.json'), join(DIST, 'sounds/catalog.json'));
 cpSync(join(ROOT, 'packages/shared/sfx.js'), join(DIST, 'sounds/sfx.js'));
 
 // 4. 게임별 파일 목록
+const sizeGroups = [];
 for (const game of games) {
   const out = join(DIST, 'games', game.id);
   const files = walk(out)
@@ -109,6 +112,7 @@ for (const game of games) {
   writeFileSync(join(out, 'files.json'), JSON.stringify({ id: game.id, files }, null, 2));
   const kb = files.reduce((sum, f) => sum + statSync(join(DIST, f.path)).size, 0) / 1024;
   console.log(`games/${game.id}: 파일 ${files.length}개, ${kb.toFixed(0)} KB (처음 열 때 캐시)`);
+  sizeGroups.push({ name: `games/${game.id}`, kind: 'game', paths: files.map((f) => f.path) });
 }
 
 // 5. 서비스 워커
@@ -142,3 +146,13 @@ if (soundErrors.length) {
   process.exit(1);
 }
 console.log('효과음 검사: 모두 직접 합성 또는 CC0, 목록 밖 소리 파일 없음');
+
+// 8. 용량 검사(기준서 1.11, 필수): 게임은 계속 늘어나므로 게임 하나·허브마다 상한. 넘으면 큰 파일 순서를 보여 준다
+sizeGroups.push({ name: '허브', kind: 'hub', paths: hubFiles });
+const size = checkSize(DIST, sizeGroups);
+if (size.warnings.length) console.warn(`용량 경고(기준서 1.11, 빌드는 계속):\n- ${size.warnings.join('\n- ')}`);
+if (size.errors.length) {
+  console.error(`용량 검사 실패(기준서 1.11):\n- ${size.errors.join('\n- ')}`);
+  process.exit(1);
+}
+console.log(`용량 검사: 게임 하나 ${LIMITS.game.warn} KB · 허브 ${LIMITS.hub.warn} KB 안${size.warnings.length ? ' (경고 있음)' : ''}`);
