@@ -871,6 +871,9 @@ h1 .word:last-child .tc:last-child .tc-in {
   animation: sheen 7s ease-in-out infinite;
   animation-delay: calc(var(--i, 0) * 0.23s);
 }
+.board .back::after {
+  display: none;
+}
 @keyframes sheen {
   0%,
   78% {
@@ -2133,6 +2136,12 @@ body:has(.screen.game) .scene {
 body:has(.screen.game) .scene .layer {
   opacity: 0.6;
 }
+/* 게임 중에는 떠다니는 카드 층을 아예 숨긴다(외우는 데 방해되고, 3D 로 도는 층이 휴대폰에서 깜박임을 일으킴) */
+body:has(.screen.game) .scene .mid,
+body:has(.screen.game) .scene .near,
+body:has(.screen.game) .scene .beams {
+  display: none;
+}
 
 /* 오로라: 스킨 색이 번진 큰 덩어리 셋이 서로 다른 속도로 흐르며 겹친다 */
 .aurora i {
@@ -2170,23 +2179,29 @@ body:has(.screen.game) .scene .layer {
     transform: translate3d(-30vw, 25vh, 0) scale(0.85) rotate(-30deg);
   }
 }
-/* 빛줄기: 위쪽 가운데에서 부채꼴로 퍼지는 옅은 빛이 아주 느리게 돈다(미술관 조명) */
-.rays {
+/* 비스듬한 빛 띠 두 줄: 서로 나란히(한 점에서 퍼지지 않게) 화면을 천천히 가로지른다. 미술관 창으로 드는 햇살 */
+.beams i {
   position: absolute;
-  left: 50%;
-  top: -60vmax;
-  width: 120vmax;
-  height: 120vmax;
-  margin-left: -60vmax;
-  background: repeating-conic-gradient(from 0deg, rgb(255 255 255 / 0.16) 0deg 6deg, transparent 6deg 22deg);
-  mask-image: radial-gradient(closest-side, #000 20%, transparent 75%);
-  -webkit-mask-image: radial-gradient(closest-side, #000 20%, transparent 75%);
-  animation: rays 140s linear infinite;
+  top: -30vh;
+  left: 0;
+  width: 26vmax;
+  height: 160vh;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.22) 45%, rgb(255 255 255 / 0.22) 55%, transparent);
+  transform: translate3d(-40vw, 0, 0) rotate(18deg);
+  animation: beam 26s ease-in-out infinite;
   will-change: transform;
 }
-@keyframes rays {
-  to {
-    transform: rotate(360deg);
+.beams i:last-child {
+  width: 12vmax;
+  animation-duration: 34s;
+  animation-delay: -14s;
+}
+@keyframes beam {
+  50% {
+    transform: translate3d(110vw, 0, 0) rotate(18deg);
+  }
+  100% {
+    transform: translate3d(-40vw, 0, 0) rotate(18deg);
   }
 }
 

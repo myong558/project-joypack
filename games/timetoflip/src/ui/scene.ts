@@ -4,7 +4,7 @@ import { reducedMotion } from './effects';
 
 /**
  * 깊이감 있는 움직이는 배경(화면 뒤 고정 층). 색은 스킨을 따른다(styles.css .scene).
- *   빛      스킨 색이 번지는 오로라 덩어리 3개가 천천히 흐르고, 위에서 빛줄기가 느리게 돈다. 가장자리는 살짝 어둡게(비네트)
+ *   빛      스킨 색이 번지는 오로라 덩어리 3개가 천천히 흐르고, 비스듬한 빛 띠 두 줄이 천천히 가로지른다(게임 중에는 숨김). 가장자리는 살짝 어둡게(비네트)
  *   먼 층   큰 빛망울이 떠다니며 숨 쉬듯 커졌다 작아짐 + 작은 반짝이
  *   중간 층 실제 카드(뒷면·도형·팝아트)가 좌우로 흔들리며 떠오르고, 가끔 뒤집혀 그림을 보였다 다시 덮음
  *   가까운 층 큰 카드가 더 빠르게, 살짝 흐릿하게(초점 밖) 지나감
@@ -46,7 +46,7 @@ export function mountScene(): void {
   scene.setAttribute('aria-hidden', 'true');
   scene.innerHTML = `
     <div class="aurora"><i class="a1"></i><i class="a2"></i><i class="a3"></i></div>
-    <div class="rays"></div>
+    <div class="beams"><i></i><i></i></div>
     <div class="layer far" style="--k:6">${bokeh}${sparks}</div>
     <div class="layer mid" style="--k:14">${cards(7, [26, 40], [30, 44])}</div>
     <div class="layer near" style="--k:28">${cards(4, [56, 76], [18, 26])}</div>`;

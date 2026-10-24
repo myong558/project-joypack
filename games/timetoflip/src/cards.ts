@@ -35,7 +35,7 @@ const pop = (koArtist: string, enArtist: string, year: string) => ({
 
 const CARDS: Record<FaceId, Entry> = {
   /* ---------- 도형: 작가 미상 우스개 ---------- */
-  circle: joke('빨간 동그라미', '모서리가 없어 굴러다니다 작가를 잃어버린 전설의 작품.', 'Red Circle', 'Not one corner. It rolled away and lost its artist, they say.'),
+  circle: joke('먹색 동그라미', '모서리가 없어 굴러다니다 작가를 잃어버린 전설의 작품.', 'Charcoal Circle', 'Not one corner. It rolled away and lost its artist, they say.'),
   triangle: joke('파란 세모', '세 변이 서로 자기가 밑변이라며 아직도 다투는 중.', 'Blue Triangle', 'All three sides still argue over which one is the bottom.'),
   square: joke('초록 네모', '네 변이 똑같아 자를 든 비평가들이 눈물을 흘렸다.', 'Green Square', 'Four equal sides. Critics with rulers wept openly.'),
   diamond: joke('노란 마름모', '네모가 고개를 45도 갸웃했을 뿐인데 몸값이 두 배.', 'Yellow Diamond', 'A square tilted its head 45° and doubled its price.'),
@@ -158,8 +158,8 @@ const CARDS: Record<FaceId, Entry> = {
 
   /* ---------- 동양화 · 수묵 ---------- */
   bamboo: art(
-    { title: '대나무', by: '가쓰시카 호쿠사이 · 18~19세기', desc: '파도 판화로 유명한 호쿠사이의 붓 그림. 먹 하나로 마디의 힘을 그렸다.' },
-    { title: 'Bamboo', by: 'Katsushika Hokusai · 18th–19th c.', desc: 'A brush painting by the master of the Great Wave, in ink alone.' },
+    { title: '풍죽(바람 속 대나무)', by: '탄은 이정 · 17세기 초', desc: '조선 왕족 화가 탄은의 대나무. 바람에 휘는 잎이 금빛 비단 위에서 흔들린다.' },
+    { title: 'Bamboo in the Wind', by: 'Yi Jeong (Taneun) · early 17th c.', desc: 'By the Joseon royal painter Taneun. Leaves bend in the wind on gold-flecked silk.' },
   ),
   plum: art(
     { title: '매화', by: '김농(진눙) · 1757', desc: '청나라 양주팔괴 가운데 한 사람. 겨울 끝에 피는 매화를 빽빽하게.' },
@@ -169,25 +169,25 @@ const CARDS: Record<FaceId, Entry> = {
     { title: '난초와 바위', by: '마수진(마서우전) · 1572', desc: '명나라의 여성 화가. 난초 잎 몇 획으로 바람과 향기를 담았다.' },
     { title: 'Orchid and Rock', by: 'Ma Shouzhen · 1572', desc: 'A Ming woman painter. A few orchid strokes carry wind and scent.' },
   ),
-  grapes: art(
-    { title: '포도', by: '보쿠사이(모쓰린 조토) · 1480~92 무렵', desc: '선종 승려 화가. 먹의 짙고 옅음만으로 잎과 포도알을 나눴다.' },
-    { title: 'Grapes', by: 'Motsurin Jōtō (Bokusai) · c.1480–92', desc: 'A Zen monk painter who told leaf from grape by ink tone alone.' },
+  lotus: art(
+    { title: '부용·연꽃과 바위', by: '석도(스타오) · 1705~07 무렵', desc: '틀에 얽매이지 않던 승려 화가. 젖은 먹을 번지게 해 큰 잎을 단숨에 그렸다.' },
+    { title: 'Hibiscus, Lotus, and Rock', by: 'Shitao · c.1705–07', desc: 'A free-spirited monk painter who let wet ink bloom into broad leaves.' },
   ),
-  swallows: art(
-    { title: '대나무와 작은 새', by: '가와바타 교쿠쇼 · 1887~92', desc: '바람을 가르는 새 두 마리. 아무것도 없는 바탕이 그대로 하늘이 된다.' },
-    { title: 'Small Birds and Bamboo', by: 'Kawabata Gyokushō · 1887–92', desc: 'Two birds cut through the wind. The empty paper becomes the sky.' },
+  eagles: art(
+    { title: '독수리 두 마리', by: '팔대산인(주탑) · 1702', desc: '명 왕족 출신의 괴짜 화가. 바위 위 독수리가 날카롭게 아래를 노려본다.' },
+    { title: 'Two Eagles', by: 'Bada Shanren (Zhu Da) · 1702', desc: 'An eccentric painter of Ming royal blood. The eagles glare down from the rock.' },
   ),
-  mist: art(
-    { title: '산수', by: '가노 모토노부 · 16세기', desc: '안개 속에 봉우리와 숲이 떠오른다. 그리지 않은 곳이 더 많은 그림.' },
-    { title: 'Landscape', by: 'Kano Motonobu · 16th c.', desc: 'Peaks and trees float in mist. More is left blank than painted.' },
+  riverbank: art(
+    { title: '강가 나무 사이의 바람', by: '예찬(니찬) · 1363', desc: '원나라 4대가의 한 사람. 텅 빈 강과 마른 나무 몇 그루로 고요를 그렸다.' },
+    { title: 'Wind among the Trees on the Riverbank', by: 'Ni Zan · 1363', desc: 'A Yuan master who painted stillness with an empty river and a few bare trees.' },
   ),
   peaks: art(
-    { title: '산수 병풍', by: '셋손 슈케이 · 16세기', desc: '여섯 폭 병풍의 한 부분. 가파른 바위산 사이로 마을과 물길이 잇는다.' },
-    { title: 'Landscape Screen', by: 'Sesson Shūkei · 16th c.', desc: 'Part of a six-panel screen: villages and streams between steep peaks.' },
+    { title: '비 오는 밤 배를 대다', by: '심주(선저우) · 1477', desc: '명나라 오파를 연 화가. 빗속 바위산 아래 작은 배가 쉬어 간다.' },
+    { title: 'Anchorage on a Rainy Night', by: 'Shen Zhou · 1477', desc: 'A founder of the Wu School. A small boat rests below rainy cliffs.' },
   ),
-  tiger: art(
-    { title: '호랑이', by: '호쿠사이 화파 · 19세기', desc: '먹선 수천 개로 털을 세운 호랑이. 무섭지만 가장 찾기 쉬울지도.' },
-    { title: 'Tiger', by: 'Hokusai School · 19th c.', desc: 'Thousands of ink strokes for its fur. Scary, but easy to spot.' },
+  huangshan: art(
+    { title: '황산 36봉을 떠올리며', by: '석도(스타오) · 1705 무렵', desc: '젊은 날 오른 황산을 늙어서 기억으로 그렸다. 봉우리가 구름처럼 솟는다.' },
+    { title: 'Thirty-six Peaks of Mount Huang', by: 'Shitao · c.1705', desc: 'Painted from memory of a youthful climb. The peaks rise like clouds.' },
   ),
 };
 

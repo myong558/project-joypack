@@ -25,7 +25,7 @@ const line = (d: string, color: string, w = 3) =>
 const glint = (d: string) => `<path d="${d}" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".45"/>`;
 const floor = `<ellipse cx="32" cy="56" rx="16" ry="2.6" fill="${INK}" opacity=".12"/>`;
 const SHAPES: Record<string, string> = {
-  circle: floor + `<circle cx="32" cy="31" r="20" fill="#ef4444"/>` + glint('M20 25a14 14 0 0 1 9-8'),
+  circle: floor + `<circle cx="32" cy="31" r="20" fill="#374151"/>` + glint('M20 25a14 14 0 0 1 9-8'),
   triangle: floor + `<path d="M32 9 54 50H10z" fill="#2563eb" stroke="#2563eb" stroke-width="5" stroke-linejoin="round"/>` + glint('M27 22l-6 11'),
   square: floor + `<rect x="13" y="12" width="38" height="38" rx="6" fill="#16a34a"/>` + glint('M19 20v9'),
   diamond: floor + `<path d="M32 7 55 31 32 55 9 31z" fill="#eab308" stroke="#eab308" stroke-width="4" stroke-linejoin="round"/>` + glint('M27 17l-7 8'),

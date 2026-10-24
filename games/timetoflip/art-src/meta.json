@@ -216,13 +216,13 @@
     "credit": "Bequest of Joan Whitney Payson, 1975"
   },
   "bamboo": {
-    "metId": 48890,
-    "title": "Bamboo",
-    "artist": "Katsushika Hokusai",
-    "date": "18th–19th century",
-    "url": "https://www.metmuseum.org/art/collection/search/48890",
-    "image": "https://images.metmuseum.org/CRDImages/as/web-large/DP-24985-001.jpg",
-    "credit": "Gift of Annette Young, in memory of her brother, Innis Young, 1956"
+    "metId": 50486,
+    "title": "Bamboo in the Wind",
+    "artist": "Yi Jeong (artist name: Taneun)",
+    "date": "early 17th century",
+    "url": "https://www.metmuseum.org/art/collection/search/50486",
+    "image": "https://images.metmuseum.org/CRDImages/as/web-large/DP355790.jpg",
+    "credit": "Mary Griggs Burke Collection, Gift of the Mary and Jackson Burke Foundation, 2015"
   },
   "plum": {
     "metId": 36432,
@@ -242,49 +242,49 @@
     "image": "https://images.metmuseum.org/CRDImages/as/web-large/DT8794.jpg",
     "credit": "Edward Elliott Family Collection, Purchase, The Dillon Fund Gift, 1982"
   },
-  "grapes": {
-    "metId": 853192,
-    "title": "Grapes",
-    "artist": "Motsurin Jōtō (Bokusai)",
-    "date": "ca. 1480–92",
-    "url": "https://www.metmuseum.org/art/collection/search/853192",
-    "image": "https://images.metmuseum.org/CRDImages/as/web-large/DP-24855-002.jpg",
-    "credit": "Mary and Cheney Cowles Collection, Gift of Mary and Cheney Cowles, 2022"
-  },
-  "swallows": {
-    "metId": 54745,
-    "title": "Small Birds and Bamboo",
-    "artist": "Kawabata Gyokushō",
-    "date": "1887–92",
-    "url": "https://www.metmuseum.org/art/collection/search/54745",
-    "image": "https://images.metmuseum.org/CRDImages/as/web-large/DP211874.jpg",
-    "credit": "Charles Stewart Smith Collection, Gift of Mrs. Charles Stewart Smith, Charles Stewart Smith Collection, Gift of Mrs. Charles Stewart Smith, Charles Stewart Smith Jr., and Howard Caswell Smith, in memory of Charles Stewart Smith, 1914"
-  },
-  "mist": {
-    "metId": 45070,
-    "title": "Landscape",
-    "artist": "Kano Motonobu",
-    "date": "16th century",
-    "url": "https://www.metmuseum.org/art/collection/search/45070",
-    "image": "https://images.metmuseum.org/CRDImages/as/web-large/DP-41805-002.jpg",
-    "credit": "Fletcher Fund,1951"
-  },
   "peaks": {
-    "metId": 45072,
-    "title": "Landscape",
-    "artist": "Sesson Shūkei",
-    "date": "16th century",
-    "url": "https://www.metmuseum.org/art/collection/search/45072",
-    "image": "https://images.metmuseum.org/CRDImages/as/web-large/LC-1982_244_16_cc-001.jpg",
-    "credit": "Bequest of Hope Skillman Schary, 1981"
+    "metId": 49549,
+    "title": "Anchorage on a rainy night",
+    "artist": "Shen Zhou",
+    "date": "dated 1477",
+    "url": "https://www.metmuseum.org/art/collection/search/49549",
+    "image": "https://images.metmuseum.org/CRDImages/as/web-large/DP235605.jpg",
+    "credit": "Gift of Marie-Hélène and Guy Weill, 2015"
   },
-  "tiger": {
-    "metId": 57300,
-    "title": "Tiger",
-    "artist": "Hokusai School",
-    "date": "19th century",
-    "url": "https://www.metmuseum.org/art/collection/search/57300",
-    "image": "https://images.metmuseum.org/CRDImages/as/web-large/DP-1310-001.jpg",
-    "credit": "Fletcher Fund, 1938"
+  "lotus": {
+    "metId": 41492,
+    "title": "Hibiscus, Lotus, and Rock",
+    "artist": "Shitao (Zhu Ruoji)",
+    "date": "ca. 1705–7",
+    "url": "https://www.metmuseum.org/art/collection/search/41492",
+    "image": "https://images.metmuseum.org/CRDImages/as/web-large/DP-36812-002.jpg",
+    "credit": "Gift of Mr. and Mrs. David M. Levitt, by exchange, 1978"
+  },
+  "eagles": {
+    "metId": 39540,
+    "title": "Two eagles",
+    "artist": "Bada Shanren (Zhu Da)",
+    "date": "dated 1702",
+    "url": "https://www.metmuseum.org/art/collection/search/39540",
+    "image": "https://images.metmuseum.org/CRDImages/as/web-large/DP-19468-002.jpg",
+    "credit": "Ex coll.: C. C. Wang Family, Gift of Oscar L. Tang Family, 2014"
+  },
+  "riverbank": {
+    "metId": 41154,
+    "title": "Wind among the Trees on the Riverbank",
+    "artist": "Ni Zan",
+    "date": "1363",
+    "url": "https://www.metmuseum.org/art/collection/search/41154",
+    "image": "https://images.metmuseum.org/CRDImages/as/web-large/DT6291.jpg",
+    "credit": "Bequest of John M. Crawford Jr., 1988"
+  },
+  "huangshan": {
+    "metId": 49181,
+    "title": "Thirty-six Peaks of Mount Huang Recollected",
+    "artist": "Shitao (Zhu Ruoji)",
+    "date": "ca. 1705",
+    "url": "https://www.metmuseum.org/art/collection/search/49181",
+    "image": "https://images.metmuseum.org/CRDImages/as/web-large/DP-36801-002.jpg",
+    "credit": "Gift of Douglas Dillon, 1976"
   }
 }

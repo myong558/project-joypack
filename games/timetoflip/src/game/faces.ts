@@ -10,7 +10,7 @@ export const FACE_SETS = [
   { id: 'popart', faces: ['berceuse', 'strawhat', 'rembrandt', 'madamex', 'arlesienne', 'wave', 'baby', 'sunflowers'] },
   { id: 'landscape', faces: ['cypress', 'olive', 'orchard', 'harvest', 'gulfstream', 'matterhorn', 'boating', 'oxbow'] },
   { id: 'life', faces: ['apples', 'roses', 'oleanders', 'shoes', 'dancers', 'cardplayers', 'tahiti', 'garden'] },
-  { id: 'ink', faces: ['bamboo', 'plum', 'orchid', 'grapes', 'swallows', 'mist', 'peaks', 'tiger'] },
+  { id: 'ink', faces: ['bamboo', 'plum', 'orchid', 'lotus', 'eagles', 'riverbank', 'peaks', 'huangshan'] },
 ] as const;
 
 export type SetId = (typeof FACE_SETS)[number]['id'];

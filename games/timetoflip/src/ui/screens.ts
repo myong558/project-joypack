@@ -116,7 +116,7 @@ function titleCards(title: string): string {
 function heroDemo(): string {
   const card = (n: number, face: FaceId) =>
     `<span class="card demo-card d${n}"><span class="inner"><span class="side back">${CARD_BACK}</span><span class="side front">${faceSvg(face)}</span></span></span>`;
-  return `<div class="demo">${card(1, 'circle')}${card(2, 'triangle')}${card(3, 'circle')}<b class="demo-pop">+1.5</b></div><div class="demo-timer"><i></i></div>`;
+  return `<div class="demo">${card(1, 'square')}${card(2, 'triangle')}${card(3, 'square')}<b class="demo-pop">+1.5</b></div><div class="demo-timer"><i></i></div>`;
 }
 
 /**
