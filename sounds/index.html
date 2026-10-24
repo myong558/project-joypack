@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="robots" content="noindex">
+<title>조이팩 효과음·진동 견본</title>
+<!-- 새 게임을 만들 때 효과음·진동을 고르는 제작용 페이지(sounds/catalog.json, 기준서 1.7). 허브에는 연결하지 않는다 -->
+<style>
+:root { --bg: #f4f2fa; --card: #fff; --ink: #24202e; --muted: #6b6478; --line: rgb(36 32 46 / 0.1); --accent: #6c47ff; --new: #0a7d57; color-scheme: light; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #17151f; --card: #221f2c; --ink: #f2eff8; --muted: #aaa3b8; --line: rgb(255 255 255 / 0.1); --accent: #a48bff; --new: #4fd1a1; color-scheme: dark; }
+}
+* { box-sizing: border-box; }
+html { touch-action: pan-x pan-y; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.45 system-ui, -apple-system, 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+main { max-width: 760px; margin: 0 auto; padding: 18px 16px 60px; }
+h1 { font-size: 22px; margin: 4px 0 6px; }
+.lead { color: var(--muted); margin: 0 0 14px; }
+.tabs { position: sticky; top: 0; z-index: 2; display: flex; gap: 6px; padding: 8px 0; background: var(--bg); }
+.tabs button { flex: 1; padding: 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); color: var(--ink); font: inherit; font-weight: 700; }
+.tabs button[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.filters { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 10px; }
+.filters button { padding: 5px 11px; border: 1px solid var(--line); border-radius: 99px; background: transparent; color: var(--ink); font: inherit; font-size: 13px; }
+.filters button[aria-pressed='true'] { border-color: var(--accent); color: var(--accent); font-weight: 700; }
+h2 { font-size: 15px; margin: 18px 0 8px; color: var(--muted); }
+.item { display: grid; grid-template-columns: 52px 1fr; gap: 4px 12px; align-items: start; padding: 12px; margin-bottom: 8px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); }
+.play { grid-row: span 3; width: 52px; height: 52px; border: 0; border-radius: 14px; background: var(--accent); color: #fff; font-size: 20px; cursor: pointer; }
+.play:active { transform: scale(0.94); }
+.play:disabled { opacity: 0.35; }
+.name { font-weight: 700; }
+.feel { color: var(--muted); font-size: 13.5px; }
+.meta { display: flex; flex-wrap: wrap; gap: 4px; font-size: 12px; }
+.meta span { padding: 1px 8px; border-radius: 99px; background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.meta .new { background: color-mix(in srgb, var(--new) 16%, transparent); color: var(--new); font-weight: 700; }
+.meta code { padding: 1px 6px; border-radius: 6px; background: var(--line); font-size: 11.5px; }
+.bars { display: flex; align-items: center; gap: 2px; height: 14px; margin-top: 2px; }
+.bars i { display: block; height: 10px; border-radius: 3px; background: var(--accent); }
+.bars i.gap { background: transparent; }
+.note { margin-top: 20px; padding: 12px 14px; border-radius: 12px; background: color-mix(in srgb, var(--accent) 8%, transparent); color: var(--muted); font-size: 13.5px; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <h1>조이팩 효과음·진동 견본</h1>
+  <p class="lead">새 게임을 만들 때 상황에 맞는 소리와 진동을 고르는 페이지입니다. 모두 코드로 합성한 소리라 저작권 걱정 없이 상업적으로 씁니다. 진동은 안드로이드 휴대폰에서만 느껴집니다.</p>
+  <div class="tabs" role="group">
+    <button data-tab="sounds" aria-pressed="true">효과음</button>
+    <button data-tab="vibrations" aria-pressed="false">진동</button>
+  </div>
+  <div class="filters" id="filters"></div>
+  <div id="list"></div>
+  <p class="note" id="note"></p>
+</main>
+<script type="module">
+import { playRecipe } from './sfx.js';
+
+const cat = await (await fetch('./catalog.json', { cache: 'no-store' })).json();
+const canVibrate = typeof navigator.vibrate === 'function';
+let ctx = null;
+let tab = 'sounds';
+let group = 'all';
+
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const owner = (id) => (id.startsWith('new/') ? '' : id.split('/')[0]);
+
+function bars(p) {
+  const list = Array.isArray(p) ? p : [p];
+  return `<span class="bars">${list.map((ms, i) => `<i class="${i % 2 ? 'gap' : ''}" style="width:${Math.max(3, ms / 4)}px"></i>`).join('')}</span>`;
+}
+
+function render() {
+  const items = cat[tab];
+  const groups = [...new Set(items.map((x) => x.group))];
+  document.getElementById('filters').innerHTML = ['all', ...groups]
+    .map((g) => `<button data-group="${g}" aria-pressed="${g === group}">${g === 'all' ? '전체' : esc(cat.groups[g] ? cat.groups[g].split('(')[0] : g)}</button>`)
+    .join('');
+  const shown = items.filter((x) => group === 'all' || x.group === group);
+  const byGroup = Object.groupBy ? Object.groupBy(shown, (x) => x.group) : shown.reduce((m, x) => ((m[x.group] ||= []).push(x), m), {});
+  document.getElementById('list').innerHTML = Object.entries(byGroup)
+    .map(([g, xs]) => `<h2>${esc(cat.groups[g] || g)}</h2>` + xs.map((x, i) => item(x)).join(''))
+    .join('');
+  document.getElementById('note').innerHTML =
+    tab === 'sounds'
+      ? `새로 넣은 후보(<b>새 후보</b>)는 아직 쓴 게임이 없습니다. 고른 소리의 <code>id</code> 를 제작 요청에 적거나, 마음에 드는 것을 말씀하시면 됩니다. 더 좋은 소리를 만들면 목록(<code>sounds/catalog.json</code>)에 더한 뒤 씁니다.`
+      : canVibrate
+        ? '막대는 진동(색)과 쉼(빈칸)의 길이입니다. 10ms 아래는 대부분 기기에서 느껴지지 않습니다.'
+        : '이 기기는 진동을 지원하지 않습니다(아이폰 등). 안드로이드 휴대폰에서 열어 보세요.';
+}
+
+function item(x) {
+  const used = x.usedBy.length ? x.usedBy.map((u) => `<span>${esc(u)}</span>`).join('') : '<span class="new">새 후보</span>';
+  if (tab === 'sounds') {
+    return `<div class="item"><button class="play" data-sound="${esc(x.id)}" aria-label="${esc(x.name)} 듣기">▶</button>
+      <div class="name">${esc(x.name)}</div><div class="feel">${esc(x.feel)}${x.note ? ' · ' + esc(x.note) : ''}</div>
+      <div class="meta">${used}<code>${esc(x.id)}</code></div></div>`;
+  }
+  return `<div class="item"><button class="play" data-vib="${esc(x.id)}" ${canVibrate ? '' : 'disabled'} aria-label="${esc(x.name)} 느끼기">📳</button>
+    <div class="name">${esc(x.name)} <code>${esc(JSON.stringify(x.pattern))}</code></div><div class="feel">${esc(x.feel)} · ${esc(x.use)}</div>
+    <div class="meta">${used}</div>${bars(x.pattern)}</div>`;
+}
+
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  if (b.dataset.tab) {
+    tab = b.dataset.tab;
+    group = 'all';
+    document.querySelectorAll('[data-tab]').forEach((t) => t.setAttribute('aria-pressed', String(t === b)));
+    render();
+  } else if (b.dataset.group) {
+    group = b.dataset.group;
+    render();
+  } else if (b.dataset.sound) {
+    ctx ??= new (window.AudioContext || window.webkitAudioContext)();
+    if (ctx.state === 'suspended') ctx.resume();
+    const s = cat.sounds.find((x) => x.id === b.dataset.sound);
+    playRecipe(ctx, s.recipe);
+  } else if (b.dataset.vib && canVibrate) {
+    navigator.vibrate(cat.vibrations.find((x) => x.id === b.dataset.vib).pattern);
+  }
+});
+render();
+</script>
+</body>
+</html>

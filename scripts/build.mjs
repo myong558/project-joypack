@@ -14,6 +14,7 @@ import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkFonts } from './check-fonts.mjs';
 import { checkIcons } from './check-icons.mjs';
+import { checkSounds } from './check-sounds.mjs';
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const DIST = join(ROOT, 'dist');
@@ -93,6 +94,12 @@ mkdirSync(join(DIST, 'shared'), { recursive: true });
 cpSync(join(ROOT, 'packages/shared/joypack.js'), join(DIST, 'shared/joypack.js'));
 cpSync(join(ROOT, 'packages/shared/topbar.css'), join(DIST, 'shared/topbar.css'));
 
+// 3-1. 효과음·진동 견본 페이지(제작용, 허브에 연결하지 않음, 미리 캐시하지 않음): dist/sounds/ (기준서 1.7)
+mkdirSync(join(DIST, 'sounds'), { recursive: true });
+cpSync(join(ROOT, 'sounds/index.html'), join(DIST, 'sounds/index.html'));
+cpSync(join(ROOT, 'sounds/catalog.json'), join(DIST, 'sounds/catalog.json'));
+cpSync(join(ROOT, 'packages/shared/sfx.js'), join(DIST, 'sounds/sfx.js'));
+
 // 4. 게임별 파일 목록
 for (const game of games) {
   const out = join(DIST, 'games', game.id);
@@ -107,7 +114,7 @@ for (const game of games) {
 // 5. 서비스 워커
 const hubFiles = walk(DIST)
   .map(sitePath)
-  .filter((p) => !p.startsWith('games/') && p !== 'sw.js' && !NO_CACHE.has(p));
+  .filter((p) => !p.startsWith('games/') && !p.startsWith('sounds/') && p !== 'sw.js' && !NO_CACHE.has(p));
 const version = createHash('sha256')
   .update(hubFiles.map((p) => p + hashOf(join(DIST, p))).join('\n'))
   .update(readFileSync(join(ROOT, 'scripts/sw-template.js')))
@@ -127,3 +134,11 @@ if (fontErrors.length) {
   process.exit(1);
 }
 console.log('글꼴 검사: 목록·배포본 모두 상업 이용 가능한 무료 글꼴');
+
+// 7. 효과음 상업 이용 검사(기준서 1.7·10장, 필수): 직접 합성 또는 CC0 만, 목록 밖 소리 파일이 배포본에 있으면 빌드 실패
+const soundErrors = checkSounds(DIST);
+if (soundErrors.length) {
+  console.error(`효과음 검사 실패(기준서 1.7):\n- ${soundErrors.join('\n- ')}`);
+  process.exit(1);
+}
+console.log('효과음 검사: 모두 직접 합성 또는 CC0, 목록 밖 소리 파일 없음');
