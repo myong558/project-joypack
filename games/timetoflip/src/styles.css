@@ -325,7 +325,7 @@ button {
   z-index: 5;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   padding: 4px 6px;
   border-radius: 999px;
   background: rgb(20 16 30 / 0.88);
@@ -338,8 +338,8 @@ button {
   font-size: 12px;
 }
 .stage-jump button {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   padding: 0;
   border: 0;
   border-radius: 50%;
@@ -359,8 +359,24 @@ button {
 .stage-jump button:focus-visible {
   background: var(--accent);
 }
+/* 출시 모드 보기 단추: 개발자 모드인 동안 늘 보인다(켜면 이 단추만 남음) */
+.stage-jump .dev-toggle {
+  width: auto;
+  height: 26px;
+  margin-left: 4px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #ffd166;
+  color: #2a2433;
+  font-size: 13px;
+}
+.stage-jump .dev-toggle[aria-pressed='true'] {
+  margin-left: 0;
+  background: rgb(255 255 255 / 0.16);
+  color: #ffd166;
+}
 
-/* 로고 위 시연: 실제 게임 카드(.card .inner .side) 세 장이 7초마다 한 번
+/* 로고 위 시연: 실제 게임 카드(.card .inner .side) 세 장이 8초마다 한 번
  * 뒤집기 → 틀림(빨간 테두리) → 짝(강조 테두리·+1.5) → 시간 막대 차오름 → 다시 엎기를 보여 준다 */
 .hero {
   --cw: 46px;
@@ -382,50 +398,66 @@ button {
 .demo .inner {
   transition: none;
 }
+/* 한 바퀴 8초. 실제 규칙 그대로: 1번 열기 → 2번 열기 → 다른 그림이라 둘 다 빨간 테두리·흔들림 → 둘 다 덮기
+ * → 1번 다시 열기 → 3번 열기 → 짝(강조 테두리·+1.5, 시간 막대 차오름) → 둘 다 덮고 처음부터 */
 .demo .d1 .inner {
-  animation: demo-a 7s ease-in-out infinite;
+  animation: demo-a 8s ease-in-out infinite;
 }
 .demo .d2 .inner {
-  animation: demo-b 7s ease-in-out infinite;
+  animation: demo-b 8s ease-in-out infinite;
 }
 .demo .d3 .inner {
-  animation: demo-c 7s ease-in-out infinite;
+  animation: demo-c 8s ease-in-out infinite;
 }
 @keyframes demo-a {
-  0%, 8% { transform: rotateY(0); }
-  12%, 57% { transform: rotateY(180deg) scale(1); }
-  61% { transform: rotateY(180deg) scale(1.12); }
-  66%, 76% { transform: rotateY(180deg) scale(1); }
-  82%, 100% { transform: rotateY(0); }
+  0%, 6% { transform: rotateY(0); }
+  10%, 26% { transform: rotateY(180deg); }
+  29% { transform: rotateY(180deg) translateX(3px); }
+  31% { transform: rotateY(180deg) translateX(-3px); }
+  33%, 37% { transform: rotateY(180deg); }
+  41%, 46% { transform: rotateY(0); }
+  50%, 62% { transform: rotateY(180deg) scale(1); }
+  66% { transform: rotateY(180deg) scale(1.12); }
+  70%, 80% { transform: rotateY(180deg) scale(1); }
+  85%, 100% { transform: rotateY(0); }
 }
 @keyframes demo-b {
-  0%, 20% { transform: rotateY(0); }
-  24%, 38% { transform: rotateY(180deg); }
-  31% { transform: rotateY(180deg) translateX(3px); }
-  33% { transform: rotateY(180deg) translateX(-3px); }
-  42%, 100% { transform: rotateY(0); }
+  0%, 16% { transform: rotateY(0); }
+  20%, 26% { transform: rotateY(180deg); }
+  29% { transform: rotateY(180deg) translateX(3px); }
+  31% { transform: rotateY(180deg) translateX(-3px); }
+  33%, 37% { transform: rotateY(180deg); }
+  41%, 100% { transform: rotateY(0); }
 }
 @keyframes demo-c {
-  0%, 44% { transform: rotateY(0); }
-  48%, 57% { transform: rotateY(180deg) scale(1); }
-  61% { transform: rotateY(180deg) scale(1.12); }
-  66%, 76% { transform: rotateY(180deg) scale(1); }
-  82%, 100% { transform: rotateY(0); }
+  0%, 54% { transform: rotateY(0); }
+  58%, 62% { transform: rotateY(180deg) scale(1); }
+  66% { transform: rotateY(180deg) scale(1.12); }
+  70%, 80% { transform: rotateY(180deg) scale(1); }
+  85%, 100% { transform: rotateY(0); }
+}
+/* 1번은 틀림(빨강)과 짝(강조색)을 모두 겪고, 2번은 틀림만, 3번은 짝만 */
+.demo .d1 .front {
+  animation: demo-front-a 8s infinite;
 }
 .demo .d2 .front {
-  animation: demo-wrong 7s infinite;
+  animation: demo-wrong 8s infinite;
 }
-.demo .d1 .front,
 .demo .d3 .front {
-  animation: demo-match 7s infinite;
+  animation: demo-match 8s infinite;
+}
+@keyframes demo-front-a {
+  0%, 25%, 39%, 63%, 82%, 100% { box-shadow: 0 3px 0 var(--depth); }
+  27%, 37% { box-shadow: inset 0 0 0 3px var(--danger), 0 3px 0 var(--depth); }
+  65%, 80% { box-shadow: inset 0 0 0 3px var(--accent), 0 0 14px var(--glow), 0 3px 0 var(--depth); }
 }
 @keyframes demo-wrong {
-  0%, 27%, 39%, 100% { box-shadow: 0 3px 0 var(--depth); }
-  29%, 37% { box-shadow: inset 0 0 0 3px var(--danger), 0 3px 0 var(--depth); }
+  0%, 25%, 39%, 100% { box-shadow: 0 3px 0 var(--depth); }
+  27%, 37% { box-shadow: inset 0 0 0 3px var(--danger), 0 3px 0 var(--depth); }
 }
 @keyframes demo-match {
-  0%, 57%, 78%, 100% { box-shadow: 0 3px 0 var(--depth); }
-  60%, 74% { box-shadow: inset 0 0 0 3px var(--accent), 0 0 14px var(--glow), 0 3px 0 var(--depth); }
+  0%, 63%, 82%, 100% { box-shadow: 0 3px 0 var(--depth); }
+  65%, 80% { box-shadow: inset 0 0 0 3px var(--accent), 0 0 14px var(--glow), 0 3px 0 var(--depth); }
 }
 .demo-pop {
   position: absolute;
@@ -437,13 +469,13 @@ button {
   line-height: 1;
   color: var(--accent-ink);
   opacity: 0;
-  animation: demo-pop 7s infinite;
+  animation: demo-pop 8s infinite;
 }
 @keyframes demo-pop {
-  0%, 58% { opacity: 0; transform: translateY(6px) scale(0.8); }
-  62% { opacity: 1; transform: none; }
-  72% { opacity: 1; transform: translateY(-6px); }
-  78%, 100% { opacity: 0; transform: translateY(-10px); }
+  0%, 64% { opacity: 0; transform: translateY(6px) scale(0.8); }
+  67% { opacity: 1; transform: none; }
+  77% { opacity: 1; transform: translateY(-6px); }
+  83%, 100% { opacity: 0; transform: translateY(-10px); }
 }
 .demo-timer {
   width: calc(var(--cw, 46px) * 3 + 16px);
@@ -458,13 +490,13 @@ button {
   border-radius: inherit;
   background: var(--accent);
   transform-origin: left;
-  animation: demo-time 7s linear infinite;
+  animation: demo-time 8s linear infinite;
 }
 @keyframes demo-time {
   0% { transform: scaleX(0.84); }
-  58% { transform: scaleX(0.5); }
-  62% { transform: scaleX(0.92); }
-  66% { transform: scaleX(0.9); }
+  64% { transform: scaleX(0.45); }
+  68% { transform: scaleX(0.92); }
+  72% { transform: scaleX(0.9); }
   100% { transform: scaleX(0.84); }
 }
 .mascot {
@@ -637,29 +669,74 @@ h1 .word:last-child .tc:last-child .tc-in {
   padding: calc(env(safe-area-inset-top, 0px) + 12px) 12px 12px;
   overflow: hidden;
 }
+/* 위 상태 영역: 반투명 유리판 하나에 일시정지 · 판 · 콤보 · 점수 · 빠른 재시작, 아래 줄에 시간 막대 */
 .hud {
   width: 100%;
   max-width: 720px;
   display: grid;
-  grid-template-columns: auto auto 1fr auto;
-  grid-template-areas: 'pause stage combo score' 'timer timer timer timer';
+  grid-template-columns: auto auto 1fr auto auto;
+  grid-template-areas: 'pause stage combo score restart' 'timer timer timer timer timer';
   align-items: center;
   gap: 8px 10px;
   flex: none;
+  padding: 8px 10px 10px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--panel) 72%, transparent);
+  border: 1px solid rgb(255 255 255 / 0.4);
+  box-shadow: 0 10px 26px rgb(20 16 40 / 0.12), inset 0 1px 0 rgb(255 255 255 / 0.5);
+  backdrop-filter: blur(12px) saturate(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+}
+:root[data-theme='dark'] .hud {
+  border-color: rgb(255 255 255 / 0.1);
+  box-shadow: 0 10px 26px rgb(0 0 0 / 0.3), inset 0 1px 0 rgb(255 255 255 / 0.08);
 }
 .hud p {
   margin: 0;
 }
+.hud-btn {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.15s, transform 0.12s;
+}
+.hud-btn:hover {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+.hud-btn:active {
+  transform: scale(0.92);
+}
+.hud-btn:focus-visible {
+  outline: 3px solid var(--accent-ink);
+  outline-offset: 2px;
+}
+.hud-btn .icon {
+  width: 22px;
+  height: 22px;
+}
 .pause-btn {
   grid-area: pause;
 }
+.restart-btn {
+  grid-area: restart;
+}
+/* 판: 강조색을 옅게 깐 작은 이름표 */
 .hud-stage {
   grid-area: stage;
-  font-size: 20px;
-  padding: 0.25em 0.7em;
-  border-radius: 99px;
-  background: var(--accent);
-  color: var(--on-accent);
+  font-size: 19px;
+  line-height: 1;
+  padding: 0.3em 0.7em 0.25em;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent-ink);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 .hud-combo {
   grid-area: combo;
@@ -674,64 +751,115 @@ h1 .word:last-child .tc:last-child .tc-in {
   opacity: 1;
   transform: none;
 }
+/* 점수: 작은 이름표 위에 큰 숫자(자릿수가 바뀌어도 폭이 흔들리지 않게 고정폭 숫자) */
 .hud-score {
   grid-area: score;
-  font-size: 28px;
-  min-width: 3.5em;
-  text-align: right;
+  display: grid;
+  justify-items: end;
+  min-width: 4.2em;
+  line-height: 1;
+}
+.hud-score small {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
 }
 .hud-score b {
   font-weight: 400;
+  font-size: 26px;
+  font-variant-numeric: tabular-nums;
 }
 .timer {
   grid-area: timer;
-  position: relative;
-  height: 40px;
   display: flex;
   align-items: center;
   gap: 10px;
 }
+/* 막대와 마스코트를 한 레일에: 마스코트는 레일 안에서만 움직여 0초에도 막대 밖으로 나가지 않는다 */
+.timer-rail {
+  --m: 34px;
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 34px;
+  display: flex;
+  align-items: center;
+}
 .timer-track {
   position: relative;
   flex: 1;
-  height: 16px;
+  height: 12px;
   border-radius: 99px;
-  background: var(--panel);
-  box-shadow: inset 0 2px 3px var(--depth);
+  background: color-mix(in srgb, var(--ink) 10%, transparent);
+  box-shadow: inset 0 1px 2px rgb(20 16 40 / 0.2);
   overflow: hidden;
 }
 .timer-bar {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 55%, #4ade80));
+  background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 50%, #4ade80));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 60%, transparent);
   transform-origin: left;
+}
+/* 막대 위를 천천히 지나가는 빛(시간이 흐르는 느낌) */
+.timer-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 30%, rgb(255 255 255 / 0.45) 50%, transparent 70%) no-repeat;
+  background-size: 40% 100%;
+  animation: timer-shine 2.4s linear infinite;
+}
+@keyframes timer-shine {
+  from {
+    background-position: -60% 0;
+  }
+  to {
+    background-position: 160% 0;
+  }
+}
+/* 시작 시간(40초)보다 많이 모았을 때: 가득 찬 막대가 금빛으로 빛난다 */
+.game.over .timer-bar {
+  background: linear-gradient(90deg, #f5b301, #ffd84d, #f5b301);
+  box-shadow: 0 0 12px rgb(255 200 40 / 0.7);
 }
 .timer .mascot {
   position: absolute;
-  left: calc(var(--at, 1) * (100% - 3.6em - 10px));
+  left: calc(var(--at, 1) * (100% - var(--m)));
   top: 50%;
-  translate: -50% -58%;
-  width: 40px;
-  height: 40px;
+  translate: 0 -55%;
+  width: var(--m);
+  height: var(--m);
   pointer-events: none;
 }
 .timer-text {
-  width: 3.6em;
-  text-align: right;
-  font-size: 21px;
+  min-width: 3.4em;
+  padding: 0.18em 0.55em 0.12em;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+  text-align: center;
+  font-size: 19px;
   font-weight: 400;
   font-variant-numeric: tabular-nums;
+}
+.game.over .timer-text {
+  color: #b77900;
+}
+:root[data-theme='dark'] .game.over .timer-text {
+  color: #ffd84d;
 }
 .game.low .mascot .sweat {
   opacity: 1;
 }
 .game.danger .timer-bar {
   background: var(--danger);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--danger) 70%, transparent);
   animation: pulse 0.5s ease-in-out infinite alternate;
 }
 .game.danger .timer-text {
   color: var(--danger-ink);
+  background: color-mix(in srgb, var(--danger) 14%, transparent);
 }
 .game.danger .timer .mascot {
   animation: shiver 0.12s linear infinite;
@@ -1733,10 +1861,14 @@ h1 .word:last-child .tc:last-child .tc-in {
 }
 
 /* 도감: 큰 카드 + 설명(고정 크기) 아래로 묶음별 카드 목록만 스크롤된다 */
+/* 도감 창은 스킨 색을 옅게 섞은 바탕: 크림색 카드 테두리가 흰 창에 묻히지 않게 */
 .modal:has(.dex) {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background:
+    radial-gradient(120% 60% at 50% 0%, color-mix(in srgb, var(--accent) 16%, var(--sheet)), transparent 70%),
+    color-mix(in srgb, var(--accent) 9%, var(--sheet));
 }
 .dex {
   flex: 1;
@@ -1752,9 +1884,7 @@ h1 .word:last-child .tc:last-child .tc-in {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--line);
+  gap: 8px;
 }
 .dex-big {
   --cw: 150px;
@@ -1787,6 +1917,15 @@ h1 .word:last-child .tc:last-child .tc-in {
 .dex-flip .side {
   border-radius: 14px;
   box-shadow: 0 4px 0 var(--depth), 0 10px 22px rgb(42 36 51 / 0.2);
+}
+/* 큰 카드는 그림을 크게(앞면 여백을 얇게) */
+.dex-big .front .art {
+  width: 93%;
+  height: 94%;
+  border-radius: 10px;
+}
+.dex-big .front svg:not(.art) {
+  width: 92%;
 }
 .dex-big.gold .front {
   background: linear-gradient(160deg, #fff7cc, #ffd970);
@@ -1856,13 +1995,17 @@ h1 .word:last-child .tc:last-child .tc-in {
   -webkit-line-clamp: 2;
   line-clamp: 2;
 }
+/* 카드 목록은 한 단계 더 진한 판 위에(카드 가장자리가 또렷하게) */
 .dex-sets {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  margin: 0 -6px;
-  padding: 0 6px 4px;
+  margin: 10px -6px 0;
+  padding: 2px 10px 10px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--accent) 12%, color-mix(in srgb, var(--ink) 6%, transparent));
+  box-shadow: inset 0 1px 3px rgb(20 16 40 / 0.12);
 }
 .dex section {
   margin-top: 12px;
@@ -1978,7 +2121,7 @@ h1 .word:last-child .tc:last-child .tc-in {
   h1 {
     font-size: 40px;
   }
-  .hud-score {
+  .hud-score b {
     font-size: 32px;
   }
 }
@@ -2023,46 +2166,38 @@ h1 .word:last-child .tc:last-child .tc-in {
     padding: 8px 12px;
   }
   .hud {
-    width: 180px;
+    width: 196px;
     flex: none;
-    grid-template-columns: auto 1fr;
-    grid-template-areas: 'pause stage' 'score score' 'combo combo' 'timer timer';
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: 'pause stage restart' 'score score score' 'combo combo combo' 'timer timer timer';
     align-content: center;
+    align-self: center;
+    padding: 10px;
   }
   .hud-score {
-    text-align: left;
+    justify-items: start;
   }
   .hud-combo {
     justify-self: start;
   }
   .hud-stage {
-    justify-self: start;
-  }
-  .timer-track {
-    flex: none;
+    justify-self: center;
   }
   .timer {
     flex-direction: column;
     align-items: stretch;
-    height: auto;
     gap: 4px;
-    padding-top: 26px;
   }
-  .timer .mascot {
-    top: 26px;
-    left: calc(var(--at, 1) * 100%);
-    translate: -50% -78%;
-    width: 34px;
-    height: 34px;
+  .timer-rail {
+    flex: none;
   }
   .timer-text {
-    width: auto;
-    text-align: left;
+    align-self: flex-start;
   }
   /* 가로: 띠·판 시작 안내는 왼쪽 상태 칸 아래쪽에 */
   .banners {
-    inset: auto auto 6px -192px;
-    width: 180px;
+    inset: auto auto 6px -208px;
+    width: 196px;
   }
   .banner {
     font-size: 17px;

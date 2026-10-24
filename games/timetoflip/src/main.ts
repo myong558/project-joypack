@@ -4,7 +4,7 @@ import { Sound } from './audio';
 import { Game, type GameEvent, type GameResult } from './game/engine';
 import { FACE_SETS, type FaceId } from './game/faces';
 import { dateKey, dateSeed, mulberry32, randomSeed } from './game/rng';
-import { MAX_MS, WARN_MS } from './game/stages';
+import { START_MS, WARN_MS } from './game/stages';
 import { setName } from './cards';
 import { preloadFaces } from './ui/art';
 import { setLang, t } from './i18n';
@@ -111,6 +111,7 @@ function showStart(settings?: 'open' | 'reset', settingsFocus?: string, opening 
       opening,
       ranking: rankingView(today),
       onPlay: play,
+      onRefresh: () => showStart(),
       onToggle(key) {
         save[key] = !save[key];
         sound.enabled = save.sound;
@@ -294,7 +295,9 @@ function play(mode: Mode, from = 1): void {
       hud.combo.classList.toggle('on', game.combo >= 2);
     }
     shown = { score: game.score, stage: game.stage, combo: game.combo };
-    const ratio = Math.max(0, Math.min(1, game.remaining / MAX_MS));
+    // 막대는 시작 시간(40초)이 꽉 찬 상태. 그보다 많이 모으면 가득 찬 채로 금빛(.over)이 되고 숫자로 남은 시간을 본다
+    const ratio = Math.max(0, Math.min(1, game.remaining / START_MS));
+    view.el.classList.toggle('over', game.remaining > START_MS);
     hud.bar.style.transform = `scaleX(${ratio.toFixed(4)})`;
     hud.mascot.style.setProperty('--at', ratio.toFixed(4));
     const s = game.remaining / 1000;

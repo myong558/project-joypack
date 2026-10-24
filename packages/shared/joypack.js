@@ -392,6 +392,23 @@
     }
   }
 
+  // 출시 모드 보기: 개발자 모드를 켠 기기에서 출시 전 확인 기능(판별 바로 시작·도감 전부 열기 등)을 잠시 숨기고
+  // 실제 출시 화면 그대로 확인할 때 켠다. 끄고 켜는 단추는 개발자 모드인 동안 늘 보인다
+  const RELEASE_VIEW_KEY = 'joypack.releaseView';
+  function releaseView() {
+    return read(RELEASE_VIEW_KEY) === 'on';
+  }
+  function setReleaseView(on) {
+    try {
+      if (on) localStorage.setItem(RELEASE_VIEW_KEY, 'on');
+      else localStorage.removeItem(RELEASE_VIEW_KEY);
+    } catch (e) {}
+  }
+  // 출시 전 확인 기능을 보일지: 개발자 모드이고 출시 모드 보기가 꺼져 있을 때만
+  function devTools() {
+    return devMode() && !releaseView();
+  }
+
   // ── 랭킹 탭 공통 기준(조이팩 전체 랭킹·모든 게임 랭킹 창, 기준서 1.6) ──
   // 랭킹 창을 열 때 처음 고를 탭: ① 등록 대기 기록이 있는 탭(여럿이면 최근 탭, 아니면 첫 번째) → ② 최근 탭(방금 한 판 또는 마지막으로 본 탭 중 나중)
   // → ③ 기본 탭. 한 기기 안에서 조이팩과 모든 게임이 같은 값을 읽고 써서, 어디서 열어도 이어진다.
@@ -476,6 +493,9 @@
     COPYRIGHT: COPYRIGHT,
     isPreview: isPreview,
     devMode: devMode,
+    releaseView: releaseView,
+    setReleaseView: setReleaseView,
+    devTools: devTools,
     topIcon: topIcon,
     deviceLang: deviceLang,
     guardBottom: guardBottom,

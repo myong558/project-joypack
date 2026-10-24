@@ -14,6 +14,11 @@ export interface JoypackApi {
   isPreview(): boolean;
   /** 이 기기에서 조이팩 개발자 모드(숨김 미리보기 보기)를 켰는지. 게임의 출시 전 확인 기능을 이때만 보인다 */
   devMode(): boolean;
+  /** 개발자 모드에서 "출시 모드 보기"를 켰는지(출시 전 확인 기능을 숨기고 실제 출시 화면으로 봄) */
+  releaseView(): boolean;
+  setReleaseView(on: boolean): void;
+  /** 출시 전 확인 기능(판별 바로 시작·도감 전부 열기 등)을 보일지: 개발자 모드이고 출시 모드 보기가 꺼져 있을 때 */
+  devTools(): boolean;
   /** 공통 상단 메뉴 아이콘 SVG 문자열 */
   topIcon(name: TopIcon): string;
   /** 기본 언어: 기기 설정 언어가 한국어면 'ko', 그 밖은 모두 'en' */

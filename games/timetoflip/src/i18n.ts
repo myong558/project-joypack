@@ -17,6 +17,8 @@ const ko = {
   'vibrate.off': '진동 꺼짐',
 
   'test.jump': '출시 전 확인: 판 골라 바로 시작',
+  'test.releaseView': '출시 화면',
+  'test.devView': '출시 화면 · 끄기',
   'dex.title': '카드 도감',
   'dex.open': '카드 도감 열기',
   'dex.locked': '아직 못 맞혔어요',
@@ -57,6 +59,7 @@ const ko = {
   'hud.combo': '콤보',
   'hud.time': '남은 시간',
   'hud.pause': '일시정지',
+  'hud.restart': '바로 다시 시작',
   'card.down': '{n}번 카드',
   'card.up': '{n}번 카드: {name}',
   'card.gone': '{n}번 카드: 맞힘',
@@ -152,6 +155,8 @@ const en: Record<MessageKey, string> = {
   'vibrate.off': 'Vibration off',
 
   'test.jump': 'Pre-release check: start at a stage',
+  'test.releaseView': 'Release view',
+  'test.devView': 'Release view · off',
   'dex.title': 'Card Album',
   'dex.open': 'Open card album',
   'dex.locked': 'Not matched yet',
@@ -192,6 +197,7 @@ const en: Record<MessageKey, string> = {
   'hud.combo': 'Combo',
   'hud.time': 'Time left',
   'hud.pause': 'Pause',
+  'hud.restart': 'Restart now',
   'card.down': 'Card {n}',
   'card.up': 'Card {n}: {name}',
   'card.gone': 'Card {n}: matched',

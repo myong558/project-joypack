@@ -89,6 +89,8 @@ export interface StartOptions {
   onPlay: (mode: Mode, from?: number) => void;
   onToggle: (key: Toggle) => void;
   onLang: (lang: Lang) => void;
+  /** 시작 화면을 다시 그린다(개발자 모드의 출시 모드 보기를 바꿨을 때) */
+  onRefresh: () => void;
   onTheme: (theme: Theme) => void;
   onSkin: (skin: SkinSetting) => void;
   onReset: () => void;
@@ -122,7 +124,7 @@ function heroDemo(): string {
 /**
  * 출시 전 확인용: 조이팩 개발자 모드를 켠 기기에서만 시작 화면 로고 위에 "N판부터 바로 시작" 단추(클래식, 기록·랭킹에 안 남음)
  */
-const STAGE_JUMP = () => Joypack.devMode();
+const STAGE_JUMP = () => Joypack.devTools();
 
 export function startScreen(opts: StartOptions): HTMLElement {
   const { save } = opts;
@@ -143,7 +145,11 @@ export function startScreen(opts: StartOptions): HTMLElement {
         </div>
       </nav>
       <div class="col main-col">
-        ${STAGE_JUMP() ? `<div class="stage-jump" role="group" aria-label="${t('test.jump')}"><span>TEST</span>${[2, 3, 4, 5, 6, 7, 8].map((n) => `<button type="button" data-from="${n}">${n}</button>`).join('')}</div>` : ''}
+        ${
+          Joypack.devMode()
+            ? `<div class="stage-jump" role="group" aria-label="${t('test.jump')}">${STAGE_JUMP() ? `<span>TEST</span>${[2, 3, 4, 5, 6, 7, 8].map((n) => `<button type="button" data-from="${n}">${n}</button>`).join('')}` : ''}<button type="button" class="dev-toggle" data-release aria-pressed="${Joypack.releaseView()}">${Joypack.releaseView() ? t('test.devView') : t('test.releaseView')}</button></div>`
+            : ''
+        }
         <div class="hero" aria-hidden="true">${heroDemo()}</div>
         <h1 aria-label="${t('app.title')}"><span aria-hidden="true">${titleCards(t('app.title'))}</span></h1>
         <p class="tagline">${t('app.tagline')}</p>
@@ -176,6 +182,11 @@ export function startScreen(opts: StartOptions): HTMLElement {
       tc.classList.add('spin');
     }),
   );
+  // 개발자 모드: 출시 모드 보기 ↔ 개발 기능 보기(판별 바로 시작·도감 전부 열기를 숨기거나 다시 보임)
+  el.querySelector('[data-release]')?.addEventListener('click', () => {
+    Joypack.setReleaseView(!Joypack.releaseView());
+    opts.onRefresh();
+  });
   el.querySelectorAll<HTMLButtonElement>('[data-from]').forEach((b) => b.addEventListener('click', () => opts.onPlay('classic', Number(b.dataset.from))));
   el.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((b) => b.addEventListener('click', () => opts.onPlay(b.dataset.mode as Mode)));
   el.querySelector('.top-lang')!.addEventListener('click', () => opts.onLang(otherLang));
@@ -202,7 +213,7 @@ export function startScreen(opts: StartOptions): HTMLElement {
 /**
  * 출시 전 확인용: 조이팩 개발자 모드를 켠 기기에서만 도감 48장을 모두 연 것처럼 보여 준다(저장된 기록은 그대로)
  */
-const DEX_ALL_OPEN = () => Joypack.devMode();
+const DEX_ALL_OPEN = () => Joypack.devTools();
 
 function openDex(host: HTMLElement, save: SaveData): void {
   const found = new Set<FaceId>(DEX_ALL_OPEN() ? ALL_FACES : save.dex);
@@ -243,6 +254,7 @@ function openDex(host: HTMLElement, save: SaveData): void {
   const info = box.querySelector<HTMLElement>('.dex-info')!;
   const [title, by, desc] = [...info.children] as HTMLElement[];
   let selected: HTMLButtonElement | null = null;
+  let turns = 0;
 
   const show = (item: HTMLButtonElement) => {
     if (item === selected) return;
@@ -251,8 +263,13 @@ function openDex(host: HTMLElement, save: SaveData): void {
     selected = item;
     const face = item.dataset.face as FaceId;
     const open = found.has(face);
+    // 새 그림은 미리 만들어 디코딩까지 끝낸 뒤 갈아 끼운다(끼우는 순간 빈 칸이 한 번 비치던 깜박임 방지)
+    const next = document.createElement('template');
+    next.innerHTML = open ? faceSvg(face) : '';
+    const img = next.content.querySelector('img');
+    const turn = ++turns;
     const apply = () => {
-      front.innerHTML = open ? faceSvg(face) : '';
+      front.replaceChildren(next.content);
       big.classList.toggle('gold', open && gold.has(face));
       const text = open ? cardInfo(face) : null;
       title.textContent = text ? text.title : '???';
@@ -262,22 +279,31 @@ function openDex(host: HTMLElement, save: SaveData): void {
       void info.offsetWidth;
       info.classList.add('swap');
     };
-    const wasUp = flip.classList.contains('up');
-    // 앞면끼리 바꿀 때는 옆으로 세워(90°) 안 보이는 순간에 그림을 갈아 끼우고 다시 펼친다
-    if (wasUp && open && !reducedMotion.matches) {
-      flip.animate([{ transform: 'rotateY(180deg)' }, { transform: 'rotateY(270deg)' }], { duration: 120, easing: 'ease-in' }).onfinish = () => {
-        apply();
-        flip.animate([{ transform: 'rotateY(90deg)' }, { transform: 'rotateY(180deg)' }], { duration: 180, easing: 'cubic-bezier(.3,1.4,.5,1)' });
-      };
-    } else {
-      // 뒷면 ↔ 앞면은 CSS 전환으로 뒤집는다(잠긴 카드는 뒷면으로 돌아감)
-      if (open) apply();
-      else setTimeout(apply, wasUp ? 130 : 0);
-      flip.classList.toggle('up', open);
-    }
-    big.classList.remove('pop');
-    void big.offsetWidth;
-    big.classList.add('pop');
+    const run = () => {
+      // 그림을 준비하는 사이 다른 카드를 눌렀으면 이 차례는 버린다
+      if (turn !== turns) return;
+      const wasUp = flip.classList.contains('up');
+      // 앞면끼리 바꿀 때는 옆으로 세워(90°) 안 보이는 순간에 그림을 갈아 끼우고 다시 펼친다.
+      // 첫 회전은 끝 자세를 붙잡아(fill) 두 회전 사이에 원래 각도가 한 프레임 비치지 않게 한다
+      if (wasUp && open && !reducedMotion.matches) {
+        const out = flip.animate([{ transform: 'rotateY(180deg)' }, { transform: 'rotateY(270deg)' }], { duration: 120, easing: 'ease-in', fill: 'forwards' });
+        out.onfinish = () => {
+          apply();
+          flip.animate([{ transform: 'rotateY(90deg)' }, { transform: 'rotateY(180deg)' }], { duration: 180, easing: 'cubic-bezier(.3,1.4,.5,1)' });
+          out.cancel();
+        };
+      } else {
+        // 뒷면 ↔ 앞면은 CSS 전환으로 뒤집는다(잠긴 카드는 뒷면으로 돌아감)
+        if (open) apply();
+        else setTimeout(apply, wasUp ? 130 : 0);
+        flip.classList.toggle('up', open);
+      }
+      big.classList.remove('pop');
+      void big.offsetWidth;
+      big.classList.add('pop');
+    };
+    if (img) img.decode().then(run, run);
+    else run();
   };
   box.querySelectorAll<HTMLButtonElement>('.dex-item').forEach((b) => b.addEventListener('click', () => show(b)));
   openModal(host, box, t('dex.title'));
@@ -618,13 +644,16 @@ export function gameScreen(opts: { daily: boolean; onPause: () => void; onResume
   const el = html(`
     <main class="screen game${opts.daily ? ' daily' : ''}">
       <div class="hud">
-        <button class="pause-btn icon-btn" aria-label="${t('hud.pause')}">${ICONS.pause}</button>
+        <button class="pause-btn hud-btn" aria-label="${t('hud.pause')}" title="${t('hud.pause')}">${ICONS.pause}</button>
         <p class="hud-stage" aria-live="polite"></p>
-        <p class="hud-score" aria-label="${t('hud.score')}"><b>0</b></p>
         <p class="hud-combo" aria-hidden="true"></p>
+        <p class="hud-score" aria-label="${t('hud.score')}"><small aria-hidden="true">${t('hud.score')}</small><b>0</b></p>
+        <button class="restart-btn hud-btn" data-act="quick-restart" aria-label="${t('hud.restart')}" title="${t('hud.restart')}">${ICONS.restart}</button>
         <div class="timer" role="timer" aria-label="${t('hud.time')}">
-          <div class="timer-track"><div class="timer-bar"></div></div>
-          <span class="mascot">${MASCOT}</span>
+          <div class="timer-rail">
+            <div class="timer-track"><div class="timer-bar"></div></div>
+            <span class="mascot">${MASCOT}</span>
+          </div>
           <b class="timer-text"></b>
         </div>
       </div>
@@ -647,6 +676,8 @@ export function gameScreen(opts: { daily: boolean; onPause: () => void; onResume
   q('.pause-btn').addEventListener('click', opts.onPause);
   q('[data-act="resume"]').addEventListener('click', opts.onResume);
   q('[data-act="restart"]').addEventListener('click', opts.onRestart);
+  // 빠른 재시작: 일시정지 없이 바로 새 판(같은 모드·같은 시작 판)
+  q('[data-act="quick-restart"]').addEventListener('click', opts.onRestart);
   q('[data-act="quit"]').addEventListener('click', opts.onQuit);
   return {
     el,
