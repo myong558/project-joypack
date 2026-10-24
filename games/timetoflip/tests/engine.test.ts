@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { Game, buildCards, type GameEvent } from '../src/game/engine';
 import { mulberry32 } from '../src/game/rng';
-import { DEAL_MS, MAX_MS, MIN_MATCH_GAIN, START_MS, comboMultiplier, stageDef } from '../src/game/stages';
+import { DEAL_MS, MAX_MS, MIN_GAIN_RATE, START_MS, comboMultiplier, stageDef } from '../src/game/stages';
 
 function setup(seed = 1) {
   const game = new Game(mulberry32(seed));
@@ -60,6 +60,13 @@ describe('판 구성', () => {
     const b = buildCards(4, stageDef(4), mulberry32(42)).map((c) => c.key);
     expect(a).toEqual(b);
   });
+
+  it('오늘의 챌린지: 위치 난수만 바꾸면 같은 카드가 다른 자리에 놓인다', () => {
+    const a = buildCards(4, stageDef(4), mulberry32(42), mulberry32(1)).map((c) => c.key);
+    const b = buildCards(4, stageDef(4), mulberry32(42), mulberry32(2)).map((c) => c.key);
+    expect([...a].sort()).toEqual([...b].sort());
+    expect(a).not.toEqual(b);
+  });
 });
 
 describe('뒤집기', () => {
@@ -97,11 +104,13 @@ describe('뒤집기', () => {
     expect(perCard(8)).toBeLessThan(perCard(6));
   });
 
-  it('9판부터 짝 시간이 판마다 줄어 13판에서 바닥에 닿고 그 아래로는 내려가지 않는다', () => {
-    expect(stageDef(8).matchGain).toBe(500);
-    expect(stageDef(9).matchGain).toBe(450);
-    expect(stageDef(13).matchGain).toBe(MIN_MATCH_GAIN);
-    expect(stageDef(40).matchGain).toBe(MIN_MATCH_GAIN);
+  it('9판부터 얻는 시간 비율이 판마다 10%씩 줄어 15판에서 30%로 멈춘다', () => {
+    expect(stageDef(8).gainRate).toBe(1);
+    expect(stageDef(9).gainRate).toBe(0.9);
+    expect(stageDef(12).gainRate).toBe(0.6);
+    expect(stageDef(15).gainRate).toBe(MIN_GAIN_RATE);
+    expect(stageDef(40).gainRate).toBe(MIN_GAIN_RATE);
+    expect(stageDef(40).matchGain).toBe(stageDef(8).matchGain);
   });
 
   it('짝을 맞히면 점수·시간이 오르고 콤보가 쌓인다', () => {

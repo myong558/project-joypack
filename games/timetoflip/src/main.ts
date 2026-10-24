@@ -150,7 +150,8 @@ function play(mode: Mode, from = 1): void {
   const daily = mode === 'daily';
   const today = new Date();
   applySkin(resolveSkin(save.skin, today));
-  const game = new Game(mulberry32(daily ? dateSeed(today) : randomSeed()));
+  // 오늘의 챌린지: 카드는 날짜로 모두 같게, 위치는 시도마다 새로(다시 해서 위치를 외워 점수를 올리지 못하게)
+  const game = daily ? new Game(mulberry32(dateSeed(today)), mulberry32(randomSeed())) : new Game(mulberry32(randomSeed()));
   const view = gameScreen({
     daily,
     onPause: () => game.pause(),

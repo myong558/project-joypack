@@ -85,7 +85,7 @@ type Listener = (e: GameEvent) => void;
 
 /**
  * 한 게임(여러 판)의 규칙과 상태. 화면을 모르고, 시간은 tick(dt)로만 흐른다.
- * 오늘의 챌린지는 날짜 시드 난수를 넣어 모두 같은 판을 받는다(난수는 판을 놓을 때만 쓴다)
+ * 오늘의 챌린지는 날짜 시드 난수로 모두 같은 카드를 받고, 카드 위치만 시도마다 새로 섞는다(난수는 판을 놓을 때만 쓴다)
  */
 export class Game {
   phase: Phase = 'idle';
@@ -109,7 +109,14 @@ export class Game {
   private faces = new Set<FaceId>();
   private listeners = new Set<Listener>();
 
-  constructor(private readonly rng: Rng) {}
+  /**
+   * rng: 어떤 카드가 나올지(그림·특수·닮은 짝·황금). layout: 카드를 어디에 놓을지.
+   * 오늘의 챌린지는 rng 를 날짜로 고정하고 layout 은 시도마다 새로 뽑아, 모두 같은 카드로 겨루되 다시 해도 위치를 외울 수 없게 한다
+   */
+  constructor(
+    private readonly rng: Rng,
+    private readonly layout: Rng = rng,
+  ) {}
 
   on(fn: Listener): () => void {
     this.listeners.add(fn);
@@ -140,7 +147,7 @@ export class Game {
     this.first = null;
     this.wrong = null;
     this.stageMistakes = 0;
-    this.cards = buildCards(stage, this.def, this.rng);
+    this.cards = buildCards(stage, this.def, this.rng, this.layout);
     this.phase = 'peek';
     this.phaseLeft = this.def.peekMs;
     this.emit({ type: 'deal', stage, def: this.def, cards: this.cards });
@@ -218,6 +225,7 @@ export class Game {
     if (a.gold) points *= 2;
     let gain = this.def.matchGain + (this.combo >= 3 ? COMBO_GAIN : 0);
     if (a.special === 'clock') gain += CLOCK_GAIN;
+    gain = Math.round(gain * this.def.gainRate);
     this.score += points;
     this.addTime(gain);
     if (!a.special) this.faces.add(a.face as FaceId);
@@ -249,7 +257,7 @@ export class Game {
   private clearStage(): void {
     const perfect = this.stageMistakes === 0;
     const bonus = this.stage * STAGE_BONUS + (perfect ? PERFECT_BONUS : 0);
-    const gain = CLEAR_GAIN + (perfect ? PERFECT_GAIN : 0);
+    const gain = Math.round((CLEAR_GAIN + (perfect ? PERFECT_GAIN : 0)) * this.def.gainRate);
     if (perfect) this.stats.perfects++;
     this.score += bonus;
     this.addTime(gain);
@@ -300,7 +308,7 @@ export class Game {
  * 한 판의 카드를 만든다. 새로 열린 묶음 그림을 절반 이상 넣어 판이 오를 때마다 새 그림을 만나게 하고,
  * 7판부터는 48장 전체에서 고른다
  */
-export function buildCards(stage: number, def: StageDef, rng: Rng): Card[] {
+export function buildCards(stage: number, def: StageDef, rng: Rng, layout: Rng = rng): Card[] {
   const specials = Math.min(specialCount(stage, rng), def.pairs - def.twins - 1);
   const normal = def.pairs - specials - def.twins;
   let picked: FaceId[];
@@ -323,6 +331,6 @@ export function buildCards(stage: number, def: StageDef, rng: Rng): Card[] {
     ...twinOf.map((face) => ({ key: `${face}~twin`, face, special: null, twin: true, gold: false })),
     ...kinds.slice(0, specials).map((s) => ({ key: s, face: s, special: s, twin: false, gold: false })),
   ];
-  const deck = shuffle(specs.flatMap((s) => [s, s]), rng);
+  const deck = shuffle(specs.flatMap((s) => [s, s]), layout);
   return deck.map((s, index) => ({ ...s, index, state: 'down', seen: false }));
 }
