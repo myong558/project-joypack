@@ -755,7 +755,9 @@ h1 .word:last-child .tc:last-child .tc-in {
   }
 }
 
+/* 흔들림(shake-*) 때마다 판이 합성층으로 올라갔다 내려오며 카드 전체를 다시 그려 깜박이던 것을 막으려고 처음부터 층으로 둔다 */
 .stage {
+  will-change: transform;
   position: relative;
   flex: 1;
   width: 100%;
@@ -770,13 +772,29 @@ h1 .word:last-child .tc:last-child .tc-in {
   place-items: center;
 }
 .board {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: repeat(var(--cols, 4), var(--cw, 64px));
   grid-auto-rows: var(--ch, 82px);
   gap: var(--gap, 8px);
 }
-.game.hot .board {
-  filter: drop-shadow(0 0 10px var(--glow));
+/* 콤보 빛: 판 자체에 filter 를 켜고 끄면 3D 카드를 통째로 다시 그려 깜박이므로, 판 뒤의 빛 판을 opacity 로만 켠다 */
+.board-wrap {
+  position: relative;
+}
+.board-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 4%;
+  border-radius: 24px;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--glow) 70%, transparent), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.game.hot .board-wrap::before {
+  opacity: 0.9;
 }
 
 /* 카드: 버튼 안에서 앞·뒤 두 면이 Y축으로 돈다. 위치 이동·회전은 transform 만 쓴다 */
@@ -845,19 +863,21 @@ h1 .word:last-child .tc:last-child .tc-in {
   box-shadow: inset 0 0 0 calc(var(--cw, 64px) * 0.04) color-mix(in srgb, var(--accent) 80%, #fff);
 }
 .back::after {
-  background: linear-gradient(110deg, transparent 38%, rgb(255 255 255 / 0.5) 50%, transparent 62%) no-repeat;
-  background-size: 260% 100%;
-  background-position: 160% 0;
+  right: auto;
+  width: 60%;
+  border-radius: 0;
+  background: linear-gradient(110deg, transparent 20%, rgb(255 255 255 / 0.5) 50%, transparent 80%);
+  transform: translateX(-110%);
   animation: sheen 7s ease-in-out infinite;
   animation-delay: calc(var(--i, 0) * 0.23s);
 }
 @keyframes sheen {
   0%,
   78% {
-    background-position: 160% 0;
+    transform: translateX(-110%);
   }
   100% {
-    background-position: -60% 0;
+    transform: translateX(270%);
   }
 }
 .front {
@@ -1139,8 +1159,7 @@ h1 .word:last-child .tc:last-child .tc-in {
   justify-content: center;
   gap: 12px;
   border-radius: 20px;
-  background: color-mix(in srgb, var(--sheet) 88%, transparent);
-  backdrop-filter: blur(6px);
+  background: color-mix(in srgb, var(--sheet) 94%, transparent);
 }
 .pause-menu[hidden] {
   display: none;
@@ -2121,7 +2140,6 @@ body:has(.screen.game) .scene .layer {
   width: 80vmax;
   height: 80vmax;
   border-radius: 50%;
-  filter: blur(10px);
   will-change: transform;
 }
 .aurora .a1 {
@@ -2235,8 +2253,7 @@ body:has(.screen.game) .scene .layer {
   opacity: 0.5;
 }
 .near .fc {
-  opacity: 0.6;
-  filter: blur(1.5px);
+  opacity: 0.45;
 }
 @keyframes rise {
   from {

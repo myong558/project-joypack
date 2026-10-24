@@ -1,7 +1,7 @@
 {
   "name": "timetoflip",
   "private": true,
-  "version": "0.6.1",
+  "version": "0.6.2",
   "author": "Myong Bum Soo",
   "license": "UNLICENSED",
   "type": "module",
