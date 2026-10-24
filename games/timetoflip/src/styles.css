@@ -781,7 +781,8 @@ h1 .word:nth-child(2) .tc-in {
   align-items: center;
   gap: 10px;
 }
-/* 막대와 마스코트를 한 레일에: 마스코트는 레일 안에서만 움직여 0초에도 막대 밖으로 나가지 않는다 */
+/* 막대와 마스코트를 한 레일에. 막대는 양쪽을 마스코트 반 폭(--m/2)씩 들여서, 마스코트 가운데가 늘 막대 끝과 같은 자리.
+ * 시간이 다 되면 마스코트가 막대 시작점(왼쪽 끝)까지 가고, 몸은 레일 밖으로 나가지 않는다 */
 .timer-rail {
   --m: 34px;
   position: relative;
@@ -790,6 +791,7 @@ h1 .word:nth-child(2) .tc-in {
   height: 34px;
   display: flex;
   align-items: center;
+  padding: 0 calc(var(--m) / 2);
 }
 .timer-track {
   position: relative;
