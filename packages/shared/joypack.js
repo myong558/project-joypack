@@ -442,6 +442,32 @@
     return last || String(fallback);
   }
 
+  // 화면 확대·축소 막기(허브와 모든 게임 공통, 이 파일을 불러오면 바로 적용).
+  // 게임 중 두 손가락이 닿거나 두 번 톡톡 쳐서 화면이 커지면 판·버튼이 밀려 조작이 망가지기 때문이다.
+  //   - touch-action: pan-x pan-y → 스크롤만 허용하고 두 손가락 확대·두 번 탭 확대는 막는다(안드로이드·iOS 13+)
+  //   - iOS Safari 는 viewport 의 user-scalable=no 를 무시하고 touch-action 도 놓칠 때가 있어
+  //     gesturestart/gesturechange 와 손가락 2개 이상인 touchmove 의 기본 동작(확대)도 막는다
+  // 손가락마다 따로 오는 pointerdown·touchstart 는 막지 않으므로 두더지잡기 같은 멀티 터치 입력은 그대로다.
+  // PC 의 Ctrl+휠·Ctrl+(+/−) 확대는 접근성 때문에 그대로 둔다
+  function blockZoom() {
+    if (typeof document === 'undefined') return;
+    const apply = (el) => el && (el.style.touchAction = 'pan-x pan-y');
+    apply(document.documentElement);
+    if (document.body) apply(document.body);
+    else document.addEventListener('DOMContentLoaded', () => apply(document.body));
+    const stop = (e) => e.preventDefault();
+    document.addEventListener('gesturestart', stop, { passive: false });
+    document.addEventListener('gesturechange', stop, { passive: false });
+    document.addEventListener(
+      'touchmove',
+      (e) => {
+        if (e.touches.length > 1) e.preventDefault();
+      },
+      { passive: false },
+    );
+  }
+  blockZoom();
+
   // 저작권 표기: 조이팩 설정 → 정보, 각 게임 설정 맨 아래 버전 밑에 그대로 쓴다(기준서 1.4). 바꿀 때는 여기 한 곳만
   var COPYRIGHT = '© 2026 Myong Bum Soo. All rights reserved.';
 
