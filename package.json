@@ -11,6 +11,7 @@
     "node": ">=24.12.0"
   },
   "scripts": {
+    "bump": "node scripts/bump.mjs",
     "dev": "pnpm --filter hub dev",
     "test": "pnpm -r --if-present test",
     "build": "node scripts/build.mjs",

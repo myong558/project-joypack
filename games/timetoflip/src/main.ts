@@ -4,7 +4,7 @@ import { Sound } from './audio';
 import { Game, type GameEvent, type GameResult } from './game/engine';
 import { FACE_SETS, type FaceId } from './game/faces';
 import { dateKey, dateSeed, mulberry32, randomSeed } from './game/rng';
-import { START_MS, WARN_MS } from './game/stages';
+import { START_MS, WARN_MS, DEAL_MS } from './game/stages';
 import { setName } from './cards';
 import { preloadFaces } from './ui/art';
 import { setLang, t } from './i18n';
@@ -193,6 +193,8 @@ function play(mode: Mode, from = 1): void {
         const label = e.stage > 1 && open ? t('banner.newSet', { set: setName(open.id) }) : t('banner.stage', { n: e.stage });
         const twinsUp = e.stage === 5 || e.stage === 8;
         view.showMessage(`${label} · ${t(twinsUp ? 'banner.twins' : 'banner.ready')}`, twinsUp ? 'ready warn' : 'ready');
+        // 카드가 다 깔린 뒤부터 미리 보기가 끝날 때까지 줄어드는 게이지(남은 외울 시간)
+        view.peekGauge(DEAL_MS, e.def.viewMs);
         break;
       }
       case 'peekEnd':

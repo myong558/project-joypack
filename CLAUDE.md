@@ -39,6 +39,7 @@
 
 ## 수정할 때
 
+- 버전은 손으로 고치지 않고 **`pnpm bump <게임 id | hub> <patch | minor>`** 로 올린다(파일의 지금 값 + 1 이라 여러 세션이 번갈아 고쳐도 번호가 꼬이지 않음). 고치기 전에 `git pull`.
 - 게임·허브를 고치면 버전을 올린다: 게임은 `games/<id>/package.json`, 허브는 루트 `package.json` (기능 추가 minor, 수정 patch). 게임은 미리보기 동안 0.x.x, **정식 공개하면 1.0.0**(`pnpm release` 가 올림).
 - 답변 끝에 **확인 버전**(바뀐 대상 → 새 버전, 확인 위치: 게임 설정 창 맨 아래 / 조이팩 설정 → 정보)을 적는다.
 - 확인: `pnpm test`, `pnpm build`, `pnpm preview`(http://localhost:4170/project-joypack/)로 실제 화면.

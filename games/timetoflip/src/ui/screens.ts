@@ -637,6 +637,8 @@ export interface GameView {
   };
   showPause(show: boolean): void;
   showMessage(text: string | null, variant?: string): void;
+  /** 미리 보기 안내 띠 아래쪽에 남은 미리 보기 시간 게이지(delay 뒤 ms 동안 줄어듦) */
+  peekGauge(delay: number, ms: number): void;
 }
 
 export function gameScreen(opts: { daily: boolean; onPause: () => void; onResume: () => void; onRestart: () => void; onQuit: () => void }): GameView {
@@ -703,6 +705,12 @@ export function gameScreen(opts: { daily: boolean; onPause: () => void; onResume
       message.classList.remove('pop');
       void message.offsetWidth;
       message.classList.add('pop');
+    },
+    peekGauge(delay, ms) {
+      message.style.setProperty('--peek-delay', `${delay}ms`);
+      message.style.setProperty('--peek-ms', `${ms}ms`);
+      message.style.setProperty('--peek-warn', `${delay + Math.max(0, ms - 500)}ms`);
+      message.classList.add('timed');
     },
   };
 }

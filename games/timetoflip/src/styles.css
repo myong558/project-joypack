@@ -1248,6 +1248,41 @@ h1 .word:nth-child(2) .tc-in {
 .message.warn {
   color: var(--danger-ink);
 }
+/* 미리 보기 남은 시간: 띠 아래쪽 얇은 게이지가 꽉 찼다가 0으로 줄어든다. 마지막 0.5초는 주황(곧 덮임).
+ * 띠는 화면 위에 떠 있어 게이지를 넣어도 배치가 움직이지 않는다 */
+.message.timed {
+  padding-bottom: 0.5em;
+}
+.message.timed::after {
+  content: '';
+  position: absolute;
+  left: 0.9em;
+  right: 0.9em;
+  bottom: 0.22em;
+  height: 4px;
+  border-radius: 99px;
+  background: var(--accent);
+  transform-origin: left;
+  animation:
+    peek-drain var(--peek-ms, 2000ms) linear var(--peek-delay, 0ms) both,
+    peek-warn 1ms linear var(--peek-warn, 1500ms) forwards;
+}
+.game.paused .message.timed::after {
+  animation-play-state: paused;
+}
+@keyframes peek-drain {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+@keyframes peek-warn {
+  to {
+    background: #f08c00;
+  }
+}
 .message.bonus {
   top: 45%;
   bottom: auto;
@@ -2296,11 +2331,12 @@ body:has(.screen.game) .scene .near {
   animation: rise var(--d) linear var(--t) infinite;
   will-change: transform;
 }
+/* 배경 카드는 배경답게 옅게(앞의 버튼·제목보다 눈에 띄지 않게) */
 .mid .fc {
-  opacity: 0.5;
+  opacity: 0.26;
 }
 .near .fc {
-  opacity: 0.45;
+  opacity: 0.2;
 }
 @keyframes rise {
   from {
