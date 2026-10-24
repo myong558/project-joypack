@@ -1553,15 +1553,41 @@ h1 .word:nth-child(2) .tc-in {
 
 /* ---------- 랭킹 등록 카드 ---------- */
 
+/* 입력 칸과 완료 칸을 한 칸에 겹쳐 둔다: 카드 높이는 처음부터 둘 중 큰 쪽이라 등록 전·후에 바뀌지 않는다 */
 .rank-entry {
   width: 100%;
   padding: 10px 12px;
   border-radius: 16px;
   background: var(--panel);
   box-shadow: inset 0 0 0 2px var(--accent);
+  display: grid;
+}
+.rank-entry-form,
+.rank-entry-done {
+  grid-area: 1 / 1;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 6px;
+  min-width: 0;
+}
+.rank-entry-done {
+  visibility: hidden;
+  padding: 8px 4px;
+  gap: 14px;
+}
+/* 완료 문구는 늘 한 줄(길면 말줄임): 문구에 따라 카드 높이가 바뀌지 않게 */
+.rank-entry-done .rank-entry-title span {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rank-entry.done .rank-entry-form {
+  visibility: hidden;
+}
+.rank-entry.done .rank-entry-done {
+  visibility: visible;
 }
 .rank-entry-title {
   margin: 0;
@@ -1613,11 +1639,6 @@ h1 .word:nth-child(2) .tc-in {
 }
 .rank-error {
   color: var(--danger-ink);
-}
-.rank-entry.done {
-  justify-content: center;
-  padding: 18px 16px;
-  gap: 14px;
 }
 .rank-view {
   width: 100%;

@@ -433,7 +433,8 @@ function shortDate(key: string): string {
 
 /**
  * 이름 입력 카드. 영문 대문자 5자까지만 받고, 지난번 이름을 미리 채운다.
- * 등록하면 그 자리에 순위와 랭킹 보기 버튼을 보여 준다
+ * 등록하면 그 자리에 순위와 랭킹 보기 버튼을 보여 준다. 입력 칸과 완료 칸을 처음부터 같은 자리에 겹쳐 두고(완료 칸은 숨김)
+ * 카드 높이를 둘 중 큰 쪽으로 정해, 등록 전·중·후에 카드 높이가 바뀌어 아래 버튼이 덜컥이지 않게 한다
  */
 function rankEntryForm(opts: {
   title: string;
@@ -445,12 +446,18 @@ function rankEntryForm(opts: {
 }): HTMLElement {
   const el = html(`
     <form class="rank-entry" novalidate>
-      <p class="rank-entry-title">${ICONS.trophy}<span>${opts.title}</span></p>
-      <div class="rank-entry-row">
-        <input name="name" value="${opts.name}" maxlength="${NAME_MAX}" placeholder="AAAAA" inputmode="email" lang="en" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="done" aria-label="${t('ranking.nameLabel')}">
-        <button class="btn primary" type="submit">${t('ranking.submit')}</button>
+      <div class="rank-entry-form">
+        <p class="rank-entry-title">${ICONS.trophy}<span>${opts.title}</span></p>
+        <div class="rank-entry-row">
+          <input name="name" value="${opts.name}" maxlength="${NAME_MAX}" placeholder="AAAAA" inputmode="email" lang="en" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="done" aria-label="${t('ranking.nameLabel')}">
+          <button class="btn primary" type="submit">${t('ranking.submit')}</button>
+        </div>
+        <p class="rank-entry-hint">${opts.compact ? '' : t('ranking.nameLabel')}</p>
       </div>
-      <p class="rank-entry-hint">${opts.compact ? '' : t('ranking.nameLabel')}</p>
+      <div class="rank-entry-done" aria-hidden="true">
+        <p class="rank-entry-title" role="status">${ICONS.trophy}<span>${t('ranking.done', { n: 10 })}</span></p>
+        ${opts.onView ? `<button class="btn primary rank-view" type="button" data-view tabindex="-1">${ICONS.trophy}<span>${t('ranking.open')}</span></button>` : ''}
+      </div>
     </form>`);
   const input = el.querySelector('input')!;
   const submit = el.querySelector<HTMLButtonElement>('[type="submit"]')!;
@@ -471,9 +478,6 @@ function rankEntryForm(opts: {
     sync();
     if (submit.disabled || sending) return;
     sending = true;
-    // 등록하는 동안과 등록한 뒤에도 카드 높이를 그대로 둬서 아래 요소가 위아래로 덜컥이지 않게 한다
-    const height = el.offsetHeight;
-    el.style.minHeight = `${height}px`;
     const label = submit.textContent!;
     submit.style.minWidth = `${submit.offsetWidth}px`;
     submit.disabled = input.disabled = true;
@@ -488,17 +492,20 @@ function rankEntryForm(opts: {
       input.disabled = false;
       submit.textContent = label;
       submit.style.minWidth = '';
-      el.style.minHeight = '';
       sync();
       hint.innerHTML = `<span class="rank-error">${t('ranking.failed')}</span>${hintText ? `<br>${hintText}` : ''}`;
       return;
     }
+    // 미리 겹쳐 둔 완료 칸으로 바꾼다(카드 높이는 그대로)
+    const form = el.querySelector<HTMLElement>('.rank-entry-form')!;
+    const done = el.querySelector<HTMLElement>('.rank-entry-done')!;
+    done.querySelector('span')!.innerHTML = place < 0 ? t('ranking.missed') : t('ranking.done', { n: place + 1 });
+    form.setAttribute('aria-hidden', 'true');
+    form.inert = true;
+    done.removeAttribute('aria-hidden');
     el.classList.add('done');
-    // 등록 칸이 줄어 아래 버튼이 튀지 않게 높이는 최소로만 지킨다(완료 글·버튼은 여백을 넉넉히)
-    el.style.minHeight = `${height}px`;
-    el.innerHTML = `<p class="rank-entry-title" role="status">${ICONS.trophy}<span>${place < 0 ? t('ranking.missed') : t('ranking.done', { n: place + 1 })}</span></p>`;
-    if (opts.onView) el.insertAdjacentHTML('beforeend', `<button class="btn primary rank-view" type="button" data-view>${ICONS.trophy}<span>${t('ranking.open')}</span></button>`);
-    const view = el.querySelector<HTMLButtonElement>('[data-view]');
+    const view = done.querySelector<HTMLButtonElement>('[data-view]');
+    view?.removeAttribute('tabindex');
     view?.addEventListener('click', () => opts.onView!(place < 0 ? null : place));
     view?.focus();
   });
