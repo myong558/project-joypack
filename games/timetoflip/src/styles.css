@@ -1114,9 +1114,34 @@ h1 .word:last-child .tc:last-child .tc-in {
   font-size: 17px;
   color: var(--muted);
 }
-.result-mascot {
-  width: 64px;
-  height: 64px;
+/* 결과 화면 위 로고: 시작 화면 카드 세 장 시연을 작게. 공유 이미지(.capturing)는 짝 맞춘 장면으로 멈춘다 */
+.result-logo {
+  --cw: 30px;
+  --ch: 39px;
+  gap: 6px;
+}
+.result-logo .demo {
+  gap: 6px;
+}
+.result-logo .demo-timer {
+  width: calc(var(--cw) * 3 + 12px);
+  height: 4px;
+}
+.result-logo .demo-pop {
+  top: -12px;
+  right: -18px;
+  font-size: 17px;
+}
+.capturing .demo *,
+.capturing .demo-timer i {
+  animation: none !important;
+}
+.capturing .demo .d1 .inner,
+.capturing .demo .d3 .inner {
+  transform: rotateY(180deg);
+}
+.capturing .demo-timer i {
+  transform: scaleX(0.9);
 }
 .final {
   margin: 0;
@@ -1359,7 +1384,7 @@ h1 .word:last-child .tc:last-child .tc-in {
   justify-content: center;
 }
 .rank-view {
-  align-self: center;
+  width: 100%;
 }
 
 /* ---------- 대화 상자(설정·랭킹·도감) ---------- */
@@ -1664,7 +1689,7 @@ h1 .word:last-child .tc:last-child .tc-in {
     min-height: 52px;
     font-size: 21px;
   }
-  .result-mascot {
+  .result-logo {
     display: none;
   }
   .final b {

@@ -638,7 +638,7 @@ export function resultScreen(opts: {
       <div class="confetti-layer" aria-hidden="true"></div>
       <div class="col main-col">
         <p class="mode">${opts.daily ? t('start.daily') : t('mode.classic')}</p>
-        <span class="mascot result-mascot" aria-hidden="true">${MASCOT}</span>
+        <div class="hero result-logo" aria-hidden="true">${heroDemo()}</div>
         <p class="final">${t('result.final')}</p>
         ${opts.isRecord ? `<p class="record">${t('result.record')}</p>` : ''}
         <dl class="numbers">
