@@ -7,7 +7,7 @@
 //   --skip-check                              pnpm test·build 를 건너뜀
 //
 // games.json 은 한 줄짜리 객체(name·desc 등) 모양을 지키도록 그 게임의 필드 줄만 글자로 고친다.
-// 허브 버전(루트 package.json)의 patch 를 올린다. 커밋·푸시와 기준서 9장 "문서 키우기"는 사람(또는 Claude)이 한다.
+// 허브 버전(루트 package.json)의 patch 를 올리고, 게임 버전이 0.x.x 면 1.0.0 으로 올린다(정식 공개 = v1). 커밋·푸시와 기준서 9장 "문서 키우기"는 사람(또는 Claude)이 한다.
 import { execSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -94,6 +94,17 @@ writeFileSync(PKG_FILE, pkgText.replace(`"version": "${version}"`, `"version": "
 
 console.log(`✓ ${summary}`);
 console.log(`✓ 허브 버전 ${version} → ${next}`);
+
+// 게임 버전: 정식 공개(지금·예약)하면 1.0.0 부터. 미리보기 동안은 0.x.x, 이미 1 이상이면 그대로(기준서 7.4)
+if (!cancel) {
+  const gamePkgFile = join(ROOT, 'games', id, 'package.json');
+  const gameText = readFileSync(gamePkgFile, 'utf8');
+  const gameVersion = JSON.parse(gameText).version;
+  if (Number(gameVersion.split('.')[0]) < 1) {
+    writeFileSync(gamePkgFile, gameText.replace(`"version": "${gameVersion}"`, '"version": "1.0.0"'));
+    console.log(`✓ 게임 버전 ${gameVersion} → 1.0.0 (정식 공개)`);
+  }
+}
 
 if (!skipCheck) {
   for (const cmd of ['pnpm test', 'pnpm build']) {

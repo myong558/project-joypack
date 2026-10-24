@@ -39,7 +39,7 @@
 
 ## 수정할 때
 
-- 게임·허브를 고치면 버전을 올린다: 게임은 `games/<id>/package.json`, 허브는 루트 `package.json` (기능 추가 minor, 수정 patch).
+- 게임·허브를 고치면 버전을 올린다: 게임은 `games/<id>/package.json`, 허브는 루트 `package.json` (기능 추가 minor, 수정 patch). 게임은 미리보기 동안 0.x.x, **정식 공개하면 1.0.0**(`pnpm release` 가 올림).
 - 답변 끝에 **확인 버전**(바뀐 대상 → 새 버전, 확인 위치: 게임 설정 창 맨 아래 / 조이팩 설정 → 정보)을 적는다.
 - 확인: `pnpm test`, `pnpm build`, `pnpm preview`(http://localhost:4170/project-joypack/)로 실제 화면.
 - 화면 배치(CSS 배치·글자 크기·화면 맞춤 코드)를 바꿨으면 `pnpm check:screens <hub | 게임 id> quick`(대표 4크기, 약 2분)으로 점검한다. 14크기 전체(`all`)는 새 게임 첫 배치와 정식 공개 직전에만 돌린다. 점검은 백그라운드로 돌리고 기다리는 동안 다른 일을 한다. 언제 어디까지 돌릴지는 기준서 7.1 "언제 돌리나"를 따르고, 묻지 않고 진행한다. 색·문구·규칙만 바꿨으면 돌리지 않는다.

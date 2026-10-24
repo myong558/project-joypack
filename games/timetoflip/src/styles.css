@@ -344,8 +344,8 @@ button {
 /* 로고 위 시연: 실제 게임 카드(.card .inner .side) 세 장이 8초마다 한 번
  * 뒤집기 → 틀림(빨간 테두리) → 짝(강조 테두리·+1.5) → 시간 막대 차오름 → 다시 엎기를 보여 준다 */
 .hero {
-  --cw: 46px;
-  --ch: 60px;
+  --cw: 56px;
+  --ch: 73px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -492,7 +492,7 @@ button {
 h1 {
   margin: 0;
   font-weight: 400;
-  font-size: clamp(26px, 8.2vw, 38px);
+  font-size: clamp(30px, 10.2vw, 46px);
   line-height: 1;
   text-align: center;
 }
@@ -1343,21 +1343,21 @@ h1 .word:nth-child(2) .tc-in {
 }
 /* 결과 화면 위 로고: 시작 화면 카드 세 장 시연을 작게. 공유 이미지(.capturing)는 짝 맞춘 장면으로 멈춘다 */
 .result-logo {
-  --cw: 30px;
-  --ch: 39px;
-  gap: 6px;
+  --cw: 40px;
+  --ch: 52px;
+  gap: 8px;
 }
 .result-logo .demo {
   gap: 6px;
 }
 .result-logo .demo-timer {
   width: calc(var(--cw) * 3 + 12px);
-  height: 4px;
+  height: 5px;
 }
 .result-logo .demo-pop {
-  top: -12px;
-  right: -18px;
-  font-size: 17px;
+  top: -14px;
+  right: -20px;
+  font-size: 20px;
 }
 .capturing .demo *,
 .capturing .demo-timer i {
@@ -2023,6 +2023,18 @@ h1 .word:nth-child(2) .tc-in {
 }
 /* 키가 낮은 휴대폰: 큰 카드·설명을 줄여 목록 자리를 남긴다 */
 @media (max-height: 700px) and (orientation: portrait) {
+  /* 낮은 휴대폰은 로고를 전처럼(버튼이 화면 밖으로 밀리지 않게) */
+  .hero {
+    --cw: 46px;
+    --ch: 60px;
+  }
+  h1 {
+    font-size: clamp(26px, 8.2vw, 38px);
+  }
+  .result-logo {
+    --cw: 30px;
+    --ch: 39px;
+  }
   .dex-big {
     --cw: 112px;
     width: 112px;
@@ -2092,11 +2104,11 @@ h1 .word:nth-child(2) .tc-in {
     gap: 48px;
   }
   .hero {
-    --cw: 56px;
-    --ch: 72px;
+    --cw: 66px;
+    --ch: 86px;
   }
   h1 {
-    font-size: 40px;
+    font-size: 50px;
   }
   .hud-score b {
     font-size: 32px;
