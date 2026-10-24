@@ -86,7 +86,9 @@ for (const game of games) {
   // 미리보기 표시: 게임은 Joypack.isPreview() 로 미리보기로 배포된 것을 안다(랭킹은 그대로 등록됨)
   if (game.status === 'preview') {
     const index = join(out, 'index.html');
-    writeFileSync(index, readFileSync(index, 'utf8').replace(/<html\b/i, '<html data-jp-preview'));
+    // 공개 예약(open)이 있으면 그 시각도 적는다: 공통 모듈이 그 전에는 "곧 공개" 화면으로 막고, 지나면 공개된 게임으로 본다
+    const openAttr = game.open ? ` data-jp-open="${game.open}"` : '';
+    writeFileSync(index, readFileSync(index, 'utf8').replace(/<html\b/i, `<html data-jp-preview${openAttr}`));
     console.log(`games/${game.id}: 숨김 미리보기(비밀번호 확인한 기기의 허브에만 보임)`);
   }
 }

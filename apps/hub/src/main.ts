@@ -31,7 +31,6 @@ live = shownGames();
 /** 공개 예약을 기다리는 게임: 누를 수 없는 COMING SOON 카드로(개발자 모드에서는 실제 카드가 TEST 로 보이므로 없음) */
 const teaserGames = () =>
   previewOn() ? [] : GAMES.filter((g) => isScheduled(g)).sort((a, b) => Date.parse(a.open!) - Date.parse(b.open!));
-/** NEW 를 붙일 게임: 모두에게 공개된 게임 중 가장 최근 것(미리보기 게임은 TEST 표시) */
 
 const ICON = {
   // 게임기: 설정에서 "모든 게임에 함께 적용" 묶음 표시
@@ -276,6 +275,22 @@ function gameCard(game: GameMeta): string {
  * 공개 예약 게임(COMING SOON): 어떤 게임인지 숨긴 누를 수 없는 미스터리 카드. 공개 날짜·시각과 D-day 를 보인다.
  * 그 시각이 되면 scheduleOpen 이 첫 화면을 다시 그려 정식 카드(NEW)로 바뀐다
  */
+/**
+ * 공개 예약 카드 그림판: 공개 72시간 전까지는 물음표 상자, 72~48시간 많이 흐린 아이콘, 48~24시간 약간 흐린 아이콘(둘 다 작은 ?),
+ * 24시간 전부터 또렷한 아이콘. 이름·설명은 공개 전까지 숨긴다. 기기 시계 기준(공개 시각과 같음)
+ */
+const VEIL_HOURS = [72, 48, 24];
+function teaserVeil(game: GameMeta, now = Date.now()): 'box' | 'heavy' | 'light' | 'clear' {
+  const hours = (Date.parse(game.open!) - now) / 3_600_000;
+  return hours > 72 ? 'box' : hours > 48 ? 'heavy' : hours > 24 ? 'light' : 'clear';
+}
+function teaserArt(game: GameMeta): string {
+  const veil = teaserVeil(game);
+  if (veil === 'box') return '<span class="teaser-box" aria-hidden="true">?</span>';
+  const mark = veil === 'clear' ? '' : '<span class="teaser-q" aria-hidden="true">?</span>';
+  return `<img class="card-icon teaser-icon" data-veil="${veil}" src="${iconUrl(game)}" alt="" width="72" height="72" />${mark}`;
+}
+
 function teaserCard(game: GameMeta): string {
   const open = new Date(game.open!);
   const day = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
@@ -290,7 +305,7 @@ function teaserCard(game: GameMeta): string {
   const opens = esc(t('teaser.opens', { when }));
   return `
     <div class="card teaser" aria-disabled="true" aria-label="Coming soon · ${opens}">
-      <span class="card-art" data-pat="${patternOf(game)}"><span class="teaser-box" aria-hidden="true">?</span></span>
+      <span class="card-art" data-pat="${patternOf(game)}">${teaserArt(game)}</span>
       <span class="card-body">
         <span class="card-play" aria-hidden="true">${ICON.lock}</span>
         <strong class="card-name">COMING SOON</strong>
@@ -487,14 +502,25 @@ let openTimer: ReturnType<typeof setTimeout> | undefined;
 function scheduleOpen(): void {
   clearTimeout(openTimer);
   const now = Date.now();
-  const next = Math.min(...GAMES.filter((g) => isScheduled(g, now)).map((g) => Date.parse(g.open!)));
+  // 공개 시각과 흐림 단계가 바뀌는 시각(72·48·24시간 전) 중 가장 가까운 때
+  const next = Math.min(
+    ...GAMES.filter((g) => isScheduled(g, now))
+      .flatMap((g) => [0, ...VEIL_HOURS].map((h) => Date.parse(g.open!) - h * 3_600_000))
+      .filter((at) => at > now),
+  );
   if (!Number.isFinite(next)) return;
   openTimer = setTimeout(openDue, Math.min(next - now + 500, 2 ** 31 - 1));
 }
+// 지난번에 확인한 첫 화면 상태(보이는 게임 + 예약 카드 흐림 단계). 달라졌을 때만 다시 그린다
+const homeKey = () => live.map((g) => g.id).join() + '|' + teaserGames().map((g) => g.id + teaserVeil(g)).join();
+let lastHomeKey = homeKey();
 function openDue(): void {
-  const before = live.map((g) => g.id).join();
   live = shownGames();
-  if (live.map((g) => g.id).join() !== before) void refreshHome();
+  const key = homeKey();
+  if (key !== lastHomeKey) {
+    lastHomeKey = key;
+    void refreshHome();
+  }
   scheduleOpen();
 }
 document.addEventListener('visibilitychange', () => {

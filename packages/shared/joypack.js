@@ -418,8 +418,55 @@
 
   // 숨김 미리보기로 배포된 게임인지(games.json status "preview"). 빌드가 그 게임 index.html 의 <html> 에 data-jp-preview 를 붙인다.
   // 미리보기 동안에도 랭킹은 실제로 등록된다(테스트용). 공개 전 테스트 점수를 지울지는 사람이 정한다(기준서 7.3)
+  // 공개 예약(games.json open)이 있으면 빌드가 data-jp-open 에 그 시각을 적는다. 그 시각이 지나면 미리보기가 아니라 공개된 게임으로 본다
   function isPreview() {
-    return typeof document !== 'undefined' && document.documentElement.hasAttribute('data-jp-preview');
+    if (typeof document === 'undefined' || !document.documentElement.hasAttribute('data-jp-preview')) return false;
+    const open = openTime();
+    return !(open && Date.now() >= open);
+  }
+
+  function openTime() {
+    const value = typeof document !== 'undefined' && document.documentElement.getAttribute('data-jp-open');
+    const ms = value ? Date.parse(value) : NaN;
+    return Number.isFinite(ms) ? ms : 0;
+  }
+
+  // 공개 전 막기: 미리보기(공개 예약 포함)로 배포된 게임을 개발자 모드가 아닌 기기에서 주소로 직접 열면
+  // 게임 대신 "곧 공개" 화면만 보인다. 공개 시각이 되면 다시 읽어 게임을 연다(기준서 7.4).
+  // 기기 시계로 판단하므로 시계를 바꾸면 열 수 있지만, 랭킹 등록은 Firestore 규칙이 서버 시각으로 막는다
+  function gatePreview() {
+    if (typeof document === 'undefined' || !isPreview() || devMode()) return;
+    const open = openTime();
+    const ko = (get('lang') || deviceLang()) === 'ko';
+    const when = open
+      ? new Date(open).toLocaleString(ko ? 'ko-KR' : 'en-US', { month: 'long', day: 'numeric', weekday: 'short', hour: 'numeric', minute: '2-digit' })
+      : '';
+    const gate = document.createElement('div');
+    gate.setAttribute('role', 'dialog');
+    gate.setAttribute('aria-modal', 'true');
+    gate.style.cssText =
+      'position:fixed;inset:0;z-index:2147483647;display:grid;place-content:center;justify-items:center;gap:14px;padding:24px;' +
+      'background:#1b1730;color:#fff;font:16px/1.5 system-ui,sans-serif;text-align:center;touch-action:none';
+    gate.innerHTML =
+      '<svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="#ffd84d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>' +
+      '<strong style="font-size:26px;letter-spacing:.02em">COMING SOON</strong>' +
+      '<p style="margin:0;opacity:.85">' +
+      (open ? (ko ? when + ' 공개' : 'Opens ' + when) : ko ? '준비 중인 게임이에요' : 'This game is not open yet') +
+      '</p>' +
+      '<a href="../../" style="margin-top:8px;padding:12px 22px;border-radius:999px;background:#ffd84d;color:#2a1d00;font-weight:700;text-decoration:none">' +
+      (ko ? '조이팩으로' : 'Back to Joypack') +
+      '</a>';
+    const stopKeys = (e) => e.stopImmediatePropagation();
+    window.addEventListener('keydown', stopKeys, true);
+    window.addEventListener('keyup', stopKeys, true);
+    const show = () => {
+      document.documentElement.style.overflow = 'hidden';
+      document.body.append(gate);
+    };
+    if (document.body) show();
+    else document.addEventListener('DOMContentLoaded', show);
+    if (open) setTimeout(() => location.reload(), Math.min(open - Date.now() + 500, 2 ** 31 - 1));
   }
 
   // 개발자 모드(조이팩 설정 → 정보의 버전을 7번 눌러 비밀번호로 켬, 허브 preview.ts 와 같은 키 joypack.preview).
@@ -530,6 +577,7 @@
     );
   }
   blockZoom();
+  gatePreview();
 
   // 저작권 표기: 조이팩 설정 → 정보, 각 게임 설정 맨 아래 버전 밑에 그대로 쓴다(기준서 1.4). 바꿀 때는 여기 한 곳만
   var COPYRIGHT = '© 2026 Myong Bum Soo. All rights reserved.';
