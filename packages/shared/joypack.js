@@ -381,6 +381,17 @@
     return typeof document !== 'undefined' && document.documentElement.hasAttribute('data-jp-preview');
   }
 
+  // 개발자 모드(조이팩 설정 → 정보의 버전을 7번 눌러 비밀번호로 켬, 허브 preview.ts 와 같은 키 joypack.preview).
+  // 켠 기기에서만 게임의 출시 전 확인 기능(판별 바로 시작·도감 전부 열기 등)을 보인다
+  function devMode() {
+    try {
+      const value = localStorage.getItem('joypack.preview');
+      return value === 'on' || value === '1';
+    } catch (e) {
+      return false;
+    }
+  }
+
   // ── 랭킹 탭 공통 기준(조이팩 전체 랭킹·모든 게임 랭킹 창, 기준서 1.6) ──
   // 랭킹 창을 열 때 처음 고를 탭: ① 등록 대기 기록이 있는 탭(여럿이면 최근 탭, 아니면 첫 번째) → ② 최근 탭(방금 한 판 또는 마지막으로 본 탭 중 나중)
   // → ③ 기본 탭. 한 기기 안에서 조이팩과 모든 게임이 같은 값을 읽고 써서, 어디서 열어도 이어진다.
@@ -438,6 +449,7 @@
     KEYS: KEYS,
     COPYRIGHT: COPYRIGHT,
     isPreview: isPreview,
+    devMode: devMode,
     topIcon: topIcon,
     deviceLang: deviceLang,
     guardBottom: guardBottom,

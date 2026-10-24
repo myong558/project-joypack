@@ -120,10 +120,9 @@ function heroDemo(): string {
 }
 
 /**
- * 출시 전 확인용: true 면 시작 화면 로고 위에 "N판부터 바로 시작" 단추(클래식, 기록·랭킹에 안 남음).
- * 사용자가 원복을 지시하면 false 로 되돌린다
+ * 출시 전 확인용: 조이팩 개발자 모드를 켠 기기에서만 시작 화면 로고 위에 "N판부터 바로 시작" 단추(클래식, 기록·랭킹에 안 남음)
  */
-const STAGE_JUMP = true;
+const STAGE_JUMP = () => Joypack.devMode();
 
 export function startScreen(opts: StartOptions): HTMLElement {
   const { save } = opts;
@@ -144,7 +143,7 @@ export function startScreen(opts: StartOptions): HTMLElement {
         </div>
       </nav>
       <div class="col main-col">
-        ${STAGE_JUMP ? `<div class="stage-jump" role="group" aria-label="${t('test.jump')}"><span>TEST</span>${[2, 3, 4, 5, 6, 7, 8].map((n) => `<button type="button" data-from="${n}">${n}</button>`).join('')}</div>` : ''}
+        ${STAGE_JUMP() ? `<div class="stage-jump" role="group" aria-label="${t('test.jump')}"><span>TEST</span>${[2, 3, 4, 5, 6, 7, 8].map((n) => `<button type="button" data-from="${n}">${n}</button>`).join('')}</div>` : ''}
         <div class="hero" aria-hidden="true">${heroDemo()}</div>
         <h1 aria-label="${t('app.title')}"><span aria-hidden="true">${titleCards(t('app.title'))}</span></h1>
         <p class="tagline">${t('app.tagline')}</p>
@@ -201,13 +200,12 @@ export function startScreen(opts: StartOptions): HTMLElement {
  * 큰 카드·설명 칸은 크기를 고정해(설명은 최대 4줄) 글 길이가 달라도 화면이 덜컥이지 않는다
  */
 /**
- * 출시 전 확인용: true 면 도감에서 48장을 모두 연 것처럼 보여 준다(저장된 기록은 그대로).
- * 사용자가 원복을 지시하면 false 로 되돌린다
+ * 출시 전 확인용: 조이팩 개발자 모드를 켠 기기에서만 도감 48장을 모두 연 것처럼 보여 준다(저장된 기록은 그대로)
  */
-const DEX_ALL_OPEN = true;
+const DEX_ALL_OPEN = () => Joypack.devMode();
 
 function openDex(host: HTMLElement, save: SaveData): void {
-  const found = new Set<FaceId>(DEX_ALL_OPEN ? ALL_FACES : save.dex);
+  const found = new Set<FaceId>(DEX_ALL_OPEN() ? ALL_FACES : save.dex);
   const gold = new Set(save.gold);
   const box = html(`
     <div class="dex">
