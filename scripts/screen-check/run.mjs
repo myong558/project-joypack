@@ -71,6 +71,11 @@ const CHECK = `(() => {
     }
     if (bad) out.push((typeof e.className === 'string' && e.className ? '.' + e.className.split(' ')[0] : e.tagName) + ' [' + e.textContent.trim().replace(/\\s+/g, ' ').slice(0, 14) + '] ' + bad);
   }
+  // 안쪽 상자의 가로 스크롤: overflow-y 만 auto 여도 overflow-x 가 auto 로 바뀌어, 내용이 조금만 넓어도 좌우로 밀린다
+  for (const e of document.querySelectorAll('body *')) {
+    const s = getComputedStyle(e);
+    if (/auto|scroll/.test(s.overflowX) && e.scrollWidth > e.clientWidth + 1 && shown(e)) out.push('.' + String(e.className).split(' ')[0] + ' 가로 스크롤 ' + e.scrollWidth + '>' + e.clientWidth);
+  }
   const de = document.documentElement;
   return (out.length ? out.slice(0, 6).join(' | ') + (out.length > 6 ? ' …+' + (out.length - 6) : '') : 'ok') + (de.scrollHeight > H + 1 ? ' · 문서 스크롤 ' + de.scrollHeight : '') + (de.scrollWidth > W + 1 ? ' · 가로 스크롤 ' + de.scrollWidth : '');
 })()`;

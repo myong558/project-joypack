@@ -165,6 +165,8 @@ body {
   height: var(--jp-vh, 100dvh);
   overflow: hidden;
   overscroll-behavior: none;
+  /* 손가락으로는 세로 스크롤만(휴대폰에서 화면이 좌우로 밀리지 않게). 판 밀기·도감 넘기기는 포인터 이벤트로 받는다 */
+  touch-action: pan-y;
 }
 
 body {
@@ -430,6 +432,7 @@ body:has(.screen.game) .scene .layer {
   align-items: center;
   justify-content: safe center;
   gap: 14px;
+  overflow-x: hidden;
   overflow-y: auto;
   padding: calc(var(--jp-top-space) + 12px) 16px 18px;
 }
@@ -731,6 +734,7 @@ body:has(.screen.game) .scene .layer {
   position: relative;
   width: min(440px, 100%);
   max-height: calc(var(--jp-vh, 100dvh) - 32px);
+  overflow-x: hidden;
   overflow-y: auto;
   padding: 20px 18px 18px;
   border-radius: 20px;
@@ -1254,6 +1258,7 @@ body:has(.screen.game) .scene .layer {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 4px 18px;
+  overflow-x: hidden;
   overflow-y: auto;
 }
 .toc h4 {
@@ -1381,6 +1386,7 @@ body:has(.screen.game) .scene .layer {
   }
   .page.flower .pg-text {
     grid-row: 2;
+    overflow-x: hidden;
     overflow-y: auto;
     align-items: flex-start;
   }
