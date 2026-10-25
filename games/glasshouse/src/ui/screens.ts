@@ -78,19 +78,20 @@ function openModal(host: HTMLElement, content: HTMLElement, label: string, reope
 }
 
 /**
- * 로고 = 게임 시연(실제 규칙대로): 오른쪽 벽 창 바로 앞 한 칸에 햇살이 고인 작은 온실에서 정원사가 화분을 두 칸 밀어
- * 햇살 자리에 넣으면 화분 바닥이 빛나고 튤립 꽃잎이 천천히 벌어진다. 8초 반복, 움직임은 CSS(.demo)
+ * 로고 = 게임 시연(실제 규칙대로)이 든 4×2 작은 온실. 위 줄은 네 칸을 한 장으로 덮은 나무 간판(게임 이름, 칸 선 없음), 아래 줄은 빈칸 → 정원사 → 화분 → 창 칸(게임 판의 벽·창 칸과 같은 그림).
+ * 정원사가 화분을 한 칸 밀어 창 바로 앞 햇살 자리에 넣으면 화분 바닥이 빛나고 튤립 꽃잎이 천천히 벌어진다. 8초 반복, 움직임은 CSS(.demo)
  */
 function heroDemo(): string {
   return `<div class="demo">
-    <i class="d-win"></i><i class="d-beam"></i>
+    <span class="d-sign"><b>${t('app.title')}</b></span>
+    <i class="d-wall"><i class="d-win"></i></i><i class="d-beam"></i>
     <span class="d-pot"><span class="glow"></span><span class="plant">${flowerSvg('tulip', false, 'game')}</span>${POT}</span>
     <span class="d-man"><svg viewBox="0 0 40 40" focusable="false"><circle cx="20" cy="20" r="14.5" fill="#d8b46a" stroke="#9a7434" stroke-width=".8"/><circle cx="20" cy="20" r="8" fill="#e6c57d"/><circle cx="20" cy="20" r="8.6" fill="none" stroke="var(--accent)" stroke-width="2"/></svg></span>
   </div>`;
 }
 
 function logo(cls = ''): string {
-  return `<div class="logo ${cls}" aria-hidden="true">${heroDemo()}<p class="logo-title">${t('app.title')}</p>${getLang() === 'ko' ? '<p class="logo-sub">Glasshouse Garden</p>' : ''}</div>`;
+  return `<div class="logo ${cls}" aria-hidden="true">${heroDemo()}</div>`;
 }
 
 /* ---------- 시작 화면 ---------- */

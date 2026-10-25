@@ -230,7 +230,6 @@ h1,
 h2,
 h3,
 .tagline,
-.logo-title,
 .rank-entry-title,
 .record,
 .goal,
@@ -238,8 +237,7 @@ h3,
   font-family: 'GowunBatang', 'GowunDodum', serif;
   font-weight: 700;
 }
-.sci,
-.logo-sub {
+.sci {
   font-family: 'GowunBatang', Georgia, serif;
   font-style: italic;
   font-weight: 700;
@@ -490,33 +488,7 @@ body:has(.screen.game) .scene .layer {
   display: flex;
   flex-direction: column;
   align-items: center;
-  --dc: 56px;
-}
-.logo-title {
-  margin: 10px 0 0;
-  font-size: 42px;
-  line-height: 1.1;
-  letter-spacing: 0.04em;
-  color: var(--leaf-ink);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  text-shadow: 0 2px 0 color-mix(in srgb, var(--sheet) 70%, transparent);
-}
-.logo-title::before,
-.logo-title::after {
-  content: '';
-  width: 28px;
-  height: 1px;
-  background: currentColor;
-  opacity: 0.45;
-  box-shadow: 0 4px 0 currentColor;
-}
-.logo-sub {
-  margin: 2px 0 0;
-  font-size: 15px;
-  color: var(--muted);
-  letter-spacing: 0.06em;
+  --dc: 60px;
 }
 .tagline {
   margin: 0;
@@ -527,31 +499,70 @@ body:has(.screen.game) .scene .layer {
 }
 .demo {
   position: relative;
-  width: calc(var(--dc) * 3);
+  width: calc(var(--dc) * 4);
   height: calc(var(--dc) * 2);
   border-radius: 12px;
-  /* 돌바닥 3×2 칸 + 테두리 턱 */
+  /* 돌바닥 4×2 칸 + 테두리 턱 */
   background:
     linear-gradient(90deg, rgb(0 0 0 / 0.07) 1px, transparent 1px) 0 0 / var(--dc) var(--dc),
     linear-gradient(rgb(0 0 0 / 0.07) 1px, transparent 1px) 0 0 / var(--dc) var(--dc),
     var(--stone);
   box-shadow: 0 0 0 5px #7a5a40, 0 0 0 6px rgb(0 0 0 / 0.25), 0 10px 24px rgb(0 0 0 / 0.18);
 }
-/* 오른쪽 벽 창(아래 줄 끝): 판의 창과 같은 십자 창살 유리가 테두리 턱에 박혀 빛나고, 바로 앞 한 칸에 햇살이 고인 햇살 자리 */
+/* 위 줄 나무 간판: 네 칸을 한 장으로 덮고(칸 선 없음) 게임 이름을 크림색으로. 한국어는 크게, 영어는 길어서 조금 작게 */
+.d-sign {
+  position: absolute;
+  inset: 0 0 auto;
+  height: var(--dc);
+  display: grid;
+  place-items: center;
+  border-radius: 12px 12px 0 0;
+  background:
+    repeating-linear-gradient(180deg, rgb(0 0 0 / 0.05) 0 2px, transparent 2px 9px),
+    linear-gradient(180deg, #9a7350, #7d5a3c);
+  box-shadow: inset 0 -3px 0 rgb(0 0 0 / 0.22), inset 0 2px 0 rgb(255 255 255 / 0.15);
+}
+.d-sign b {
+  font-family: 'GowunBatang', serif;
+  font-weight: 700;
+  font-size: calc(var(--dc) * 0.56);
+  line-height: 1;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  color: #fbefd4;
+  text-shadow: 0 1px 0 rgb(0 0 0 / 0.35);
+}
+:root[lang='en'] .d-sign b {
+  font-size: calc(var(--dc) * 0.43);
+  letter-spacing: -0.01em;
+}
+/* 아래 줄 끝 창 칸: 게임 판의 벽·창 칸(.tile.window)과 같은 그림. 창이 판 안 한 칸이라 떠 보이지 않고,
+ * 빛은 둘레로 번지지 않고 바로 앞 햇살 자리에만 고인다 */
+.d-wall {
+  position: absolute;
+  z-index: 2;
+  left: calc(var(--dc) * 3);
+  top: var(--dc);
+  width: var(--dc);
+  height: var(--dc);
+  border-bottom-right-radius: 12px;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.18), transparent 30%, rgb(0 0 0 / 0.15)),
+    linear-gradient(90deg, rgb(0 0 0 / 0.12) 1px, transparent 1px) 0 0 / 50% 50%,
+    linear-gradient(rgb(0 0 0 / 0.12) 1px, transparent 1px) 0 0 / 100% 50%,
+    #8a6448;
+  box-shadow: inset 0 2px 0 color-mix(in srgb, var(--leaf) 55%, #8a6448);
+}
 .d-win {
   position: absolute;
-  z-index: 1;
-  left: calc(100% - 3px);
-  top: calc(var(--dc) + var(--dc) * 0.16);
-  width: calc(var(--dc) * 0.3);
-  height: calc(var(--dc) * 0.68);
+  inset: 18%;
   border: 2px solid #5a4030;
   border-radius: 3px;
   background:
     linear-gradient(#5a4030, #5a4030) 50% 0 / 2px 100% no-repeat,
     linear-gradient(#5a4030, #5a4030) 0 50% / 100% 2px no-repeat,
     linear-gradient(135deg, #fffbe8, var(--sun));
-  box-shadow: 0 0 calc(var(--dc) * 0.35) calc(var(--dc) * 0.08) color-mix(in srgb, var(--sun) 85%, transparent);
+  box-shadow: inset 0 0 6px rgb(255 240 190 / 0.8);
   animation: shimmer 3.4s ease-in-out infinite alternate;
 }
 .d-beam {
@@ -663,14 +674,7 @@ body:has(.screen.game) .scene .layer {
   }
 }
 .logo.small {
-  --dc: 40px;
-}
-.logo.small .logo-title {
-  font-size: 26px;
-  margin-top: 6px;
-}
-.logo.small .logo-sub {
-  display: none;
+  --dc: 42px;
 }
 .opening .logo,
 .opening .tagline,
@@ -2030,16 +2034,10 @@ body:has(.screen.game) .scene .layer {
     gap: 56px;
   }
   .start .logo {
-    --dc: 70px;
-  }
-  .logo-title {
-    font-size: 50px;
+    --dc: 74px;
   }
   .logo.small {
-    --dc: 50px;
-  }
-  .logo.small .logo-title {
-    font-size: 32px;
+    --dc: 52px;
   }
 }
 @media (orientation: landscape) and (max-height: 559px) {
@@ -2052,16 +2050,10 @@ body:has(.screen.game) .scene .layer {
     padding-top: calc(var(--jp-top-space) + 6px);
   }
   .start .logo {
-    --dc: 44px;
-  }
-  .logo-title {
-    font-size: 32px;
+    --dc: 46px;
   }
   .logo.small {
-    --dc: 32px;
-  }
-  .logo.small .logo-title {
-    font-size: 22px;
+    --dc: 34px;
   }
   .start .side-col,
   .result .side-col {
