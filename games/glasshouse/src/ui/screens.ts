@@ -6,6 +6,7 @@ import { captureResult, type ShareOutcome } from '../share';
 import { dailyOpen, flowerCount, gardenScore, nextLevel, petalCount, type SaveData } from '../storage';
 import { SKIN_SETTINGS, THEMES, type Skin, type SkinSetting, type Theme } from '../theme';
 import { countUp, reducedMotion } from './effects';
+import { POT } from './board';
 import { flowerSvg } from './flowers';
 import { HABIT_ICON, ICONS, SKIN_ICONS, THEME_ICONS } from './icons';
 
@@ -83,7 +84,7 @@ function openModal(host: HTMLElement, content: HTMLElement, label: string, reope
 function heroDemo(): string {
   return `<div class="demo">
     <i class="d-win"></i><i class="d-beam"></i>
-    <span class="d-pot"><span class="glow"></span><svg class="pot-body" viewBox="0 0 40 40" focusable="false"><path d="M8 15h24l-3.2 19.2q-.3 1.8-2.2 1.8H13.4q-1.9 0-2.2-1.8z" fill="#b8613a"/><path d="M8 15h7l1.2 21h-2.8q-1.9 0-2.2-1.8z" fill="#d98a5c" opacity=".55"/><rect x="6.5" y="11" width="27" height="6" rx="2" fill="#c96f45"/><ellipse cx="20" cy="12.2" rx="11.2" ry="1.7" fill="#4a3324"/></svg><span class="plant">${flowerSvg('tulip', false)}</span></span>
+    <span class="d-pot"><span class="glow"></span><span class="plant">${flowerSvg('tulip', false, 'game')}</span>${POT}</span>
     <span class="d-man"><svg viewBox="0 0 40 40" focusable="false"><circle cx="20" cy="20" r="14.5" fill="#d8b46a" stroke="#9a7434" stroke-width=".8"/><circle cx="20" cy="20" r="8" fill="#e6c57d"/><circle cx="20" cy="20" r="8.6" fill="none" stroke="var(--accent)" stroke-width="2"/></svg></span>
   </div>`;
 }
@@ -210,7 +211,7 @@ function openPicker(host: HTMLElement, save: SaveData, onPlay: (level: number) =
                 const label = open ? t('pick.level', { season: t(`season.${s}`), n: (i % 6) + 1, state: rec ? t('pick.cleared', { p: rec.petals }) : t('pick.open') }) : `${levelName(i)} — ${t('pick.locked')}`;
                 return `<li><button type="button" class="tile-btn${rec ? ' done' : ''}" data-level="${i}" ${open ? '' : 'disabled'} aria-label="${label}">
                   <b>${(i % 6) + 1}</b>
-                  <span class="mini">${rec || ALL_OPEN() ? flowerSvg(lv.flower) : open ? flowerSvg(lv.flower, false) : ICONS.lock}</span>
+                  <span class="mini">${rec || ALL_OPEN() ? flowerSvg(lv.flower, true, 'game') : open ? flowerSvg(lv.flower, false, 'game') : ICONS.lock}</span>
                   ${rec ? petalRow(rec.petals) : '<span class="petals"></span>'}
                 </button></li>`;
               })
@@ -231,151 +232,115 @@ function openPicker(host: HTMLElement, save: SaveData, onPlay: (level: number) =
   box.querySelector<HTMLButtonElement>(`[data-level="${next < 0 ? 0 : next}"]`)?.focus();
 }
 
-/* ---------- 식물 도감(넘기는 책) ---------- */
+/* ---------- 식물 도감(큰 카드 + 계절별 작은 카드) ---------- */
 
 const monthsText = (f: Flower) => (f.months[0] === f.months[1] ? t('dex.month', { a: f.months[0] }) : t('dex.months', { a: f.months[0], b: f.months[1] }));
 const HABIT_KEY: Record<Habit, 'habit.sun' | 'habit.shade' | 'habit.moist'> = { sun: 'habit.sun', shade: 'habit.shade', moist: 'habit.moist' };
 
-function bookPage(save: SaveData, page: number): string {
-  if (page === 0) {
-    // 차례: 계절마다 여섯 꽃. 아직 안 핀 꽃은 이름 대신 점선
-    return `<div class="page contents">
-      <p class="pg-kicker">${t('dex.contents')}</p>
-      <h3 class="pg-title">${t('dex.cover')}</h3>
-      <p class="pg-sub">${t('dex.coverSub')}</p>
-      <div class="toc">${SEASONS.map(
-        (s) => `<section><h4>${t(`season.${s}`)}</h4><ol>${FLOWERS.map((f, i) => ({ f, i }))
-          .filter(({ i }) => seasonOf(i) === s)
-          .map(({ f, i }) => {
-            const open = ALL_OPEN() || !!save.levels[i];
-            return `<li><button type="button" data-goto="${i + 1}" ${open ? '' : 'class="locked"'}><span>${open ? text(f).name : '· · · · ·'}</span><i>${i + 1}</i></button></li>`;
-          })
-          .join('')}</ol></section>`,
-      ).join('')}</div>
-    </div>`;
-  }
-  const i = page - 1;
-  const f = FLOWERS[i];
-  const open = ALL_OPEN() || !!save.levels[i];
-  const s = seasonOf(i);
-  if (!open) {
-    return `<div class="page flower locked">
-      <p class="pg-kicker">${levelName(i)}</p>
-      <div class="plate">${flowerSvg(f.id)}</div>
-      <h3 class="pg-title">${t('dex.locked')}</h3>
-      <p class="pg-desc">${t('dex.lockedDesc', { season: t(`season.${s}`), n: (i % 6) + 1 })}</p>
-      <p class="folio">— ${page} —</p>
-    </div>`;
-  }
-  const tx = text(f);
-  return `<div class="page flower">
-    <p class="pg-kicker">${levelName(i)}</p>
-    <div class="plate">${flowerSvg(f.id)}</div>
-    <div class="pg-text">
-      <h3 class="pg-title">${tx.name}</h3>
-      <p class="sci">${f.sci}</p>
-      <dl class="facts">
-        <div><dt>${t('dex.meaning')}</dt><dd>${tx.meaning}</dd></div>
-        <div><dt>${t('dex.bloom')}</dt><dd>${monthsText(f)}</dd></div>
-        <div><dt>${t('dex.origin')}</dt><dd>${tx.origin}</dd></div>
-        <div><dt>${t('dex.habit')}</dt><dd><span class="habit-ico">${HABIT_ICON[f.habit]}</span>${t(HABIT_KEY[f.habit])}</dd></div>
-      </dl>
-      <p class="pg-desc">${tx.desc}</p>
-    </div>
-    <p class="folio">— ${page} —</p>
-  </div>`;
-}
+/** 큰 카드 뒷면: 온실 아치 창 안의 새싹(도감 표지) */
+const DEX_BACK = `<svg viewBox="0 0 40 40" aria-hidden="true" focusable="false"><path d="M6 37V18a14 14 0 0 1 28 0v19z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 4v33M6 23h28" stroke="currentColor" stroke-width="1.4"/><path d="M20 33c-6-1-8.5-6-7.5-10.5 4.5 .3 7.5 4.5 7.5 10.5zm0 0c6-1 8.5-6 7.5-10.5-4.5 .3-7.5 4.5-7.5 10.5z" fill="currentColor"/></svg>`;
 
 /**
- * 도감: 오래된 식물 도감 한 쪽(미색 종이, 겹줄 테두리 속 삽화, 학명 이탤릭, 꽃말·피는 때·원산지·습성, 짧은 설명).
- * 차례(0쪽) + 꽃 24쪽. 앞·뒤 단추나 밀기·화살표 키로 넘기면 종이가 책등을 축으로 넘어간다. 쪽 크기는 고정이라 글 길이가 달라도 덜컥이지 않는다
+ * 도감(타임 투 플립 도감과 같은 짜임): 위 가운데 큰 카드(처음엔 뒷면) + 그 아래 설명, 아래쪽에 계절별 작은 카드 여섯 장씩.
+ * 작은 카드를 누르면 큰 카드가 뒤집혀 그 꽃의 사실적인 도감 그림(flowerSvg 'dex')으로 바뀌고 이름·학명·꽃말·피는 때·원산지·설명이 나온다.
+ * 작은 카드는 게임 화분과 같은 약식 그림. 큰 카드·설명 칸은 크기가 고정이라 글 길이가 달라도 덜컥이지 않는다.
+ * start 를 주면(결과 화면 "도감") 그 꽃을 펼친 채 연다
  */
-export function openDex(host: HTMLElement, save: SaveData, start: number | null, onSeen?: (page: number) => void): void {
-  const last = FLOWERS.length;
-  let page = start === null ? 0 : start + 1;
+export function openDex(host: HTMLElement, save: SaveData, start: number | null, onSeen?: (i: number) => void): void {
+  const open = (i: number) => ALL_OPEN() || !!save.levels[i];
+  const count = FLOWERS.filter((_, i) => open(i)).length;
   const box = html(`
-    <div class="book">
+    <div class="dex">
       ${closeButton()}
-      <h2 class="sr-only">${t('dex.title')}</h2>
-      <div class="spread"><div class="sheet" aria-live="polite"></div></div>
-      <div class="book-nav">
-        <button class="icon-btn" data-prev aria-label="${t('dex.prev')}">${ICONS.left}</button>
-        <span class="book-no"></span>
-        <button class="icon-btn" data-next aria-label="${t('dex.next')}">${ICONS.right}</button>
+      <h2>${t('dex.title')} <small>${count}/${FLOWERS.length}</small></h2>
+      <div class="dex-stage">
+        <div class="dex-big" aria-hidden="true">
+          <span class="dex-flip"><span class="side back">${DEX_BACK}</span><span class="side front"></span></span>
+        </div>
+        <div class="dex-info" aria-live="polite">
+          <p class="dex-title">${t('dex.pickTitle')}</p>
+          <p class="dex-by">&nbsp;</p>
+          <p class="dex-facts">&nbsp;</p>
+          <p class="dex-desc">${t('dex.pick')}</p>
+        </div>
+      </div>
+      <div class="dex-sets">
+        ${SEASONS.map((season) => {
+          const idx = FLOWERS.map((_, i) => i).filter((i) => seasonOf(i) === season);
+          return `<section>
+            <h3>${t(`season.${season}`)} <small>${idx.filter(open).length}/${idx.length}</small></h3>
+            <ul>${idx
+              .map((i) => {
+                const label = open(i) ? text(FLOWERS[i]).name : `${levelName(i)} — ${t('dex.locked')}`;
+                const fresh = !!save.levels[i] && !save.seen.includes(i);
+                return `<li><button class="dex-item${open(i) ? '' : ' locked'}${fresh ? ' new' : ''}" type="button" data-i="${i}" aria-pressed="false" aria-label="${label}">${open(i) ? flowerSvg(FLOWERS[i].id, true, 'game') : ICONS.lock}</button></li>`;
+              })
+              .join('')}</ul>
+          </section>`;
+        }).join('')}
       </div>
     </div>`);
-  const spread = box.querySelector<HTMLElement>('.spread')!;
-  let sheet = box.querySelector<HTMLElement>('.sheet')!;
-  const no = box.querySelector<HTMLElement>('.book-no')!;
-  const prev = box.querySelector<HTMLButtonElement>('[data-prev]')!;
-  const nextBtn = box.querySelector<HTMLButtonElement>('[data-next]')!;
-  const fill = (el: HTMLElement, p: number) => {
-    el.innerHTML = bookPage(save, p);
-    el.querySelectorAll<HTMLButtonElement>('[data-goto]').forEach((b) => b.addEventListener('click', () => go(Number(b.dataset.goto))));
-    if (p > 0 && save.levels[p - 1]) onSeen?.(p - 1);
-  };
-  const status = () => {
-    no.textContent = page === 0 ? t('dex.contents') : t('dex.page', { n: page });
-    prev.disabled = page === 0;
-    nextBtn.disabled = page === last;
-  };
-  let turning = false;
-  const go = (to: number) => {
-    to = Math.max(0, Math.min(last, to));
-    if (to === page || turning) return;
-    const forward = to > page;
-    page = to;
-    status();
-    if (reducedMotion.matches) {
-      fill(sheet, page);
-      return;
-    }
-    // 새 쪽을 밑에 깔고, 앞으로 넘길 때는 지금 쪽이 왼쪽 책등을 축으로 넘어가고, 뒤로 갈 때는 새 쪽이 왼쪽에서 넘어와 덮는다
-    turning = true;
-    const fresh = document.createElement('div');
-    fresh.className = 'sheet';
-    fill(fresh, page);
-    const old = sheet;
-    if (forward) {
-      spread.insertBefore(fresh, old);
-      old.classList.add('turn-out');
-      old.addEventListener('animationend', () => {
-        old.remove();
-        turning = false;
-      }, { once: true });
-    } else {
-      spread.append(fresh);
-      fresh.classList.add('turn-in');
-      fresh.addEventListener('animationend', () => {
-        fresh.classList.remove('turn-in');
-        old.remove();
-        turning = false;
-      }, { once: true });
-    }
-    sheet = fresh;
+
+  const flip = box.querySelector<HTMLElement>('.dex-flip')!;
+  const front = flip.querySelector<HTMLElement>('.front')!;
+  const [title, by, facts, desc] = [...box.querySelector<HTMLElement>('.dex-info')!.children] as HTMLElement[];
+  let selected: HTMLButtonElement | null = null;
+
+  const show = (item: HTMLButtonElement) => {
+    if (item === selected) return;
+    selected?.setAttribute('aria-pressed', 'false');
+    item.setAttribute('aria-pressed', 'true');
+    selected = item;
+    const i = Number(item.dataset.i);
+    const f = FLOWERS[i];
+    const isOpen = open(i);
+    const apply = () => {
+      front.innerHTML = isOpen ? `<div class="plate">${flowerSvg(f.id, true, 'dex')}</div>` : '';
+      if (!isOpen) {
+        title.textContent = '???';
+        by.textContent = t('dex.locked');
+        facts.innerHTML = '&nbsp;';
+        desc.textContent = t('dex.lockedDesc', { season: t(`season.${seasonOf(i)}`), n: (i % 6) + 1 });
+        return;
+      }
+      const tx = text(f);
+      title.textContent = tx.name;
+      by.innerHTML = `<i>${f.sci}</i> · ${t('dex.meaning')} ${tx.meaning}`;
+      facts.innerHTML = `${t('dex.bloom')} ${monthsText(f)} · ${t('dex.origin')} ${tx.origin} · <span class="habit-ico">${HABIT_ICON[f.habit]}</span>${t(HABIT_KEY[f.habit])}`;
+      desc.textContent = tx.desc;
+      if (save.levels[i]) {
+        onSeen?.(i);
+        item.classList.remove('new');
+      }
+    };
+    const wasUp = flip.classList.contains('up');
     pageSound?.();
+    // 앞면끼리 바꿀 때는 옆으로 세워(90°) 안 보이는 순간에 그림을 갈아 끼우고 다시 펼친다(첫 회전은 끝 자세를 붙잡아 한 프레임 비침 방지)
+    if (wasUp && isOpen && !reducedMotion.matches) {
+      const out = flip.animate([{ transform: 'rotateY(180deg)' }, { transform: 'rotateY(270deg)' }], { duration: 120, easing: 'ease-in', fill: 'forwards' });
+      out.onfinish = () => {
+        apply();
+        flip.animate([{ transform: 'rotateY(90deg)' }, { transform: 'rotateY(180deg)' }], { duration: 180, easing: 'cubic-bezier(.3,1.4,.5,1)' });
+        out.cancel();
+      };
+    } else {
+      // 뒷면 ↔ 앞면은 CSS 전환으로 뒤집는다(잠긴 꽃은 뒷면으로 돌아감)
+      if (isOpen) apply();
+      else setTimeout(apply, wasUp ? 130 : 0);
+      flip.classList.toggle('up', isOpen);
+    }
   };
-  prev.addEventListener('click', () => go(page - 1));
-  nextBtn.addEventListener('click', () => go(page + 1));
-  box.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft') go(page - 1);
-    else if (e.key === 'ArrowRight') go(page + 1);
-  });
-  // 가로로 밀어 넘기기
-  let sx = 0;
-  let sy = 0;
-  spread.addEventListener('pointerdown', (e) => ((sx = e.clientX), (sy = e.clientY)));
-  spread.addEventListener('pointerup', (e) => {
-    const dx = e.clientX - sx;
-    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(e.clientY - sy)) go(page + (dx < 0 ? 1 : -1));
-  });
-  fill(sheet, page);
-  status();
-  openModal(host, box, t('dex.title'), undefined, 'book-modal');
-  nextBtn.focus();
+  const items = [...box.querySelectorAll<HTMLButtonElement>('.dex-item')];
+  items.forEach((b) => b.addEventListener('click', () => show(b)));
+  openModal(host, box, t('dex.title'), undefined, 'dex-modal');
+  const first = start === null ? null : items[start];
+  if (first) {
+    show(first);
+    first.focus();
+  }
 }
 
-/** 도감 넘김 소리(main 이 넣어 줌) */
+/** 도감 카드 뒤집는 소리(main 이 넣어 줌) */
 let pageSound: (() => void) | null = null;
 export function setPageSound(fn: () => void): void {
   pageSound = fn;

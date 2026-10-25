@@ -4,7 +4,7 @@
  */
 export type FlowerId =
   | 'tulip' | 'daffodil' | 'hyacinth' | 'lily' | 'pansy' | 'peony'
-  | 'forgetmenot' | 'hydrangea' | 'lavender' | 'iris' | 'waterlily' | 'sunflower'
+  | 'forgetmenot' | 'hydrangea' | 'lavender' | 'iris' | 'balsam' | 'sunflower'
   | 'cosmos' | 'lycoris' | 'gujeolcho' | 'dahlia' | 'aster' | 'mum'
   | 'camellia' | 'cyclamen' | 'poinsettia' | 'hellebore' | 'snowdrop' | 'adonis';
 
@@ -65,9 +65,9 @@ export const FLOWERS: Flower[] = [
   F('iris', 'Iris ensata', 'moist', 'summer', [6, 7],
     { name: '꽃창포', meaning: '우아한 마음', origin: '한국 · 일본 · 중국 동북부', desc: '물가나 습한 풀밭에서 자란다. 단오에 머리를 감던 창포와는 이름만 닮은 다른 식물이다.' },
     { name: 'Japanese Iris', meaning: 'A graceful heart', origin: 'Korea · Japan · NE China', desc: 'It grows by water and in damp meadows. Despite the similar Korean name, it is unrelated to the sweet flag used for washing hair.' }),
-  F('waterlily', 'Nymphaea tetragona', 'moist', 'summer', [6, 9],
-    { name: '수련', meaning: '청순한 마음', origin: '북반구 온대(한국 포함)', desc: '잎과 꽃을 물 위에 띄우고 산다. 낮에 피었다가 저녁에 오므리기를 며칠 되풀이해 \'잠자는 연꽃\'이라는 이름이 붙었다.' },
-    { name: 'Pygmy Water Lily', meaning: 'A pure heart', origin: 'Northern temperate zone', desc: 'Its leaves and flowers float on the water. It opens by day and closes at dusk for several days, hence the Korean name "sleeping lotus".' }),
+  F('balsam', 'Impatiens balsamina', 'sun', 'summer', [6, 8],
+    { name: '봉선화', meaning: '나를 건드리지 마세요', origin: '인도 · 미얀마 · 중국 남부', desc: '잎겨드랑이마다 꽃이 매달리듯 핀다. 익은 열매는 살짝만 건드려도 터져 씨앗을 튕겨 내고, 꽃잎을 찧어 손톱을 물들이던 풍습이 있다.' },
+    { name: 'Garden Balsam', meaning: 'Touch me not', origin: 'India · Myanmar · southern China', desc: 'Its flowers hang from the leaf joints. Ripe pods burst at the slightest touch and fling out their seeds, and the petals were crushed to dye fingernails.' }),
   F('sunflower', 'Helianthus annuus', 'sun', 'summer', [7, 9],
     { name: '해바라기', meaning: '숭배', origin: '북아메리카', desc: '큰 꽃 한 송이처럼 보이지만 작은 꽃 수백 송이가 모인 꽃차례다. 씨앗은 서로 엇갈린 나선 무늬로 빽빽이 들어선다.' },
     { name: 'Sunflower', meaning: 'Adoration', origin: 'North America', desc: 'What looks like one flower is a head of hundreds of tiny florets. Its seeds pack tightly in crossing spirals.' }),

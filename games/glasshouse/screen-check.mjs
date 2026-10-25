@@ -21,7 +21,8 @@ const play = async (p) => {
 export const screens = [
   { name: 'start', setup: SAVE },
   { name: 'pick', setup: SAVE, go: (p) => p.click('[data-pick]') },
-  { name: 'dex', setup: SAVE, go: async (p) => (await p.click('[data-dex]'), p.click('[data-next]'), p.wait(700)) },
+  // 도감: 첫 꽃 카드를 눌러 큰 카드를 뒤집은 모습
+  { name: 'dex', setup: SAVE, go: async (p) => (await p.click('[data-dex]'), await p.wait(300), p.click('.dex-item:not(.locked)'), p.wait(700)) },
   { name: 'ranking', setup: SAVE, go: (p) => p.click('[data-ranking]') },
   { name: 'settings', setup: SAVE, go: (p) => p.click('.settings-btn') },
   { name: 'play', setup: SAVE, go: play },

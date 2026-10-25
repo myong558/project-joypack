@@ -457,7 +457,7 @@ function play(level: number | 'daily'): void {
 function accentOf(id: string): string {
   const c: Record<string, string> = {
     tulip: '#d2554c', daffodil: '#f1d36b', hyacinth: '#8f80cf', lily: '#f4f1e6', pansy: '#7a5fb0', peony: '#e48ba2',
-    forgetmenot: '#7aa8dc', hydrangea: '#8f9ce0', lavender: '#9a80c8', iris: '#7d64b6', waterlily: '#f1dbe2', sunflower: '#e8b528',
+    forgetmenot: '#7aa8dc', hydrangea: '#8f9ce0', lavender: '#9a80c8', iris: '#7d64b6', balsam: '#e0507a', sunflower: '#e8b528',
     cosmos: '#de7fa8', lycoris: '#c23a32', gujeolcho: '#f4e6ea', dahlia: '#b93a54', aster: '#8d5fba', mum: '#e09a32',
     camellia: '#c2333f', cyclamen: '#d2466e', poinsettia: '#c62d39', hellebore: '#f1ede0', snowdrop: '#f7f6f0', adonis: '#ebc42e',
   };

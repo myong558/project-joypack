@@ -7,16 +7,19 @@ import { flowerSvg } from './flowers';
  * 칸 크기(--cell)는 판 자리에 맞춰 계산한다(layout). 움직임은 transform 만 쓴다
  */
 
-/** 화분 SVG(40×40): 그림자 · 테라코타 몸통(왼쪽 빛, 오른쪽 그늘) · 테두리 · 흙 */
-const POT = `<svg class="pot-body" viewBox="0 0 40 40" aria-hidden="true" focusable="false">
-<ellipse cx="20" cy="35.5" rx="13" ry="3.2" fill="rgb(40 30 20 / .28)"/>
-<path d="M8 15h24l-3.2 19.2q-.3 1.8-2.2 1.8H13.4q-1.9 0-2.2-1.8z" fill="#b8613a"/>
-<path d="M8 15h7l1.2 21h-2.8q-1.9 0-2.2-1.8z" fill="#d98a5c" opacity=".55"/>
-<path d="M32 15h-6l-1.6 21h2.4q1.9 0 2.2-1.8z" fill="#7c3a20" opacity=".45"/>
-<rect x="6.5" y="11" width="27" height="6" rx="2" fill="#c96f45"/>
-<rect x="6.5" y="11" width="27" height="2.4" rx="1.2" fill="#e7a07a" opacity=".7"/>
-<ellipse cx="20" cy="12.2" rx="11.2" ry="1.7" fill="#4a3324"/>
-<path d="M8 15h24l-3.2 19.2q-.3 1.8-2.2 1.8H13.4q-1.9 0-2.2-1.8zM6.5 11h27v6h-27z" fill="none" stroke="#5a2c18" stroke-width=".5" stroke-opacity=".6"/>
+/**
+ * 화분 SVG(40×26): 칸 아래쪽에 앉는 낮고 넓은 테라코타 화분(그림자 · 몸통 왼쪽 빛·오른쪽 그늘 · 굵은 테두리 · 흙).
+ * 칸 하나 안에 꽃과 함께 들어가도록 키를 줄이고 입구를 넓혀, 작게 그려도 화분으로 읽힌다
+ */
+export const POT = `<svg class="pot-body" viewBox="0 0 40 26" aria-hidden="true" focusable="false">
+<ellipse cx="20" cy="23.4" rx="14" ry="2.4" fill="rgb(40 30 20 / .3)"/>
+<path d="M6.5 8.5h27l-3 13q-.4 1.8-2.3 1.8H11.8q-1.9 0-2.3-1.8z" fill="#b8613a"/>
+<path d="M6.5 8.5h7.5l1 14.8h-3.2q-1.9 0-2.3-1.8z" fill="#d98a5c" opacity=".55"/>
+<path d="M33.5 8.5h-6.5l-1.3 14.8h2.6q1.9 0 2.3-1.8z" fill="#7c3a20" opacity=".45"/>
+<rect x="3.5" y="3" width="33" height="6.6" rx="2.2" fill="#c96f45"/>
+<rect x="3.5" y="3" width="33" height="2.6" rx="1.3" fill="#e7a07a" opacity=".7"/>
+<ellipse cx="20" cy="4.3" rx="14" ry="1.6" fill="#4a3324"/>
+<path d="M6.5 9.6h27l-3 11.9q-.4 1.8-2.3 1.8H11.8q-1.9 0-2.3-1.8zM3.5 3h33v6.6h-33z" fill="none" stroke="#5a2c18" stroke-width=".5" stroke-opacity=".6"/>
 </svg>`;
 
 /** 정원사: 위에서 본 밀짚모자(얼굴 없음). 모자 띠의 매듭이 뒤쪽을 가리켜 보는 방향을 알린다 */
@@ -84,7 +87,7 @@ export class BoardView {
     state.pots.forEach((_, i) => {
       const el = document.createElement('div');
       el.className = 'pot';
-      el.innerHTML = `<span class="glow"></span>${POT}<span class="plant">${flowerSvg(species[i], false)}</span>`;
+      el.innerHTML = `<span class="glow"></span><span class="plant">${flowerSvg(species[i], false, 'game')}</span>${POT}`;
       pieces.append(el);
       this.pots.push({ el, plant: el.querySelector('.plant')! });
     });

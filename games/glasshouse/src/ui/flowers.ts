@@ -3,8 +3,12 @@ import type { FlowerId } from '../flora';
 /**
  * 식물 도감 삽화풍 꽃 그림(코드로 그린 SVG, 사진·외부 그림 없음). 가는 먹선 + 물감을 겹친 듯한 옅은 칠.
  * 꽃잎마다 .pt 묶음에 열린 각도(--r)와 오므린 각도·크기(--c·--s)를 두어, 그림 하나로 봉오리(.closed)부터
- * 활짝 핀 모습까지 꽃잎이 실제로 벌어지는 움직임을 낸다(styles.css .fl). 그림은 100×120 판에 그린다
+ * 활짝 핀 모습까지 꽃잎이 실제로 벌어지는 움직임을 낸다(styles.css .fl). 그림은 100×120 판에 그린다.
+ * 두 가지로 그린다: 도감(dex)은 잎·꽃잎 결까지 사실적으로, 게임(game)은 칸이 작아 잎·결을 빼고 꽃 머리만 가운데로 잘라(FOCUS) 약식으로
  */
+export type FlowerDetail = 'dex' | 'game';
+/** 지금 그리는 단계(DRAW 를 부르기 전에 정함) */
+let detail: FlowerDetail = 'dex';
 
 const INK = '#4a3a2a';
 const LEAF = '#5f7f45';
@@ -59,13 +63,17 @@ class Plate {
 
   /** 잎: (x,y)에서 ang 쪽으로 자라는 잎. curl 은 잎이 휘는 정도 */
   leaf(x: number, y: number, ang: number, L: number, W: number, curl = 0.25, c = LEAF, l = LEAF_L): this {
+    if (detail === 'game') return this;
     const w = W / 2;
     const k = curl * L;
     const d = `M0 0C${n(w * 1.4 + k)} ${n(-L * 0.3)} ${n(w + k)} ${n(-L * 0.85)} ${n(k * 1.2)} ${n(-L)}C${n(-w * 0.6 + k)} ${n(-L * 0.8)} ${n(-w * 1.3)} ${n(-L * 0.35)} 0 0Z`;
     this.parts.push(
       `<g transform="translate(${n(x)} ${n(y)}) rotate(${ang})"><path d="${d}" fill="${c}" fill-opacity=".82" stroke="${INK}" stroke-width=".45" stroke-opacity=".7"/>` +
         `<path d="${d}" fill="${l}" fill-opacity=".45" transform="translate(${n(-w * 0.25)} ${n(-L * 0.12)}) scale(.6 .75)"/>` +
-        `<path d="M0 0Q${n(k * 0.5)} ${n(-L * 0.55)} ${n(k * 1.15)} ${n(-L * 0.96)}" fill="none" stroke="${INK}" stroke-width=".35" stroke-opacity=".55"/></g>`,
+        `<path d="M0 0Q${n(k * 0.5)} ${n(-L * 0.55)} ${n(k * 1.15)} ${n(-L * 0.96)}" fill="none" stroke="${INK}" stroke-width=".35" stroke-opacity=".55"/>` +
+        // 곁맥: 가운데 잎맥에서 비스듬히 갈라지는 가는 선 셋씩
+        [0.3, 0.5, 0.7].map((t) => `<path d="M${n(k * t * 0.9)} ${n(-L * t)}l${n(w * 0.7)} ${n(-L * 0.12)}M${n(k * t * 0.9)} ${n(-L * t)}l${n(-w * 0.7)} ${n(-L * 0.12)}" stroke="${INK}" stroke-width=".22" stroke-opacity=".35"/>`).join('') +
+        '</g>',
     );
     return this;
   }
@@ -74,7 +82,9 @@ class Plate {
   petal(x: number, y: number, ang: number, L: number, W: number, o: PetalOpts): this {
     const d = petalD(o.shape ?? 'oval', L, W);
     const closed = o.closed ?? ang * 0.12;
-    const vein = o.vein === false ? '' : `<path d="M0 ${n(-L * 0.08)}V${n(-L * 0.72)}" stroke="${INK}" stroke-width=".3" stroke-opacity=".35"/>`;
+    // 꽃잎 결: 도감은 가운데 결 + 양옆 결, 게임은 없음
+    const side = `<path d="M0 ${n(-L * 0.1)}Q${n(W * 0.2)} ${n(-L * 0.4)} ${n(W * 0.28)} ${n(-L * 0.66)}M0 ${n(-L * 0.1)}Q${n(-W * 0.2)} ${n(-L * 0.4)} ${n(-W * 0.28)} ${n(-L * 0.66)}" fill="none" stroke="${INK}" stroke-width=".22" stroke-opacity=".25"/>`;
+    const vein = o.vein === false || detail === 'game' ? '' : `<path d="M0 ${n(-L * 0.08)}V${n(-L * 0.72)}" stroke="${INK}" stroke-width=".3" stroke-opacity=".35"/>${L > 8 ? side : ''}`;
     const sy = o.sy ? ` scale(1 ${o.sy})` : '';
     this.parts.push(
       `<g transform="translate(${n(x)} ${n(y)})${sy}"><g class="pt" style="--r:${n(ang)}deg;--c:${n(closed)}deg;--s:${o.cs ?? 0.45};--d:${o.delay ?? 0}ms">` +
@@ -106,6 +116,12 @@ class Plate {
 
   raw(svg: string): this {
     this.parts.push(svg);
+    return this;
+  }
+
+  /** 잎처럼 꽃이 아닌 부분(게임 약식에서는 뺌) */
+  foliage(svg: string): this {
+    if (detail === 'dex') this.parts.push(svg);
     return this;
   }
 
@@ -220,15 +236,16 @@ const DRAW: Record<FlowerId, () => Plate> = {
       .raw(`<path d="M-3 4L-10 14M3 4L10 14" stroke="#f0c94a" stroke-width="1.2" stroke-linecap="round"/>`);
     return p.raw(head(50, 56, h));
   },
-  waterlily: () => {
-    const p = new Plate().raw(
-      `<path d="M50 108L84 101A36 11 0 1 1 82 96Z" fill="${LEAF}" fill-opacity=".8" stroke="${INK}" stroke-width=".45"/><path d="M50 108L20 104M50 108L32 98M50 108L66 96" stroke="${INK}" stroke-width=".3" stroke-opacity=".45"/><path d="M8 116Q30 112 50 116T92 116" fill="none" stroke="#7aa6b8" stroke-width=".6" stroke-opacity=".7"/>`,
-    );
-    const h = new Plate()
-      .ring(0, 0, 8, 18, 9, { shape: 'point', c: '#f1e7ea', l: '#ffffff', start: -90, sy: 0.45, cs: 0.35 } as PetalOpts, 50)
-      .ring(0, -2, 6, 14, 8, { shape: 'point', c: '#efd2dc', l: '#fff4f7', start: -60, sy: 0.6, cs: 0.35, delay: 300 } as PetalOpts, 50)
-      .disc(0, -3, 3.5, '#f2c84b', '#fff0a0', 0, 0.6);
-    return p.raw(head(50, 100, h));
+  balsam: () => {
+    // 곧은 줄기 잎겨드랑이마다 분홍 꽃이 매달림(꽃잎 다섯, 아래로 휜 꿀주머니)
+    const p = new Plate().stem('M50 116C50 96 50 74 50 44', 2);
+    for (const [y, a] of [[104, -48], [96, 46], [86, -44], [76, 42], [64, -38], [52, 34]] as const) p.leaf(50, y, a, 24, 7, a < 0 ? 0.15 : -0.15);
+    const bloom = (x: number, y: number, delay: number) => {
+      const h = new Plate().ring(0, 0, 5, 9, 9, { shape: 'heart', c: '#d9466f', l: '#f6a3bb', start: 0, sy: 0.9, cs: 0.4, delay } as PetalOpts, 60);
+      h.raw(`<path d="M2 3Q6 8 3 11" fill="none" stroke="#b8345a" stroke-width="1.1" stroke-linecap="round"/><circle r="1.6" fill="#f7e3ea" stroke="${INK}" stroke-width=".3"/>`);
+      return head(x, y, h);
+    };
+    return p.raw(`<path d="M50 70L41 66M50 58L60 54M50 82L59 80" stroke="${STEM}" stroke-width=".8"/>` + bloom(40, 64, 0) + bloom(61, 52, 200) + bloom(60, 79, 400) + bloom(50, 42, 600));
   },
   sunflower: () => {
     const p = new Plate().stem('M50 116C50 96 52 80 52 68', 2.4).leaf(50, 106, -60, 30, 22, 0.3).leaf(51, 96, 58, 28, 20, -0.3);
@@ -236,7 +253,7 @@ const DRAW: Record<FlowerId, () => Plate> = {
     return p.raw(head(52, 48, h));
   },
   cosmos: () => {
-    const p = new Plate().stem('M50 116C47 96 46 78 52 58', 0.9).raw(
+    const p = new Plate().stem('M50 116C47 96 46 78 52 58', 0.9).foliage(
       `<path d="M48 100L38 92M38 92L33 94M38 92L36 86M49 88L60 80M60 80L65 82M60 80L60 74M47 106L58 100" stroke="${LEAF}" stroke-width=".8" fill="none" stroke-linecap="round"/>`,
     );
     const h = new Plate().ring(0, 0, 8, 22, 15, { shape: 'notch', c: '#de7fa8', l: '#f7c6db', start: 10 } as PetalOpts, 50).disc(0, 0, 4.5, '#e9b730', '#fbe38a', 14);
@@ -292,7 +309,7 @@ const DRAW: Record<FlowerId, () => Plate> = {
   },
   cyclamen: () => {
     const p = new Plate().stem('M48 112C46 80 44 62 40 48', 0.9).stem('M52 112C56 84 62 66 64 56', 0.9);
-    for (const [x, a] of [[38, -40], [50, -5], [62, 35]] as const) p.raw(`<g transform="translate(${x} 112) rotate(${a})"><path d="M0 0C12 -4 14 -18 0 -16C-14 -18 -12 -4 0 0Z" fill="#4f7a43" fill-opacity=".85" stroke="${INK}" stroke-width=".45"/><path d="M0 -3C7 -6 8 -13 0 -12C-8 -13 -7 -6 0 -3Z" fill="#b9cf9a" fill-opacity=".55"/></g>`);
+    for (const [x, a] of [[38, -40], [50, -5], [62, 35]] as const) p.foliage(`<g transform="translate(${x} 112) rotate(${a})"><path d="M0 0C12 -4 14 -18 0 -16C-14 -18 -12 -4 0 0Z" fill="#4f7a43" fill-opacity=".85" stroke="${INK}" stroke-width=".45"/><path d="M0 -3C7 -6 8 -13 0 -12C-8 -13 -7 -6 0 -3Z" fill="#b9cf9a" fill-opacity=".55"/></g>`);
     const flower = (x: number, y: number, tilt: number, delay: number) => {
       const h = new Plate();
       [-30, -12, 6, 22].forEach((a, i) => h.petal(0, 0, a + tilt, 20, 7, { shape: 'oval', c: '#d2466e', l: '#f4a2b8', closed: 170, cs: 0.4, delay: delay + i * 80 }));
@@ -329,7 +346,7 @@ const DRAW: Record<FlowerId, () => Plate> = {
     return p.raw(head(64, 42, h));
   },
   adonis: () => {
-    const p = new Plate().stem('M50 116C50 100 50 88 50 76', 1.4).raw(
+    const p = new Plate().stem('M50 116C50 100 50 88 50 76', 1.4).foliage(
       `<path d="M50 104L38 96M38 96L34 97M38 96L37 91M50 98L62 90M62 90L66 92M62 90L62 85M50 110L40 106M50 110L60 105" stroke="${LEAF}" stroke-width=".9" fill="none" stroke-linecap="round"/>`,
     );
     const h = new Plate()
@@ -340,11 +357,31 @@ const DRAW: Record<FlowerId, () => Plate> = {
   },
 };
 
-const cache = new Map<FlowerId, string>();
+/** 게임 약식 그림에서 가운데로 잘라 올 꽃 머리 자리: [가운데 x, 가운데 y, 반지름] (100×120 판 좌표) */
+const FOCUS: Record<FlowerId, [number, number, number]> = {
+  tulip: [50, 40, 20], daffodil: [56, 46, 21], hyacinth: [50, 55, 22], lily: [66, 52, 19], pansy: [50, 54, 23], peony: [50, 50, 24],
+  forgetmenot: [51, 56, 24], hydrangea: [50, 54, 25], lavender: [53, 50, 25], iris: [50, 52, 27], balsam: [50, 60, 26], sunflower: [52, 48, 24],
+  cosmos: [52, 52, 24], lycoris: [50, 48, 30], gujeolcho: [50, 56, 21], dahlia: [50, 52, 25], aster: [50, 56, 22], mum: [50, 58, 22],
+  camellia: [50, 56, 24], cyclamen: [52, 46, 26], poinsettia: [50, 58, 29], hellebore: [56, 64, 22], snowdrop: [62, 54, 20], adonis: [50, 68, 22],
+};
 
-/** 꽃 그림 SVG. open 이 false 면 봉오리(styles.css .fl.closed) */
-export function flowerSvg(id: FlowerId, open = true): string {
-  let body = cache.get(id);
-  if (!body) cache.set(id, (body = DRAW[id]().toString()));
-  return `<svg class="fl${open ? '' : ' closed'}" viewBox="0 0 100 120" aria-hidden="true" focusable="false">${body}</svg>`;
+const cache = new Map<string, string>();
+
+/**
+ * 꽃 그림 SVG. open 이 false 면 봉오리(styles.css .fl.closed).
+ * kind: 'dex' 는 잎까지 그린 100×120 전체, 'game' 은 잎·결을 뺀 약식을 꽃 머리 가운데로 잘라 정사각형으로(화분 위·작은 칸)
+ */
+export function flowerSvg(id: FlowerId, open = true, kind: FlowerDetail = 'dex'): string {
+  const key = `${kind}:${id}`;
+  let body = cache.get(key);
+  if (!body) {
+    detail = kind;
+    cache.set(key, (body = DRAW[id]().toString()));
+    detail = 'dex';
+  }
+  // 게임 칸에서는 꽃 머리 둘레를 조금 더 바짝(반지름의 85%) 잘라 크게 보이게
+  const [cx, cy, r0] = FOCUS[id];
+  const r = kind === 'game' ? Math.round(r0 * 0.85) : r0;
+  const box = kind === 'game' ? `${cx - r} ${cy - r} ${r * 2} ${r * 2}` : '0 0 100 120';
+  return `<svg class="fl ${kind}${open ? '' : ' closed'}" viewBox="${box}" aria-hidden="true" focusable="false">${body}</svg>`;
 }
