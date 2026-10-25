@@ -184,6 +184,7 @@ function play(mode: Mode, from = 1): void {
     }
   };
 
+  const HINTS = { clock: 'hint.clock', peek: 'hint.peek', gold: 'hint.gold' } as const;
   // 특수 카드·황금 카드를 처음 맞히면 도감 "특수 카드" 칸에 남긴다
   const recordItem = (item: ItemId, el: HTMLElement) => {
     if (save.items.includes(item)) return;
@@ -198,11 +199,12 @@ function play(mode: Mode, from = 1): void {
         board.deal(e.cards, e.def);
         sound.play('deal');
         // 미리 보기 동안 위 가운데 짧은 안내: 닮은 카드가 처음 나오거나(5판) 늘어나는 판(8판)은 경고,
-        // 특수 카드(시계·돋보기)가 이 기기에서 처음 깔리면 그 효과 한 줄(한 번만, 새 묶음 이름보다 먼저),
+        // 특수 카드(시계·돋보기)·황금 카드가 이 기기에서 처음 깔리면 그 효과 두 줄(한 번만, 새 묶음 이름보다 먼저),
         // 새 묶음이 열리는 판은 그 이름, 1판은 "위치를 기억하세요". 남은 외울 시간은 시간 막대가 보여 준다(renderHud)
         const open = FACE_SETS[e.stage - 1];
         const twinsUp = e.stage === 5 || e.stage === 8;
-        const firstItem = twinsUp ? undefined : e.cards.find((c) => c.special && !save.itemHints.includes(c.special))?.special;
+        const itemOf = (c: (typeof e.cards)[number]): ItemId | null => c.special ?? (c.gold ? 'gold' : null);
+        const firstItem = twinsUp ? undefined : e.cards.map(itemOf).find((i): i is ItemId => !!i && !save.itemHints.includes(i));
         if (firstItem) {
           save.itemHints.push(firstItem);
           writeSave(save);
@@ -210,7 +212,7 @@ function play(mode: Mode, from = 1): void {
         const note = twinsUp
           ? t('banner.twins')
           : firstItem
-            ? t(firstItem === 'clock' ? 'hint.clock' : 'hint.peek')
+            ? t(HINTS[firstItem])
             : e.stage > 1 && open
               ? t('banner.newSet', { set: setName(open.id) })
               : e.stage === 1

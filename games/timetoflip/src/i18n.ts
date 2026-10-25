@@ -34,6 +34,7 @@ const ko = {
   'item.gold': '보통 카드 한 쌍이 가끔 금빛으로 나와요. 그 짝을 맞히면 점수가 2배예요.',
   'hint.clock': '시계 카드\n맞히면 +5초',
   'hint.peek': '돋보기 카드\n맞히면 엿보기',
+  'hint.gold': '황금 카드\n맞히면 점수 2배',
 
   'lang.label': '언어 선택',
   'nav.hub': '조이팩 게임 목록',
@@ -176,6 +177,7 @@ const en: Record<MessageKey, string> = {
   'item.gold': 'Sometimes a pair shines gold. Match it for double points.',
   'hint.clock': 'Clock card\n+5 seconds',
   'hint.peek': 'Magnifier\npeek at all',
+  'hint.gold': 'Gold card\ndouble points',
 
   'lang.label': 'Choose language',
   'nav.hub': 'Joypack games',
