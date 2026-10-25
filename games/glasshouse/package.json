@@ -1,7 +1,7 @@
 {
   "name": "glasshouse",
   "private": true,
-  "version": "0.5.16",
+  "version": "0.6.0",
   "author": "Myong Bum Soo",
   "license": "UNLICENSED",
   "type": "module",
@@ -10,7 +10,7 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "font": "node --use-system-ca ../../scripts/font-subset.mjs gowun-dodum=src/fonts/gowun-dodum-subset.woff2 gowun-batang-bold=src/fonts/gowun-batang-bold-subset.woff2 jua=src/fonts/jua-topbar-subset.woff2=한국어",
+    "font": "node --use-system-ca ../../scripts/font-subset.mjs gowun-dodum=src/fonts/gowun-dodum-subset.woff2 jua=src/fonts/jua-subset.woff2",
     "levels": "node tools/levelgen.ts",
     "daily": "node tools/dailygen.ts",
     "picklevels": "node tools/picklevels.ts"

@@ -139,7 +139,7 @@ function showStart(settings?: 'open' | 'reset', settingsFocus?: string, opening 
       ranking,
       onPlay: play,
       onDaily: () => play('daily'),
-      onRefresh: () => showStart(),
+      onRefresh: (settings) => showStart(settings ? 'open' : undefined, '[data-release]'),
       onToggle(key) {
         save[key] = !save[key];
         sound.enabled = save.sound;

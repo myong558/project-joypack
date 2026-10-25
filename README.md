@@ -407,10 +407,10 @@ pnpm --filter hub icons  # 로고(apps/hub/public/logo.svg)를 바꾼 뒤 앱 �
 
 | 저작물 | 쓰는 곳 | 출처·라이선스 | 상업 이용 | 함께 배포하는 파일 |
 | --- | --- | --- | --- | --- |
-| Jua 글꼴 | 허브·업다운·두더지잡기(전체), 타임 투 플립·온실정원(위 메뉴 언어 단추) | SIL OFL 1.1(Reserved Font Name 없음 → 서브셋 허용) | 가능(글꼴만 따로 팔기는 불가) | 허브 `fonts/LICENSE-Jua.txt`(apps/hub/public), 업다운 `games/updown/fonts/LICENSE-Jua.txt`, 두더지잡기 `fonts/LICENSE-Jua.txt`, 타임 투 플립 `fonts/LICENSE-Jua.txt`, 온실정원 `fonts/LICENSE-Jua.txt` |
+| Jua 글꼴 | 허브·업다운·두더지잡기(전체), 온실정원(제목·간판·큰 단추·꽃 이름·위 메뉴), 타임 투 플립(위 메뉴 언어 단추) | SIL OFL 1.1(Reserved Font Name 없음 → 서브셋 허용) | 가능(글꼴만 따로 팔기는 불가) | 허브 `fonts/LICENSE-Jua.txt`(apps/hub/public), 업다운 `games/updown/fonts/LICENSE-Jua.txt`, 두더지잡기 `fonts/LICENSE-Jua.txt`, 타임 투 플립 `fonts/LICENSE-Jua.txt`, 온실정원 `fonts/LICENSE-Jua.txt` |
 | Do Hyeon 글꼴 | 타임 투 플립(본문·숫자) | SIL OFL 1.1(Reserved Font Name 없음 → 서브셋 허용), Google Fonts 저장소 원본 | 가능(글꼴만 따로 팔기는 불가) | 타임 투 플립 `fonts/LICENSE-DoHyeon.txt`(games/timetoflip/public/fonts) |
 | 명화 카드 그림 32장 | 타임 투 플립(3판부터 나오는 카드 앞면) | 메트로폴리탄·시카고 미술관 Open Access(CC0 1.0), 암스테르담 국립미술관(Public Domain Mark 1.0), 국립중앙박물관(공공누리 제1유형: 출처 표시). 작품 번호·출처 `games/timetoflip/art-src/meta.json` | 가능(수정·상업 이용 자유. 공공누리 1유형 5점은 출처 표시 의무 → 도감 작가 줄 "국립중앙박물관" + 배포 파일) | 타임 투 플립 `art-credits.txt`(games/timetoflip/public, `art-src/credits.mjs` 로 만듦) |
-| Gowun Batang 글꼴(Bold) | 온실정원(제목·꽃 이름·학명) | SIL OFL 1.1(© The Gowun Batang Project Authors, Reserved Font Name 없음 → 서브셋 허용), Google Fonts 저장소 원본 | 가능(글꼴만 따로 팔기는 불가) | 온실정원 `fonts/LICENSE-GowunBatang.txt`(games/glasshouse/public/fonts) |
+| Gowun Batang 글꼴(Bold) | 지금 쓰는 곳 없음(온실정원 v0.6.0 에서 Jua 로 바꿈, 목록에는 남김) | SIL OFL 1.1(© The Gowun Batang Project Authors, Reserved Font Name 없음 → 서브셋 허용), Google Fonts 저장소 원본 | 가능(글꼴만 따로 팔기는 불가) | 없음 |
 | Gowun Dodum 글꼴 | 온실정원(본문·숫자) | SIL OFL 1.1(© The Gowun Dodum Project Authors, Reserved Font Name 없음 → 서브셋 허용), Google Fonts 저장소 원본 | 가능(글꼴만 따로 팔기는 불가) | 온실정원 `fonts/LICENSE-GowunDodum.txt`(games/glasshouse/public/fonts) |
 | Dongle 글꼴(Bold) | 타임 투 플립(제목·팝업) | SIL OFL 1.1(© The Dongle Project Authors, Reserved Font Name 없음 → 서브셋 허용), Google Fonts 저장소 원본 | 가능(글꼴만 따로 팔기는 불가) | 타임 투 플립 `fonts/LICENSE-Dongle.txt`(games/timetoflip/public/fonts) |
 | 아이콘·로고·캐릭터·배경 그림 | 허브·모든 게임 | 직접 제작(코드로 그린 SVG·CSS·캔버스, 그 PNG 사본) | 가능(자체 저작물) | 없음 |
@@ -432,7 +432,7 @@ pnpm --filter hub icons  # 로고(apps/hub/public/logo.svg)를 바꾼 뒤 앱 �
 
 | 항목 | 상태 |
 | --- | --- |
-| 저작물 | 그림·소리는 모두 직접 제작, 글꼴 5종(Jua·Do Hyeon·Dongle·Gowun Batang·Gowun Dodum, 모두 OFL. 목록 `fonts/catalog.json`)은 상업 이용 가능(8.1). 외부 CDN 없음 |
+| 저작물 | 그림·소리는 모두 직접 제작, 글꼴 4종(Jua·Do Hyeon·Dongle·Gowun Dodum, 모두 OFL. 목록 `fonts/catalog.json`)은 상업 이용 가능(8.1). 외부 CDN 없음 |
 | 랭킹 이름(사용자 글) | 영문 대문자 1~5자, 금지어 필터 `Joypack.isAllowedName`(허브 v1.21.2 · 업다운 v1.13.0 · 두더지잡기 v0.14.0), 서버 규칙 `allowedName` 으로 한 번 더 검사 |
 | 서버에 저장하는 개인정보 | 랭킹 이니셜·점수·시각뿐(로그인·이메일·기기 ID·위치 없음). 나머지는 기기 `localStorage` |
 | 내용 등급 | 전체 이용가 목표(만화 같은 두더지 때리기 수준), 도박처럼 보이는 요소 없음 |

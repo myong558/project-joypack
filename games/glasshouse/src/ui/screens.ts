@@ -105,7 +105,8 @@ export interface StartOptions {
   onDaily: () => void;
   onToggle: (key: Toggle) => void;
   onLang: (lang: Lang) => void;
-  onRefresh: () => void;
+  /** 시작 화면을 다시 그린다. settings 면 설정 창을 다시 연다(출시 화면 보기 전환 뒤) */
+  onRefresh: (settings?: boolean) => void;
   onTheme: (theme: Theme) => void;
   onSkin: (skin: SkinSetting) => void;
   onReset: () => void;
@@ -138,11 +139,6 @@ export function startScreen(opts: StartOptions): HTMLElement {
         </div>
       </nav>
       <div class="col main-col">
-        ${
-          Joypack.prerelease()
-            ? `<div class="dev-row">${ALL_OPEN() ? `<span>TEST · ${t('test.jump')}</span>` : ''}<button type="button" class="dev-toggle" data-release aria-pressed="${Joypack.releaseView()}">${Joypack.releaseView() ? t('test.devView') : t('test.releaseView')}</button></div>`
-            : ''
-        }
         ${logo()}
         <h1 class="sr-only">${t('app.title')}</h1>
         <p class="tagline">${t('app.tagline')}</p>
@@ -157,8 +153,8 @@ export function startScreen(opts: StartOptions): HTMLElement {
           }</small></span>${ICONS.arrow}
         </button>
         <div class="row two">
-          <button class="btn" data-pick>${ICONS.grid}<span>${t('start.pick')}</span></button>
-          <button class="btn dex-btn" data-dex aria-label="${t('dex.open')}">${ICONS.book}<span>${t('dex.title')}</span>${newPages ? `<em>NEW</em>` : ''}</button>
+          <button class="btn pic-btn" data-pick>${ICONS.garden}<span>${t('start.pick')}</span></button>
+          <button class="btn pic-btn dex-btn" data-dex aria-label="${t('dex.open')}">${ICONS.book}<span>${t('dex.title')}</span>${newPages ? `<em title="NEW">N</em>` : ''}</button>
         </div>
         <p class="best">${t('start.score', { score: gardenScore(save) })}<br>${t('start.progress', { n: flowerCount(save), p: petalCount(save) })}</p>
         <p class="hint">${t('start.hint')}</p>
@@ -169,10 +165,6 @@ export function startScreen(opts: StartOptions): HTMLElement {
     el.classList.add('opening');
     el.addEventListener('pointerdown', () => el.classList.remove('opening'), { once: true });
   }
-  el.querySelector('[data-release]')?.addEventListener('click', () => {
-    Joypack.setReleaseView(!Joypack.releaseView());
-    opts.onRefresh();
-  });
   el.querySelector('[data-play]')!.addEventListener('click', () => (next < 0 ? openPicker(el, save, opts.onPlay) : opts.onPlay(next)));
   el.querySelector('[data-pick]')!.addEventListener('click', () => openPicker(el, save, opts.onPlay));
   el.querySelector('[data-daily]')!.addEventListener('click', opts.onDaily);
@@ -202,7 +194,7 @@ function openPicker(host: HTMLElement, save: SaveData, onPlay: (level: number) =
   const box = html(`
     <div class="picker">
       ${closeButton()}
-      <h2>${ICONS.grid} ${t('pick.title')} <small>${save.levels.filter(Boolean).length}/${LEVELS.length}</small></h2>
+      <h2>${ICONS.garden} ${t('pick.title')} <small>${save.levels.filter(Boolean).length}/${LEVELS.length}</small></h2>
       <ul class="gardens">${LEVELS.map((lv, i) => {
         const rec = save.levels[i];
         const open = unlocked(save, i);
@@ -212,11 +204,11 @@ function openPicker(host: HTMLElement, save: SaveData, onPlay: (level: number) =
           <b>${i + 1}</b>
           <span class="mini">${rec || ALL_OPEN() ? flowerSvg(lv.flower, true, 'game') : open ? flowerSvg(lv.flower, false, 'game') : ICONS.lock}</span>
           <span class="name">${open ? name : '?'}</span>
-          ${rec ? petalRow(rec.petals) : '<span class="petals"></span>'}
+          ${rec ? petalRow(rec.petals) : '<span class="petals ghost" aria-hidden="true"><i></i><i></i><i></i></span>'}
         </button></li>`;
       }).join('')}</ul>
     </div>`);
-  const close = openModal(host, box, t('pick.title'), undefined, 'wide');
+  const close = openModal(host, box, t('pick.title'), undefined, 'wide pick-modal');
   box.querySelectorAll<HTMLButtonElement>('[data-level]').forEach((b) =>
     b.addEventListener('click', () => {
       close();
@@ -232,7 +224,6 @@ function openPicker(host: HTMLElement, save: SaveData, onPlay: (level: number) =
 
 const monthsText = (f: Flower) => (f.months[0] === f.months[1] ? t('dex.month', { a: f.months[0] }) : t('dex.months', { a: f.months[0], b: f.months[1] }));
 
-/** 큰 카드 뒷면: 온실 아치 창 안의 새싹(도감 표지) */
 // 카드 뒷면: 초록 온실 벽의 아치 창(반원 밑과 아래를 같은 높이로 나눈 창살)으로 햇살이 들어 바닥에 비스듬히 비친다
 const DEX_BACK = `<svg viewBox="0 0 100 128" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"><defs><linearGradient id="dxb-wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#46785a"/><stop offset="1" stop-color="#23402d"/></linearGradient><radialGradient id="dxb-glass" cx=".75" cy=".15" r="1"><stop offset="0" stop-color="#fffbe6"/><stop offset=".45" stop-color="#ffe2a0"/><stop offset="1" stop-color="#f2b866"/></radialGradient><linearGradient id="dxb-beam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2c4" stop-opacity=".5"/><stop offset="1" stop-color="#fff2c4" stop-opacity="0"/></linearGradient></defs><rect width="100" height="128" fill="url(#dxb-wall)"/><polygon points="22,96 78,96 56,128 -4,128" fill="url(#dxb-beam)"/><path d="M22 96V50a28 28 0 0 1 56 0v46z" fill="url(#dxb-glass)"/><path d="M22 96V50a28 28 0 0 1 56 0v46zM22 50h56M22 73h56M50 22v74" fill="none" stroke="#5a3d26" stroke-width="2.6" stroke-linejoin="round"/><rect x="17" y="95" width="66" height="4.5" rx="1" fill="#9a7350"/></svg>`;
 
@@ -248,7 +239,7 @@ export function openDex(host: HTMLElement, save: SaveData, start: number | null,
   const box = html(`
     <div class="dex">
       ${closeButton()}
-      <h2>${t('dex.title')} <small>${count}/${FLOWERS.length}</small></h2>
+      <h2>${ICONS.book} ${t('dex.title')} <small>${count}/${FLOWERS.length}</small></h2>
       <div class="dex-stage">
         <div class="dex-big" aria-hidden="true">
           <span class="dex-flip"><span class="side back">${DEX_BACK}</span><span class="side front"></span></span>
@@ -400,6 +391,12 @@ function settingsPanel(opts: StartOptions): HTMLElement {
           </div>
         </div>
       </section>
+      ${
+        // 미리보기 동안만: 출시 전 확인 도구. 시작 화면에 띄우면 작은 화면에서 위 메뉴·로고와 겹쳐 설정 창 맨 아래에 둔다
+        Joypack.prerelease()
+          ? `<section class="dev-section"><h3>TEST</h3>${ALL_OPEN() ? `<p class="note">${t('test.jump')}</p>` : ''}<button type="button" class="dev-toggle" data-release aria-pressed="${Joypack.releaseView()}">${Joypack.releaseView() ? t('test.devView') : t('test.releaseView')}</button></section>`
+          : ''
+      }
       <p class="app-version">${t('settings.version')} v${__APP_VERSION__}</p>
       <p class="app-copyright">${Joypack.COPYRIGHT}</p>
     </div>`);
@@ -431,6 +428,10 @@ function settingsPanel(opts: StartOptions): HTMLElement {
       b.innerHTML = toggleInner(key, save[key]);
     }),
   );
+  el.querySelector('[data-release]')?.addEventListener('click', () => {
+    Joypack.setReleaseView(!Joypack.releaseView());
+    opts.onRefresh(true);
+  });
   const resetBtn = el.querySelector<HTMLButtonElement>('[data-reset]')!;
   const confirm = el.querySelector<HTMLElement>('.confirm')!;
   resetBtn.addEventListener('click', () => {
@@ -792,7 +793,7 @@ export function resultScreen(opts: {
           <button class="btn primary big" data-act="next">${nextLabel}${ICONS.arrow}</button>
           <div class="row">
             <button class="btn" data-act="retry">${ICONS.restart}<span>${t('result.retry')}</span></button>
-            <button class="btn" data-act="dex">${ICONS.book}<span>${t('result.dex')}</span></button>
+            <button class="btn pic-btn" data-act="dex">${ICONS.book}<span>${t('result.dex')}</span></button>
           </div>
           <div class="row">
             <button class="btn share-btn" data-act="share">${ICONS.share} ${t('result.share')}</button>
