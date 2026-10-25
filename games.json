@@ -57,7 +57,7 @@
   },
   {
     "id": "glasshouse",
-    "name": { "ko": "온실 정원", "en": "Glasshouse Garden" },
+    "name": { "ko": "온실정원", "en": "Glasshouse Garden" },
     "desc": { "ko": "화분을 밀어 창가 햇살 자리에 꽃 피우기", "en": "Push pots into the sunny window spots to bloom" },
     "path": "games/glasshouse/",
     "icon": "games/glasshouse/public/favicon.svg",

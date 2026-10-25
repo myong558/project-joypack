@@ -10,7 +10,7 @@
 //   ■ 업다운      games/updown/scores-{50|100|200}/{id}   기록 1건 = 문서 1개
 //   ■ 두더지잡기  games/hammer/rankings/{classic|daily-YYYY-MM-DD}   순위표 1개 = 문서 1개
 //   ■ 타임 투 플립 games/timetoflip/rankings/{classic|daily-YYYY-MM-DD}   순위표 1개 = 문서 1개
-//   ■ 온실 정원   games/glasshouse/rankings/{garden|daily-YYYY-MM-DD}   순위표 1개 = 문서 1개(이름마다 한 줄)
+//   ■ 온실정원   games/glasshouse/rankings/{garden|daily-YYYY-MM-DD}   순위표 1개 = 문서 1개(이름마다 한 줄)
 // =====================================================================================================
 rules_version = '2';
 service cloud.firestore {
@@ -211,7 +211,7 @@ service cloud.firestore {
       allow delete: if false;
     }
     // -------------------------------------------------------------------------------------------------
-    // ■ 게임: 온실 정원 (glasshouse)
+    // ■ 게임: 온실정원 (glasshouse)
     //   경로   games/glasshouse/rankings/garden (정원 점수) · daily-YYYY-MM-DD (오늘의 정원, 아래 ghDaily…)
     //   모양   순위표 1개 = 문서 1개 { entries: [{ name, score, flowers, date }, ...] } (점수 높은 순 1~10위)
     //   권한   누구나 읽기. 등록은 "새 기록 1개를 끼운 것"만: 빈자리에 더하기 · 10위를 밀어내기 ·

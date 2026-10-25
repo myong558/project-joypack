@@ -12,7 +12,7 @@
 > | 업다운 | `https://myong558.github.io/project-joypack/games/updown/` |
 > | 두더지잡기 | `https://myong558.github.io/project-joypack/games/hammer/` |
 > | 타임 투 플립 | `https://myong558.github.io/project-joypack/games/timetoflip/` (2026-10-26 12:00 정식 공개 예약) |
-> | 온실 정원 | `https://myong558.github.io/project-joypack/games/glasshouse/` (미리보기: 개발자 모드에서만) |
+> | 온실정원 | `https://myong558.github.io/project-joypack/games/glasshouse/` (미리보기: 개발자 모드에서만) |
 
 ---
 
@@ -407,16 +407,16 @@ pnpm --filter hub icons  # 로고(apps/hub/public/logo.svg)를 바꾼 뒤 앱 �
 
 | 저작물 | 쓰는 곳 | 출처·라이선스 | 상업 이용 | 함께 배포하는 파일 |
 | --- | --- | --- | --- | --- |
-| Jua 글꼴 | 허브·업다운·두더지잡기(전체), 타임 투 플립·온실 정원(위 메뉴 언어 단추) | SIL OFL 1.1(Reserved Font Name 없음 → 서브셋 허용) | 가능(글꼴만 따로 팔기는 불가) | 허브 `fonts/LICENSE-Jua.txt`(apps/hub/public), 업다운 `games/updown/fonts/LICENSE-Jua.txt`, 두더지잡기 `fonts/LICENSE-Jua.txt`, 타임 투 플립 `fonts/LICENSE-Jua.txt`, 온실 정원 `fonts/LICENSE-Jua.txt` |
+| Jua 글꼴 | 허브·업다운·두더지잡기(전체), 타임 투 플립·온실정원(위 메뉴 언어 단추) | SIL OFL 1.1(Reserved Font Name 없음 → 서브셋 허용) | 가능(글꼴만 따로 팔기는 불가) | 허브 `fonts/LICENSE-Jua.txt`(apps/hub/public), 업다운 `games/updown/fonts/LICENSE-Jua.txt`, 두더지잡기 `fonts/LICENSE-Jua.txt`, 타임 투 플립 `fonts/LICENSE-Jua.txt`, 온실정원 `fonts/LICENSE-Jua.txt` |
 | Do Hyeon 글꼴 | 타임 투 플립(본문·숫자) | SIL OFL 1.1(Reserved Font Name 없음 → 서브셋 허용), Google Fonts 저장소 원본 | 가능(글꼴만 따로 팔기는 불가) | 타임 투 플립 `fonts/LICENSE-DoHyeon.txt`(games/timetoflip/public/fonts) |
 | 명화 카드 그림 32장 | 타임 투 플립(3판부터 나오는 카드 앞면) | 메트로폴리탄·시카고 미술관 Open Access(CC0 1.0), 암스테르담 국립미술관(Public Domain Mark 1.0), 국립중앙박물관(공공누리 제1유형: 출처 표시). 작품 번호·출처 `games/timetoflip/art-src/meta.json` | 가능(수정·상업 이용 자유. 공공누리 1유형 5점은 출처 표시 의무 → 도감 작가 줄 "국립중앙박물관" + 배포 파일) | 타임 투 플립 `art-credits.txt`(games/timetoflip/public, `art-src/credits.mjs` 로 만듦) |
-| Gowun Batang 글꼴(Bold) | 온실 정원(제목·꽃 이름·학명) | SIL OFL 1.1(© The Gowun Batang Project Authors, Reserved Font Name 없음 → 서브셋 허용), Google Fonts 저장소 원본 | 가능(글꼴만 따로 팔기는 불가) | 온실 정원 `fonts/LICENSE-GowunBatang.txt`(games/glasshouse/public/fonts) |
-| Gowun Dodum 글꼴 | 온실 정원(본문·숫자) | SIL OFL 1.1(© The Gowun Dodum Project Authors, Reserved Font Name 없음 → 서브셋 허용), Google Fonts 저장소 원본 | 가능(글꼴만 따로 팔기는 불가) | 온실 정원 `fonts/LICENSE-GowunDodum.txt`(games/glasshouse/public/fonts) |
+| Gowun Batang 글꼴(Bold) | 온실정원(제목·꽃 이름·학명) | SIL OFL 1.1(© The Gowun Batang Project Authors, Reserved Font Name 없음 → 서브셋 허용), Google Fonts 저장소 원본 | 가능(글꼴만 따로 팔기는 불가) | 온실정원 `fonts/LICENSE-GowunBatang.txt`(games/glasshouse/public/fonts) |
+| Gowun Dodum 글꼴 | 온실정원(본문·숫자) | SIL OFL 1.1(© The Gowun Dodum Project Authors, Reserved Font Name 없음 → 서브셋 허용), Google Fonts 저장소 원본 | 가능(글꼴만 따로 팔기는 불가) | 온실정원 `fonts/LICENSE-GowunDodum.txt`(games/glasshouse/public/fonts) |
 | Dongle 글꼴(Bold) | 타임 투 플립(제목·팝업) | SIL OFL 1.1(© The Dongle Project Authors, Reserved Font Name 없음 → 서브셋 허용), Google Fonts 저장소 원본 | 가능(글꼴만 따로 팔기는 불가) | 타임 투 플립 `fonts/LICENSE-Dongle.txt`(games/timetoflip/public/fonts) |
 | 아이콘·로고·캐릭터·배경 그림 | 허브·모든 게임 | 직접 제작(코드로 그린 SVG·CSS·캔버스, 그 PNG 사본) | 가능(자체 저작물) | 없음 |
 | 효과음·진동 | 모든 게임 | 직접 제작(Web Audio 로 그 자리에서 합성, 소리 파일 없음) | 가능(자체 저작물) | 없음 |
 | 이모지(업다운 온도 힌트 🔥☀️🌊❄️) | 업다운 | 글자로만 쓰고 그림은 기기 글꼴이 그림(파일 포함 안 함) | 가능 | 없음 |
-| 외부 라이브러리 | 허브·두더지잡기·타임 투 플립·온실 정원 빌드 | Vite·TypeScript 등 개발 도구(MIT 등). 배포 파일에 들어가는 실행 라이브러리는 두더지잡기·타임 투 플립·온실 정원의 Firebase JS SDK(Apache-2.0, 랭킹)·html-to-image(MIT, 결과 이미지) | 가능 | 없음 |
+| 외부 라이브러리 | 허브·두더지잡기·타임 투 플립·온실정원 빌드 | Vite·TypeScript 등 개발 도구(MIT 등). 배포 파일에 들어가는 실행 라이브러리는 두더지잡기·타임 투 플립·온실정원의 Firebase JS SDK(Apache-2.0, 랭킹)·html-to-image(MIT, 결과 이미지) | 가능 | 없음 |
 
 새 게임이 글꼴·소리·그림 등 남의 저작물을 쓰면 이 표에 한 줄 더하고, 그 라이선스 파일이 `dist` 에 들어가는지 확인합니다(기준서 6장 9번·10.1).
 

@@ -128,7 +128,7 @@ const FETCHERS: Record<string, { key: (board: string) => string; fetch: Fetcher 
   // 두더지잡기·타임 투 플립: 순위표 1개 = 문서 1개({ entries: [...] }). 오늘의 챌린지는 날짜마다 새 문서다
   hammer: boardDoc('hammer'),
   timetoflip: boardDoc('timetoflip'),
-  // 온실 정원: 정원 점수는 garden 문서(점수 높은 순), 오늘의 정원은 daily-YYYY-MM-DD 문서(이동 수 적은 순 → 시간 짧은 순, 횟수·시간으로 보임)
+  // 온실정원: 정원 점수는 garden 문서(점수 높은 순), 오늘의 정원은 daily-YYYY-MM-DD 문서(이동 수 적은 순 → 시간 짧은 순, 횟수·시간으로 보임)
   glasshouse: {
     key: (board) => (board === 'daily' ? `daily-${dateKey()}` : 'garden'),
     async fetch(board, limit) {
