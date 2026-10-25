@@ -49,10 +49,10 @@ describe('오늘의 정원 판', () => {
     expect(dailyLevel(key).rows).toEqual(dailyLevel(DAILY_START).rows);
   });
 
-  it('화분마다 다른 꽃, 이미 연 꽃 가운데서', () => {
+  it('그날 꽃 한 종을 모든 화분에, 이미 연 꽃 가운데서', () => {
     const opened = (i: number) => i < 6 || i === 10;
     const ids = dailySpecies(3, 3, opened);
-    expect(new Set(ids).size).toBe(3);
+    expect(new Set(ids).size).toBe(1);
     const seen = new Set(LEVELS.filter((_, i) => opened(i)).map((l) => l.flower));
     ids.forEach((id) => expect(seen.has(id)).toBe(true));
     expect(dailySpecies(3, 4, opened)).not.toEqual(ids);

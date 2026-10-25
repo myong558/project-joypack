@@ -338,7 +338,7 @@ function play(level: number | 'daily'): void {
       vibrate([60, 50, 60, 50, 220]);
       fx.shake('small');
       board.bloom();
-      board.pots.forEach((p, i) => later(260 + i * 320, () => fx.petals(p.el, accentOf(i === 0 ? f.id : species[i]))));
+      board.pots.forEach((p, i) => later(260 + i * 320, () => fx.petals(p.el, accentOf(f.id))));
     });
     later(2600, () => finish());
   };

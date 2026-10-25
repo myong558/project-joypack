@@ -51,22 +51,18 @@ export const levelName = (i: number) => t('level.name', { n: i + 1 });
 /** 그 판에서 처음 알려 줄 것(판 위 한 줄) */
 export const TIPS: Partial<Record<number, MessageKey>> = { 0: 'tip.l1', 1: 'tip.l2', 2: 'tip.l3' };
 
-/**
- * 화분마다 피울 꽃: 첫 화분은 그 판의 꽃, 나머지는 앞 판들에서 가장 최근에 핀 꽃부터(첫 판은 다음 꽃)
- */
+/** 화분마다 피울 꽃: 판마다 그 판의 꽃 한 종만(화분이 여럿이면 모두 같은 꽃) */
 export function speciesFor(level: number, count: number): FlowerId[] {
-  const before = FLOWERS.slice(0, level).reverse();
-  const after = FLOWERS.slice(level + 1);
-  return [FLOWERS[level], ...before, ...after].slice(0, count).map((f) => f.id);
+  return Array.from({ length: count }, () => LEVELS[level].flower);
 }
 
 /**
- * 오늘의 정원 화분마다 피울 꽃: 이미 도감에 연 꽃 가운데서(아직 못 본 꽃을 미리 보이지 않게) 날마다 돌아가며 고른다.
- * 연 꽃이 화분 수보다 적으면(출시 전 확인용) 앞 정원의 꽃부터. opened 는 도감에 열린 판 번호
+ * 오늘의 정원 꽃: 이미 도감에 연 꽃 가운데 날마다 한 종을 돌아가며 골라 모든 화분에(아직 못 본 꽃을 미리 보이지 않게).
+ * 연 꽃이 없으면(출시 전 확인용) 앞 정원의 꽃부터. opened 는 도감에 열린 판 번호
  */
 export function dailySpecies(count: number, day: number, opened: (i: number) => boolean): FlowerId[] {
   const seen = FLOWERS.filter((_, i) => opened(i));
-  const pool = seen.length >= count ? seen : FLOWERS.slice(0, 6);
-  const start = ((day % pool.length) + pool.length) % pool.length;
-  return Array.from({ length: count }, (_, k) => pool[(start + k) % pool.length].id);
+  const pool = seen.length ? seen : FLOWERS.slice(0, 6);
+  const pick = pool[((day % pool.length) + pool.length) % pool.length].id;
+  return Array.from({ length: count }, () => pick);
 }

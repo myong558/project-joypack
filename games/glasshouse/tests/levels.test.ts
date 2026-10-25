@@ -24,10 +24,8 @@ describe('정원 24개', () => {
       const sol = solve(board, start, explore(board, start, 2_000_000)!)!;
       expect(sol.moves).toBe(lv.par);
       expect(lit(board, start.pots).some(Boolean)).toBe(false);
-      // 첫 화분이 그 판의 꽃(그 꽃이 도감에 열림), 화분마다 다른 꽃
-      const species = speciesFor(i, start.pots.length);
-      expect(species[0]).toBe(lv.flower);
-      expect(new Set(species).size).toBe(species.length);
+      // 화분 모두 그 판의 꽃 한 종(그 꽃이 도감에 열림)
+      expect(speciesFor(i, start.pots.length)).toEqual(start.pots.map(() => lv.flower));
       // 칸 100개 미만(상태 번호 규칙)
       expect(board.w * board.h).toBeLessThan(100);
     });
