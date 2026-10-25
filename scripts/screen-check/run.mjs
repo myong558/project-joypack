@@ -31,13 +31,13 @@ if (!existsSync(join(ROOT, 'dist'))) {
 
 // 실제 기기에서 브라우저 주소창·아래 버튼·내비게이션 바를 뺀 뒤 남는 크기(CSS px)
 export const SIZES = {
-  portrait: ['360x560', '344x690', '390x664'], // 주소창+아래 버튼, 폴드 바깥 화면, 사파리
+  portrait: ['320x560', '360x560', '344x690', '390x664'], // 작은 폰(아이폰 SE 1세대·글자 크게 쓴 안드로이드), 주소창+아래 버튼, 폴드 바깥 화면, 사파리
   landscape: ['844x390', '780x300', '667x375', '640x290', '740x260', '568x320'], // 가로: 바로가기 전체, 주소창+버튼, 작은 폰
   fold: ['720x740', '740x690', '884x1004', '1104x784'], // 폴드 펼침(거의 정사각형)
   pc: ['1366x768'],
 };
 // 대표 크기: 문제는 대부분 가장 작은 세로·가장 낮은 가로·정사각 폴드·PC 에서 드러난다
-const QUICK = ['360x560', '740x260', '884x1004', '1366x768'];
+const QUICK = ['320x560', '740x260', '884x1004', '1366x768'];
 const sizes = (group === 'all' ? Object.values(SIZES).flat() : group === 'quick' ? QUICK : SIZES[group] ?? group.split(',')).map((s) => s.split('x').map(Number));
 
 const { screens, base = '' } = await import(pathToFileURL(defFile).href);
@@ -66,8 +66,10 @@ const CHECK = `(() => {
     for (let p = e.parentElement; p && p !== document.body && !bad; p = p.parentElement) {
       if (fixed && !fixed.contains(p)) break;
       const s = getComputedStyle(p), pr = p.getBoundingClientRect();
-      if (/auto|scroll/.test(s.overflowY)) break;
-      if ((/hidden|clip/.test(s.overflowY) && (r.bottom > pr.bottom + 2 || r.top < pr.top - 2)) || (/hidden|clip/.test(s.overflowX) && (r.right > pr.right + 2 || r.left < pr.left - 2))) bad = 'clip by .' + String(p.className).split(' ')[0];
+      // 가로 잘림은 세로 스크롤 상자(overflow-y: auto + overflow-x: hidden)에서도 본다: 세로로는 스크롤해 볼 수 있어도 가로로 잘린 것은 못 본다
+      const cutX = /hidden|clip/.test(s.overflowX) && (r.right > pr.right + 2 || r.left < pr.left - 2);
+      if (!cutX && /auto|scroll/.test(s.overflowY)) break;
+      if (cutX || (/hidden|clip/.test(s.overflowY) && (r.bottom > pr.bottom + 2 || r.top < pr.top - 2))) bad = 'clip by .' + String(p.className).split(' ')[0];
     }
     if (bad) out.push((typeof e.className === 'string' && e.className ? '.' + e.className.split(' ')[0] : e.tagName) + ' [' + e.textContent.trim().replace(/\\s+/g, ' ').slice(0, 14) + '] ' + bad);
   }
