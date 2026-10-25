@@ -132,6 +132,88 @@ function pot(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: 
   ctx.rect(x - w * 0.56, y - h - h * 0.22, w * 1.12, h * 0.26);
 }
 
+/** 늘어진 넓은 잎(바나나 잎): 밑에서 ang 쪽으로 뻗다가 bend 만큼 휘어 처짐. 가운데 잎맥·곁맥은 vein 경로에 */
+function droop(ctx: CanvasRenderingContext2D, vein: Path2D, x: number, y: number, ang: number, len: number, wid: number, bend: number): void {
+  const N = 14;
+  const mid: [number, number, number][] = [[x, y, ang]];
+  for (let k = 1; k <= N; k++) {
+    const a = ang + bend * (k / N) ** 2;
+    const [px, py] = mid[k - 1];
+    mid.push([px + Math.cos(a) * (len / N), py + Math.sin(a) * (len / N), a]);
+  }
+  const edge = (side: number) => mid.map(([mx, my, a], k) => {
+    const wd = wid * Math.sin(Math.PI * Math.min(1, (k / N) * 1.05)) ** 0.6;
+    return [mx - Math.sin(a) * wd * side, my + Math.cos(a) * wd * side] as const;
+  });
+  const l = edge(1), r = edge(-1);
+  ctx.moveTo(x, y);
+  l.forEach(([ex, ey]) => ctx.lineTo(ex, ey));
+  r.reverse().forEach(([ex, ey]) => ctx.lineTo(ex, ey));
+  ctx.closePath();
+  vein.moveTo(x, y);
+  mid.forEach(([mx, my]) => vein.lineTo(mx, my));
+  // 곁맥: 잎맥에서 가장자리로 비스듬히(바나나 잎 결)
+  for (let k = 2; k < N - 1; k += 2) {
+    const [mx, my] = mid[k];
+    for (const [ex, ey] of [edge(1)[k + 1], edge(-1)[k + 1]]) {
+      vein.moveTo(mx, my);
+      vein.lineTo(mx + (ex - mx) * 0.9, my + (ey - my) * 0.9);
+    }
+  }
+}
+
+/** 야자 잎: 길게 휘는 잎줄기에 가늘고 긴 잎이 양쪽으로 빗처럼 */
+function palm(ctx: CanvasRenderingContext2D, stem: Path2D, x: number, y: number, ang: number, len: number, bend: number): void {
+  const N = 16;
+  const step = len / N;
+  stem.moveTo(x, y);
+  for (let k = 1; k <= N; k++) {
+    const s = k / N;
+    const a = ang + bend * s * s;
+    x += Math.cos(a) * step;
+    y += Math.sin(a) * step;
+    stem.lineTo(x, y);
+    if (k < 3) continue;
+    const l = len * 0.3 * (1 - s * 0.55);
+    blade(ctx, x, y, a - 0.62 + bend * 0.15, l, l * 0.07, 0.5);
+    blade(ctx, x, y, a + 0.62 + bend * 0.15, l, l * 0.07, 0.5);
+  }
+}
+
+/** 전나무 가지: 가지 선을 따라 짧은 바늘잎이 양쪽으로, 위쪽 바늘 끝에 성에(frost) */
+function fir(stem: Path2D, frost: Path2D, x: number, y: number, ang: number, len: number, bend: number, needle: number, twigs = true): void {
+  const N = 16;
+  const step = len / N;
+  stem.moveTo(x, y);
+  const pts: [number, number, number][] = [];
+  for (let k = 1; k <= N; k++) {
+    const s = k / N;
+    const a = ang + bend * s;
+    x += Math.cos(a) * step;
+    y += Math.sin(a) * step;
+    stem.lineTo(x, y);
+    pts.push([x, y, a]);
+  }
+  pts.forEach(([px, py, a], k) => {
+    const n = needle * (1 - (k / N) * 0.45);
+    for (const d of [-1.05, -0.75, 0.75, 1.05]) {
+      const ex = px + Math.cos(a + d) * n, ey = py + Math.sin(a + d) * n;
+      stem.moveTo(px, py);
+      stem.lineTo(ex, ey);
+      // 위를 향한 바늘 끝에만 성에
+      if (ey < py - n * 0.4 && k % 2 === 0) {
+        frost.moveTo(ex + 1.6, ey);
+        frost.arc(ex, ey, 1.6, 0, Math.PI * 2);
+      }
+    }
+  });
+  if (!twigs) return;
+  for (const [t, side] of [[0.3, 1], [0.5, -1], [0.68, 1]] as const) {
+    const [px, py, a] = pts[Math.floor(N * t)];
+    fir(stem, frost, px, py, a + side * 0.75, len * 0.32, -side * 0.2, needle * 0.75, false);
+  }
+}
+
 interface BackPlant { x: number; kind: number; size: number; phase: number; leaves: number[] }
 interface Cloud { x: number; y: number; s: number; v: number; puffs: [number, number, number][] }
 
@@ -451,38 +533,73 @@ function paint(canvas: HTMLCanvasElement, rnd: () => number): void {
     ctx.lineWidth = 1.2;
     ctx.stroke(stems);
 
-    // 앞 줄: 양쪽 아래 모서리의 큰 잎(가장 가까운 어둠). 왼쪽은 고사리·하트 잎, 오른쪽은 하트 잎·칼 잎. 바람결이 왼쪽에서 오른쪽으로 번진다
+    // 앞 줄: 양쪽 아래 모서리의 큰 잎(가장 가까운 어둠). 스킨마다 다른 식물(맑음 고사리·하트 잎·칼 잎, 비 늘어진 바나나 잎,
+    // 노을 야자수, 눈 성에 앉은 전나무 가지). 바람결이 왼쪽에서 오른쪽으로 번진다
     const S = Math.max(120, Math.min(300, Math.min(w, h) * 0.42));
     const gust = (ph: number) => Math.sin(t * 0.55 + ph) * 0.045 + Math.sin(t * 1.4 + ph * 2) * 0.015;
     const fstem = new Path2D();
     const veins = new Path2D();
+    const frost = new Path2D();
+    const trunk = new Path2D();
+    let stemWidth = 2;
     ctx.beginPath();
     const lx = -S * 0.05 - px * 4;
-    for (let i = 0; i < 6; i++) frond(ctx, fstem, lx + S * 0.12, h + 6, -1.75 + i * 0.27 + gust(i * 0.4), S * (0.95 + (i % 3) * 0.12), 0.55 + i * 0.05);
-    for (let i = 0; i < 3; i++) {
-      const ang = -1.2 + i * 0.35 + gust(2 + i);
-      const L = S * (0.55 + i * 0.08);
-      const ex = lx + S * 0.02 + Math.cos(ang) * L * 0.55, ey = h + 8 + Math.sin(ang) * L * 0.55;
-      fstem.moveTo(lx + S * 0.02, h + 8);
-      fstem.quadraticCurveTo(lx + S * 0.02 + Math.cos(ang) * L * 0.3, h + 8 + Math.sin(ang) * L * 0.4, ex, ey);
-      heart(ctx, ex, ey, ang + 0.5, S * 0.32, veins);
-    }
     const rx = w + S * 0.05 - px * 4;
-    for (let i = 0; i < 7; i++) blade(ctx, rx - S * 0.12 - i * S * 0.035, h + 6, -1.62 - i * 0.07 + gust(4 + i * 0.3) * 0.6, S * (0.85 + ((i * 37) % 5) * 0.09), S * 0.06, 0.38);
-    for (let i = 0; i < 3; i++) {
-      const ang = Math.PI + 1.15 - i * 0.33 + gust(6 + i);
-      const L = S * (0.6 + i * 0.07);
-      const bx = rx - S * 0.02;
-      const ex = bx + Math.cos(ang) * L * 0.55, ey = h + 8 + Math.sin(ang) * L * 0.55;
-      fstem.moveTo(bx, h + 8);
-      fstem.quadraticCurveTo(bx + Math.cos(ang) * L * 0.3, h + 8 + Math.sin(ang) * L * 0.4, ex, ey);
-      heart(ctx, ex, ey, ang - 0.5, S * 0.34, veins);
+    if (weather === 'rain') {
+      for (let i = 0; i < 4; i++) droop(ctx, veins, lx + S * 0.08, h + 10, -1.95 + i * 0.28 + gust(i * 0.5), S * (1.05 + (i % 2) * 0.2), S * 0.13, 1.1 - i * 0.12);
+      for (let i = 0; i < 3; i++) frond(ctx, fstem, lx + S * 0.2, h + 6, -1.4 + i * 0.3 + gust(3 + i), S * 0.7, 0.5);
+      for (let i = 0; i < 4; i++) droop(ctx, veins, rx - S * 0.08, h + 10, Math.PI + 1.95 - i * 0.28 + gust(5 + i * 0.5), S * (1.1 + (i % 2) * 0.15), S * 0.14, -(1.1 - i * 0.12));
+    } else if (weather === 'dusk') {
+      // 왼쪽: 모서리에서 기울어 오른 야자수 줄기 끝에 잎 왕관
+      const tx = lx + S * 0.42 + gust(1) * S * 0.3, ty = h - S * 1.05;
+      trunk.moveTo(lx + S * 0.02, h + 10);
+      trunk.quadraticCurveTo(lx + S * 0.12, h - S * 0.6, tx, ty);
+      for (let i = 0; i < 8; i++) {
+        const ang = -Math.PI + i * (Math.PI / 7) + gust(i * 0.4) * 1.2;
+        palm(ctx, fstem, tx, ty, ang, S * (0.7 + (i % 2) * 0.12), ang < -Math.PI / 2 ? -0.9 : 0.9);
+      }
+      // 오른쪽: 땅에서 부채처럼 퍼지는 낮은 야자 잎
+      for (let i = 0; i < 6; i++) {
+        const ang = -Math.PI / 2 - 0.2 - i * 0.22 + gust(6 + i * 0.3);
+        palm(ctx, fstem, rx - S * 0.1, h + 8, ang, S * (0.8 + (i % 3) * 0.1), -0.7);
+      }
+    } else if (weather === 'snow') {
+      // 양옆에서 비스듬히 들어온 전나무 가지(바늘잎은 선으로 그려 굵게 칠함)
+      stemWidth = 1.7;
+      for (let i = 0; i < 3; i++) fir(fstem, frost, lx, h - S * (0.15 + i * 0.32), -0.55 - i * 0.12 + gust(i * 0.6), S * (1 - i * 0.15), 0.25, S * 0.07);
+      for (let i = 0; i < 3; i++) fir(fstem, frost, rx, h - S * (0.05 + i * 0.34), Math.PI + 0.5 + i * 0.12 + gust(4 + i * 0.6), S * (0.95 - i * 0.15), -0.25, S * 0.07);
+    } else {
+      for (let i = 0; i < 6; i++) frond(ctx, fstem, lx + S * 0.12, h + 6, -1.75 + i * 0.27 + gust(i * 0.4), S * (0.95 + (i % 3) * 0.12), 0.55 + i * 0.05);
+      for (let i = 0; i < 3; i++) {
+        const ang = -1.2 + i * 0.35 + gust(2 + i);
+        const L = S * (0.55 + i * 0.08);
+        const ex = lx + S * 0.02 + Math.cos(ang) * L * 0.55, ey = h + 8 + Math.sin(ang) * L * 0.55;
+        fstem.moveTo(lx + S * 0.02, h + 8);
+        fstem.quadraticCurveTo(lx + S * 0.02 + Math.cos(ang) * L * 0.3, h + 8 + Math.sin(ang) * L * 0.4, ex, ey);
+        heart(ctx, ex, ey, ang + 0.5, S * 0.32, veins);
+      }
+      for (let i = 0; i < 7; i++) blade(ctx, rx - S * 0.12 - i * S * 0.035, h + 6, -1.62 - i * 0.07 + gust(4 + i * 0.3) * 0.6, S * (0.85 + ((i * 37) % 5) * 0.09), S * 0.06, 0.38);
+      for (let i = 0; i < 3; i++) {
+        const ang = Math.PI + 1.15 - i * 0.33 + gust(6 + i);
+        const L = S * (0.6 + i * 0.07);
+        const bx = rx - S * 0.02;
+        const ex = bx + Math.cos(ang) * L * 0.55, ey = h + 8 + Math.sin(ang) * L * 0.55;
+        fstem.moveTo(bx, h + 8);
+        fstem.quadraticCurveTo(bx + Math.cos(ang) * L * 0.3, h + 8 + Math.sin(ang) * L * 0.4, ex, ey);
+        heart(ctx, ex, ey, ang - 0.5, S * 0.34, veins);
+      }
     }
     ctx.fillStyle = rgba(leaf, (dark ? 0.9 : 0.62) * gameK);
     ctx.fill();
     ctx.strokeStyle = ctx.fillStyle;
-    ctx.lineWidth = 2;
+    ctx.lineWidth = stemWidth;
     ctx.stroke(fstem);
+    ctx.lineWidth = S * 0.05;
+    ctx.stroke(trunk);
+    if (weather === 'snow') {
+      ctx.fillStyle = rgba(WHITE, (dark ? 0.55 : 0.9) * gameK);
+      ctx.fill(frost);
+    }
     ctx.strokeStyle = rgba(mix(leaf, b, 0.6), (dark ? 0.35 : 0.5) * gameK);
     ctx.lineWidth = 1.2;
     ctx.stroke(veins);
