@@ -2,21 +2,14 @@ import { solved, step, type Board, type Dir, type State } from './rules.ts';
 
 /**
  * 판 풀이기(너비 우선 탐색). 판의 기준 이동 수(가장 적은 이동)를 정하고, 모의 플레이에서
- * 상태마다 "앞으로 몇 걸음이면 깨는지"를 알려 준다. 같은 습성 화분끼리는 바꿔 놓아도 같은 상태로 본다
+ * 상태마다 "앞으로 몇 걸음이면 깨는지"를 알려 준다. 화분끼리는 바꿔 놓아도 같은 상태로 본다(어느 화분이든 햇살 자리에 놓으면 됨)
  */
 
 /** 상태를 숫자 하나로(칸 100개 미만 · 화분 6개까지는 정확함) */
-export function stateKey(board: Board, s: State): number {
-  const order = canonical(board, s.pots);
+export function stateKey(s: State): number {
   let k = s.player;
-  for (const p of order) k = k * 100 + p;
+  for (const p of s.pots.slice().sort((a, b) => a - b)) k = k * 100 + p;
   return k;
-}
-
-function canonical(board: Board, pots: readonly number[]): number[] {
-  const groups: Record<string, number[]> = { sun: [], shade: [], moist: [] };
-  pots.forEach((p, i) => groups[board.habits[i]].push(p));
-  return [...groups.sun.sort((a, b) => a - b), ...groups.shade.sort((a, b) => a - b), ...groups.moist.sort((a, b) => a - b)];
 }
 
 export interface Graph {
@@ -33,7 +26,7 @@ export interface Graph {
 /** 처음 상태에서 닿는 모든 상태를 만든다. 너무 많으면(어려운 판 만들기 중) null */
 export function explore(board: Board, start: State, limit = 400_000): Graph | null {
   const states: State[] = [start];
-  const index = new Map<number, number>([[stateKey(board, start), 0]]);
+  const index = new Map<number, number>([[stateKey(start), 0]]);
   const nextList: number[] = [];
   const dist: number[] = [0];
   for (let i = 0; i < states.length; i++) {
@@ -48,7 +41,7 @@ export function explore(board: Board, start: State, limit = 400_000): Graph | nu
         nextList.push(-1);
         continue;
       }
-      const k = stateKey(board, r.state);
+      const k = stateKey(r.state);
       let j = index.get(k);
       if (j === undefined) {
         j = states.length;

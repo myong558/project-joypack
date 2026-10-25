@@ -8,7 +8,7 @@ export const base = 'games/glasshouse/';
 const SAVE = `localStorage.setItem('joypack.preview', 'on'); localStorage.setItem('joypack.releaseView', 'on'); localStorage.setItem('glasshouse:v1', JSON.stringify({ levels: Array.from({ length: 24 }, (_, i) => (i < 6 ? { moves: 20, score: 900, petals: 2 } : null)) }))`;
 
 // 여름 1(봄 여섯 다음 판, 이어 가꾸기로 열림). src/game/levels.ts 와 같은 판
-const LEVEL = ['#v####', '#~#..#', '#.#M.#', '#.#..#', '#..@.#', '#....<', '######'];
+const LEVEL = ['#v###v##', '#......#', '#..o#..#', '#...#..#', '##.....#', '#.#.o..#', '#....@.#', '########'];
 const KEYS = ['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft'];
 const { board, start } = parse(LEVEL);
 const PATH = solve(board, start).path;

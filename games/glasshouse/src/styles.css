@@ -497,24 +497,28 @@ body:has(.screen.game) .scene .layer {
     var(--stone);
   box-shadow: 0 0 0 5px #7a5a40, 0 0 0 6px rgb(0 0 0 / 0.25), 0 10px 24px rgb(0 0 0 / 0.18);
 }
+/* 오른쪽 벽 창(아래 줄 끝)과 그 바로 앞 한 칸에 고인 햇살 = 햇살 자리 */
 .d-win {
   position: absolute;
-  left: calc(var(--dc) * 3 + 8px);
-  top: -9px;
-  width: calc(var(--dc) - 16px);
-  height: 8px;
+  left: calc(100% + 1px);
+  top: calc(var(--dc) + 8px);
+  width: 8px;
+  height: calc(var(--dc) - 16px);
   border-radius: 3px;
-  background: linear-gradient(#fff6d6, #ffd98a);
+  background: linear-gradient(90deg, #ffd98a, #fff6d6);
   box-shadow: 0 0 12px 3px rgb(255 214 120 / 0.8);
 }
 .d-beam {
   position: absolute;
-  left: calc(var(--dc) * 3 + 6px);
-  top: 0;
-  width: calc(var(--dc) - 12px);
-  height: 100%;
-  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--sun) 80%, transparent), transparent);
-  opacity: 0.9;
+  left: calc(var(--dc) * 3);
+  top: var(--dc);
+  width: var(--dc);
+  height: var(--dc);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--sun) 90%, white), color-mix(in srgb, var(--sun) 45%, transparent) 65%, transparent);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--sun) 70%, transparent);
+  scale: 0.86;
+  opacity: 0.95;
 }
 .d-pot,
 .d-man {
@@ -1645,42 +1649,7 @@ body:has(.screen.game) .scene .layer {
     linear-gradient(#5a4030, #5a4030) 50% 0 / 2px 100% no-repeat,
     linear-gradient(#5a4030, #5a4030) 0 50% / 100% 2px no-repeat;
 }
-/* 물길: 푸른 물에 잔물결이 천천히 흐름(물결 층만 움직임) */
-.tile.water {
-  overflow: hidden;
-  border-radius: 4px;
-  background: linear-gradient(180deg, #5f9db5, #3f7f99);
-  box-shadow: inset 0 3px 4px rgb(0 30 50 / 0.35);
-}
-.tile.water::after {
-  content: '';
-  position: absolute;
-  inset: 0 -100% 0 0;
-  background: repeating-linear-gradient(100deg, transparent 0 10px, rgb(255 255 255 / 0.22) 10px 12px, transparent 12px 22px);
-  animation: ripple 5s linear infinite;
-}
-@keyframes ripple {
-  to {
-    transform: translateX(-50%);
-  }
-}
-/* 언 물길: 옅은 푸른 얼음에 금과 반사광 */
-.tile.ice {
-  border-radius: 4px;
-  background:
-    linear-gradient(135deg, rgb(255 255 255 / 0.75) 0 12%, transparent 12% 46%, rgb(255 255 255 / 0.45) 46% 50%, transparent 50%),
-    linear-gradient(180deg, #d6ecf6, #a9d0e3);
-  box-shadow: inset 0 0 0 1px rgb(80 140 170 / 0.4), inset 0 -3px 5px rgb(60 120 150 / 0.25);
-}
-.tile.mirror {
-  z-index: 3;
-  filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.3));
-}
-.tile.mirror svg {
-  width: 100%;
-  height: 100%;
-}
-/* 햇살 줄기: 가운데가 밝은 빛 띠. 화분에 닿으면 끝이 동그랗게 퍼짐 */
+/* 햇살 자리: 창 바로 앞 한 칸. 창 쪽에서 들어온 빛 띠가 칸 끝으로 갈수록 옅어지고, 바닥에는 동그랗게 고인 빛과 빛 테두리 */
 .beam-layer {
   position: absolute;
   inset: 0;
@@ -1701,23 +1670,29 @@ body:has(.screen.game) .scene .layer {
 .beam.h {
   background: linear-gradient(180deg, transparent 12%, color-mix(in srgb, var(--beam) 70%, transparent) 34%, var(--beam-core) 50%, color-mix(in srgb, var(--beam) 70%, transparent) 66%, transparent 88%);
 }
-.beam.half.in2,
-.beam.half.out0 {
-  height: calc(var(--cell) * 0.5);
+.beam.spot.d0 {
+  mask-image: linear-gradient(to top, #000 35%, transparent 100%);
 }
-.beam.half.in0,
-.beam.half.out2 {
-  height: calc(var(--cell) * 0.5);
-  top: calc((var(--y) + 0.5) * var(--cell));
+.beam.spot.d1 {
+  mask-image: linear-gradient(to right, #000 35%, transparent 100%);
 }
-.beam.half.in1,
-.beam.half.out3 {
-  width: calc(var(--cell) * 0.5);
+.beam.spot.d2 {
+  mask-image: linear-gradient(to bottom, #000 35%, transparent 100%);
 }
-.beam.half.in3,
-.beam.half.out1 {
-  width: calc(var(--cell) * 0.5);
-  left: calc((var(--x) + 0.5) * var(--cell));
+.beam.spot.d3 {
+  mask-image: linear-gradient(to left, #000 35%, transparent 100%);
+}
+.spot-pool {
+  position: absolute;
+  left: calc(var(--x) * var(--cell));
+  top: calc(var(--y) * var(--cell));
+  width: var(--cell);
+  height: var(--cell);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--beam-core) 85%, transparent), color-mix(in srgb, var(--beam) 45%, transparent) 60%, transparent);
+  box-shadow: inset 0 0 0 calc(var(--cell) * 0.05) color-mix(in srgb, var(--sun) 70%, transparent);
+  scale: 0.84;
+  animation: shimmer 3.4s ease-in-out infinite alternate;
 }
 @keyframes shimmer {
   from {
@@ -1770,24 +1745,6 @@ body:has(.screen.game) .scene .layer {
   width: 100%;
   height: 100%;
 }
-.stamp {
-  position: absolute;
-  left: 50%;
-  top: 56%;
-  width: 36%;
-  height: 36%;
-  translate: -50% -50%;
-  padding: 7%;
-  border-radius: 50%;
-  background: #f6ead2;
-  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.35), 0 0 0 1px rgb(90 44 24 / 0.5);
-  transition: box-shadow 0.25s;
-}
-.stamp svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
 .plant {
   position: absolute;
   left: 50%;
@@ -1816,20 +1773,11 @@ body:has(.screen.game) .scene .layer {
   transition: opacity 0.3s;
   background: radial-gradient(closest-side, var(--glow-c, rgb(255 215 120 / 0.9)), transparent);
 }
-.pot.shade {
-  --glow-c: rgb(130 200 150 / 0.75);
-}
-.pot.moist {
-  --glow-c: rgb(120 190 230 / 0.8);
-}
 .pot.happy .glow {
   opacity: 1;
 }
-.pot.happy .stamp {
-  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.2), 0 0 0 2px #fff7d6, 0 0 8px 2px var(--glow-c, rgb(255 215 120 / 0.9));
-}
-.pot.stuck .stamp {
-  box-shadow: 0 0 0 2px var(--danger), 0 0 8px var(--danger);
+.pot.stuck .pot-body {
+  filter: drop-shadow(0 0 2px var(--danger)) drop-shadow(0 0 5px var(--danger));
 }
 .board.cleared .pot .plant {
   transform: scale(1.1);
@@ -1879,12 +1827,6 @@ body:has(.screen.game) .scene .layer {
   border-radius: 50%;
   border: 3px solid rgb(255 220 130 / 0.95);
   animation: ring 0.6s ease-out forwards;
-}
-.ring.shade {
-  border-color: rgb(150 215 165 / 0.95);
-}
-.ring.moist {
-  border-color: rgb(140 200 240 / 0.95);
 }
 @keyframes ring {
   to {
@@ -2174,7 +2116,6 @@ body:has(.screen.game) .scene .layer {
   .plant {
     transition-duration: 0s;
   }
-  .tile.water::after,
   .beam,
   .tile.window::before {
     animation: none;

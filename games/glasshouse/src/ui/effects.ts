@@ -5,10 +5,10 @@ export const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 export class Effects {
   constructor(private readonly stage: HTMLElement) {}
 
-  /** 화분 자리에 햇빛 고리가 퍼진다(습성에 맞게 놓인 순간) */
-  ring(target: HTMLElement, variant = ''): void {
+  /** 화분 자리에 햇빛 고리가 퍼진다(햇살 자리에 놓인 순간) */
+  ring(target: HTMLElement): void {
     const el = document.createElement('span');
-    el.className = `ring ${variant}`;
+    el.className = 'ring';
     this.place(el, target);
     el.addEventListener('animationend', () => el.remove());
   }

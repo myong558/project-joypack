@@ -1,4 +1,4 @@
-import { happy, light, parse, solved, step, stuckPots, type Board, type Dir, type Light, type State, type Step } from './rules.ts';
+import { lit, parse, solved, step, stuckPots, type Board, type Dir, type State, type Step } from './rules.ts';
 
 /** 판 하나의 진행: 움직이기·되돌리기·처음부터, 이동 수. 화면은 move 가 돌려준 결과로 그린다 */
 export class Game {
@@ -17,12 +17,9 @@ export class Game {
     this.state = start;
   }
 
-  get light(): Light {
-    return light(this.board, this.state.pots);
-  }
-
-  get happy(): boolean[] {
-    return happy(this.board, this.state.pots);
+  /** 화분마다 햇살 자리에 있는지 */
+  get lit(): boolean[] {
+    return lit(this.board, this.state.pots);
   }
 
   get stuck(): number[] {
@@ -34,7 +31,7 @@ export class Game {
   }
 
   move(dir: Dir): Step {
-    if (this.done) return { state: this.state, moved: false, pushed: -1, trail: [] };
+    if (this.done) return { state: this.state, moved: false, pushed: -1 };
     const r = step(this.board, this.state, dir);
     if (!r.moved) return r;
     this.history.push(this.state);
@@ -75,7 +72,7 @@ export class Game {
         const ny = y + [-1, 0, 1, 0][d];
         if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
         const nc = ny * w + nx;
-        if (prev.has(nc) || blocked.has(nc) || (tiles[nc] !== 0 && tiles[nc] !== 3)) continue;
+        if (prev.has(nc) || blocked.has(nc) || tiles[nc] !== 0) continue;
         prev.set(nc, [c, d]);
         queue.push(nc);
       }

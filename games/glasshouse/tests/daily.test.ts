@@ -3,8 +3,7 @@ import { FLOWER } from '../src/flora';
 import { DAILY, DAILY_START } from '../src/game/daily-data';
 import { dailyLevel, dayIndex, seasonOfKey, unpack } from '../src/game/daily';
 import { dailySpecies } from '../src/game/levels';
-import { happy, parse } from '../src/game/rules';
-import { usesFeature } from '../src/game/roomgen';
+import { lit, parse } from '../src/game/rules';
 import { explore, solve } from '../src/game/solver';
 import { dailyAhead, insertDaily, placeOfDaily, sanitizeDaily, type DailyEntry } from '../src/ranking';
 
@@ -19,7 +18,7 @@ describe('오늘의 정원 판', () => {
     expect(new Set(DAILY).size).toBe(DAILY.length);
   });
 
-  it('모든 판: 칸 100개 미만, 처음엔 맞는 화분이 없고, 판 계절 = 그날 계절, 기준 이동 14~40', () => {
+  it('모든 판: 칸 100개 미만, 처음엔 햇살 자리에 화분이 없고, 판 계절 = 그날 계절, 기준 이동 14~40', () => {
     DAILY.forEach((line, i) => {
       const { season, par, rows } = unpack(line);
       const date = new Date(2026, 9, 25 + i);
@@ -29,18 +28,17 @@ describe('오늘의 정원 판', () => {
       expect(par).toBeLessThanOrEqual(40);
       const { board, start } = parse(rows);
       expect(board.w * board.h).toBeLessThan(100);
-      expect(happy(board, start.pots).some(Boolean)).toBe(false);
+      expect(lit(board, start.pots).some(Boolean)).toBe(false);
     });
   });
 
-  // 전부 풀면 오래 걸려 열흘에 하루씩 다시 푼다(기준 이동 수와 계절 요소)
+  // 전부 풀면 오래 걸려 열흘에 하루씩 다시 푼다
   DAILY.filter((_, i) => i % 10 === 0).forEach((line, k) => {
     it(`${k * 10}일째 판을 다시 풀면 기준 이동 수가 같다`, () => {
-      const { season, par, rows } = unpack(line);
+      const { par, rows } = unpack(line);
       const { board, start } = parse(rows);
       const sol = solve(board, start, explore(board, start, 2_000_000)!)!;
       expect(sol.moves).toBe(par);
-      expect(usesFeature(season, board, start, sol.path)).toBe(true);
     });
   });
 
@@ -52,14 +50,14 @@ describe('오늘의 정원 판', () => {
     expect(dailyLevel(key).rows).toEqual(dailyLevel(DAILY_START).rows);
   });
 
-  it('화분마다 습성이 같은 꽃, 열린 꽃을 먼저', () => {
-    const habits = ['sun', 'shade', 'moist'] as const;
-    const none = dailySpecies('autumn', habits, 3, () => false);
-    none.forEach((id, k) => expect(FLOWER[id].habit).toBe(habits[k]));
-    // 봄 판만 연 사람: 가을 판이어도 이미 본 봄 꽃(햇살·그늘)
-    const spring = dailySpecies('autumn', habits, 3, (i) => i < 6);
-    expect(FLOWER[spring[0]].season).toBe('spring');
-    expect(FLOWER[spring[1]].season).toBe('spring');
+  it('화분마다 다른 꽃, 열린 꽃을 먼저', () => {
+    const none = dailySpecies('autumn', 3, 3, () => false);
+    expect(new Set(none).size).toBe(3);
+    none.forEach((id) => expect(FLOWER[id].season).toBe('autumn'));
+    // 봄 판만 연 사람: 가을 판이어도 이미 본 봄 꽃
+    const spring = dailySpecies('autumn', 3, 3, (i) => i < 6);
+    spring.forEach((id) => expect(FLOWER[id].season).toBe('spring'));
+    expect(new Set(spring).size).toBe(3);
   });
 });
 

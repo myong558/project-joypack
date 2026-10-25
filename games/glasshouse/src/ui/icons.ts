@@ -1,4 +1,4 @@
-import type { Habit } from '../game/rules';
+import type { Habit } from '../flora';
 import type { SkinSetting, Theme } from '../theme';
 
 /** 선 아이콘(24×24, currentColor). 위 메뉴 아이콘은 공통 모듈 Joypack.topIcon 을 쓴다 */

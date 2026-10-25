@@ -1,6 +1,5 @@
-import { FLOWER, FLOWERS, SEASONS, type Flower, type Season } from '../flora';
+import { FLOWER, FLOWERS, SEASONS, type Flower, type Habit, type Season } from '../flora';
 import { LEVELS, levelName, seasonOf } from '../game/levels';
-import type { Habit } from '../game/rules';
 import { LANGS, getLang, iga, t, type Lang } from '../i18n';
 import { NAME_MAX, RANK_SIZE, cleanName, clock, isValidName, pendingRecord, placeOf, placeOfDaily, type DailyEntry, type DailyRecord } from '../ranking';
 import { captureResult, type ShareOutcome } from '../share';
@@ -78,8 +77,8 @@ function openModal(host: HTMLElement, content: HTMLElement, label: string, reope
 }
 
 /**
- * 로고 = 게임 시연(실제 규칙대로): 위 창에서 햇살 줄기가 내려오는 작은 온실에서 정원사가 화분을 두 칸 밀어
- * 햇살 속에 넣으면 화분 바닥이 빛나고 튤립 꽃잎이 천천히 벌어진다. 8초 반복, 움직임은 CSS(.demo)
+ * 로고 = 게임 시연(실제 규칙대로): 오른쪽 벽 창 바로 앞 한 칸에 햇살이 고인 작은 온실에서 정원사가 화분을 두 칸 밀어
+ * 햇살 자리에 넣으면 화분 바닥이 빛나고 튤립 꽃잎이 천천히 벌어진다. 8초 반복, 움직임은 CSS(.demo)
  */
 function heroDemo(): string {
   return `<div class="demo">
@@ -712,8 +711,7 @@ export interface GameView {
 }
 
 /** level 이 null 이면 오늘의 정원(판 번호 자리에 걸린 시간) */
-export function gameScreen(opts: { level: number | null; par: number; habits: Habit[]; onPause: () => void; onResume: () => void; onRestart: () => void; onUndo: () => void; onQuit: () => void }): GameView {
-  const kinds = (['sun', 'shade', 'moist'] as Habit[]).filter((h) => opts.habits.includes(h));
+export function gameScreen(opts: { level: number | null; par: number; onPause: () => void; onResume: () => void; onRestart: () => void; onUndo: () => void; onQuit: () => void }): GameView {
   const el = html(`
     <main class="screen game">
       <div class="hud">
@@ -738,7 +736,7 @@ export function gameScreen(opts: { level: number | null; par: number; habits: Ha
         </div>
       </div>
       <div class="dock">
-        <ul class="legend">${kinds.map((h) => `<li><span class="habit-ico">${HABIT_ICON[h]}</span><span><b>${t(HABIT_KEY[h])}</b> ${t(`habit.${h}Rule`)}</span></li>`).join('')}</ul>
+        <ul class="legend"><li><span class="habit-ico">${HABIT_ICON.sun}</span><span><b>${t('legend.spot')}</b> ${t('legend.rule')}</span></li></ul>
         <button class="btn undo-btn" data-act="undo" aria-label="${t('hud.undo')}">${ICONS.undo}<span>${t('hud.undo')}</span></button>
       </div>
     </main>`);

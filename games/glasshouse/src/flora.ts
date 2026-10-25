@@ -1,5 +1,3 @@
-import type { Habit } from './game/rules';
-
 /**
  * 도감에 실리는 꽃 24종(판 하나에 한 종). 글은 사실만 확인해 직접 썼다(위키백과 문장을 옮기지 않음).
  * 꽃말은 한국에서 널리 알려진 것을 적고 영어는 그 뜻을 옮겼다. checked: 출처 기사로 다시 확인한 꽃말(README 상업 기준 참고)
@@ -11,6 +9,8 @@ export type FlowerId =
   | 'camellia' | 'cyclamen' | 'poinsettia' | 'hellebore' | 'snowdrop' | 'adonis';
 
 export type Season = 'spring' | 'summer' | 'autumn' | 'winter';
+/** 도감에 적는 그 꽃이 좋아하는 곳(판 규칙과는 상관없음) */
+export type Habit = 'sun' | 'shade' | 'moist';
 export const SEASONS: Season[] = ['spring', 'summer', 'autumn', 'winter'];
 
 interface Text {

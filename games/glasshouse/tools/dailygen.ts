@@ -2,7 +2,7 @@
  * 오늘의 정원 판 만들기(배포에 안 들어감). 날짜마다 날짜 시드로 방을 여러 개 만들어 풀이기로 거르고 가장 어려운 판을 고른다.
  *   node tools/dailygen.ts <시작 YYYY-MM-DD> <날 수> <결과 json>      날짜 범위 하나 만들기(여러 개를 동시에 돌려도 됨)
  *   node tools/dailygen.ts merge <결과 json …>                          모아서 src/game/daily-data.ts 로 쓰기
- * 기준은 정해 둔 판(levels.ts)과 같다: 처음부터 맞는 화분이 없고, 그 계절 요소를 써야 깨지고, 가장 적은 이동이 PAR 범위 안
+ * 기준은 정해 둔 판(levels.ts)과 같다: 처음부터 햇살 자리에 있는 화분이 없고, 가장 적은 이동이 PAR 범위 안. 방 크기·화분 수는 그날 계절을 따른다
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dateKey, seasonCode, seasonOfKey } from '../src/game/daily.ts';
@@ -40,7 +40,7 @@ function generate(key: string, salt = 0): string {
   for (let i = 0; i < 6000 && found.length < WANT; i++) {
     const rows = makeRoom(season, r);
     if (!rows) continue;
-    const c = rate(season, rows, LIMIT, PUSH);
+    const c = rate(rows, LIMIT, PUSH);
     if (c && c.moves >= PAR[0] && c.moves <= PAR[1]) found.push(c);
   }
   if (!found.length) return generate(key, salt + 1);

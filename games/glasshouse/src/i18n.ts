@@ -3,7 +3,7 @@ export const LANGS: Lang[] = ['ko', 'en'];
 
 const ko = {
   'app.title': '온실 정원',
-  'app.tagline': '햇살 길을 읽고 화분을 밀어 꽃을 피우세요',
+  'app.tagline': '화분을 밀어 창가 햇살 자리에 꽃을 피우세요',
   'start.play': '정원 가꾸기',
   'start.continue': '이어 가꾸기',
   'start.where': '{season} {n}',
@@ -40,12 +40,12 @@ const ko = {
   'pick.open': '아직 안 핌',
   'pick.cleared': '꽃잎 {p}장',
 
-  'habit.sun': '햇살 꽃',
-  'habit.shade': '그늘 꽃',
-  'habit.moist': '물가 꽃',
-  'habit.sunRule': '햇살 줄기가 닿아야 피어요',
-  'habit.shadeRule': '햇살이 닿지 않아야 피어요',
-  'habit.moistRule': '물길 바로 옆에서 피어요',
+  'habit.sun': '햇볕 잘 드는 곳',
+  'habit.shade': '반그늘',
+  'habit.moist': '축축한 물가',
+
+  'legend.spot': '햇살 자리',
+  'legend.rule': '창 앞 햇살 자리마다 화분을 놓으면 꽃이 펴요',
 
   'hud.pause': '일시정지',
   'hud.moves': '이동',
@@ -56,12 +56,9 @@ const ko = {
   'hud.time': '시간',
   'hud.board': '온실 판: 화살표 키나 밀기로 정원사를 움직여요',
 
-  'tip.l1': '화분을 밀어 햇살 줄기 속에 놓으세요',
-  'tip.l2': '햇살 줄기 하나는 화분 하나만 비춰요',
-  'tip.l4': '그늘 꽃은 햇살을 피해요 · 다른 화분 뒤에 숨겨도 돼요',
-  'tip.l7': '물가 꽃은 물길 바로 옆에 놓으세요',
-  'tip.l13': '반사판은 햇살 줄기를 꺾어요',
-  'tip.l19': '언 물길에서는 화분이 멈출 때까지 미끄러져요',
+  'tip.l1': '화분을 밀어 창 앞 햇살 자리에 놓으세요',
+  'tip.l2': '화분은 밀기만 돼요 · 구석에 넣으면 못 빼요',
+  'tip.l3': '햇살 자리마다 화분 하나씩 · 미는 순서를 먼저 생각해요',
   'tip.stuck': '구석에 몰린 화분이 있어요 · 되돌리기',
 
   'pause.title': '일시정지',
@@ -105,7 +102,7 @@ const ko = {
   'dex.meaning': '꽃말',
   'dex.bloom': '피는 때',
   'dex.origin': '원산지',
-  'dex.habit': '습성',
+  'dex.habit': '좋아하는 곳',
   'dex.months': '{a}~{b}월',
   'dex.month': '{a}월',
   'dex.locked': '아직 피지 않은 꽃',
@@ -172,7 +169,7 @@ export type MessageKey = keyof typeof ko;
 
 const en: Record<MessageKey, string> = {
   'app.title': 'Glasshouse Garden',
-  'app.tagline': 'Read the sunbeams, push the pots, bring the flowers out',
+  'app.tagline': 'Push the pots into the sunny spots and bring the flowers out',
   'start.play': 'Start gardening',
   'start.continue': 'Continue',
   'start.where': '{season} {n}',
@@ -209,12 +206,12 @@ const en: Record<MessageKey, string> = {
   'pick.open': 'not yet bloomed',
   'pick.cleared': '{p} petals',
 
-  'habit.sun': 'Sun flower',
-  'habit.shade': 'Shade flower',
-  'habit.moist': 'Waterside flower',
-  'habit.sunRule': 'Blooms when a sunbeam reaches it',
-  'habit.shadeRule': 'Blooms out of the sunbeams',
-  'habit.moistRule': 'Blooms right next to water',
+  'habit.sun': 'Full sun',
+  'habit.shade': 'Part shade',
+  'habit.moist': 'Moist ground',
+
+  'legend.spot': 'Sunny spot',
+  'legend.rule': 'Put a pot on every sunny spot by a window to bloom',
 
   'hud.pause': 'Pause',
   'hud.moves': 'Moves',
@@ -225,12 +222,9 @@ const en: Record<MessageKey, string> = {
   'hud.time': 'Time',
   'hud.board': 'Glasshouse: move the gardener with arrow keys or swipes',
 
-  'tip.l1': 'Push the pot into the sunbeam',
-  'tip.l2': 'One sunbeam lights only one pot',
-  'tip.l4': 'Shade flowers avoid the sun · hide them behind another pot',
-  'tip.l7': 'Put waterside flowers right next to the water',
-  'tip.l13': 'Reflectors bend the sunbeams',
-  'tip.l19': 'Pots slide on ice until something stops them',
+  'tip.l1': 'Push the pot onto the sunny spot by the window',
+  'tip.l2': 'Pots only push · one in a corner stays there',
+  'tip.l3': 'One pot per sunny spot · plan the order first',
   'tip.stuck': 'A pot is stuck in a corner · Undo',
 
   'pause.title': 'Paused',
@@ -274,7 +268,7 @@ const en: Record<MessageKey, string> = {
   'dex.meaning': 'Meaning',
   'dex.bloom': 'Blooms',
   'dex.origin': 'Native to',
-  'dex.habit': 'Habit',
+  'dex.habit': 'Likes',
   'dex.months': '{a}–{b}',
   'dex.month': '{a}',
   'dex.locked': 'Not yet in bloom',

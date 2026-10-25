@@ -1,14 +1,13 @@
 import type { FlowerId } from '../flora';
-import { Tile, type Board, type Dir, type Light, type State } from '../game/rules';
+import { Tile, type Board, type Dir, type State } from '../game/rules';
 import { flowerSvg } from './flowers';
-import { HABIT_ICON } from './icons';
 
 /**
- * 온실 판 그리기. 바닥·벽·물길·언 물길·반사판은 한 번 깔고, 햇살 줄기·화분·정원사는 움직일 때마다 옮긴다.
+ * 온실 판 그리기. 바닥·벽·창과 창 앞 햇살 자리는 한 번 깔고, 화분·정원사는 움직일 때마다 옮긴다.
  * 칸 크기(--cell)는 판 자리에 맞춰 계산한다(layout). 움직임은 transform 만 쓴다
  */
 
-/** 화분 SVG(40×40): 그림자 · 테라코타 몸통(왼쪽 빛, 오른쪽 그늘) · 테두리 · 흙. 습성 표시는 몸통에 찍은 도장 */
+/** 화분 SVG(40×40): 그림자 · 테라코타 몸통(왼쪽 빛, 오른쪽 그늘) · 테두리 · 흙 */
 const POT = `<svg class="pot-body" viewBox="0 0 40 40" aria-hidden="true" focusable="false">
 <ellipse cx="20" cy="35.5" rx="13" ry="3.2" fill="rgb(40 30 20 / .28)"/>
 <path d="M8 15h24l-3.2 19.2q-.3 1.8-2.2 1.8H13.4q-1.9 0-2.2-1.8z" fill="#b8613a"/>
@@ -33,10 +32,6 @@ const GARDENER = `<svg viewBox="0 0 40 40" aria-hidden="true" focusable="false">
 <path d="M20 28.6l-2.4 6.4 2.4-1.6 2.4 1.6z" fill="var(--accent)"/>
 </svg>`;
 
-/** 반사판: 놋쇠 틀에 비스듬히 세운 거울판 */
-const mirror = (slash: boolean) =>
-  `<svg viewBox="0 0 40 40" aria-hidden="true" focusable="false"><g transform="rotate(${slash ? -45 : 45} 20 20)"><rect x="4" y="16.5" width="32" height="7" rx="2" fill="#a07a3a"/><rect x="5.5" y="17.6" width="29" height="4.8" rx="1.2" fill="#dfe9ee"/><rect x="5.5" y="17.6" width="29" height="1.8" rx=".9" fill="#ffffff" opacity=".9"/></g><circle cx="20" cy="20" r="2.4" fill="#7a5a26"/></svg>`;
-
 export interface PotView {
   el: HTMLElement;
   plant: HTMLElement;
@@ -45,7 +40,6 @@ export interface PotView {
 export class BoardView {
   readonly el: HTMLElement;
   readonly pots: PotView[] = [];
-  private readonly beams: HTMLElement;
   private readonly gardener: HTMLElement;
   private facing: Dir = 2;
 
@@ -76,18 +70,21 @@ export class BoardView {
           return j >= 0 && j < w * h && Math.abs(jx - x) <= 1 && tiles[j] !== Tile.Wall;
         });
         if (touches) floor += `<i class="tile wall" ${pos}></i>`;
-      } else if (t === Tile.Water) floor += `<i class="tile water" ${pos}></i>`;
-      else if (t === Tile.Ice) floor += `<i class="tile ice" ${pos}></i>`;
-      else if (t === Tile.MirrorA || t === Tile.MirrorB) floor += `<i class="tile floor" ${pos}></i><i class="tile mirror" ${pos}>${mirror(t === Tile.MirrorA)}</i>`;
-      else floor += `<i class="tile floor${(x + y) % 2 ? ' alt' : ''}" ${pos}></i>`;
+      } else floor += `<i class="tile floor${(x + y) % 2 ? ' alt' : ''}" ${pos}></i>`;
     }
-    this.el.innerHTML = `<div class="floor-layer">${floor}</div><div class="beam-layer"></div><div class="piece-layer"></div>`;
-    this.beams = this.el.querySelector('.beam-layer')!;
+    // 햇살 자리: 창에서 들어온 빛이 바로 앞 한 칸 바닥에 고인다(빛 띠는 창 쪽에서 들어오는 방향)
+    const sun = board.windows
+      .map(({ spot, dir }) => {
+        const pos = `style="--x:${spot % w};--y:${Math.floor(spot / w)}"`;
+        return `<i class="spot-pool" ${pos}></i><i class="beam spot ${dir % 2 ? 'h' : 'v'} d${dir}" ${pos}></i>`;
+      })
+      .join('');
+    this.el.innerHTML = `<div class="floor-layer">${floor}</div><div class="beam-layer">${sun}</div><div class="piece-layer"></div>`;
     const pieces = this.el.querySelector<HTMLElement>('.piece-layer')!;
-    board.habits.forEach((habit, i) => {
+    state.pots.forEach((_, i) => {
       const el = document.createElement('div');
-      el.className = `pot ${habit}`;
-      el.innerHTML = `<span class="glow"></span>${POT}<span class="stamp">${HABIT_ICON[habit]}</span><span class="plant">${flowerSvg(species[i], false)}</span>`;
+      el.className = 'pot';
+      el.innerHTML = `<span class="glow"></span>${POT}<span class="plant">${flowerSvg(species[i], false)}</span>`;
       pieces.append(el);
       this.pots.push({ el, plant: el.querySelector('.plant')! });
     });
@@ -115,21 +112,16 @@ export class BoardView {
   }
 
   /**
-   * 화분·정원사를 새 자리로 옮긴다. slide 는 미끄러진 화분(그 칸 수만큼 오래 움직임).
-   * face 는 정원사가 바라볼 방향(막혀서 못 움직여도 그쪽을 본다)
+   * 화분·정원사를 새 자리로 옮긴다. face 는 정원사가 바라볼 방향(막혀서 못 움직여도 그쪽을 본다)
    */
-  place(state: State, face: Dir | null, slide?: { pot: number; cells: number }): void {
+  place(state: State, face: Dir | null): void {
     const { w } = this.board;
     if (face !== null) this.facing = face;
     const at = (el: HTMLElement, c: number) => {
       el.style.setProperty('--x', String(c % w));
       el.style.setProperty('--y', String(Math.floor(c / w)));
     };
-    state.pots.forEach((c, i) => {
-      const el = this.pots[i].el;
-      el.style.setProperty('--dur', slide?.pot === i ? `${90 + slide.cells * 70}ms` : '');
-      at(el, c);
-    });
+    state.pots.forEach((c, i) => at(this.pots[i].el, c));
     at(this.gardener, state.player);
     this.gardener.style.setProperty('--face', `${[180, 270, 0, 90][this.facing]}deg`);
   }
@@ -143,31 +135,9 @@ export class BoardView {
     this.gardener.classList.add('bump');
   }
 
-  /** 햇살 줄기: 지나간 칸마다 빛 띠(가로·세로), 반사판에서 꺾인 곳·멈춘 곳은 반 칸 띠 */
-  beam(light: Light): void {
-    const { w } = this.board;
-    let out = '';
-    for (const [c, d, end] of light.path) {
-      const x = c % w;
-      const y = Math.floor(c / w);
-      const axis = d % 2 ? 'h' : 'v';
-      const tile = this.board.tiles[c];
-      if (tile === Tile.MirrorA || tile === Tile.MirrorB) {
-        out += `<i class="beam half ${axis} in${d}" style="--x:${x};--y:${y}"></i>`;
-        const out2 = (tile === Tile.MirrorA ? [1, 0, 3, 2] : [3, 2, 1, 0])[d];
-        out += `<i class="beam half ${out2 % 2 ? 'h' : 'v'} out${out2}" style="--x:${x};--y:${y}"></i>`;
-        continue;
-      }
-      // 벽에서 멈춘 빛은 벽 칸에 그리지 않는다. 화분에서 멈춘 빛은 화분 가운데까지
-      if (end === 2) continue;
-      out += `<i class="beam ${axis}${end ? ` half in${d} hit` : ''}" style="--x:${x};--y:${y}"></i>`;
-    }
-    this.beams.innerHTML = out;
-  }
-
-  /** 화분마다 습성에 맞는지(맞으면 꽃대가 서고 바닥이 빛남) */
-  mood(happy: boolean[], stuck: number[]): void {
-    happy.forEach((ok, i) => {
+  /** 화분마다 햇살 자리에 있는지(있으면 꽃대가 서고 바닥이 빛남) */
+  mood(lit: boolean[], stuck: number[]): void {
+    lit.forEach((ok, i) => {
       this.pots[i].el.classList.toggle('happy', ok);
       this.pots[i].el.classList.toggle('stuck', stuck.includes(i));
     });

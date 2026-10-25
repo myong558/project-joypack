@@ -4,7 +4,7 @@ import { Sound } from './audio';
 import { FLOWER } from './flora';
 import { Game, levelScore, petals } from './game/engine';
 import { dailyLevel, dateKey, dayIndex } from './game/daily';
-import { LEVELS, SEASON_TIP, TIPS, dailySpecies, seasonOf, speciesFor } from './game/levels';
+import { LEVELS, TIPS, dailySpecies, seasonOf, speciesFor } from './game/levels';
 import type { Dir } from './game/rules';
 import { setLang, t } from './i18n';
 import { fetchBoard, fetchDaily, submitDaily, submitEntry } from './online';
@@ -191,7 +191,6 @@ function play(level: number | 'daily'): void {
   const view = gameScreen({
     level: daily ? null : (level as number),
     par: def.par,
-    habits: game.board.habits,
     onPause: () => setPaused(true),
     onResume: () => setPaused(false),
     onRestart: () => {
@@ -203,8 +202,8 @@ function play(level: number | 'daily'): void {
   });
   mount(view.el);
   const species = daily
-    ? dailySpecies(daily.season, game.board.habits, dayIndex(daily.date), (i) => !!save.levels[i])
-    : speciesFor(level as number, game.board.habits);
+    ? dailySpecies(daily.season, game.state.pots.length, dayIndex(daily.date), (i) => !!save.levels[i])
+    : speciesFor(level as number, game.state.pots.length);
   const board = new BoardView(view.boardHost, game.board, species, game.state);
   const fx = new Effects(view.stage);
   let paused = false;
@@ -225,30 +224,29 @@ function play(level: number | 'daily'): void {
   const ro = new ResizeObserver(fit);
   ro.observe(view.boardHost);
 
-  // 처음 나오는 규칙은 그 판에서 한 번 안내한다(같은 판을 다시 해도 보임). 안내가 없으면 비워 둔다
-  const tipKey = daily ? SEASON_TIP[daily.season] : TIPS[level as number];
+  // 처음 알려 줄 것은 그 판에서 안내한다(같은 판을 다시 해도 보임). 안내가 없으면 비워 둔다(오늘의 정원도)
+  const tipKey = daily ? undefined : TIPS[level as number];
   const tip = tipKey ? t(tipKey) : '';
-  let lastHappy = game.happy;
+  let lastLit = game.lit;
   const render = (initial = false) => {
     view.moves.textContent = String(game.moves);
     view.moves.classList.toggle('over', game.moves > def.par);
     view.undo.disabled = !game.canUndo;
-    board.beam(game.light);
-    const happy = game.happy;
+    const lit = game.lit;
     const stuck = game.stuck;
-    board.mood(happy, stuck);
+    board.mood(lit, stuck);
     view.note.textContent = stuck.length ? t('tip.stuck') : tip;
     view.note.classList.toggle('warn', stuck.length > 0);
     if (!initial) {
-      happy.forEach((ok, i) => {
-        if (ok && !lastHappy[i] && !game.done) {
+      lit.forEach((ok, i) => {
+        if (ok && !lastLit[i] && !game.done) {
           sound.play('happy');
           vibrate(30);
-          fx.ring(board.pots[i].el, game.board.habits[i]);
-        } else if (!ok && lastHappy[i]) sound.play('unhappy');
+          fx.ring(board.pots[i].el);
+        } else if (!ok && lastLit[i]) sound.play('unhappy');
       });
     }
-    lastHappy = happy;
+    lastLit = lit;
   };
   render(true);
 
@@ -269,10 +267,9 @@ function play(level: number | 'daily'): void {
     }
     // 소리 → 진동 → 화면 연출 순
     if (r.pushed >= 0) {
-      const slid = r.trail.length > 1;
-      sound.play(slid ? 'slide' : 'push');
-      vibrate(slid ? [30, 40, 70] : 35);
-      board.place(game.state, dir, slid ? { pot: r.pushed, cells: r.trail.length } : undefined);
+      sound.play('push');
+      vibrate(35);
+      board.place(game.state, dir);
       fx.shake('tiny');
     } else {
       sound.play('step');
@@ -289,7 +286,7 @@ function play(level: number | 'daily'): void {
     board.place(game.state, 2);
     sound.play('undo');
     render(true);
-    lastHappy = game.happy;
+    lastLit = game.lit;
   };
 
   const undo = () => {
@@ -341,7 +338,7 @@ function play(level: number | 'daily'): void {
       vibrate([60, 50, 60, 50, 220]);
       fx.shake('small');
       board.bloom();
-      board.pots.forEach((p, i) => later(260 + i * 320, () => fx.petals(p.el, FLOWER[species[i]].habit === 'moist' ? '#9cc4e8' : i === 0 ? accentOf(f.id) : accentOf(species[i]))));
+      board.pots.forEach((p, i) => later(260 + i * 320, () => fx.petals(p.el, accentOf(i === 0 ? f.id : species[i]))));
     });
     later(2600, () => finish());
   };

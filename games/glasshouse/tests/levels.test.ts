@@ -1,42 +1,35 @@
 import { describe, expect, it } from 'vitest';
 import { FLOWER, FLOWERS } from '../src/flora';
-import { LEVELS, seasonOf, speciesFor } from '../src/game/levels';
-import { Tile, happy, light, parse, step } from '../src/game/rules';
+import { LEVELS, speciesFor } from '../src/game/levels';
+import { lit, parse } from '../src/game/rules';
 import { explore, solve } from '../src/game/solver';
 
-/** 판마다: 풀리고, 기준 이동 수가 맞고, 처음엔 맞는 화분이 없고, 그 계절 요소를 실제로 써야 깨진다 */
+/** 판마다: 풀리고, 기준 이동 수가 맞고, 처음엔 햇살 자리에 화분이 없고, 뒤 계절일수록 화분이 많다 */
 describe('정원 24개', () => {
   it('판 수와 꽃이 맞물린다', () => {
     expect(LEVELS).toHaveLength(24);
     expect(LEVELS.map((l) => l.flower)).toEqual(FLOWERS.map((f) => f.id));
   });
 
+  it('계절이 갈수록 화분이 늘어난다(봄 1~2 · 여름 2 · 가을 2~3 · 겨울 3)', () => {
+    const pots = LEVELS.map((l) => parse(l.rows).start.pots.length);
+    for (let i = 1; i < 24; i++) expect(pots[i]).toBeGreaterThanOrEqual(pots[i - 1]);
+    expect(pots[0]).toBe(1);
+    expect(pots[23]).toBe(3);
+  });
+
   LEVELS.forEach((lv, i) => {
     it(`${i + 1}. ${FLOWER[lv.flower].ko.name}`, () => {
       const { board, start } = parse(lv.rows);
-      const graph = explore(board, start, 2_000_000)!;
-      const sol = solve(board, start, graph)!;
+      const sol = solve(board, start, explore(board, start, 2_000_000)!)!;
       expect(sol.moves).toBe(lv.par);
-      expect(happy(board, start.pots).some(Boolean)).toBe(false);
-      // 그 판의 꽃과 습성이 같은 화분이 있다(그 꽃이 핀다)
-      expect(speciesFor(i, board.habits)).toContain(lv.flower);
+      expect(lit(board, start.pots).some(Boolean)).toBe(false);
+      // 첫 화분이 그 판의 꽃(그 꽃이 도감에 열림), 화분마다 다른 꽃
+      const species = speciesFor(i, start.pots.length);
+      expect(species[0]).toBe(lv.flower);
+      expect(new Set(species).size).toBe(species.length);
       // 칸 100개 미만(상태 번호 규칙)
       expect(board.w * board.h).toBeLessThan(100);
-      // 계절 요소
-      let s = start;
-      let slid = false;
-      for (const d of sol.path) {
-        const r = step(board, s, d);
-        slid ||= r.trail.length > 1;
-        s = r.state;
-      }
-      const season = seasonOf(i);
-      if (season === 'summer') expect(board.habits).toContain('moist');
-      if (season === 'autumn') {
-        const bent = light(board, s.pots).path.some(([c]) => board.tiles[c] === Tile.MirrorA || board.tiles[c] === Tile.MirrorB);
-        expect(bent).toBe(true);
-      }
-      if (season === 'winter') expect(slid).toBe(true);
     });
   });
 });
