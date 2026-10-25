@@ -23,9 +23,10 @@ export function mountScene(): void {
     const leaves = Array.from({ length: Math.floor(len / 22) }, (_, k) => `<path d="M0 ${12 + k * 22}c${k % 2 ? '' : '-'}9 -2 ${k % 2 ? '' : '-'}13 -8 ${k % 2 ? '' : '-'}12 -14c${k % 2 ? '-' : ''}6 2 ${k % 2 ? '-' : ''}11 7 ${k % 2 ? '-' : ''}12 14z" />`).join('');
     return `<i class="vine" style="--x:${(i * 17 + Number(pick(0, 8))).toFixed(1)}%;--sw:${pick(7, 12)}s;--t:-${pick(0, 10)}s"><svg viewBox="-16 0 32 ${len}" style="height:${len}px" focusable="false"><path d="M0 0V${len}" stroke="currentColor" stroke-width="1.2" fill="none"/><g fill="currentColor">${leaves}</g></svg></i>`;
   }).join('');
-  const bits = Array.from({ length: 9 }, () => {
-    const d = Number(pick(16, 26));
-    return `<i class="bit" style="--x:${pick(0, 100)}%;--s:${pick(10, 18)}px;--d:${d}s;--t:-${pick(0, d)}s;--w:${pick(30, 90)}px;--r:${pick(-180, 180)}deg"></i>`;
+  // 떨어지는 것 24개: 맑음·눈은 모두, 노을은 앞 10개만(styles.css). 셋에 하나는 작은 잎(맑음)
+  const bits = Array.from({ length: 24 }, () => {
+    const d = Number(pick(12, 24));
+    return `<i class="bit" style="--x:${pick(0, 100)}%;--s:${pick(9, 20)}px;--d:${d}s;--t:-${pick(0, d)}s;--w:${pick(30, 90)}px;--r:${pick(-180, 180)}deg"></i>`;
   }).join('');
 
   const scene = document.createElement('div');
@@ -137,7 +138,9 @@ interface Cloud { x: number; y: number; s: number; v: number; puffs: [number, nu
 function paint(canvas: HTMLCanvasElement, rnd: () => number): void {
   const ctx = canvas.getContext('2d', { alpha: false })!;
   const motes = Array.from({ length: 30 }, () => ({ x: rnd(), y: rnd(), d: 14 + rnd() * 14, t: rnd() * 30, r: 0.8 + rnd() * 1.4 }));
-  const snow = Array.from({ length: 70 }, () => ({ x: rnd(), y: rnd(), s: 0.5 + rnd() * 1.3, v: 14 + rnd() * 30, far: rnd() < 0.5 }));
+  const snow = Array.from({ length: 170 }, () => ({ x: rnd(), y: rnd(), s: 0.5 + rnd() * 1.3, v: 14 + rnd() * 30, far: rnd() < 0.5 }));
+  // 눈: 잎보다 앞에서 크게 내리는 송이(가장 가까운 층)
+  const flakes = Array.from({ length: 26 }, () => ({ x: rnd(), y: rnd(), s: 2.4 + rnd() * 2.4, v: 40 + rnd() * 40, p: rnd() * 9 }));
   const rain = Array.from({ length: 80 }, () => ({ x: rnd(), y: rnd(), l: 10 + rnd() * 16, v: 0.9 + rnd() * 0.5 }));
   const drops = Array.from({ length: 22 }, () => ({ x: rnd(), y: rnd(), r: 1.4 + rnd() * 2.6, v: 0.015 + rnd() * 0.05, p: rnd() * 10 }));
   const clouds: Cloud[] = Array.from({ length: 6 }, (_, i) => ({
@@ -270,12 +273,17 @@ function paint(canvas: HTMLCanvasElement, rnd: () => number): void {
         const v = f.far ? f.v * 0.6 : f.v;
         const y = ((f.y * h + t * v) % (h + 20)) - 10;
         const x = f.x * w + Math.sin(t / 3 + f.x * 9) * 12 - px * (f.far ? 0.5 : 1.5);
-        const r = f.s * (f.far ? 1.1 : 2);
+        const r = f.s * (f.far ? 1.4 : 2.6);
         ctx.moveTo(x + r, y);
         ctx.arc(x, y, r, 0, Math.PI * 2);
       }
       ctx.globalAlpha = 0.75 * k;
       ctx.fill();
+      if (!dark) {
+        ctx.strokeStyle = 'rgba(120,145,175,.35)';
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+      }
       ctx.globalAlpha = 1;
     }
 
@@ -478,6 +486,25 @@ function paint(canvas: HTMLCanvasElement, rnd: () => number): void {
     ctx.strokeStyle = rgba(mix(leaf, b, 0.6), (dark ? 0.35 : 0.5) * gameK);
     ctx.lineWidth = 1.2;
     ctx.stroke(veins);
+
+    if (weather === 'snow') {
+      ctx.fillStyle = dark ? 'rgba(225,235,255,.6)' : 'rgba(255,255,255,.95)';
+      ctx.beginPath();
+      for (const f of flakes) {
+        const y = ((f.y * h + t * f.v) % (h + 30)) - 15;
+        const x = f.x * w + Math.sin(t / 2.4 + f.p) * 18 - px * 3;
+        ctx.moveTo(x + f.s, y);
+        ctx.arc(x, y, f.s, 0, Math.PI * 2);
+      }
+      ctx.globalAlpha = 0.85 * k;
+      ctx.fill();
+      if (!dark) {
+        ctx.strokeStyle = 'rgba(120,145,175,.4)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    }
 
     const v = ctx.createRadialGradient(w / 2, h * 0.45, Math.min(w, h) * 0.3, w / 2, h * 0.45, Math.max(w, h) * 0.75);
     v.addColorStop(0, rgba(leaf, 0));
