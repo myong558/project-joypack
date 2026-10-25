@@ -295,6 +295,8 @@ function teaserArt(game: GameMeta): string {
   return `<img class="card-icon teaser-icon" data-veil="${veil}" src="${iconUrl(game)}" alt="" width="72" height="72" />${mark}`;
 }
 
+// 날짜·시각 글은 브라우저(toLocale*)가 만들어 소스에 없다. 허브 글꼴 부분집합(scripts/font-subset.mjs 가 소스 글자를 모음)에
+// 빠지지 않게 나올 수 있는 글자를 여기 적어 둔다: 년 월 일 · 요일 일 월 화 수 목 금 토 · 오전 오후 낮 밤 · 시 분 초
 /** 한국어 12시: "오후 12:00"은 "낮 12:00", "오전 12:00"은 "밤 12:00"으로(오전·오후 12시는 헷갈림). 다른 시각은 그대로 */
 function noonMidnight(text: string, d: Date): string {
   if (getLang() !== 'ko' || d.getHours() % 12) return text;
