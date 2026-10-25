@@ -689,6 +689,10 @@ function toggle(name: string, on: boolean, label: string): string {
   return `<label class="switch"><span>${label}</span><input type="checkbox" role="switch" data-toggle="${name}" ${on ? 'checked' : ''} /><i aria-hidden="true"></i></label>`;
 }
 
+// 설정 "게임 데이터"(내 기록·오프라인 저장): 게임이 늘면 길어지고 자주 쓰지 않으므로 접어 두고 접힌 줄에 이 요약을 보인다.
+// 게임마다 한 줄에 기록·저장 상태와 지우기 버튼 두 개를 함께 둔다(같은 게임 목록을 두 번 그리지 않게)
+const dataSummary = () => t('data.summary', { n: live.length, saved: live.filter((g) => cached.get(g.id)).length });
+
 async function openSettings(): Promise<void> {
   await refreshCached();
   const body = `
@@ -730,34 +734,25 @@ async function openSettings(): Promise<void> {
       <p class="hint">${t('settings.initialsHint')}</p>
     </section>
     </div>
-    <section class="set-group">
-      <h3>${t('settings.records')}</h3>
+    <details class="set-group data-group">
+      <summary><h3>${t('settings.data')}</h3><span class="data-summary" data-data-summary>${dataSummary()}</span></summary>
       <ul class="storage">${live
         .map(
           (g) => `<li data-game="${g.id}">
             <img src="${iconUrl(g)}" alt="" width="28" height="28" />
-            <span class="storage-name">${esc(g.name[getLang()])}</span>
-            <span class="storage-state">${esc(bestRecord(g) ?? t('records.none'))}</span>
-            <button class="small-btn danger" data-records="${g.id}" ${canClearRecords(g) ? '' : 'disabled'}>${lbl(t('records.clear'))}</button>
+            <div class="storage-body">
+              <span class="storage-name">${esc(g.name[getLang()])}</span>
+              <span class="storage-state"><span data-record-state>${esc(bestRecord(g) ?? t('records.none'))}</span> · <span data-cache-state>${cached.get(g.id) ? t('storage.ready') : t('storage.none')}</span></span>
+              <span class="storage-actions">
+                <button class="small-btn danger" data-records="${g.id}" ${canClearRecords(g) ? '' : 'disabled'}>${lbl(t('records.clear'))}</button>
+                <button class="small-btn" data-clear="${g.id}" ${cached.get(g.id) ? '' : 'disabled'}>${lbl(t('storage.clear'))}</button>
+              </span>
+            </div>
           </li>`,
         )
         .join('')}</ul>
-      <p class="hint">${t('settings.recordsHint')}</p>
-    </section>
-    <section class="set-group">
-      <h3>${t('settings.storage')}</h3>
-      <ul class="storage">${live
-        .map(
-          (g) => `<li data-game="${g.id}">
-            <img src="${iconUrl(g)}" alt="" width="28" height="28" />
-            <span class="storage-name">${esc(g.name[getLang()])}</span>
-            <span class="storage-state">${cached.get(g.id) ? t('storage.ready') : t('storage.none')}</span>
-            <button class="small-btn" data-clear="${g.id}" ${cached.get(g.id) ? '' : 'disabled'}>${lbl(t('storage.clear'))}</button>
-          </li>`,
-        )
-        .join('')}</ul>
-      <p class="hint">${t('settings.storageHint')}</p>
-    </section>
+      <p class="hint">${t('data.hint')}</p>
+    </details>
     <section class="set-group about">
       <h3>${t('settings.about')}</h3>
       <p><span class="ver-tap" data-ver-tap>${t('app.title')} v${__APP_VERSION__}</span></p>
@@ -819,7 +814,7 @@ async function openSettings(): Promise<void> {
       b.classList.remove('armed');
       b.innerHTML = lbl(t('records.cleared'));
       b.disabled = true;
-      b.closest('li')!.querySelector('.storage-state')!.textContent = t('records.none');
+      b.closest('li')!.querySelector('[data-record-state]')!.textContent = t('records.none');
     });
   });
   dialog.querySelectorAll<HTMLButtonElement>('[data-clear]').forEach((b) =>
@@ -827,7 +822,8 @@ async function openSettings(): Promise<void> {
       await Joypack.clearGameCache(b.dataset.clear!);
       cached.set(b.dataset.clear!, false);
       b.disabled = true;
-      b.closest('li')!.querySelector('.storage-state')!.textContent = t('storage.none');
+      b.closest('li')!.querySelector('[data-cache-state]')!.textContent = t('storage.none');
+      dialog.querySelector('[data-data-summary]')!.textContent = dataSummary();
     }),
   );
   // 숨김 미리보기: 버전 글자를 7번 연속(누름 사이 0.8초 안) 누르면 늘 비밀번호 창 → 맞으면 켜기·끄기 창.

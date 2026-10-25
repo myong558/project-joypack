@@ -1435,29 +1435,104 @@ a.card:active .card-play {
   list-style: none;
 }
 
-.storage li {
+/* 게임 데이터: 접힌 줄(제목 + 요약 + 화살표)만 보이다가 누르면 게임 목록이 펼쳐진다 */
+.data-group summary {
   display: flex;
   align-items: center;
+  gap: 8px;
+  margin: -14px;
+  padding: 14px;
+  border-radius: 20px;
+  list-style: none;
+  cursor: pointer;
+}
+
+.data-group summary::-webkit-details-marker {
+  display: none;
+}
+
+.data-group summary:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: -2px;
+}
+
+.data-group summary h3 {
+  flex: 1;
+  margin: 0;
+}
+
+.data-summary {
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+/* 펼침 화살표: 접혀 있으면 아래, 펼치면 위 */
+.data-group summary::after {
+  content: '';
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin: 0 4px 4px 2px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg);
+  transition: transform 0.2s ease;
+}
+
+.data-group[open] summary::after {
+  margin-bottom: -4px;
+  transform: rotate(-135deg);
+}
+
+.data-group[open] summary {
+  margin-bottom: -4px;
+}
+
+.data-group .storage {
+  margin-top: 14px;
+}
+
+.storage li {
+  display: flex;
+  align-items: flex-start;
   gap: 10px;
-  padding: 6px 0;
+  padding: 8px 0;
+}
+
+.storage li + li {
+  border-top: 1px solid var(--line);
 }
 
 .storage img {
+  flex: none;
   border-radius: 8px;
 }
 
-.storage-name {
+.storage-body {
+  display: flex;
   flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.storage-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .storage-state {
-  min-width: 0;
-  overflow: hidden;
   color: var(--muted);
   font-size: 13px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+}
+
+.storage-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
 }
 
 .small-btn {
