@@ -48,11 +48,20 @@ export function isScheduled(game: GameMeta, now = Date.now()): boolean {
 const NEW_DAYS = 7;
 
 /** 최근에 추가한 게임부터. 날짜가 같으면 games.json 에서 뒤에 적힌 게임이 앞에 온다 */
-export function byNewest(games: GameMeta[]): GameMeta[] {
+function byAdded(games: GameMeta[]): GameMeta[] {
   return games
     .map((game, i) => ({ game, i }))
     .sort((a, b) => b.game.added.localeCompare(a.game.added) || b.i - a.i)
     .map(({ game }) => game);
+}
+
+/**
+ * 첫 화면 카드 순서: 신규 게임이 맨 앞.
+ * 테스트 중(아직 공개 전, 개발자 모드에서만 보임)인 게임이 공개 게임보다 앞이고, 그 안에서는 games.json 에 나중에 더한 게임이 앞.
+ * 공개 게임은 공개한 날(added)이 늦은 순. 공개 예약 게임은 added 가 앞날의 공개일이라, 날짜로 줄 세우면 그 뒤에 더한 테스트 게임이 밀린다
+ */
+export function byNewest(games: GameMeta[], now = Date.now()): GameMeta[] {
+  return [...games.filter((g) => !isPublic(g, now)).reverse(), ...byAdded(games.filter((g) => isPublic(g, now)))];
 }
 
 /** 허브 카드 그림판 무늬 가짓수(styles.css .card-art[data-pat]) */
@@ -60,7 +69,7 @@ const PATTERNS = 6;
 
 /** 그림판 무늬 번호: 추가한 순서(오래된 게임부터 0)대로 돌려 쓴다. 새 게임이 생겨도 기존 게임 무늬는 그대로 */
 export function patternOf(game: GameMeta): number {
-  return byNewest(GAMES).reverse().indexOf(game) % PATTERNS;
+  return byAdded(GAMES).reverse().indexOf(game) % PATTERNS;
 }
 
 /** NEW 표시: 공개한 게임마다 공개한 날(added)부터 NEW_DAYS 동안. 새 게임이 나와도 앞서 나온 게임의 NEW 는 그대로(같은 날 여러 게임을 내도 모두 NEW) */
