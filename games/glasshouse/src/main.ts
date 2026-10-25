@@ -10,7 +10,7 @@ import { setLang, t } from './i18n';
 import { fetchBoard, fetchDaily, submitDaily, submitEntry } from './online';
 import { BOARD, clock, dailyAhead, placeOf, placeOfDaily, type DailyEntry, type RankEntry } from './ranking';
 import { shareResult } from './share';
-import { dailyOpen, emptyRecords, flowerCount, gardenScore, loadSave, writeSave } from './storage';
+import { emptyRecords, flowerCount, gardenScore, loadSave, writeSave } from './storage';
 import { applySkin, applyTheme, resolveSkin, todaySkin } from './theme';
 import { BoardView } from './ui/board';
 import { Effects } from './ui/effects';
@@ -181,11 +181,11 @@ const DIRS: Record<string, Dir> = { ArrowUp: 0, ArrowRight: 1, ArrowDown: 2, Arr
 /** level: 정원 번호(0~23) 또는 오늘의 정원 */
 function play(level: number | 'daily'): void {
   const daily = level === 'daily' ? dailyLevel(today()) : null;
-  if (daily ? !(ALL_OPEN() || dailyOpen(save)) : !unlocked(save, level as number)) return;
+  if (!daily && !unlocked(save, level as number)) return;
   sound.unlock();
   const def = daily ?? LEVELS[level as number];
   // 출시 전 확인용으로 아직 안 열린 판을 바로 연 경우는 기록에 남기지 않는다(오늘의 정원은 순위표 등록도 막음)
-  const test = daily ? !dailyOpen(save) : ALL_OPEN() && (level as number) > 0 && !save.levels[(level as number) - 1] && !save.levels[level as number];
+  const test = !daily && ALL_OPEN() && (level as number) > 0 && !save.levels[(level as number) - 1] && !save.levels[level as number];
   applySkin(resolveSkin(save.skin, new Date(), daily ? 0 : (level as number) + 1));
   const game = new Game(def.rows);
   const view = gameScreen({
@@ -224,8 +224,8 @@ function play(level: number | 'daily'): void {
   const ro = new ResizeObserver(fit);
   ro.observe(view.boardHost);
 
-  // 처음 알려 줄 것은 그 판에서 안내한다(같은 판을 다시 해도 보임). 안내가 없으면 비워 둔다(오늘의 정원도)
-  const tipKey = daily ? undefined : TIPS[level as number];
+  // 처음 알려 줄 것은 그 판에서 안내한다(같은 판을 다시 해도 보임). 오늘의 정원은 아직 정원 1을 안 깬 사람에게만 첫 규칙 안내
+  const tipKey = daily ? (save.levels[0] ? undefined : TIPS[0]) : TIPS[level as number];
   const tip = tipKey ? t(tipKey) : '';
   let lastLit = game.lit;
   const render = (initial = false) => {

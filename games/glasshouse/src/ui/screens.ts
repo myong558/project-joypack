@@ -3,7 +3,7 @@ import { LEVELS, levelName } from '../game/levels';
 import { LANGS, getLang, iga, t, type Lang } from '../i18n';
 import { NAME_MAX, RANK_SIZE, cleanName, clock, isValidName, pendingRecord, placeOf, placeOfDaily, type DailyEntry, type DailyRecord } from '../ranking';
 import { captureResult, type ShareOutcome } from '../share';
-import { dailyOpen, flowerCount, gardenScore, nextLevel, petalCount, type SaveData } from '../storage';
+import { flowerCount, gardenScore, nextLevel, petalCount, type SaveData } from '../storage';
 import { SKIN_SETTINGS, THEMES, type Skin, type SkinSetting, type Theme } from '../theme';
 import { countUp, reducedMotion } from './effects';
 import { POT } from './board';
@@ -122,7 +122,6 @@ export function startScreen(opts: StartOptions): HTMLElement {
   const next = nextLevel(save);
   const pending = () => !!pendingRecord(save.rankings, save.pending) || !!dailyPendingRecord(opts.ranking);
   const today = opts.ranking.today();
-  const dailyOn = ALL_OPEN() || dailyOpen(save);
   const best = save.daily?.date === today ? save.daily : null;
   const newPages = save.levels.filter((r, i) => r && !save.seen.includes(i)).length;
   const el = html(`
@@ -151,15 +150,15 @@ export function startScreen(opts: StartOptions): HTMLElement {
         <button class="btn primary big" data-play>
           ${next < 0 ? t('start.allDone') : `<span>${next === 0 ? t('start.play') : t('start.continue')}</span><small>${levelName(next)}</small>`}
         </button>
+        <button class="btn daily-btn" data-daily>
+          ${ICONS.calendar}<span class="daily-text"><b>${t('start.daily')}</b><small>${
+            best ? t('start.dailyBest', { moves: best.moves, time: clock(best.time) }) : t('start.dailySub', { date: longDate(today) })
+          }</small></span>${ICONS.arrow}
+        </button>
         <div class="row two">
           <button class="btn" data-pick>${ICONS.grid}<span>${t('start.pick')}</span></button>
           <button class="btn dex-btn" data-dex aria-label="${t('dex.open')}">${ICONS.book}<span>${t('dex.title')}</span>${newPages ? `<em>NEW</em>` : ''}</button>
         </div>
-        <button class="btn daily-btn" data-daily ${dailyOn ? '' : 'disabled'}>
-          ${ICONS.calendar}<span class="daily-text"><b>${t('start.daily')}</b><small>${
-            !dailyOn ? t('start.dailyLocked') : best ? t('start.dailyBest', { moves: best.moves, time: clock(best.time) }) : t('start.dailySub', { date: longDate(today) })
-          }</small></span>${dailyOn ? ICONS.arrow : ICONS.lock}
-        </button>
         <p class="best">${t('start.score', { score: gardenScore(save) })}<br>${t('start.progress', { n: flowerCount(save), p: petalCount(save) })}</p>
         <p class="hint">${t('start.hint')}</p>
       </div>

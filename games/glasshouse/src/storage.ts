@@ -54,7 +54,6 @@ export const petalCount = (save: SaveData) => save.levels.reduce((n, r) => n + (
 export const nextLevel = (save: SaveData) => save.levels.findIndex((r) => !r);
 
 /** 오늘의 정원은 봄 정원 여섯을 모두 피우면 열린다(햇살·그늘 규칙을 다 배운 뒤. 계절 요소는 판 위 안내 한 줄로 알려 줌) */
-export const dailyOpen = (save: SaveData) => save.levels.slice(0, 6).every(Boolean);
 
 const dailyRecord = (raw: unknown): (DailyRecord & { date: string }) | null => {
   const r = raw as (DailyRecord & { date: string }) | null;

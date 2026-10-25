@@ -706,19 +706,23 @@ body:has(.screen.game) .scene .layer {
   width: 1.5em;
   height: 1.5em;
 }
+/* 정원 점수: 배경 하늘·잎에 묻히지 않게 단추와 같은 종이빛 판 + 테두리·그림자, 글자도 진하게 */
 .best {
   margin: 0;
-  padding: 4px 14px;
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--panel) 80%, transparent);
+  padding: 6px 18px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--sheet) 94%, transparent);
+  border: 1px solid color-mix(in srgb, var(--leaf) 30%, var(--line));
+  box-shadow: 0 3px 0 var(--depth), 0 8px 18px rgb(0 0 0 / 0.12);
+  backdrop-filter: blur(6px);
   text-align: center;
   font-size: 15px;
   line-height: 1.6;
-  color: var(--muted);
+  color: color-mix(in srgb, var(--ink) 75%, var(--muted));
 }
 .best b {
-  color: var(--ink);
-  font-size: 17px;
+  color: var(--leaf-ink);
+  font-size: 18px;
 }
 .hint {
   margin: 0;

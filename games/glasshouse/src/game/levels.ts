@@ -58,11 +58,11 @@ export function speciesFor(level: number, count: number): FlowerId[] {
 
 /**
  * 오늘의 정원 꽃: 이미 도감에 연 꽃 가운데 날마다 한 종을 돌아가며 골라 모든 화분에(아직 못 본 꽃을 미리 보이지 않게).
- * 연 꽃이 없으면(출시 전 확인용) 앞 정원의 꽃부터. opened 는 도감에 열린 판 번호
+ * 연 꽃이 없으면(처음 온 사람) 정원 1의 꽃(튤립, 깨면 바로 열리는 꽃). opened 는 도감에 열린 판 번호
  */
 export function dailySpecies(count: number, day: number, opened: (i: number) => boolean): FlowerId[] {
   const seen = FLOWERS.filter((_, i) => opened(i));
-  const pool = seen.length ? seen : FLOWERS.slice(0, 6);
+  const pool = seen.length ? seen : [FLOWERS[0]];
   const pick = pool[((day % pool.length) + pool.length) % pool.length].id;
   return Array.from({ length: count }, () => pick);
 }
