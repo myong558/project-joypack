@@ -690,7 +690,7 @@ function toggle(name: string, on: boolean, label: string): string {
 }
 
 // 설정 "게임 데이터"(내 기록·오프라인 저장): 게임이 늘면 길어지고 자주 쓰지 않으므로 접어 두고 접힌 줄에 이 요약을 보인다.
-// 게임마다 한 줄에 기록·저장 상태와 지우기 버튼 두 개를 함께 둔다(같은 게임 목록을 두 번 그리지 않게)
+// 게임마다 한 줄에 기록·저장 상태(왼쪽)와 지우기 버튼 두 개(오른쪽)를 함께 둔다(같은 게임 목록을 두 번 그리지 않게). 5개 넘으면 목록 안에서 스크롤
 const dataSummary = () => t('data.summary', { n: live.length, saved: live.filter((g) => cached.get(g.id)).length });
 
 async function openSettings(): Promise<void> {
@@ -742,11 +742,12 @@ async function openSettings(): Promise<void> {
             <img src="${iconUrl(g)}" alt="" width="28" height="28" />
             <div class="storage-body">
               <span class="storage-name">${esc(g.name[getLang()])}</span>
-              <span class="storage-state"><span data-record-state>${esc(bestRecord(g) ?? t('records.none'))}</span> · <span data-cache-state>${cached.get(g.id) ? t('storage.ready') : t('storage.none')}</span></span>
-              <span class="storage-actions">
-                <button class="small-btn danger" data-records="${g.id}" ${canClearRecords(g) ? '' : 'disabled'}>${lbl(t('records.clear'))}</button>
-                <button class="small-btn" data-clear="${g.id}" ${cached.get(g.id) ? '' : 'disabled'}>${lbl(t('storage.clear'))}</button>
-              </span>
+              <span class="storage-state" data-record-state>${esc(bestRecord(g) ?? t('records.none'))}</span>
+              <span class="storage-state" data-cache-state>${cached.get(g.id) ? t('storage.ready') : t('storage.none')}</span>
+            </div>
+            <div class="storage-actions">
+              <button class="small-btn danger" data-records="${g.id}" ${canClearRecords(g) ? '' : 'disabled'}>${lbl(t('records.clear'))}</button>
+              <button class="small-btn" data-clear="${g.id}" ${cached.get(g.id) ? '' : 'disabled'}>${lbl(t('storage.clear'))}</button>
             </div>
           </li>`,
         )

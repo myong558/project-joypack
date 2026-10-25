@@ -1489,15 +1489,22 @@ a.card:active .card-play {
   margin-bottom: -4px;
 }
 
+/* 게임 줄은 높이를 같게(글 3줄 · 버튼 2개) 해서 펼쳤을 때 5개까지 보이고 그 아래는 목록 안에서 스크롤 */
 .data-group .storage {
-  margin-top: 14px;
+  --row: 72px;
+  max-height: calc(var(--row) * 5);
+  margin-top: 10px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .storage li {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 10px;
-  padding: 8px 0;
+  box-sizing: border-box;
+  height: var(--row);
 }
 
 .storage li + li {
@@ -1513,7 +1520,6 @@ a.card:active .card-play {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 2px;
   min-width: 0;
 }
 
@@ -1524,15 +1530,24 @@ a.card:active .card-play {
 }
 
 .storage-state {
+  overflow: hidden;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
+/* 버튼 두 개는 오른쪽에 위아래로, 같은 너비 */
 .storage-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 4px;
+  display: grid;
+  flex: none;
+  gap: 4px;
+}
+
+.storage-actions .small-btn {
+  padding: 3px 10px;
+  font-size: 13px;
 }
 
 .small-btn {
