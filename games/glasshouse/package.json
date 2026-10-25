@@ -1,7 +1,7 @@
 {
   "name": "glasshouse",
   "private": true,
-  "version": "0.5.14",
+  "version": "0.5.16",
   "author": "Myong Bum Soo",
   "license": "UNLICENSED",
   "type": "module",
@@ -25,5 +25,5 @@
     "html-to-image": "1.11.13",
     "@joypack/shared": "workspace:*"
   },
-  "description": "조이팩 미니 게임: 온실 정원"
+  "description": "조이팩 미니 게임: 온실정원"
 }

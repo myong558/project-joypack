@@ -233,7 +233,8 @@ function openPicker(host: HTMLElement, save: SaveData, onPlay: (level: number) =
 const monthsText = (f: Flower) => (f.months[0] === f.months[1] ? t('dex.month', { a: f.months[0] }) : t('dex.months', { a: f.months[0], b: f.months[1] }));
 
 /** 큰 카드 뒷면: 온실 아치 창 안의 새싹(도감 표지) */
-const DEX_BACK = `<svg viewBox="0 0 40 40" aria-hidden="true" focusable="false"><path d="M6 37V18a14 14 0 0 1 28 0v19z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 4v33M6 23h28" stroke="currentColor" stroke-width="1.4"/><path d="M20 33c-6-1-8.5-6-7.5-10.5 4.5 .3 7.5 4.5 7.5 10.5zm0 0c6-1 8.5-6 7.5-10.5-4.5 .3-7.5 4.5-7.5 10.5z" fill="currentColor"/></svg>`;
+// 카드 뒷면: 초록 온실 벽의 아치 창(반원 밑과 아래를 같은 높이로 나눈 창살)으로 햇살이 들어 바닥에 비스듬히 비친다
+const DEX_BACK = `<svg viewBox="0 0 100 128" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"><defs><linearGradient id="dxb-wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#46785a"/><stop offset="1" stop-color="#23402d"/></linearGradient><radialGradient id="dxb-glass" cx=".75" cy=".15" r="1"><stop offset="0" stop-color="#fffbe6"/><stop offset=".45" stop-color="#ffe2a0"/><stop offset="1" stop-color="#f2b866"/></radialGradient><linearGradient id="dxb-beam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2c4" stop-opacity=".5"/><stop offset="1" stop-color="#fff2c4" stop-opacity="0"/></linearGradient></defs><rect width="100" height="128" fill="url(#dxb-wall)"/><polygon points="22,96 78,96 56,128 -4,128" fill="url(#dxb-beam)"/><path d="M22 96V50a28 28 0 0 1 56 0v46z" fill="url(#dxb-glass)"/><path d="M22 96V50a28 28 0 0 1 56 0v46zM22 50h56M22 73h56M50 22v74" fill="none" stroke="#5a3d26" stroke-width="2.6" stroke-linejoin="round"/><rect x="17" y="95" width="66" height="4.5" rx="1" fill="#9a7350"/></svg>`;
 
 /**
  * 도감(타임 투 플립 도감과 같은 짜임): 위 가운데 큰 카드(처음엔 뒷면) + 그 아래 설명, 아래쪽에 정원 순서대로 작은 카드 24장.

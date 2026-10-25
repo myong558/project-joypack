@@ -2,7 +2,7 @@ export type Lang = 'ko' | 'en';
 export const LANGS: Lang[] = ['ko', 'en'];
 
 const ko = {
-  'app.title': '온실 정원',
+  'app.title': '온실정원',
   'app.tagline': '화분을 밀어 창가 햇살 자리에 꽃을 피우세요',
   'start.play': '정원 가꾸기',
   'start.continue': '이어 가꾸기',

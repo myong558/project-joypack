@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- 온실 정원 아이콘: 진한 흙빛 온실 유리 격자 벽, 가운데 십자 창살 창에서 햇살이 들고 그 앞 테라코타 화분(게임 화분)에 게임 속 튤립이 핌 -->
+  <!-- 온실정원 아이콘: 진한 흙빛 온실 유리 격자 벽, 가운데 십자 창살 창에서 햇살이 들고 그 앞 테라코타 화분(게임 화분)에 게임 속 튤립이 핌 -->
 <defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a2f20"/><stop offset="1" stop-color="#26170f"/></linearGradient>
 <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe7a3" stop-opacity=".85"/><stop offset="1" stop-color="#ffd27a" stop-opacity=".12"/></linearGradient>
 <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fffbe8"/><stop offset="1" stop-color="#ffd27a"/></linearGradient>
