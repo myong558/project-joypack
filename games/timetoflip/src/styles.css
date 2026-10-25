@@ -1101,6 +1101,20 @@ h1 .word:nth-child(2) .tc-in {
     0 3px 0 var(--depth),
     0 0 10px rgb(255 196 40 / 0.55);
 }
+/* 도형 카드(그림 파일이 아닌 SVG)는 바탕을 보통 카드색으로 두고 둘레만 금 액자(노란 초승달 등이 금빛에 묻히지 않게) */
+.card.gold .front:not(:has(.art)) {
+  border: calc(var(--cw, 64px) * 0.07) solid transparent;
+  background:
+    linear-gradient(var(--card-front), var(--card-front)) padding-box,
+    linear-gradient(145deg, #fff3b0 0%, #f5c542 28%, #c98a06 52%, #ffe58a 74%, #b87a00 100%) border-box;
+}
+.card.gold .front:not(:has(.art)) svg {
+  width: 88%;
+}
+.card.gold .front:not(:has(.art))::after {
+  top: 0;
+  right: 0;
+}
 .card.gold .front .art {
   box-shadow:
     0 0 0 1.5px #7a4a00,
@@ -2181,10 +2195,17 @@ h1 .word:nth-child(2) .tc-in {
 .dex-big .front.special {
   background: linear-gradient(160deg, #e6fbff, #b5edf4);
 }
+/* 도감의 황금 칸도 게임판 황금 카드처럼: 보통 카드 바탕 + 둘레 금 액자, 가운데 ★ */
 .mini-card.gold,
 .dex-big .front.gold {
-  background: linear-gradient(160deg, #fff7cc, #ffd970);
-  box-shadow: inset 0 0 0 2px var(--gold), 0 2px 0 var(--depth);
+  border: 4px solid transparent;
+  background:
+    linear-gradient(var(--card-front), var(--card-front)) padding-box,
+    linear-gradient(145deg, #fff3b0 0%, #f5c542 28%, #c98a06 52%, #ffe58a 74%, #b87a00 100%) border-box;
+  box-shadow: 0 2px 0 var(--depth), 0 0 8px rgb(255 196 40 / 0.5);
+}
+.dex-big .front.gold {
+  border-width: 10px;
 }
 .dex-big .front.special svg,
 .dex-big .front.gold svg {
