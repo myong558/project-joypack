@@ -25,4 +25,13 @@ export const screens = [
       await p.wait(300);
     },
   },
+  // 기록 지우기 확인 창(기록이 없으면 버튼이 꺼져 있어 점검 때만 켜고 누른다. 확인은 누르지 않음)
+  {
+    name: 'settings-confirm',
+    async go(p) {
+      await p.click('[data-open="settings"]');
+      await p.eval("const b = document.querySelector('[data-records]'); b.disabled = false; b.click(); true");
+      await p.wait(400);
+    },
+  },
 ];

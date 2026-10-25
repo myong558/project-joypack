@@ -794,37 +794,28 @@ async function openSettings(): Promise<void> {
   Joypack.initialsInput(initials, (clean) => {
     if (clean) saveSetting(settings, 'initials', clean);
   });
-  // 내 기록 지우기: 실수로 지우지 않게 두 번 눌러야 지운다(첫 번째 누름 뒤 3초 안에 한 번 더)
-  dialog.querySelectorAll<HTMLButtonElement>('[data-records]').forEach((b) => {
-    let armed: ReturnType<typeof setTimeout> | undefined;
+  // 기록 지우기·저장 비우기: 실수로 지우지 않게 확인 창을 한 번 더 띄운다
+  const gameOf = (id: string) => live.find((g) => g.id === id)!;
+  dialog.querySelectorAll<HTMLButtonElement>('[data-records]').forEach((b) =>
     b.addEventListener('click', () => {
-      const game = live.find((g) => g.id === b.dataset.records)!;
-      if (!armed) {
-        b.innerHTML = lbl(t('records.confirm'));
-        b.classList.add('armed');
-        armed = setTimeout(() => {
-          armed = undefined;
-          b.innerHTML = lbl(t('records.clear'));
-          b.classList.remove('armed');
-        }, 3000);
-        return;
-      }
-      clearTimeout(armed);
-      armed = undefined;
-      clearRecords(game);
-      b.classList.remove('armed');
-      b.innerHTML = lbl(t('records.cleared'));
-      b.disabled = true;
-      b.closest('li')!.querySelector('[data-record-state]')!.textContent = t('records.none');
-    });
-  });
+      const game = gameOf(b.dataset.records!);
+      openConfirm(t('records.clear'), t('records.confirmText', { name: esc(game.name[getLang()]) }), () => {
+        clearRecords(game);
+        b.disabled = true;
+        b.closest('li')!.querySelector('[data-record-state]')!.textContent = t('records.none');
+      });
+    }),
+  );
   dialog.querySelectorAll<HTMLButtonElement>('[data-clear]').forEach((b) =>
-    b.addEventListener('click', async () => {
-      await Joypack.clearGameCache(b.dataset.clear!);
-      cached.set(b.dataset.clear!, false);
-      b.disabled = true;
-      b.closest('li')!.querySelector('[data-cache-state]')!.textContent = t('storage.none');
-      dialog.querySelector('[data-data-summary]')!.textContent = dataSummary();
+    b.addEventListener('click', () => {
+      const game = gameOf(b.dataset.clear!);
+      openConfirm(t('storage.clear'), t('storage.confirmText', { name: esc(game.name[getLang()]) }), async () => {
+        await Joypack.clearGameCache(game.id);
+        cached.set(game.id, false);
+        b.disabled = true;
+        b.closest('li')!.querySelector('[data-cache-state]')!.textContent = t('storage.none');
+        dialog.querySelector('[data-data-summary]')!.textContent = dataSummary();
+      });
     }),
   );
   // 숨김 미리보기: 버전 글자를 7번 연속(누름 사이 0.8초 안) 누르면 늘 비밀번호 창 → 맞으면 켜기·끄기 창.
@@ -837,6 +828,24 @@ async function openSettings(): Promise<void> {
     if (++taps < 7) return;
     taps = 0;
     openPreviewLock(dialog);
+  });
+}
+
+/** 지우기 확인 창(설정 창 위 가운데). 확인 버튼 이름은 창 제목과 같게 해 무엇을 하는지 한 번 더 보인다. 취소·X·바깥은 아무것도 안 함 */
+function openConfirm(title: string, text: string, onOk: () => void | Promise<void>): void {
+  const body = `
+    <div class="confirm">
+      <p class="sheet-sub">${text}</p>
+      <div class="confirm-actions">
+        <button class="primary-btn secondary" data-confirm-cancel>${lbl(t('confirm.cancel'))}</button>
+        <button class="primary-btn danger" data-confirm-ok>${lbl(title)}</button>
+      </div>
+    </div>`;
+  const dialog = openDialog('confirm center', body, title);
+  dialog.querySelector('[data-confirm-cancel]')!.addEventListener('click', () => dialog.close());
+  dialog.querySelector('[data-confirm-ok]')!.addEventListener('click', async () => {
+    await onOk();
+    dialog.close();
   });
 }
 

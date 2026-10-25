@@ -943,6 +943,28 @@ a.card:active .card-play {
   gap: 12px;
 }
 
+/* 지우기 확인 창: [취소][지우기] 나란히 */
+.confirm .sheet-sub {
+  margin: 0 2px 16px;
+}
+
+.confirm-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.confirm-actions .primary-btn {
+  padding: 10px 12px;
+  font-size: 16px;
+}
+
+.primary-btn.danger {
+  background: #d23b3b;
+  color: #fff;
+  box-shadow: 0 6px 16px rgb(210 59 59 / 0.3);
+}
+
 .preview-lock .initials {
   text-transform: none;
 }
@@ -1563,12 +1585,6 @@ a.card:active .card-play {
 
 .small-btn.danger {
   color: #d23b3b;
-}
-
-.small-btn.armed {
-  border-color: #d23b3b;
-  background: #d23b3b;
-  color: #fff;
 }
 
 .small-btn:disabled {
