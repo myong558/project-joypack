@@ -63,7 +63,7 @@ const TABLE: Omit<StageDef, 'peekMs' | 'gainRate'>[] = [
  * 9판부터 얻는 시간 전체를 판마다 10%씩 줄이고 30%(15판)에서 멈춘다. 잘하는 사람도 판 클리어·퍼펙트·콤보·시계로
  * 쓰는 시간보다 많이 받아 끝없이 이어지지 않게(모의 플레이: 고수 평균 133판 → 약 16판). 시계는 늘 같은 속도로 흐른다
  */
-export const GAIN_RATE_STEP = 0.1;
+const GAIN_RATE_STEP = 0.1;
 export const MIN_GAIN_RATE = 0.3;
 
 /** n판(1부터)의 규칙. 6판부터는 같은 크기로 계속되고, 8판부터 닮은 짝이 하나 더 늘고 짝 시간·미리 보기가 조금 줄어든다.

@@ -20,7 +20,7 @@ const firebaseConfig = {
 /** 응답이 이보다 늦으면 오프라인으로 보고 기기에 남은 순위를 보여 준다 */
 const TIMEOUT_MS = 8000;
 
-export function boardId(mode: Mode, today: string): string {
+function boardId(mode: Mode, today: string): string {
   return mode === 'classic' ? 'classic' : `daily-${today}`;
 }
 
