@@ -9,13 +9,20 @@ notice above:
 
 - Jua font — SIL Open Font License 1.1
   (apps/hub/public/fonts/LICENSE-Jua.txt, games/updown/fonts/LICENSE-Jua.txt,
-  games/hammer/public/fonts/LICENSE-Jua.txt, games/timetoflip/public/fonts/LICENSE-Jua.txt)
+  games/hammer/public/fonts/LICENSE-Jua.txt, games/timetoflip/public/fonts/LICENSE-Jua.txt,
+  games/glasshouse/public/fonts/LICENSE-Jua.txt)
 - Do Hyeon font — SIL Open Font License 1.1
   (games/timetoflip/public/fonts/LICENSE-DoHyeon.txt)
 - Dongle font — SIL Open Font License 1.1
   (games/timetoflip/public/fonts/LICENSE-Dongle.txt)
+- Gowun Batang font — SIL Open Font License 1.1
+  (games/glasshouse/public/fonts/LICENSE-GowunBatang.txt)
+- Gowun Dodum font — SIL Open Font License 1.1
+  (games/glasshouse/public/fonts/LICENSE-GowunDodum.txt)
 
-- Time to Flip masterpiece card images — The Metropolitan Museum of Art
-  Open Access, CC0 1.0 (games/timetoflip/art-src/meta.json lists each work)
+- Time to Flip masterpiece card images — The Metropolitan Museum of Art and
+  Art Institute of Chicago Open Access (CC0 1.0), Rijksmuseum (Public Domain
+  Mark 1.0), National Museum of Korea (KOGL Type 1, attribution required)
+  (games/timetoflip/public/art-credits.txt, art-src/meta.json lists each work)
 
 See README.md section 8.1 for the full list.

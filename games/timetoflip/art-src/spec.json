@@ -1,19 +1,5 @@
 [
  {
-  "face": "berceuse",
-  "id": 437984,
-  "cx": 0.5,
-  "cy": 0.4,
-  "hf": 0.66,
-  "mode": "pop",
-  "palette": [
-   "#1b1340",
-   "#ff3d8b",
-   "#ffd23f",
-   "#fff6e0"
-  ]
- },
- {
   "face": "strawhat",
   "id": 436532,
   "cx": 0.5,
@@ -42,34 +28,6 @@
   ]
  },
  {
-  "face": "madamex",
-  "id": 12127,
-  "cx": 0.5,
-  "cy": 0.28,
-  "hf": 0.4,
-  "mode": "pop",
-  "palette": [
-   "#101010",
-   "#7b2ff7",
-   "#ff61c6",
-   "#f8f8f8"
-  ]
- },
- {
-  "face": "arlesienne",
-  "id": 436529,
-  "cx": 0.45,
-  "cy": 0.33,
-  "hf": 0.55,
-  "mode": "pop",
-  "palette": [
-   "#123b1f",
-   "#ff4f4f",
-   "#ffd400",
-   "#e9fff4"
-  ]
- },
- {
   "face": "wave",
   "id": 45434,
   "cx": 0.3,
@@ -81,20 +39,6 @@
    "#ff5a1f",
    "#21d4fd",
    "#fffbea"
-  ]
- },
- {
-  "face": "baby",
-  "id": 459123,
-  "cx": 0.42,
-  "cy": 0.38,
-  "hf": 0.62,
-  "mode": "pop",
-  "palette": [
-   "#3a0d0d",
-   "#2563eb",
-   "#a3e635",
-   "#fff7ed"
   ]
  },
  {
@@ -119,81 +63,11 @@
   "hf": 0.92
  },
  {
-  "face": "olive",
-  "id": 437998,
-  "cx": 0.5,
-  "cy": 0.5,
-  "hf": 1
- },
- {
-  "face": "orchard",
-  "id": 436527,
-  "cx": 0.5,
-  "cy": 0.5,
-  "hf": 0.9
- },
- {
   "face": "harvest",
   "id": 435809,
   "cx": 0.62,
   "cy": 0.5,
   "hf": 1
- },
- {
-  "face": "gulfstream",
-  "id": 11122,
-  "cx": 0.5,
-  "cy": 0.55,
-  "hf": 0.9
- },
- {
-  "face": "matterhorn",
-  "id": 10158,
-  "cx": 0.55,
-  "cy": 0.38,
-  "hf": 0.72
- },
- {
-  "face": "boating",
-  "id": 436947,
-  "cx": 0.62,
-  "cy": 0.45,
-  "hf": 0.95
- },
- {
-  "face": "oxbow",
-  "id": 10497,
-  "cx": 0.7,
-  "cy": 0.55,
-  "hf": 0.9
- },
- {
-  "face": "apples",
-  "id": 435882,
-  "cx": 0.4,
-  "cy": 0.62,
-  "hf": 0.72
- },
- {
-  "face": "roses",
-  "id": 436534,
-  "cx": 0.5,
-  "cy": 0.45,
-  "hf": 0.8
- },
- {
-  "face": "oleanders",
-  "id": 436530,
-  "cx": 0.5,
-  "cy": 0.4,
-  "hf": 0.8
- },
- {
-  "face": "shoes",
-  "id": 436533,
-  "cx": 0.5,
-  "cy": 0.55,
-  "hf": 0.9
  },
  {
   "face": "dancers",
@@ -215,13 +89,6 @@
   "cx": 0.78,
   "cy": 0.4,
   "hf": 0.6
- },
- {
-  "face": "garden",
-  "id": 436965,
-  "cx": 0.6,
-  "cy": 0.6,
-  "hf": 0.75
  },
  {
   "face": "bamboo",
@@ -246,22 +113,6 @@
   "mode": "ink"
  },
  {
-  "face": "orchid",
-  "id": 48932,
-  "cx": 0.5,
-  "cy": 0.72,
-  "hf": 0.45,
-  "mode": "ink"
- },
- {
-  "face": "lotus",
-  "id": 41492,
-  "cx": 0.5,
-  "cy": 0.72,
-  "hf": 0.48,
-  "mode": "ink"
- },
- {
   "face": "eagles",
   "id": 39540,
   "cx": 0.5,
@@ -270,39 +121,200 @@
   "mode": "ink"
  },
  {
-  "face": "riverbank",
-  "id": 41154,
-  "cx": 0.42,
-  "cy": 0.55,
-  "hf": 0.5,
-  "mode": "ink"
- },
- {
-  "face": "peaks",
-  "id": 49549,
-  "cx": 0.42,
-  "cy": 0.52,
-  "hf": 0.49,
-  "mode": "ink",
-  "box": [
-   49,
-   184,
-   172,
-   420
+  "face": "girl",
+  "id": 437879,
+  "cx": 0.46,
+  "cy": 0.36,
+  "hf": 0.66,
+  "mode": "pop",
+  "palette": [
+   "#101010",
+   "#7b2ff7",
+   "#ff61c6",
+   "#f8f8f8"
   ]
  },
  {
-  "face": "huangshan",
-  "id": 49181,
+  "face": "modigliani",
+  "id": 488903,
   "cx": 0.5,
+  "cy": 0.35,
+  "hf": 0.62,
+  "mode": "pop",
+  "palette": [
+   "#1b1340",
+   "#ff3d8b",
+   "#ffd23f",
+   "#fff6e0"
+  ]
+ },
+ {
+  "face": "milkmaid",
+  "id": "rijks-SK-A-2344",
+  "cx": 0.55,
   "cy": 0.52,
-  "hf": 0.9,
+  "hf": 0.82
+ },
+ {
+  "face": "bedroom",
+  "id": "aic-28560",
+  "cx": 0.55,
+  "cy": 0.5,
+  "hf": 1
+ },
+ {
+  "face": "sisters",
+  "id": "aic-14655",
+  "cx": 0.5,
+  "cy": 0.55,
+  "hf": 0.75
+ },
+ {
+  "face": "irises",
+  "id": 436528,
+  "cx": 0.5,
+  "cy": 0.45,
+  "hf": 1
+ },
+ {
+  "face": "basket",
+  "id": "aic-111436",
+  "cx": 0.32,
+  "cy": 0.45,
+  "hf": 0.9
+ },
+ {
+  "face": "jatte",
+  "id": "aic-27992",
+  "cx": 0.42,
+  "cy": 0.55,
+  "hf": 0.95
+ },
+ {
+  "face": "lilypond",
+  "id": "aic-87088",
+  "cx": 0.5,
+  "cy": 0.5,
+  "hf": 1
+ },
+ {
+  "face": "haystacks",
+  "id": "aic-64818",
+  "cx": 0.33,
+  "cy": 0.55,
+  "hf": 1
+ },
+ {
+  "face": "toledo",
+  "id": 436575,
+  "cx": 0.55,
+  "cy": 0.45,
+  "hf": 0.9
+ },
+ {
+  "face": "rainyparis",
+  "id": "aic-20684",
+  "cx": 0.74,
+  "cy": 0.5,
+  "hf": 1
+ },
+ {
+  "face": "littlestreet",
+  "id": "rijks-SK-A-2860",
+  "cx": 0.5,
+  "cy": 0.5,
+  "hf": 1
+ },
+ {
+  "face": "sehando",
+  "id": "nmk-36516218",
+  "cx": 0.39,
+  "cy": 0.5,
+  "hf": 1,
   "mode": "ink",
   "box": [
-   40,
-   24,
-   215,
-   572
+   270,
+   235,
+   640,
+   255
+  ]
+ },
+ {
+  "face": "inwang",
+  "id": "nmk-36549667",
+  "cx": 0.45,
+  "cy": 0.5,
+  "hf": 1,
+  "mode": "ink"
+ },
+ {
+  "face": "ssireum",
+  "id": "nmk-551",
+  "cx": 0.5,
+  "cy": 0.5,
+  "hf": 0.98,
+  "mode": "ink",
+  "box": [
+   570,
+   74,
+   1830,
+   2214
+  ]
+ },
+ {
+  "face": "seodang",
+  "id": "nmk-552",
+  "cx": 0.5,
+  "cy": 0.5,
+  "hf": 0.98,
+  "mode": "ink",
+  "box": [
+   300,
+   90,
+   2390,
+   2790
+  ]
+ },
+ {
+  "face": "mudong",
+  "id": "nmk-553",
+  "cx": 0.5,
+  "cy": 0.5,
+  "hf": 0.98,
+  "mode": "ink",
+  "box": [
+   293,
+   60,
+   2344,
+   2850
+  ]
+ },
+ {
+  "face": "hals",
+  "id": "rijks-SK-A-135",
+  "cx": 0.5,
+  "cy": 0.35,
+  "hf": 0.6,
+  "mode": "pop",
+  "palette": [
+   "#123b1f",
+   "#ff4f4f",
+   "#ffd400",
+   "#e9fff4"
+  ]
+ },
+ {
+  "face": "stuart",
+  "id": 16584,
+  "cx": 0.5,
+  "cy": 0.4,
+  "hf": 0.75,
+  "mode": "pop",
+  "palette": [
+   "#3a0d0d",
+   "#2563eb",
+   "#a3e635",
+   "#fff7ed"
   ]
  }
 ]

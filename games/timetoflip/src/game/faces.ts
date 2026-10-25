@@ -7,11 +7,19 @@
 export const FACE_SETS = [
   { id: 'shape', faces: ['circle', 'triangle', 'square', 'diamond', 'hexagon', 'ring', 'plus', 'moon'] },
   { id: 'pop', faces: ['lips', 'bolt', 'eye', 'pow', 'heart', 'shades', 'cone', 'crown'] },
-  { id: 'popart', faces: ['berceuse', 'strawhat', 'rembrandt', 'madamex', 'arlesienne', 'wave', 'baby', 'sunflowers'] },
-  { id: 'life', faces: ['apples', 'roses', 'oleanders', 'shoes', 'dancers', 'cardplayers', 'tahiti', 'garden'] },
-  { id: 'landscape', faces: ['cypress', 'olive', 'orchard', 'harvest', 'gulfstream', 'matterhorn', 'boating', 'oxbow'] },
-  { id: 'ink', faces: ['bamboo', 'plum', 'orchid', 'lotus', 'eagles', 'riverbank', 'peaks', 'huangshan'] },
+  { id: 'popart', faces: ['girl', 'strawhat', 'rembrandt', 'modigliani', 'hals', 'wave', 'stuart', 'sunflowers'] },
+  { id: 'life', faces: ['basket', 'irises', 'bedroom', 'milkmaid', 'dancers', 'cardplayers', 'tahiti', 'sisters'] },
+  { id: 'landscape', faces: ['cypress', 'jatte', 'lilypond', 'harvest', 'haystacks', 'toledo', 'rainyparis', 'littlestreet'] },
+  { id: 'ink', faces: ['bamboo', 'plum', 'sehando', 'inwang', 'eagles', 'ssireum', 'seodang', 'mudong'] },
 ] as const;
+
+/** v1.2.0 에서 덜 알려진 명화 20점을 더 유명한 그림으로 바꿨다. 예전 도감 기록은 같은 자리의 새 카드로 이어 준다 */
+export const RENAMED_FACES: Record<string, FaceId> = {
+  berceuse: 'girl', madamex: 'modigliani', arlesienne: 'hals', baby: 'stuart',
+  apples: 'basket', roses: 'irises', oleanders: 'bedroom', shoes: 'milkmaid', garden: 'sisters',
+  olive: 'jatte', orchard: 'lilypond', gulfstream: 'haystacks', matterhorn: 'toledo', boating: 'rainyparis', oxbow: 'littlestreet',
+  orchid: 'sehando', lotus: 'inwang', riverbank: 'ssireum', peaks: 'seodang', huangshan: 'mudong',
+};
 
 export type SetId = (typeof FACE_SETS)[number]['id'];
 export type FaceId = (typeof FACE_SETS)[number]['faces'][number];

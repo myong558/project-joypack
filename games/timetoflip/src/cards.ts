@@ -4,7 +4,8 @@ import { getLang, t } from './i18n';
 /**
  * 도감 설명: 묶음 이름과 카드마다 제목·작가·한두 줄 설명(한국어·영어).
  * 도형·팝아트(조이팩이 직접 그린 그림)는 작가 줄은 "그림 조이팩", 설명은 지어낸 우스개,
- * 명화는 실제 작가·연도·짧은 이야기. 명화 그림은 모두 메트로폴리탄 미술관 Open Access(CC0) 이미지다(art-src/meta.json)
+ * 명화는 실제 작가·연도·짧은 이야기. 명화 그림은 미술관 공개 이미지다(CC0·퍼블릭 도메인·공공누리 1유형, art-src/meta.json).
+ * 공공누리 1유형(국립중앙박물관)은 출처 표시가 의무라 작가 줄에 소장처를 쓴다
  */
 interface Text {
   title: string;
@@ -55,9 +56,9 @@ const CARDS: Record<FaceId, Entry> = {
   crown: joke('왕관', '주인 미상, 사이즈 프리. 써 본 사람 모두 "조금 크다".', 'Crown', 'Owner unknown, one size fits all. Everyone says “a bit big.”'),
 
   /* ---------- 팝아트로 본 명화: 실제 명화를 4색 팝아트로 ---------- */
-  berceuse: art(
-    { title: '자장가(룰랭 부인)', by: pop('빈센트 반 고흐', 'Vincent van Gogh', '1889').ko, desc: '우체부 룰랭의 아내. 손에 쥔 끈으로 보이지 않는 요람을 흔든다.' },
-    { title: 'La Berceuse', by: pop('빈센트 반 고흐', 'Vincent van Gogh', '1889').en, desc: 'The postman’s wife rocks an unseen cradle with the rope she holds.' },
+  girl: art(
+    { title: '젊은 여인의 초상', by: pop('요하네스 페르메이르', 'Johannes Vermeer', '1665–67').ko, desc: '「진주 귀걸이를 한 소녀」를 그린 페르메이르의 또 다른 얼굴 그림.' },
+    { title: 'Study of a Young Woman', by: pop('요하네스 페르메이르', 'Johannes Vermeer', '1665–67').en, desc: 'Another face by Vermeer, the painter of “Girl with a Pearl Earring.”' },
   ),
   strawhat: art(
     { title: '밀짚모자를 쓴 자화상', by: pop('빈센트 반 고흐', 'Vincent van Gogh', '1887').ko, desc: '모델 살 돈이 없던 파리 시절, 자신을 그렸다. 뒷면에도 그림이 있다.' },
@@ -67,77 +68,75 @@ const CARDS: Record<FaceId, Entry> = {
     { title: '자화상', by: pop('렘브란트', 'Rembrandt', '1660').ko, desc: '평생 자화상을 수십 점 남긴 렘브란트의 54세. 주름도 그대로 그렸다.' },
     { title: 'Self-Portrait', by: pop('렘브란트', 'Rembrandt', '1660').en, desc: 'Rembrandt at 54, one of dozens of self-portraits. Every wrinkle kept.' },
   ),
-  madamex: art(
-    { title: '마담 X', by: pop('존 싱어 사전트', 'John Singer Sargent', '1883–84').ko, desc: '흘러내린 어깨끈이 스캔들이 되어 작가가 끈을 다시 그려 올렸다.' },
-    { title: 'Madame X', by: pop('존 싱어 사전트', 'John Singer Sargent', '1883–84').en, desc: 'A slipped strap caused a scandal, so Sargent painted it back up.' },
+  modigliani: art(
+    { title: '잔 에뷔테른', by: pop('아메데오 모딜리아니', 'Amedeo Modigliani', '1919').ko, desc: '긴 목과 갸름한 얼굴. 모딜리아니가 사랑한 아내를 그렸다.' },
+    { title: 'Jeanne Hébuterne', by: pop('아메데오 모딜리아니', 'Amedeo Modigliani', '1919').en, desc: 'A long neck and an oval face: Modigliani’s beloved wife.' },
   ),
-  arlesienne: art(
-    { title: '아를의 여인', by: pop('빈센트 반 고흐', 'Vincent van Gogh', '1888–89').ko, desc: '아를의 카페 주인 마리 지누. 고흐와 고갱이 함께 그린 모델이다.' },
-    { title: 'L’Arlésienne', by: pop('빈센트 반 고흐', 'Vincent van Gogh', '1888–89').en, desc: 'Marie Ginoux, a café owner in Arles, painted by Van Gogh and Gauguin.' },
+  hals: art(
+    { title: '즐거운 술꾼', by: pop('프란스 할스', 'Frans Hals', '1628–30').ko, desc: '잔을 들고 말을 거는 듯한 웃음. 빠른 붓질로 한순간을 붙잡았다.' },
+    { title: 'The Merry Drinker', by: pop('프란스 할스', 'Frans Hals', '1628–30').en, desc: 'Glass raised, he seems to talk to you. Quick strokes catch a moment.' },
   ),
   wave: art(
     { title: '가나가와 앞바다의 파도', by: pop('가쓰시카 호쿠사이', 'Katsushika Hokusai', 'c.1831').ko, desc: '「후지산 36경」 목판화. 거대한 파도 뒤에 작은 후지산이 숨어 있다.' },
     { title: 'Under the Wave off Kanagawa', by: pop('가쓰시카 호쿠사이', 'Katsushika Hokusai', 'c.1831').en, desc: 'From “Thirty-six Views of Mount Fuji.” A tiny Fuji hides behind the wave.' },
   ),
-  baby: art(
-    { title: '룰랭 부인과 아기', by: pop('빈센트 반 고흐', 'Vincent van Gogh', '1888').ko, desc: '룰랭 부인이 갓난 딸 마르셀을 안았다. 아기가 튀어나올 듯 또렷하다.' },
-    { title: 'Madame Roulin and Her Baby', by: pop('빈센트 반 고흐', 'Vincent van Gogh', '1888').en, desc: 'Madame Roulin holds newborn Marcelle, who almost pops off the canvas.' },
+  stuart: art(
+    { title: '조지 워싱턴', by: pop('길버트 스튜어트', 'Gilbert Stuart', '1795').ko, desc: '미국 1달러 지폐 속 워싱턴 초상을 그린 화가의 또 다른 워싱턴.' },
+    { title: 'George Washington', by: pop('길버트 스튜어트', 'Gilbert Stuart', '1795').en, desc: 'By the painter of the Washington on the US one-dollar bill.' },
   ),
   sunflowers: art(
     { title: '해바라기', by: pop('빈센트 반 고흐', 'Vincent van Gogh', '1887').ko, desc: '파리 시절, 꺾은 해바라기를 크게 그렸다. 아를의 꽃병보다 먼저다.' },
     { title: 'Sunflowers', by: pop('빈센트 반 고흐', 'Vincent van Gogh', '1887').en, desc: 'Cut sunflowers painted up close in Paris, before the vases of Arles.' },
   ),
-
   /* ---------- 서양화 · 풍경 ---------- */
   cypress: art(
     { title: '사이프러스가 있는 밀밭', by: '빈센트 반 고흐 · 1889', desc: '생레미 시절 작품. 고흐는 사이프러스가 오벨리스크처럼 아름답다 했다.' },
     { title: 'Wheat Field with Cypresses', by: 'Vincent van Gogh · 1889', desc: 'From Saint-Rémy. He found cypresses as beautiful as an obelisk.' },
   ),
-  olive: art(
-    { title: '올리브 나무', by: '빈센트 반 고흐 · 1889', desc: '생레미에서 열다섯 점 가까이 그린 올리브 숲. 보랏빛 그림자가 특징.' },
-    { title: 'Olive Trees', by: 'Vincent van Gogh · 1889', desc: 'One of some fifteen olive groves from Saint-Rémy, with violet shadows.' },
+  jatte: art(
+    { title: '그랑드자트섬의 일요일 오후', by: '조르주 쇠라 · 1884–86', desc: '작은 색 점을 셀 수 없이 찍어 그렸다. 완성까지 2년이 걸렸다.' },
+    { title: 'A Sunday on La Grande Jatte', by: 'Georges Seurat · 1884–86', desc: 'Made of countless tiny dots of color. It took him two years.' },
   ),
-  orchard: art(
-    { title: '꽃 핀 과수원', by: '빈센트 반 고흐 · 1888', desc: '아를의 첫봄, 꽃이 지기 전에 서둘러 그린 과수원 연작 가운데 하나.' },
-    { title: 'The Flowering Orchard', by: 'Vincent van Gogh · 1888', desc: 'His first spring in Arles, racing to paint before the blossoms fell.' },
+  lilypond: art(
+    { title: '수련 연못', by: '클로드 모네 · 1900', desc: '지베르니 집 정원에 모네가 직접 만든 일본식 다리와 수련 연못.' },
+    { title: 'Water Lily Pond', by: 'Claude Monet · 1900', desc: 'The Japanese bridge and lily pond Monet built in his Giverny garden.' },
   ),
   harvest: art(
     { title: '추수하는 사람들', by: '피터르 브뤼헐 · 1565', desc: '한 해의 때를 그린 연작. 배나무 그늘에서 점심 먹고 낮잠 자는 농부들.' },
     { title: 'The Harvesters', by: 'Pieter Bruegel the Elder · 1565', desc: 'Workers lunch and nap under a pear tree, from a series on the year.' },
   ),
-  gulfstream: art(
-    { title: '멕시코 만류', by: '윈즐로 호머 · 1899', desc: '돛대 부러진 배와 상어, 멀리 회오리바람. 그래도 선원은 담담하다.' },
-    { title: 'The Gulf Stream', by: 'Winslow Homer · 1899', desc: 'Broken mast, circling sharks, a far waterspout. The sailor stays calm.' },
+  haystacks: art(
+    { title: '건초더미(늦여름)', by: '클로드 모네 · 1890–91', desc: '같은 건초더미를 계절과 시간마다 그린 연작. 주인공은 빛이다.' },
+    { title: 'Stacks of Wheat (End of Summer)', by: 'Claude Monet · 1890–91', desc: 'One of a series of the same stacks at every hour. Light is the star.' },
   ),
-  matterhorn: art(
-    { title: '마테호른의 해돋이', by: '앨버트 비어스타트 · 1875년 이후', desc: '알프스 봉우리가 아침 햇빛을 받아 분홍빛으로 물드는 순간을 담았다.' },
-    { title: 'Sunrise on the Matterhorn', by: 'Albert Bierstadt · after 1875', desc: 'The Alpine peak blushes pink in the very first light of dawn.' },
+  toledo: art(
+    { title: '톨레도 풍경', by: '엘 그레코 · 1600 무렵', desc: '폭풍이 몰려오는 하늘 아래 스페인 톨레도. 그가 남긴 드문 풍경화다.' },
+    { title: 'View of Toledo', by: 'El Greco · c.1600', desc: 'Toledo, Spain, under a stormy sky. One of his rare landscapes.' },
   ),
-  boating: art(
-    { title: '뱃놀이', by: '에두아르 마네 · 1874', desc: '아르장퇴유의 여름 한낮. 수평선 없이 물이 화면을 가득 채운다.' },
-    { title: 'Boating', by: 'Edouard Manet · 1874', desc: 'A summer day at Argenteuil. No horizon, only water everywhere.' },
+  rainyparis: art(
+    { title: '파리의 거리, 비 오는 날', by: '귀스타브 카유보트 · 1877', desc: '새로 닦은 파리 대로를 우산 쓴 사람들이 걷는다. 젖은 돌길이 빛난다.' },
+    { title: 'Paris Street; Rainy Day', by: 'Gustave Caillebotte · 1877', desc: 'Umbrellas on a new Paris boulevard. The wet cobbles shine.' },
   ),
-  oxbow: art(
-    { title: '홀리요크산에서 본 풍경(옥스보)', by: '토머스 콜 · 1836', desc: '왼쪽은 폭풍 치는 숲, 오른쪽은 햇빛 든 들판. 강이 멍에처럼 휜다.' },
-    { title: 'The Oxbow', by: 'Thomas Cole · 1836', desc: 'Storm on the left, sunny fields on the right, and a bending river.' },
+  littlestreet: art(
+    { title: '작은 거리', by: '요하네스 페르메이르 · 1658 무렵', desc: '델프트 골목의 집들. 실제 자리가 어디였는지 2015년에야 밝혀졌다.' },
+    { title: 'The Little Street', by: 'Johannes Vermeer · c.1658', desc: 'Houses in Delft. Their real location was only found in 2015.' },
   ),
-
   /* ---------- 서양화 · 인물과 정물 ---------- */
-  apples: art(
-    { title: '사과와 앵초 화분이 있는 정물', by: '폴 세잔 · 1890년 무렵', desc: '사과 하나로 파리를 놀라게 하겠다던 세잔. 사과가 굴러떨어질 듯하다.' },
-    { title: 'Still Life with Apples and a Pot of Primroses', by: 'Paul Cézanne · c.1890', desc: 'Cézanne wanted to astonish Paris with an apple. They seem to roll.' },
+  basket: art(
+    { title: '사과 바구니', by: '폴 세잔 · 1893 무렵', desc: '기울어진 탁자와 바구니. 세잔은 사과 하나로 파리를 놀라게 하겠다 했다.' },
+    { title: 'The Basket of Apples', by: 'Paul Cézanne · c.1893', desc: 'A tilted table and basket. He meant to astonish Paris with an apple.' },
   ),
-  roses: art(
-    { title: '장미', by: '빈센트 반 고흐 · 1890', desc: '원래 분홍이던 꽃잎이 세월에 바래 지금은 하얗게 보이는 장미.' },
-    { title: 'Roses', by: 'Vincent van Gogh · 1890', desc: 'These roses were pink once. The color has faded to white over time.' },
+  irises: art(
+    { title: '붓꽃', by: '빈센트 반 고흐 · 1890', desc: '생레미를 떠나기 전에 그린 꽃병의 붓꽃. 분홍 바탕이 바래 하얘졌다.' },
+    { title: 'Irises', by: 'Vincent van Gogh · 1890', desc: 'Painted before he left Saint-Rémy. The pink background faded to white.' },
   ),
-  oleanders: art(
-    { title: '협죽도', by: '빈센트 반 고흐 · 1888', desc: '탁자 위 노란 책은 졸라의 소설 「삶의 기쁨」. 꽃만큼 밝은 그림.' },
-    { title: 'Oleanders', by: 'Vincent van Gogh · 1888', desc: 'The yellow book is Zola’s “The Joy of Life,” as bright as the flowers.' },
+  bedroom: art(
+    { title: '아를의 침실', by: '빈센트 반 고흐 · 1889', desc: '아를 노란 집의 고흐 방. 같은 방을 세 번 그렸고 이것이 두 번째다.' },
+    { title: 'The Bedroom', by: 'Vincent van Gogh · 1889', desc: 'His room in the Yellow House, Arles. Painted three times; this is the second.' },
   ),
-  shoes: art(
-    { title: '신발', by: '빈센트 반 고흐 · 1888', desc: '아를의 붉은 바닥 위 닳은 작업화 한 켤레. 고흐는 신발을 여러 번 그렸다.' },
-    { title: 'Shoes', by: 'Vincent van Gogh · 1888', desc: 'A worn pair of work boots on a red floor in Arles. He painted shoes often.' },
+  milkmaid: art(
+    { title: '우유 따르는 여인', by: '요하네스 페르메이르 · 1660 무렵', desc: '창가 빛 속에서 하녀가 우유를 붓는다. 빵 위 반짝이는 빛 점까지 그렸다.' },
+    { title: 'The Milkmaid', by: 'Johannes Vermeer · c.1660', desc: 'A maid pours milk in the window light. Even the bread glints with dots.' },
   ),
   dancers: art(
     { title: '무용 수업', by: '에드가 드가 · 1874', desc: '쉬고 기다리고 몸을 푸는 무용수들. 드가는 무대보다 연습실을 그렸다.' },
@@ -151,12 +150,11 @@ const CARDS: Record<FaceId, Entry> = {
     { title: '이아 오라나 마리아', by: '폴 고갱 · 1891', desc: '타히티에서 그린 첫 대작. 아기를 어깨에 태운 엄마로 성모자를 그렸다.' },
     { title: 'Ia Orana Maria (Hail Mary)', by: 'Paul Gauguin · 1891', desc: 'His first great Tahitian work: the Madonna and Child, reimagined.' },
   ),
-  garden: art(
-    { title: '아르장퇴유 정원의 모네 가족', by: '에두아르 마네 · 1874', desc: '친구 모네의 아내와 아들. 옆에서 르누아르도 같은 장면을 그렸다.' },
-    { title: 'The Monet Family in Their Garden', by: 'Edouard Manet · 1874', desc: 'Camille Monet and her son. Renoir painted the same scene beside him.' },
+  sisters: art(
+    { title: '두 자매(테라스에서)', by: '피에르오귀스트 르누아르 · 1881', desc: '센강 가 테라스의 두 소녀. 제목과 달리 사실 자매가 아니었다.' },
+    { title: 'Two Sisters (On the Terrace)', by: 'Pierre-Auguste Renoir · 1881', desc: 'Two girls on a terrace by the Seine. Despite the title, not sisters.' },
   ),
-
-  /* ---------- 동양화 · 수묵 ---------- */
+  /* ---------- 동양화 · 수묵(한국 그림은 국립중앙박물관 공공누리 1유형이라 작가 줄에 출처를 밝힌다) ---------- */
   bamboo: art(
     { title: '풍죽(바람 속 대나무)', by: '탄은 이정 · 17세기 초', desc: '조선 왕족 화가 탄은의 대나무. 바람에 휘는 잎이 금빛 비단 위에서 흔들린다.' },
     { title: 'Bamboo in the Wind', by: 'Yi Jeong (Taneun) · early 17th c.', desc: 'By the Joseon royal painter Taneun. Leaves bend in the wind on gold-flecked silk.' },
@@ -165,29 +163,29 @@ const CARDS: Record<FaceId, Entry> = {
     { title: '매화', by: '김농(진눙) · 1757', desc: '청나라 양주팔괴 가운데 한 사람. 겨울 끝에 피는 매화를 빽빽하게.' },
     { title: 'Plum Blossoms', by: 'Jin Nong · 1757', desc: 'One of the Eight Eccentrics of Yangzhou, painting late-winter plums.' },
   ),
-  orchid: art(
-    { title: '난초와 바위', by: '마수진(마서우전) · 1572', desc: '명나라의 여성 화가. 난초 잎 몇 획으로 바람과 향기를 담았다.' },
-    { title: 'Orchid and Rock', by: 'Ma Shouzhen · 1572', desc: 'A Ming woman painter. A few orchid strokes carry wind and scent.' },
+  sehando: art(
+    { title: '세한도', by: '추사 김정희 · 국립중앙박물관', desc: '1844년 제주 유배 중, 변치 않은 제자에게 겨울 소나무를 그려 보냈다.' },
+    { title: 'Sehando (Winter Scene)', by: 'Kim Jeong-hui · Natl. Museum of Korea', desc: '1844, in exile on Jeju: winter pines for a pupil who stayed loyal.' },
   ),
-  lotus: art(
-    { title: '부용·연꽃과 바위', by: '석도(스타오) · 1705~07 무렵', desc: '틀에 얽매이지 않던 승려 화가. 젖은 먹을 번지게 해 큰 잎을 단숨에 그렸다.' },
-    { title: 'Hibiscus, Lotus, and Rock', by: 'Shitao · c.1705–07', desc: 'A free-spirited monk painter who let wet ink bloom into broad leaves.' },
+  inwang: art(
+    { title: '인왕제색도', by: '겸재 정선 · 국립중앙박물관', desc: '1751년 비 갠 뒤의 인왕산. 젖은 바위를 먹으로 굵게 칠해 우뚝 세웠다.' },
+    { title: 'Mount Inwang After Rain', by: 'Jeong Seon · Natl. Museum of Korea', desc: '1751: Mount Inwang after rain, its wet rocks in bold, heavy ink.' },
   ),
   eagles: art(
     { title: '독수리 두 마리', by: '팔대산인(주탑) · 1702', desc: '명 왕족 출신의 괴짜 화가. 바위 위 독수리가 날카롭게 아래를 노려본다.' },
     { title: 'Two Eagles', by: 'Bada Shanren (Zhu Da) · 1702', desc: 'An eccentric painter of Ming royal blood. The eagles glare down from the rock.' },
   ),
-  riverbank: art(
-    { title: '강가 나무 사이의 바람', by: '예찬(니찬) · 1363', desc: '원나라 4대가의 한 사람. 텅 빈 강과 마른 나무 몇 그루로 고요를 그렸다.' },
-    { title: 'Wind among the Trees on the Riverbank', by: 'Ni Zan · 1363', desc: 'A Yuan master who painted stillness with an empty river and a few bare trees.' },
+  ssireum: art(
+    { title: '씨름', by: '단원 김홍도 · 국립중앙박물관', desc: '구경꾼이 빙 둘러앉은 씨름판. 누가 넘어갈지 표정을 보면 안다.' },
+    { title: 'Ssireum (Wrestling)', by: 'Kim Hong-do · Natl. Museum of Korea', desc: 'Wrestlers ringed by onlookers. Their faces tell you who will fall.' },
   ),
-  peaks: art(
-    { title: '비 오는 밤 배를 대다', by: '심주(선저우) · 1477', desc: '명나라 오파를 연 화가. 빗속 바위산 아래 작은 배가 쉬어 간다.' },
-    { title: 'Anchorage on a Rainy Night', by: 'Shen Zhou · 1477', desc: 'A founder of the Wu School. A small boat rests below rainy cliffs.' },
+  seodang: art(
+    { title: '서당', by: '단원 김홍도 · 국립중앙박물관', desc: '훈장님께 혼난 아이가 훌쩍이고, 친구들은 웃음을 꾹 참는다.' },
+    { title: 'Seodang (Village School)', by: 'Kim Hong-do · Natl. Museum of Korea', desc: 'A scolded boy sniffles while his classmates hold back their laughter.' },
   ),
-  huangshan: art(
-    { title: '황산 36봉을 떠올리며', by: '석도(스타오) · 1705 무렵', desc: '젊은 날 오른 황산을 늙어서 기억으로 그렸다. 봉우리가 구름처럼 솟는다.' },
-    { title: 'Thirty-six Peaks of Mount Huang', by: 'Shitao · c.1705', desc: 'Painted from memory of a youthful climb. The peaks rise like clouds.' },
+  mudong: art(
+    { title: '무동(춤추는 아이)', by: '단원 김홍도 · 국립중앙박물관', desc: '북·장구·피리 가락에 맞춰 아이가 신나게 춤춘다. 소리가 들리는 듯하다.' },
+    { title: 'Dancing Boy', by: 'Kim Hong-do · Natl. Museum of Korea', desc: 'A boy dances to drums and pipes. You can almost hear the music.' },
   ),
 };
 

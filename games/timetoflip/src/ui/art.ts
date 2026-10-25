@@ -3,7 +3,7 @@ import { FACE_SETS, type FaceId, type SpecialId } from '../game/faces';
 /**
  * 카드 그림 48장 + 특수 카드 2장 + 카드 뒷면 + 시간 막대 스톱워치.
  * 도형·팝아트 16장과 특수 카드·뒷면·마스코트는 이 파일에서 코드로 그린 SVG,
- * 명화 32장은 메트로폴리탄 미술관 Open Access(CC0) 이미지를 잘라 만든 src/art/*.webp(만드는 법·출처는 art-src/)
+ * 명화 32장은 미술관 공개 이미지(CC0·퍼블릭 도메인·공공누리 1유형)를 잘라 만든 src/art/*.webp(만드는 법·출처는 art-src/)
  */
 
 const INK = '#2b2233';
@@ -76,7 +76,7 @@ const POPS: Record<string, string> = {
     `<circle cx="25" cy="47.5" r="2.2" fill="#2563eb"/><circle cx="15" cy="47.5" r="1.8" fill="#22c55e"/><circle cx="35" cy="47.5" r="1.8" fill="#22c55e"/>`,
 };
 
-/* ---------- 명화(3판~): 메트로폴리탄 미술관 Open Access(CC0) 이미지를 잘라 만든 webp(art-src/ 참고) ---------- */
+/* ---------- 명화(3판~): 미술관 공개 이미지를 잘라 만든 webp(art-src/ 참고) ---------- */
 
 const PHOTOS = import.meta.glob<string>('../art/*.webp', { eager: true, query: '?url', import: 'default' });
 const photoUrl = (face: string) => PHOTOS[`../art/${face}.webp`];

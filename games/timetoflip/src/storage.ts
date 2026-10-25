@@ -1,6 +1,6 @@
 import '@joypack/shared';
 import type { SharedSetting } from '@joypack/shared';
-import { ALL_FACES, ITEMS, type FaceId, type ItemId } from './game/faces';
+import { ALL_FACES, ITEMS, RENAMED_FACES, type FaceId, type ItemId } from './game/faces';
 import { LANGS, detectLang, type Lang } from './i18n';
 import { cleanName, emptyPending, emptyRankings, sanitizePending, sanitizeRankings, type PendingRanks, type Rankings } from './ranking';
 import { SKIN_SETTINGS, THEMES, type SkinSetting, type Theme } from './theme';
@@ -62,8 +62,9 @@ export function loadSave(): SaveData {
     const raw = localStorage.getItem(KEY);
     if (!raw) return withShared(base);
     const data = { ...base, ...(JSON.parse(raw) as Partial<SaveData>) } as SaveData;
-    // v0.9.0 에서 도형 '반원(arch)'을 '초승달(moon)'로 바꿨다. 모은 도감은 그대로 이어지게 옮긴다
-    data.dex = (Array.isArray(data.dex) ? (data.dex as string[]) : []).map((f) => (f === 'arch' ? 'moon' : f)) as FaceId[];
+    // v0.9.0 에서 도형 '반원(arch)'을 '초승달(moon)'로, v1.2.0 에서 명화 20점을 바꿨다. 모은 도감은 그대로 이어지게 옮긴다
+    const renamed: Record<string, string> = { arch: 'moon', ...RENAMED_FACES };
+    data.dex = [...new Set((Array.isArray(data.dex) ? (data.dex as string[]) : []).map((f) => renamed[f] ?? f))] as FaceId[];
     data.dex = data.dex.filter((f) => ALL_FACES.includes(f));
     for (const k of ['items', 'itemHints'] as const) data[k] = (Array.isArray(data[k]) ? data[k] : []).filter((i) => ITEMS.includes(i));
     // v0.11.0 에서 도감의 황금 ★ 기록을 없앴다(예전 저장의 gold 는 버림)
