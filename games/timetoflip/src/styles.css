@@ -769,10 +769,12 @@ h1 .word:nth-child(2) .tc-in {
 .mascot .sw-eye {
   display: none;
 }
-.game.peeking .mascot .sw-eye {
+.game.peeking .mascot .sw-eye,
+.game.revealing .mascot .sw-eye {
   display: inline;
 }
-.game.peeking .mascot .sw-watch {
+.game.peeking .mascot .sw-watch,
+.game.revealing .mascot .sw-watch {
   display: none;
 }
 /* 시간 칸: 외우는 동안은 레몬색 카드 뒷면으로 덮였다가, 미리 보기가 끝나면 카드처럼 뒤집혀 게임 시간이 나타난다 */

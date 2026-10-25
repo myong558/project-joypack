@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { Game, buildCards, type GameEvent } from '../src/game/engine';
 import { mulberry32 } from '../src/game/rng';
-import { DEAL_MS, MAX_MS, MIN_GAIN_RATE, START_MS, comboMultiplier, stageDef } from '../src/game/stages';
+import { DEAL_MS, MAX_MS, MIN_GAIN_RATE, PEEK_REVEAL, START_MS, comboMultiplier, stageDef } from '../src/game/stages';
 
 function setup(seed = 1) {
   const game = new Game(mulberry32(seed));
@@ -216,5 +216,39 @@ describe('점수', () => {
     expect(comboMultiplier(2)).toBe(1.5);
     expect(comboMultiplier(9)).toBe(5);
     expect(comboMultiplier(20)).toBe(5);
+  });
+});
+
+describe('돋보기 카드', () => {
+  it('남은 카드를 모두 보여 주는 동안은 시간이 멈추고 누름을 받지 않는다', () => {
+    // 돋보기 카드가 있는 판을 찾는다(4판부터 특수 카드가 꼭 1장 이상)
+    let found: { game: Game; events: GameEvent[] } | null = null;
+    for (let seed = 1; seed < 200 && !found; seed++) {
+      const game = new Game(mulberry32(seed));
+      const events: GameEvent[] = [];
+      game.on((e) => events.push(e));
+      game.start(4);
+      if (game.cards.some((c) => c.special === 'peek')) found = { game, events };
+    }
+    const { game, events } = found!;
+    game.tick(game.def.peekMs);
+    expect(game.phase).toBe('playing');
+    const [a, b] = pairOf(game, 'peek');
+    game.flip(a);
+    game.flip(b);
+    expect(events.some((e) => e.type === 'reveal')).toBe(true);
+    const left = game.remaining;
+    game.tick(PEEK_REVEAL / 2);
+    expect(game.remaining).toBe(left);
+    // 보여 주는 동안 누른 카드는 뒤집히지 않는다
+    const down = game.cards.find((c) => c.state === 'down')!;
+    game.flip(down.index);
+    expect(down.state).toBe('down');
+    game.tick(PEEK_REVEAL / 2);
+    expect(events.some((e) => e.type === 'revealEnd')).toBe(true);
+    game.tick(1000);
+    expect(game.remaining).toBe(left - 1000);
+    game.flip(down.index);
+    expect(down.state).toBe('up');
   });
 });

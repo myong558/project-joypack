@@ -26,6 +26,11 @@ function simulate(seed: number, memory: number, flipMs: number) {
       step(game.phase === 'peek' ? game.phaseLeft : 100);
       continue;
     }
+    // 돋보기로 모두 보여 주는 동안은 누름을 받지 않으므로 끝날 때까지 기다린다(사람도 보고 있는 시간)
+    if (game.revealLeft > 0) {
+      step(game.revealLeft);
+      continue;
+    }
     const pick = () => {
       // 기억 속에 짝이 둘 다 있으면 그 둘
       const byKey = new Map<string, number[]>();

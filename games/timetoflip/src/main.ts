@@ -196,6 +196,8 @@ function play(mode: Mode, from = 1): void {
   const handle = (e: GameEvent) => {
     switch (e.type) {
       case 'deal': {
+        board.reveal(false);
+        view.el.classList.remove('revealing');
         board.deal(e.cards, e.def);
         sound.play('deal');
         // 미리 보기 동안 위 가운데 짧은 안내: 닮은 카드가 처음 나오거나(5판) 늘어나는 판(8판)은 경고,
@@ -261,9 +263,16 @@ function play(mode: Mode, from = 1): void {
         view.el.classList.toggle('hot', e.combo >= 5);
         break;
       }
+      // 돋보기: 남은 카드를 모두 보여 주는 동안 시간이 멈춘다. 스톱워치가 눈으로 바뀌어 "보는 시간"임을 알린다(막대는 그 자리에 멈춤)
       case 'reveal':
-        board.reveal(e.ms);
+        board.reveal(true);
+        view.el.classList.add('revealing');
         fx.banner(t('popup.peek'), 'peek');
+        break;
+      case 'revealEnd':
+        board.reveal(false);
+        view.el.classList.remove('revealing');
+        sound.play('flip');
         break;
       case 'mismatch':
         sound.play(e.mistake ? 'mistake' : 'miss');

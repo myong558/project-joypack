@@ -94,10 +94,9 @@ export class Board {
     }
   }
 
-  /** 엿보기 카드: 남은 카드를 ms 동안 보여 준다 */
-  reveal(ms: number): void {
-    this.el.classList.add('reveal');
-    setTimeout(() => this.el.classList.remove('reveal'), ms);
+  /** 엿보기 카드: 남은 카드를 모두 보여 준다(끝은 게임 규칙의 revealEnd 가 알림 · 일시정지 동안은 그대로 기다림) */
+  reveal(on: boolean): void {
+    this.el.classList.toggle('reveal', on);
   }
 
   /** 시간이 끝나면 남은 카드를 모두 펼쳐 보여 준다 */

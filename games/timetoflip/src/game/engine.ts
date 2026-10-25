@@ -76,6 +76,7 @@ export type GameEvent =
     }
   | { type: 'mismatch'; a: Card; b: Card; mistake: boolean; penalty: number; comboLost: number }
   | { type: 'reveal'; ms: number }
+  | { type: 'revealEnd' }
   | { type: 'stageClear'; stage: number; bonus: number; gain: number; perfect: boolean }
   | { type: 'pause' }
   | { type: 'resume' }
@@ -98,6 +99,8 @@ export class Game {
   maxCombo = 0;
   /** 판 시작 미리 보기·판 사이 쉬는 시간이 얼마나 남았는지 */
   phaseLeft = 0;
+  /** 돋보기 카드로 남은 카드를 모두 보여 주는 시간이 얼마나 남았는지. 이 동안은 시간이 멈추고 누름을 받지 않는다(판 시작 미리 보기와 같은 규칙) */
+  revealLeft = 0;
 
   private first: Card | null = null;
   private firstSeenBefore = false;
@@ -147,6 +150,7 @@ export class Game {
     this.first = null;
     this.wrong = null;
     this.stageMistakes = 0;
+    this.revealLeft = 0;
     this.cards = buildCards(stage, this.def, this.rng, this.layout);
     this.phase = 'peek';
     this.phaseLeft = this.def.peekMs;
@@ -172,6 +176,14 @@ export class Game {
       this.phaseLeft -= dt;
       if (this.phaseLeft <= 0) this.deal(this.stage + 1);
     } else if (this.phase === 'playing') {
+      if (this.revealLeft > 0) {
+        this.revealLeft -= dt;
+        if (this.revealLeft <= 0) {
+          this.revealLeft = 0;
+          this.emit({ type: 'revealEnd' });
+        }
+        return;
+      }
       this.remaining -= dt;
       if (this.remaining <= 0) {
         this.remaining = 0;
@@ -194,7 +206,7 @@ export class Game {
       if (this.def.peekMs - this.phaseLeft < DEAL_MS) return;
       this.endPeek();
     }
-    if (this.phase !== 'playing') return;
+    if (this.phase !== 'playing' || this.revealLeft > 0) return;
     // 틀린 두 장을 보여 주는 중에 다음 카드를 누르면 기다리지 않고 바로 덮는다(손이 빠른 사람이 막히지 않게)
     if (this.wrong) this.hideWrong();
     const card = this.cards[index];
@@ -230,8 +242,11 @@ export class Game {
     this.addTime(gain);
     if (!a.special) this.faces.add(a.face as FaceId);
     this.emit({ type: 'match', a, b, points, gain, combo: this.combo, multiplier, bonus });
-    if (a.special === 'peek') this.emit({ type: 'reveal', ms: PEEK_REVEAL });
     if (this.pairsLeft === 0) this.clearStage();
+    else if (a.special === 'peek') {
+      this.revealLeft = PEEK_REVEAL;
+      this.emit({ type: 'reveal', ms: PEEK_REVEAL });
+    }
   }
 
   private mismatch(a: Card, b: Card): void {
