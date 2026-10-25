@@ -24,6 +24,7 @@ const ko = {
   'test.devView': '출시 화면 · 끄기',
 
   'pick.title': '정원 고르기',
+  'pick.petalHint': '꽃잎 3장 = 가장 적은 이동 수(기준)로 깸',
   'pick.locked': '앞 정원을 가꾸면 열려요',
   'pick.level': '{name} · {flower} · {state}',
   'pick.open': '아직 안 핌',
@@ -169,6 +170,7 @@ const en: Record<MessageKey, string> = {
   'test.devView': 'Release view · off',
 
   'pick.title': 'Pick a garden',
+  'pick.petalHint': '3 petals = cleared in the fewest moves',
   'pick.locked': 'Finish the garden before to open it',
   'pick.level': '{name} · {flower} · {state}',
   'pick.open': 'not yet bloomed',

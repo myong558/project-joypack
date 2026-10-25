@@ -27,6 +27,7 @@ export const POT = `<svg class="pot-body" viewBox="0 0 40 26" aria-hidden="true"
  * 부분마다 묶음을 나눠 CSS 로 움직인다(styles.css .gardener): .g-hat 모자(늘 아주 살짝 흔들림, 쉬는 동작 때 벗음),
  * .g-arm 팔(화분을 밀 때 앞으로 쭉), .g-head 모자 밑 머리, .g-mouth 하품하는 입, .g-hand 땀 닦는·입 가리는 손, .g-drop 땀방울, .g-all 몸 전체(두리번)
  * 짚 결: 챙에 방사선 결 + 엇갈린 점선 고리, 꼭대기에 점선 고리. 손으로 엮은 듯 챙 가장자리가 고르지 않고 꼭대기도 살짝 비뚤게(반듯한 원이 아니게)
+ * 모자 리본은 스킨(강조색)과 상관없이 짙은 초록으로 고정: 로고·게임 화면 어디서나 같은 정원사로 보이게
  */
 export const GARDENER = `<svg viewBox="0 0 40 40" aria-hidden="true" focusable="false">
 <ellipse cx="21" cy="23" rx="15" ry="14" fill="rgb(40 30 20 / .22)"/>
@@ -47,8 +48,8 @@ export const GARDENER = `<svg viewBox="0 0 40 40" aria-hidden="true" focusable="
 <circle cx="20" cy="20" r="6.2" fill="none" stroke="#b8924a" stroke-width=".55" stroke-dasharray="1 1"/>
 <circle cx="20" cy="20" r="4.2" fill="none" stroke="#b8924a" stroke-width=".55" stroke-dasharray=".9 1"/>
 <circle cx="20" cy="20" r="1.6" fill="#c9a256"/>
-<circle cx="20" cy="20" r="8.6" fill="none" stroke="var(--accent)" stroke-width="2"/>
-<path d="M20 11.4l-2.4-6.4 2.4 1.6 2.4-1.6z" fill="var(--accent)"/>
+<circle cx="20" cy="20" r="8.6" fill="none" stroke="#2f6b3e" stroke-width="2"/>
+<path d="M20 11.4l-2.4-6.4 2.4 1.6 2.4-1.6z" fill="#2f6b3e"/>
 </g>
 <circle class="g-hand" cx="20" cy="26" r="2.4" fill="#e2ad85" stroke="#9a6a48" stroke-width=".5"/>
 <path class="g-drop" d="M27 20q1.6 2.6 0 3.6q-1.6-1 0-3.6z" fill="#8fd0f2" stroke="#3f86b0" stroke-width=".4"/>
