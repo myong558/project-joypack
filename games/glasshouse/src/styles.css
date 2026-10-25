@@ -973,19 +973,17 @@ h2 .icon-pic {
 .picker h2 {
   flex: none;
 }
-/* 제목 밑 한 줄: 카드 아래 꽃잎 3장이 무슨 뜻인지(가장 적은 이동 수로 깸) */
+/* 제목 밑 두 줄: 카드 아래 꽃잎 수가 무슨 뜻인지(3장 = 가장 적은 이동, 더 움직일수록 2장·1장) */
 .pick-hint {
   flex: none;
-  display: flex;
-  align-items: center;
-  gap: 6px;
   margin: -6px 0 10px;
   font-family: 'GowunDodum', sans-serif;
-  font-size: 13px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+  word-break: keep-all;
+  text-wrap: pretty;
   color: var(--muted);
-}
-.pick-hint .petals {
-  flex: none;
 }
 .picker .gardens {
   flex: 1;

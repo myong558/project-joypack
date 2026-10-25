@@ -24,7 +24,8 @@ const ko = {
   'test.devView': '출시 화면 · 끄기',
 
   'pick.title': '정원 고르기',
-  'pick.petalHint': '꽃잎 3장 = 가장 적은 이동 수(기준)로 깸',
+  'pick.petalHint': '꽃잎 3장은 가장 적은 이동으로 완료한 경우 받아요',
+  'pick.petalHint2': '조금 더 움직이면 2장, 많이 움직이면 1장',
   'pick.locked': '앞 정원을 가꾸면 열려요',
   'pick.level': '{name} · {flower} · {state}',
   'pick.open': '아직 안 핌',
@@ -170,7 +171,8 @@ const en: Record<MessageKey, string> = {
   'test.devView': 'Release view · off',
 
   'pick.title': 'Pick a garden',
-  'pick.petalHint': '3 petals = cleared in the fewest moves',
+  'pick.petalHint': 'You get 3 petals for clearing in the fewest moves',
+  'pick.petalHint2': 'A few more moves gives 2, many more gives 1',
   'pick.locked': 'Finish the garden before to open it',
   'pick.level': '{name} · {flower} · {state}',
   'pick.open': 'not yet bloomed',

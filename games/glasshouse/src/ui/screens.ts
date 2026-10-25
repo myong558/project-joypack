@@ -195,7 +195,7 @@ function openPicker(host: HTMLElement, save: SaveData, onPlay: (level: number) =
     <div class="picker">
       ${closeButton()}
       <h2>${ICONS.garden} ${t('pick.title')} <small>${save.levels.filter(Boolean).length}/${LEVELS.length}</small></h2>
-      <p class="pick-hint">${petalRow(3).replace('role="img"', 'aria-hidden="true"')}<span>${t('pick.petalHint')}</span></p>
+      <p class="pick-hint">${t('pick.petalHint')}<br>${t('pick.petalHint2')}</p>
       <ul class="gardens">${LEVELS.map((lv, i) => {
         const rec = save.levels[i];
         const open = unlocked(save, i);
