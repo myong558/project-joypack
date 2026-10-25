@@ -26,6 +26,14 @@ const ko = {
   'dex.pickTitle': '어떤 그림일까요?',
   'dex.pick': '아래 카드를 누르면 큰 카드가 뒤집히며 그림 이야기가 나와요.',
   'dex.lockedDesc': '{n}판부터 나와요. 짝을 맞히면 그림과 이야기가 열려요.',
+  'dex.items': '특수 카드',
+  'dex.itemKind': '특수 카드',
+  'dex.itemLocked': '{n}판부터 나와요. 짝을 맞히면 어떤 효과인지 열려요.',
+  'item.clock': '짝을 맞히면 남은 시간이 5초 늘어나요. 시간이 모자랄 때 먼저 찾아 두세요.',
+  'item.peek': '짝을 맞히면 남은 카드를 잠깐 모두 보여 줘요. 카드가 많이 남았을 때 더 좋아요.',
+  'item.gold': '보통 카드 한 쌍이 가끔 금빛으로 나와요. 그 짝을 맞히면 점수가 2배예요.',
+  'hint.clock': '시계 카드\n맞히면 +5초',
+  'hint.peek': '돋보기 카드\n맞히면 엿보기',
 
   'lang.label': '언어 선택',
   'nav.hub': '조이팩 게임 목록',
@@ -131,6 +139,7 @@ const ko = {
 
   'face.clock': '시계',
   'face.peek': '돋보기',
+  'face.gold': '황금 카드',
 };
 
 export type MessageKey = keyof typeof ko;
@@ -159,6 +168,14 @@ const en: Record<MessageKey, string> = {
   'dex.pickTitle': 'What could it be?',
   'dex.pick': 'Tap a card below to flip the big card and read its story.',
   'dex.lockedDesc': 'Appears from stage {n}. Match it to unlock its picture and story.',
+  'dex.items': 'Special cards',
+  'dex.itemKind': 'Special card',
+  'dex.itemLocked': 'Appears from stage {n}. Match it to find out what it does.',
+  'item.clock': 'Match it to add 5 seconds. Find it first when time runs low.',
+  'item.peek': 'Match it to see all remaining cards for a moment. Best when many are left.',
+  'item.gold': 'Sometimes a pair shines gold. Match it for double points.',
+  'hint.clock': 'Clock card\n+5 seconds',
+  'hint.peek': 'Magnifier\npeek at all',
 
   'lang.label': 'Choose language',
   'nav.hub': 'Joypack games',
@@ -265,6 +282,7 @@ const en: Record<MessageKey, string> = {
 
   'face.clock': 'Clock',
   'face.peek': 'Magnifier',
+  'face.gold': 'Gold card',
 };
 
 const dictionaries: Record<Lang, Record<MessageKey, string>> = { ko, en };

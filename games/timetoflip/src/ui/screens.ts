@@ -1,5 +1,5 @@
 import type { GameResult } from '../game/engine';
-import { ALL_FACES, FACE_SETS, type FaceId } from '../game/faces';
+import { ALL_FACES, FACE_SETS, ITEMS, ITEM_FROM, type FaceId, type ItemId } from '../game/faces';
 import { cardInfo, faceName, setName } from '../cards';
 import { LANGS, getLang, t, type Lang } from '../i18n';
 import type { SaveData } from '../storage';
@@ -35,6 +35,15 @@ function miniCard(face: FaceId, opts: { locked?: boolean; isNew?: boolean } = {}
   if (opts.locked) return `<span class="mini-card locked" aria-hidden="true">${CARD_BACK}</span>`;
   return `<span class="mini-card" aria-hidden="true">${faceSvg(face)}${opts.isNew ? '<em>NEW</em>' : ''}</span>`;
 }
+
+/** 도감 특수 카드 칸의 황금 카드 그림: 금빛 카드 위 별(실제 황금 카드는 보통 그림이 금빛 카드에 나옴) */
+const GOLD_STAR =
+  '<svg viewBox="0 0 64 64" aria-hidden="true" focusable="false"><path d="M32 8l7 15 16 2-12 11 3 16-14-8-14 8 3-16L9 25l16-2z" fill="#f5b301" stroke="#a86b00" stroke-width="3" stroke-linejoin="round"/><path d="M27 21l5-9 3 7" fill="none" stroke="#fff6c2" stroke-width="3" stroke-linecap="round"/></svg>';
+const itemSvg = (item: ItemId) => (item === 'gold' ? GOLD_STAR : faceSvg(item));
+const itemName = (item: ItemId) => (item === 'gold' ? t('face.gold') : faceName(item));
+const ITEM_DESC = { clock: 'item.clock', peek: 'item.peek', gold: 'item.gold' } as const;
+/** 특수 카드는 게임판과 같은 바탕(시계·돋보기는 하늘색, 황금은 금빛) */
+const itemTone = (item: ItemId) => (item === 'gold' ? 'gold' : 'special');
 
 /**
  * 화면 안에 띄우는 대화상자. Esc·바깥 누르기·닫기 버튼으로 닫힌다.
@@ -207,7 +216,7 @@ export function startScreen(opts: StartOptions): HTMLElement {
 /* ---------- 도감 ---------- */
 
 /**
- * 도감: 위 가운데 큰 카드(처음엔 뒷면) + 그 아래 설명, 아래쪽에 묶음별 작은 카드.
+ * 도감: 위 가운데 큰 카드(처음엔 뒷면) + 그 아래 설명, 아래쪽에 묶음별 작은 카드, 맨 아래 특수 카드 칸(시계·돋보기·황금, 모으는 수에는 넣지 않음).
  * 작은 카드를 누르면 큰 카드가 뒤집혀 그 그림으로 바뀌고 제목·작가·설명이 나온다.
  * 큰 카드·설명 칸은 크기를 고정해(설명은 최대 4줄) 글 길이가 달라도 화면이 덜컥이지 않는다
  */
@@ -218,6 +227,7 @@ const DEX_ALL_OPEN = () => Joypack.devTools();
 
 function openDex(host: HTMLElement, save: SaveData): void {
   const found = new Set<FaceId>(DEX_ALL_OPEN() ? ALL_FACES : save.dex);
+  const itemsFound = new Set<ItemId>(DEX_ALL_OPEN() ? ITEMS : save.items);
   const box = html(`
     <div class="dex">
       ${closeButton()}
@@ -245,6 +255,15 @@ function openDex(host: HTMLElement, save: SaveData): void {
               .join('')}</ul>
           </section>`,
         ).join('')}
+        <section class="dex-specials">
+          <h3>${t('dex.items')} <small>${t('dex.from', { n: ITEM_FROM })}</small></h3>
+          <ul>${ITEMS.map((i) => {
+            const open = itemsFound.has(i);
+            const label = open ? itemName(i) : `??? — ${t('dex.locked')}`;
+            const card = open ? `<span class="mini-card ${itemTone(i)}" aria-hidden="true">${itemSvg(i)}</span>` : miniCard('circle', { locked: true });
+            return `<li><button class="dex-item" type="button" data-item="${i}" aria-pressed="false" aria-label="${label}">${card}</button></li>`;
+          }).join('')}</ul>
+        </section>
       </div>
     </div>`);
 
@@ -260,19 +279,21 @@ function openDex(host: HTMLElement, save: SaveData): void {
     selected?.setAttribute('aria-pressed', 'false');
     item.setAttribute('aria-pressed', 'true');
     selected = item;
-    const face = item.dataset.face as FaceId;
-    const open = found.has(face);
+    const face = item.dataset.face as FaceId | undefined;
+    const special = item.dataset.item as ItemId | undefined;
+    const open = face ? found.has(face) : itemsFound.has(special!);
     // 새 그림은 미리 만들어 디코딩까지 끝낸 뒤 갈아 끼운다(끼우는 순간 빈 칸이 한 번 비치던 깜박임 방지)
     const next = document.createElement('template');
-    next.innerHTML = open ? faceSvg(face) : '';
+    next.innerHTML = !open ? '' : face ? faceSvg(face) : itemSvg(special!);
     const img = next.content.querySelector('img');
     const turn = ++turns;
     const apply = () => {
       front.replaceChildren(next.content);
-      const text = open ? cardInfo(face) : null;
+      front.className = `side front${open && special ? ` ${itemTone(special)}` : ''}`;
+      const text = !open ? null : face ? cardInfo(face) : { title: itemName(special!), by: t('dex.itemKind'), desc: t(ITEM_DESC[special!]) };
       title.textContent = text ? text.title : '???';
       by.textContent = text ? text.by : t('dex.locked');
-      desc.textContent = text ? text.desc : t('dex.lockedDesc', { n: Number(item.dataset.stage) });
+      desc.textContent = text ? text.desc : face ? t('dex.lockedDesc', { n: Number(item.dataset.stage) }) : t('dex.itemLocked', { n: ITEM_FROM });
     };
     const run = () => {
       // 그림을 준비하는 사이 다른 카드를 눌렀으면 이 차례는 버린다

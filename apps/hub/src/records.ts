@@ -43,7 +43,7 @@ const CLEARERS: Record<string, () => void> = {
   timetoflip() {
     const save = readJson('timetoflip:v1') as Record<string, unknown> | null;
     if (!save) return;
-    Object.assign(save, { best: 0, bestStage: 0, daily: null, dex: [], gold: [], pairs: 0 });
+    Object.assign(save, { best: 0, bestStage: 0, daily: null, dex: [], items: [], pairs: 0 });
     localStorage.setItem('timetoflip:v1', JSON.stringify(save));
   },
 };

@@ -19,6 +19,11 @@ export type FaceId = (typeof FACE_SETS)[number]['faces'][number];
 /** 효과가 있는 특수 카드. 도감에는 넣지 않는다 */
 export type SpecialId = 'clock' | 'peek';
 
+/** 도감 "특수 카드" 칸: 효과가 있는 특수 카드 + 황금 카드(점수 2배). 처음 맞히면 열린다. 모두 2판부터 나온다 */
+export type ItemId = SpecialId | 'gold';
+export const ITEMS: ItemId[] = ['clock', 'peek', 'gold'];
+export const ITEM_FROM = 2;
+
 export const ALL_FACES: FaceId[] = FACE_SETS.flatMap((s) => [...s.faces]);
 
 /** 그 판에서 열려 있는 묶음 수(1판 1개 … 6판부터 6개 모두) */

@@ -745,8 +745,11 @@ h1 .word:nth-child(2) .tc-in {
   max-width: 100%;
   margin: 0;
   font-size: 15px;
+  line-height: 1.05;
+  text-align: center;
   color: var(--accent-ink);
-  white-space: nowrap;
+  /* 특수 카드 첫 안내는 두 줄(이름 / 효과): 좁은 휴대폰에서도 콤보 자리 안에 들어가게 */
+  white-space: pre-line;
   overflow: hidden;
   text-overflow: ellipsis;
   opacity: 0;
@@ -2110,6 +2113,21 @@ h1 .word:nth-child(2) .tc-in {
   width: 100%;
   height: auto;
   aspect-ratio: 0.78;
+}
+/* 특수 카드 칸(시계·돋보기·황금): 게임판과 같은 바탕. 큰 카드에서는 그림을 가운데 작게 */
+.mini-card.special,
+.dex-big .front.special {
+  background: linear-gradient(160deg, #e6fbff, #b5edf4);
+}
+.mini-card.gold,
+.dex-big .front.gold {
+  background: linear-gradient(160deg, #fff7cc, #ffd970);
+  box-shadow: inset 0 0 0 2px var(--gold), 0 2px 0 var(--depth);
+}
+.dex-big .front.special svg,
+.dex-big .front.gold svg {
+  width: 72%;
+  height: auto;
 }
 /* 키가 낮은 휴대폰: 큰 카드·설명을 줄여 목록 자리를 남긴다 */
 @media (max-height: 700px) and (orientation: portrait) {
