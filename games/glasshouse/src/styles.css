@@ -194,13 +194,28 @@ body {
   touch-action: pan-y;
 }
 
+/* 화면 글꼴은 주아(제목·단추·탭·숫자·이름표까지 둥글고 따뜻하게). 문장이 긴 설명 글만 아래에서 고운돋움으로 */
 body {
-  font-family: 'GowunDodum', system-ui, sans-serif;
+  font-family: 'Jua', 'GowunDodum', system-ui, sans-serif;
   color: var(--ink);
   background: var(--sky-b);
   -webkit-tap-highlight-color: transparent;
   -webkit-user-select: none;
   user-select: none;
+}
+/* 긴 설명 글: 고운돋움(읽기 편한 본문) */
+.note,
+.hint,
+.dex-by,
+.dex-facts,
+.dex-desc,
+.legend,
+.confirm p,
+.goal small,
+.daily-text small,
+.app-version,
+.app-copyright {
+  font-family: 'GowunDodum', sans-serif;
 }
 
 #app {
@@ -302,7 +317,6 @@ button {
   border-radius: 18px;
 }
 .btn.big small {
-  font-family: 'GowunDodum', sans-serif;
   font-weight: 400;
   font-size: 14px;
   opacity: 0.9;
@@ -968,7 +982,6 @@ h2 .icon-pic {
   padding: 4px 6px 6px;
 }
 .picker h2 small {
-  font-family: 'GowunDodum', sans-serif;
   font-weight: 400;
   font-size: 13px;
   color: var(--muted);
