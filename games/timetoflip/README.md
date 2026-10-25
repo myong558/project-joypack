@@ -50,9 +50,9 @@
 ## 출시 전 확인용(개발자 모드를 켠 기기 + 미리보기 배포일 때만, 정식 공개하면 모두 사라짐)
 
 - 도감 48장 모두 열림: `src/ui/screens.ts` `DEX_ALL_OPEN`(개발자 도구가 켜진 동안만, 정식 공개하면 저장된 기록대로)
-- 시작 화면 로고 위 "TEST 2~8" 단추로 그 판부터 클래식 바로 시작(최고 기록·랭킹에 안 남음): `src/ui/screens.ts` `STAGE_JUMP`
+- 설정 창 맨 위 TEST 칸의 "2~8" 단추로 그 판부터 클래식 바로 시작(최고 기록·랭킹에 안 남음): `src/ui/screens.ts` `STAGE_JUMP`
 - 판단은 공용 `Joypack.prerelease()` = 개발자 모드(`Joypack.devMode()`, 허브 설정 → 정보 버전 7번, 키 `joypack.preview`)이면서 games.json `status: "preview"` 로 배포된 동안. 기능 자체는 `Joypack.devTools()`(= prerelease 이고 "출시 화면" 보기가 꺼져 있을 때). 일반 사용자에게는 보이지 않고, `pnpm release` 로 정식 공개하면 개발자 모드여도 나오지 않는다
-- **출시 화면 단추**: 출시 전 확인 단계(prerelease)인 동안 로고 위에 늘 보인다. 누르면 위 두 기능을 숨겨 실제 출시 화면 그대로 확인하고, 다시 누르면 돌아온다(공용 `Joypack.setReleaseView`, 키 `joypack.releaseView`)
+- **출시 화면 단추**: 출시 전 확인 단계(prerelease)인 동안 설정 창 맨 위 TEST 칸에 늘 보인다. 누르면 위 두 기능을 숨겨 실제 출시 화면 그대로 확인하고, 다시 누르면 돌아온다(공용 `Joypack.setReleaseView`, 키 `joypack.releaseView`)
 
 ## 게임 화면 위쪽
 

@@ -353,6 +353,12 @@ function settingsPanel(opts: StartOptions): HTMLElement {
     <div class="settings">
       ${closeButton()}
       <h2>${ICONS.gear} ${t('settings.title')}</h2>
+      ${
+        // 미리보기 동안만: 출시 전 확인 도구. 테스트할 때 바로 누르도록 설정 창 맨 위에 둔다(시작 화면에 띄우면 작은 화면에서 위 메뉴·로고와 겹침)
+        Joypack.prerelease()
+          ? `<section class="dev-section"><h3>TEST</h3>${ALL_OPEN() ? `<p class="note">${t('test.jump')}</p>` : ''}<button type="button" class="dev-toggle" data-release aria-pressed="${Joypack.releaseView()}">${Joypack.releaseView() ? t('test.devView') : t('test.releaseView')}</button></section>`
+          : ''
+      }
       <section>
         <h3>${t('theme.label')}</h3>
         <div class="seg" role="group">
@@ -391,12 +397,6 @@ function settingsPanel(opts: StartOptions): HTMLElement {
           </div>
         </div>
       </section>
-      ${
-        // 미리보기 동안만: 출시 전 확인 도구. 시작 화면에 띄우면 작은 화면에서 위 메뉴·로고와 겹쳐 설정 창 맨 아래에 둔다
-        Joypack.prerelease()
-          ? `<section class="dev-section"><h3>TEST</h3>${ALL_OPEN() ? `<p class="note">${t('test.jump')}</p>` : ''}<button type="button" class="dev-toggle" data-release aria-pressed="${Joypack.releaseView()}">${Joypack.releaseView() ? t('test.devView') : t('test.releaseView')}</button></section>`
-          : ''
-      }
       <p class="app-version">${t('settings.version')} v${__APP_VERSION__}</p>
       <p class="app-copyright">${Joypack.COPYRIGHT}</p>
     </div>`);

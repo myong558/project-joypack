@@ -111,7 +111,7 @@ function showStart(settings?: 'open' | 'reset', settingsFocus?: string, opening 
       opening,
       ranking: rankingView(today),
       onPlay: play,
-      onRefresh: () => showStart(),
+      onRefresh: () => showStart('open', '[data-release]'),
       onToggle(key) {
         save[key] = !save[key];
         sound.enabled = save.sound;

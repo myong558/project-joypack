@@ -99,7 +99,7 @@ export interface StartOptions {
   onPlay: (mode: Mode, from?: number) => void;
   onToggle: (key: Toggle) => void;
   onLang: (lang: Lang) => void;
-  /** 시작 화면을 다시 그린다(개발자 모드의 출시 모드 보기를 바꿨을 때) */
+  /** 시작 화면을 다시 그리고 설정 창을 다시 연다(개발자 모드의 출시 모드 보기를 바꿨을 때) */
   onRefresh: () => void;
   onTheme: (theme: Theme) => void;
   onSkin: (skin: SkinSetting) => void;
@@ -132,7 +132,7 @@ function heroDemo(): string {
 }
 
 /**
- * 출시 전 확인용(Joypack.devTools: 개발자 모드 + 미리보기 배포, 정식 공개하면 사라짐): 시작 화면 로고 위에 "N판부터 바로 시작" 단추(클래식, 기록·랭킹에 안 남음)
+ * 출시 전 확인용(Joypack.devTools: 개발자 모드 + 미리보기 배포, 정식 공개하면 사라짐): 설정 창 맨 위 TEST 칸의 "N판부터 바로 시작" 단추(클래식, 기록·랭킹에 안 남음)
  */
 const STAGE_JUMP = () => Joypack.devTools();
 
@@ -155,11 +155,6 @@ export function startScreen(opts: StartOptions): HTMLElement {
         </div>
       </nav>
       <div class="col main-col">
-        ${
-          Joypack.prerelease()
-            ? `<div class="stage-jump" role="group" aria-label="${t('test.jump')}">${STAGE_JUMP() ? `<span>TEST</span>${[2, 3, 4, 5, 6, 7, 8].map((n) => `<button type="button" data-from="${n}">${n}</button>`).join('')}` : ''}<button type="button" class="dev-toggle" data-release aria-pressed="${Joypack.releaseView()}">${Joypack.releaseView() ? t('test.devView') : t('test.releaseView')}</button></div>`
-            : ''
-        }
         <div class="hero" aria-hidden="true">${heroDemo()}</div>
         <h1 aria-label="${t('app.title')}"><span aria-hidden="true">${titleCards(t('app.title'))}</span></h1>
         <p class="tagline">${t('app.tagline')}</p>
@@ -192,12 +187,6 @@ export function startScreen(opts: StartOptions): HTMLElement {
       tc.classList.add('spin');
     }),
   );
-  // 개발자 모드: 출시 모드 보기 ↔ 개발 기능 보기(판별 바로 시작·도감 전부 열기를 숨기거나 다시 보임)
-  el.querySelector('[data-release]')?.addEventListener('click', () => {
-    Joypack.setReleaseView(!Joypack.releaseView());
-    opts.onRefresh();
-  });
-  el.querySelectorAll<HTMLButtonElement>('[data-from]').forEach((b) => b.addEventListener('click', () => opts.onPlay('classic', Number(b.dataset.from))));
   el.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((b) => b.addEventListener('click', () => opts.onPlay(b.dataset.mode as Mode)));
   el.querySelector('.top-lang')!.addEventListener('click', () => opts.onLang(otherLang));
   el.querySelector('[data-dex]')!.addEventListener('click', () => openDex(el, save));
@@ -344,6 +333,12 @@ function settingsPanel(opts: StartOptions): HTMLElement {
     <div class="settings">
       ${closeButton()}
       <h2>${ICONS.gear} ${t('settings.title')}</h2>
+      ${
+        // 미리보기 동안만: 출시 전 확인 도구. 테스트할 때 바로 누르도록 설정 창 맨 위에 둔다
+        Joypack.prerelease()
+          ? `<section class="dev-section"><h3>TEST</h3>${STAGE_JUMP() ? `<p class="note">${t('test.jump')}</p><div class="stage-jump" role="group" aria-label="${t('test.jump')}">${[2, 3, 4, 5, 6, 7, 8].map((n) => `<button type="button" data-from="${n}">${n}</button>`).join('')}</div>` : ''}<button type="button" class="dev-toggle" data-release aria-pressed="${Joypack.releaseView()}">${Joypack.releaseView() ? t('test.devView') : t('test.releaseView')}</button></section>`
+          : ''
+      }
       <section>
         <h3>${t('theme.label')}</h3>
         <div class="seg" role="group">
@@ -427,6 +422,12 @@ function settingsPanel(opts: StartOptions): HTMLElement {
     resetBtn.focus();
   });
   confirm.querySelector('[data-confirm]')!.addEventListener('click', opts.onReset);
+  // 개발자 모드: 출시 모드 보기 ↔ 개발 기능 보기(판별 바로 시작·도감 전부 열기를 숨기거나 다시 보임)
+  el.querySelector('[data-release]')?.addEventListener('click', () => {
+    Joypack.setReleaseView(!Joypack.releaseView());
+    opts.onRefresh();
+  });
+  el.querySelectorAll<HTMLButtonElement>('[data-from]').forEach((b) => b.addEventListener('click', () => opts.onPlay('classic', Number(b.dataset.from))));
   return el;
 }
 
