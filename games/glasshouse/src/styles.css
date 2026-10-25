@@ -562,8 +562,8 @@ body:has(.screen.game) .scene .layer {
     linear-gradient(#5a4030, #5a4030) 50% 0 / 2px 100% no-repeat,
     linear-gradient(#5a4030, #5a4030) 0 50% / 100% 2px no-repeat,
     linear-gradient(135deg, #fffbe8, var(--sun));
-  /* 게임 판 창과 같은 햇빛 번짐(창 칸 안이라 떠 보이지 않음) */
-  box-shadow: 0 0 calc(var(--dc) * 0.35) calc(var(--dc) * 0.08) color-mix(in srgb, var(--sun) 85%, transparent), inset 0 0 6px rgb(255 240 190 / 0.8);
+  /* 게임 판 창과 같은 햇빛 번짐. 로고는 칸이 커서 게임보다 약하게(창 칸 안이라 떠 보이지 않음) */
+  box-shadow: 0 0 calc(var(--dc) * 0.2) calc(var(--dc) * 0.02) color-mix(in srgb, var(--sun) 55%, transparent), inset 0 0 6px rgb(255 240 190 / 0.8);
   animation: shimmer 3.4s ease-in-out infinite alternate;
 }
 /* 창에서 바로 앞 햇살 자리 바닥으로 들어오는 빛 띠(게임 판 .beam.spot.h.d3 와 같은 그림: 창 쪽이 진하고 칸 끝으로 옅어짐) */
@@ -575,8 +575,8 @@ body:has(.screen.game) .scene .layer {
   height: var(--dc);
   background: linear-gradient(180deg, transparent 12%, color-mix(in srgb, var(--beam) 70%, transparent) 34%, var(--beam-core) 50%, color-mix(in srgb, var(--beam) 70%, transparent) 66%, transparent 88%);
   mask-image: linear-gradient(to left, #000 35%, transparent 100%);
+  opacity: 0.45;
   pointer-events: none;
-  animation: shimmer 3.4s ease-in-out infinite alternate;
 }
 .d-beam {
   position: absolute;
@@ -588,7 +588,7 @@ body:has(.screen.game) .scene .layer {
   background: radial-gradient(closest-side, color-mix(in srgb, var(--sun) 90%, white), color-mix(in srgb, var(--sun) 45%, transparent) 65%, transparent);
   box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--sun) 70%, transparent);
   scale: 0.86;
-  opacity: 0.95;
+  opacity: 0.6;
 }
 .d-pot,
 .d-man {
