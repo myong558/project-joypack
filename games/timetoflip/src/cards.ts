@@ -3,7 +3,7 @@ import { getLang, t } from './i18n';
 
 /**
  * 도감 설명: 묶음 이름과 카드마다 제목·작가·한두 줄 설명(한국어·영어).
- * 도형·팝아트(조이팩이 직접 그린 그림)는 "작가 미상"의 지어낸 우스개 설명,
+ * 도형·팝아트(조이팩이 직접 그린 그림)는 작가 줄은 "그림 조이팩", 설명은 지어낸 우스개,
  * 명화는 실제 작가·연도·짧은 이야기. 명화 그림은 모두 메트로폴리탄 미술관 Open Access(CC0) 이미지다(art-src/meta.json)
  */
 interface Text {
@@ -16,13 +16,13 @@ type Entry = { ko: Text; en: Text };
 const SETS: Record<SetId, { ko: string; en: string }> = {
   shape: { ko: '도형', en: 'Shapes' },
   pop: { ko: '팝아트', en: 'Pop Art' },
-  popart: { ko: '명화 팝', en: 'Masterpiece Pop' },
+  popart: { ko: '팝아트로 본 명화', en: 'Masterpieces in Pop' },
   landscape: { ko: '서양화 · 풍경', en: 'Western Landscapes' },
   life: { ko: '서양화 · 인물과 정물', en: 'Western Figures & Still Life' },
   ink: { ko: '동양화 · 수묵', en: 'Ink Painting' },
 };
 
-const anon = { ko: '작가 미상 · 연도 미상', en: 'Artist unknown · date unknown' };
+const anon = { ko: '그림 조이팩', en: 'Art by Joypack' };
 const joke = (koTitle: string, ko: string, enTitle: string, en: string): Entry => ({
   ko: { title: koTitle, by: anon.ko, desc: ko },
   en: { title: enTitle, by: anon.en, desc: en },
@@ -34,8 +34,8 @@ const pop = (koArtist: string, enArtist: string, year: string) => ({
 });
 
 const CARDS: Record<FaceId, Entry> = {
-  /* ---------- 도형: 작가 미상 우스개 ---------- */
-  circle: joke('먹색 동그라미', '모서리가 없어 굴러다니다 작가를 잃어버린 전설의 작품.', 'Charcoal Circle', 'Not one corner. It rolled away and lost its artist, they say.'),
+  /* ---------- 도형: 조이팩 그림 + 우스개 ---------- */
+  circle: joke('먹색 동그라미', '모서리가 없어 걸어 두면 자꾸 액자 밖으로 굴러 나간다.', 'Charcoal Circle', 'Not one corner. Hang it up and it keeps rolling out of the frame.'),
   triangle: joke('파란 세모', '세 변이 서로 자기가 밑변이라며 아직도 다투는 중.', 'Blue Triangle', 'All three sides still argue over which one is the bottom.'),
   square: joke('초록 네모', '네 변이 똑같아 자를 든 비평가들이 눈물을 흘렸다.', 'Green Square', 'Four equal sides. Critics with rulers wept openly.'),
   diamond: joke('빨간 마름모', '네모가 고개를 45도 갸웃했을 뿐인데 몸값이 두 배.', 'Red Diamond', 'A square tilted its head 45° and doubled its price.'),
@@ -44,7 +44,7 @@ const CARDS: Record<FaceId, Entry> = {
   plus: joke('청록 더하기', '더하기 같지만 작가는 빼기를 두 번 그렸을 뿐이라 주장.', 'Teal Plus', 'Looks like a plus. The artist insists it is two minuses.'),
   moon: joke('노란 초승달', '보름달이 되려다 누가 한 입 베어 먹었다. 범인은 아직 안 잡혔다.', 'Yellow Crescent', 'It was on its way to full moon until someone took a bite.'),
 
-  /* ---------- 팝아트: 작가 미상 우스개 ---------- */
+  /* ---------- 팝아트: 조이팩 그림 + 우스개 ---------- */
   lips: joke('쪽!', '키스 자국을 가장 많이 받은 그림. 대부분 관람객 것.', 'Smack!', 'The most-kissed painting in the gallery. Mostly by visitors.'),
   bolt: joke('번쩍!', '그리는 데 0.1초, 액자에 넣는 데는 3년 걸렸다고 한다.', 'Zap!', 'Painted in 0.1 seconds. Framing it took three years.'),
   eye: joke('눈', '지나가면 눈동자가 따라온다는 소문이 있다. 확인 금지.', 'The Eye', 'They say it follows you around the room. Don’t check.'),
@@ -54,7 +54,7 @@ const CARDS: Record<FaceId, Entry> = {
   cone: joke('녹는 중', '그림 속 아이스크림인데 여름이면 액자 아래가 끈적하다.', 'Melting', 'Only a painted ice cream, yet each summer the frame gets sticky.'),
   crown: joke('왕관', '주인 미상, 사이즈 프리. 써 본 사람 모두 "조금 크다".', 'Crown', 'Owner unknown, one size fits all. Everyone says “a bit big.”'),
 
-  /* ---------- 명화 팝: 실제 명화를 4색 팝아트로 ---------- */
+  /* ---------- 팝아트로 본 명화: 실제 명화를 4색 팝아트로 ---------- */
   berceuse: art(
     { title: '자장가(룰랭 부인)', by: pop('빈센트 반 고흐', 'Vincent van Gogh', '1889').ko, desc: '우체부 룰랭의 아내. 손에 쥔 끈으로 보이지 않는 요람을 흔든다.' },
     { title: 'La Berceuse', by: pop('빈센트 반 고흐', 'Vincent van Gogh', '1889').en, desc: 'The postman’s wife rocks an unseen cradle with the rope she holds.' },
