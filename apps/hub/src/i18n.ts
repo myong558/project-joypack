@@ -39,7 +39,7 @@ const ko = {
   'best.updown': '최고 {board} {score}점',
   'best.hammer': '최고 {score}점',
   'best.timetoflip': '최고 {score}점 · {stage}판',
-  'best.glasshouse': '정원 {score}점 · 꽃 {n}/24',
+  'best.glasshouse': '총점 {score}점 · 꽃 {n}/24',
 
   'ranking.open': '전체 랭킹',
   'ranking.title': '전체 랭킹',
@@ -142,7 +142,7 @@ const en: Record<keyof typeof ko, string> = {
   'best.updown': 'Best {board} {score}',
   'best.hammer': 'Best {score}',
   'best.timetoflip': 'Best {score} · Stage {stage}',
-  'best.glasshouse': 'Garden {score} · {n}/24 flowers',
+  'best.glasshouse': 'Total {score} · {n}/24 flowers',
 
   'ranking.open': 'Rankings',
   'ranking.title': 'Rankings',
