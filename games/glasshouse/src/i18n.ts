@@ -157,7 +157,7 @@ const en: Record<MessageKey, string> = {
   'start.progress': 'Flowers {n}/24 · Petals {p}/72',
   'start.hint': 'Keyboard: arrows to move · Z undo · R restart · Esc pause',
   'start.daily': "Today's Garden",
-  'start.dailySub': '{date} · same garden for everyone',
+  'start.dailySub': '{date} · same garden for all',
   'start.dailyBest': 'Today {moves} moves · {time}',
   'sound.on': 'Sound on',
   'sound.off': 'Sound off',

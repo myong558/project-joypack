@@ -740,13 +740,14 @@ body:has(.screen.game) .scene .layer {
   height: 1.5em;
 }
 /* 정원 점수: 배경 하늘·잎에 묻히지 않게 단추와 같은 종이빛 판 + 테두리·그림자, 글자도 진하게 */
+/* 정원 점수: 누르는 단추가 아니라 정보 칸. 바닥 턱·떠 있는 그림자 없이 납작하게, 연한 잎빛 바탕과 안쪽 선으로 배경과만 구분 */
 .best {
   margin: 0;
   padding: 6px 18px;
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--sheet) 94%, transparent);
-  border: 1px solid color-mix(in srgb, var(--leaf) 30%, var(--line));
-  box-shadow: 0 3px 0 var(--depth), 0 8px 18px rgb(0 0 0 / 0.12);
+  border-radius: 10px;
+  background: color-mix(in srgb, color-mix(in srgb, var(--leaf) 12%, var(--sheet)) 88%, transparent);
+  border: 1px solid color-mix(in srgb, var(--leaf) 40%, var(--line));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.35), 0 1px 3px rgb(0 0 0 / 0.1);
   backdrop-filter: blur(6px);
   text-align: center;
   font-size: 15px;
@@ -767,6 +768,27 @@ body:has(.screen.game) .scene .layer {
   .hint {
     display: none;
   }
+}
+/* 미리보기 전용 줄: 흐름에서 빼 위 메뉴 바로 밑에 띄운다(출시 화면에는 없으니, 있든 없든 시작 화면 배치가 같게) */
+.screen.start {
+  position: relative;
+}
+.start .dev-row {
+  position: absolute;
+  top: calc(var(--jp-top-space) - 8px);
+  left: 0;
+  right: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+.start .dev-row > * {
+  pointer-events: auto;
+}
+.start .dev-toggle {
+  min-height: 22px;
+  padding: 0 10px;
+  font-size: 11px;
+  background: color-mix(in srgb, var(--sheet) 85%, transparent);
 }
 .dev-row {
   display: flex;
@@ -2226,6 +2248,13 @@ body:has(.screen.game) .scene .layer {
 .result .main-col {
   gap: 10px;
 }
+/* 결과 화면은 위 메뉴가 없어 그 자리만큼 비우지 않고 로고를 위로 올린다. 로고 밑은 꽃 카드와 조금 띄움 */
+.screen.result {
+  padding-top: calc(env(safe-area-inset-top, 0px) + 14px);
+}
+.result .logo {
+  margin-bottom: 10px;
+}
 .bloom-card {
   position: relative;
   display: grid;
@@ -2559,4 +2588,31 @@ body:has(.screen.game) .scene .layer {
   font-weight: 400;
   font-size: 12px;
   color: var(--muted);
+}
+
+/* 영어 글자 맞춤: 영어 문구가 한국어보다 길어 좁은 칸에서 줄이 바뀌거나 잘리던 곳만 조금 작게 */
+:root[lang='en'] .tagline {
+  font-size: 15px;
+  text-wrap: balance;
+}
+:root[lang='en'] .daily-text small {
+  font-size: 12px;
+  letter-spacing: -0.01em;
+}
+:root[lang='en'] .modal h2 {
+  font-size: 21px;
+  white-space: nowrap;
+}
+:root[lang='en'] .tile-btn .name {
+  font-size: 10px;
+  line-height: 1.15;
+  overflow-wrap: normal;
+}
+:root[lang='en'] .bloom-card h2 {
+  font-size: 18px;
+  text-wrap: balance;
+}
+.pg-kicker em,
+.rank-list .stage {
+  white-space: nowrap;
 }

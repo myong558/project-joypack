@@ -202,10 +202,18 @@ const DRAW: Record<FlowerId, () => Plate> = {
     const p = new Plate().leaf(46, 116, -18, 70, 22, 0.15).leaf(54, 116, 16, 64, 20, -0.15).stem('M50 116C50 80 56 50 82 46', 1);
     const h = new Plate();
     h.tint = true;
-    // 꽃자루: 휘어진 꽃대(위 곡선)에서 아래로 처져 방울 꽃 꼭대기(y + 9)에 닿음
-    [[55, 50], [61.5, 47], [68, 45.5], [74.5, 46], [80, 49]].forEach(([x, y], i) => {
-      h.raw(`<path d="M${x - 1.5} ${y - 3}Q${x + 1.5} ${y + 2} ${x} ${y + 9}" fill="none" stroke="${STEM}" stroke-width=".7"/>`);
-      h.petal(x, y + 9, 180, 9, 10, { shape: 'cup', c: '#f4f1e6', l: '#ffffff', closed: 180, cs: 0.55, delay: i * 120 });
+    // 꽃대 곡선(위 stem 과 같은 베지어) 위의 점에서 꽃자루가 아래로 처져 방울 꽃 꼭대기에 닿는다
+    const arc = (t: number) => {
+      const u = 1 - t;
+      const bz = (a: number, b: number, c: number, d: number) => u * u * u * a + 3 * u * u * t * b + 3 * u * t * t * c + t * t * t * d;
+      return [bz(50, 50, 56, 82), bz(116, 80, 50, 46)];
+    };
+    [0.6, 0.7, 0.79, 0.88, 0.97].forEach((t, i) => {
+      const [ax, ay] = arc(t);
+      const bx = ax + 1.2;
+      const by = ay + 8;
+      h.raw(`<path d="M${n(ax)} ${n(ay)}Q${n(ax + 2.4)} ${n(ay + 3)} ${n(bx)} ${n(by)}" fill="none" stroke="${STEM}" stroke-width=".7" stroke-linecap="round"/>`);
+      h.petal(bx, by, 180, 9, 10, { shape: 'cup', c: '#f4f1e6', l: '#ffffff', closed: 180, cs: 0.55, delay: i * 120 });
     });
     return p.raw(h.toString());
   },
@@ -422,11 +430,14 @@ const DRAW: Record<FlowerId, () => Plate> = {
 
 /** 게임 약식 그림에서 가운데로 잘라 올 꽃 머리 자리: [가운데 x, 가운데 y, 반지름] (100×120 판 좌표) */
 const FOCUS: Record<FlowerId, [number, number, number]> = {
-  tulip: [50, 40, 20], daffodil: [56, 46, 21], hyacinth: [50, 55, 22], lily: [66, 52, 19], pansy: [50, 54, 23], peony: [50, 50, 24],
+  tulip: [50, 40, 20], daffodil: [56, 46, 21], hyacinth: [50, 55, 22], lily: [63, 60, 20], pansy: [50, 54, 23], peony: [50, 50, 24],
   forgetmenot: [51, 56, 24], hydrangea: [50, 54, 25], lavender: [53, 50, 25], iris: [50, 52, 27], balsam: [50, 60, 26], sunflower: [52, 48, 24],
   cosmos: [52, 52, 24], lycoris: [50, 48, 30], gujeolcho: [50, 56, 21], dahlia: [50, 52, 25], aster: [50, 56, 22], mum: [50, 58, 22],
   camellia: [50, 56, 24], cyclamen: [52, 46, 26], poinsettia: [50, 58, 29], hellebore: [56, 64, 22], snowdrop: [62, 54, 20], adonis: [50, 68, 22],
 };
+
+/** 게임 약식 그림 틀만 따로 옮길 꽃(x 방향): 은방울꽃은 도감에서는 잎까지 보이게 왼쪽, 게임 칸에서는 방울 꽃 줄 가운데 */
+const GAME_SHIFT: Partial<Record<FlowerId, number>> = { lily: 6 };
 
 const cache = new Map<string, string>();
 
@@ -445,7 +456,7 @@ export function flowerSvg(id: FlowerId, open = true, kind: FlowerDetail = 'dex')
   // 게임 칸에서는 꽃 머리 둘레를 조금 더 바짝(반지름의 85%) 잘라 크게 보이게
   const [cx, cy, r0] = FOCUS[id];
   const r = kind === 'game' ? Math.round(r0 * 0.85) : r0;
-  return `<svg class="fl ${kind}${open ? '' : ' closed'}" viewBox="${kind === 'game' ? `${cx - r} ${cy - r} ${r * 2} ${r * 2}` : dexBox(cx, cy)}" aria-hidden="true" focusable="false">${body}</svg>`;
+  return `<svg class="fl ${kind}${open ? '' : ' closed'}" viewBox="${kind === 'game' ? `${cx + (GAME_SHIFT[id] ?? 0) - r} ${cy - r} ${r * 2} ${r * 2}` : dexBox(cx, cy)}" aria-hidden="true" focusable="false">${body}</svg>`;
 }
 
 /** 튤립 꽃 머리 높이(도감 판에서 꽃 머리가 오는 자리) */
