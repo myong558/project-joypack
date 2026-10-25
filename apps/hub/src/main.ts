@@ -295,6 +295,12 @@ function teaserArt(game: GameMeta): string {
   return `<img class="card-icon teaser-icon" data-veil="${veil}" src="${iconUrl(game)}" alt="" width="72" height="72" />${mark}`;
 }
 
+/** 한국어 12시: "오후 12:00"은 "낮 12:00", "오전 12:00"은 "밤 12:00"으로(오전·오후 12시는 헷갈림). 다른 시각은 그대로 */
+function noonMidnight(text: string, d: Date): string {
+  if (getLang() !== 'ko' || d.getHours() % 12) return text;
+  return d.getHours() ? text.replace('오후', '낮') : text.replace('오전', '밤');
+}
+
 function teaserCard(game: GameMeta): string {
   const open = new Date(game.open!);
   const day = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
@@ -306,11 +312,11 @@ function teaserCard(game: GameMeta): string {
     hour: 'numeric',
     minute: '2-digit',
   });
-  const opens = esc(t('teaser.opens', { when }));
+  const opens = esc(t('teaser.opens', { when: noonMidnight(when, open) }));
   // 화면에는 날짜 / 시각 두 줄로 나눠 "오후 / 12:00"처럼 어색한 자리에서 줄이 바뀌지 않게 한다
   const locale = getLang() === 'ko' ? 'ko-KR' : 'en-US';
   const date = open.toLocaleDateString(locale, { month: 'short', day: 'numeric', weekday: 'short' });
-  const time = open.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' });
+  const time = noonMidnight(open.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' }), open);
   return `
     <div class="card teaser" aria-disabled="true" aria-label="Coming soon · ${opens}">
       <span class="card-art" data-pat="${patternOf(game)}" data-backdrop="${__TEASER_BACKDROP__[game.id] ?? 0}">${teaserArt(game)}</span>
