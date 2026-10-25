@@ -374,7 +374,11 @@ dist/                       → https://myong558.github.io/project-joypack/
 
 - **Node 24.12 이상**(LTS, `package.json` engines — Firebase 13 이 요구). 낮으면 `pnpm install` 이 멈춘다. Node 를 바꾼 뒤에는 `pnpm install --force` 로 다시 설치한다.
 - **pnpm 12.8.1**(`packageManager`). `corepack enable`, 권한이 없거나 corepack 이 오래돼 안 되면 `npm i -g pnpm@12.8.1`.
-- `pnpm setup:claude` — Claude Code 개인 설정을 이 PC에 깐다(열린 세션은 다시 시작).
+- **git**: `git clone https://github.com/myong558/project-joypack.git` 뒤 이 저장소에서만 작성자를 다른 PC와 같게 `git config user.name "명범수(S025547)"`·`git config user.email myong558@naver.com`. 첫 `git push` 때 뜨는 GitHub 로그인 창(Git Credential Manager)으로 로그인한다.
+- `pnpm install` 뒤 `pnpm test`·`pnpm build` 가 통과하는지 먼저 본다(rolldown 바이너리가 빠졌다는 오류면 `pnpm install --force`).
+- `pnpm setup:claude` — Claude Code 개인 설정(전역 지침·압축 뒤 한국어 훅·답변 언어)과 이 저장소 작업 메모리(`setup/claude/memory`)를 이 PC에 깐다(열린 세션은 다시 시작). 이 PC에서 메모리·설정이 늘었으면 `pnpm setup:claude --save` 뒤 커밋해 다른 PC로 넘긴다.
+- `pnpm check:screens` 는 Chrome 으로 찍는다. 없으면 Windows 기본 Edge 를 쓰고, 둘 다 다른 곳에 있으면 `CHROME` 환경 변수에 실행 파일 경로를 넣는다.
+- 줄바꿈은 `.gitattributes`(`* text=auto`)로 저장소에 LF 로 둔다. PC마다 `core.autocrlf` 가 달라도 괜찮다.
 
 ```bash
 pnpm install

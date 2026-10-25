@@ -1,0 +1,2 @@
+# 줄바꿈: 저장소에는 LF 로 둔다(PC마다 core.autocrlf 가 달라도 같은 파일이 바뀐 것처럼 보이지 않게)
+* text=auto

@@ -11,11 +11,14 @@ const CHROME_PATHS = [
   '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
   '/usr/bin/google-chrome',
   '/usr/bin/chromium',
+  // Chrome 이 없는 Windows PC 는 기본으로 깔린 Edge(같은 Chromium)로 찍는다
+  'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
+  'C:/Program Files/Microsoft/Edge/Application/msedge.exe',
 ].filter(Boolean);
 
 export async function launch() {
   const chrome = CHROME_PATHS.find((p) => existsSync(p));
-  if (!chrome) throw new Error('Chrome 을 찾지 못했어요. CHROME 환경 변수에 실행 파일 경로를 넣어 주세요');
+  if (!chrome) throw new Error('Chrome·Edge 를 찾지 못했어요. CHROME 환경 변수에 실행 파일 경로를 넣어 주세요');
   const profile = mkdtempSync(join(tmpdir(), 'jp-chrome-'));
   const port = 9300 + Math.floor(Math.random() * 500);
   const proc = spawn(chrome, ['--headless=new', `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`, '--no-first-run', '--disable-gpu', 'about:blank'], { stdio: 'ignore' });

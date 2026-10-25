@@ -61,7 +61,8 @@
 
 이 문서·기준서·README는 저장소에 있어 `git pull`만 하면 된다. Claude Code 개인 설정(`~/.claude/`)도 원본을 [setup/claude/](setup/claude/)에 두었다.
 
-- 원본: `setup/claude/CLAUDE.md`(전역 지침: 한국어 답변, 답변 뒤 별도 메시지로 진행 시간·토큰 한 줄), `setup/claude/hooks/korean-after-compact.js`(압축 직후 한국어 규칙을 다시 넣는 훅)
-- 설치: `pnpm setup:claude` → `~/.claude/`에 복사하고 `settings.json`의 `hooks.SessionStart`(matcher `compact`)에 그 PC 경로로 훅을 넣는다(다른 설정은 그대로, 내용이 다른 기존 파일은 `.bak`으로 남김). 적용은 세션을 다시 시작한 뒤부터.
-- 개인 설정을 고쳤으면 `pnpm setup:claude --save`로 저장소 원본에 반영하고 커밋한다(두 곳이 어긋나지 않게).
+- 원본: `setup/claude/CLAUDE.md`(전역 지침: 한국어 답변, 답변 뒤 별도 메시지로 진행 시간·토큰 한 줄), `setup/claude/hooks/korean-after-compact.js`(압축 직후 한국어 규칙을 다시 넣는 훅), `setup/claude/memory/*.md`(이 저장소 작업 메모리. Claude 메모리는 PC마다 따로라 여기로 옮긴다)
+- 설치: `pnpm setup:claude` → `~/.claude/`에 복사하고 `settings.json`의 `hooks.SessionStart`(matcher `compact`)에 그 PC 경로로 훅을, 비어 있으면 `language: korean`을 넣는다. 메모리는 그 PC의 이 저장소 메모리 폴더에 깔고 `MEMORY.md`는 없는 줄만 더한다(다른 설정은 그대로, 내용이 다른 기존 파일은 `.bak`으로 남김). 적용은 세션을 다시 시작한 뒤부터.
+- 개인 설정을 고쳤거나 **메모리를 새로 쓰거나 고쳤으면** 같은 작업의 커밋에서 `pnpm setup:claude --save`로 저장소 원본에 반영한다(두 PC가 어긋나지 않게).
+- 새 PC 준비(Node 24.12+, pnpm 12.8.1, git 작성자, GitHub 로그인, Chrome/Edge)는 [README 7장](README.md) "새 PC에서 처음 받을 때"를 따른다.
 - **세션 첫 답변 전에 확인한다:** 이 대화에 전역 지침(`~/.claude/CLAUDE.md`의 "진행 시간·토큰" 규칙)이 안 보이거나 `~/.claude/hooks/korean-after-compact.js`가 없으면, 개인 설정이 안 깔린 PC다. 답변 맨 앞에 "`pnpm setup:claude` 실행 후 세션 재시작"을 알리고, 사용자가 원하면 대신 실행한다.

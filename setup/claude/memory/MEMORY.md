@@ -1,0 +1,2 @@
+- [두 PC 작업 준비](two-pc-setup.md) — 두 PC 번갈아 작업, 새 PC에서 막힌 Node·pnpm·git 작성자·GitHub 로그인
+- [임시 판 먼저](temp-levels-first.md) — 판 생성이 오래 걸리면 임시 판으로 진행, 완성 단계에서 전체 생성 제안
