@@ -12,7 +12,7 @@ import { BOARD, clock, dailyAhead, placeOf, placeOfDaily, type DailyEntry, type 
 import { shareResult } from './share';
 import { emptyRecords, flowerCount, gardenScore, loadSave, writeSave } from './storage';
 import { applySkin, applyTheme, resolveSkin, todaySkin } from './theme';
-import { BoardView } from './ui/board';
+import { BoardView, IDLE_KINDS, type IdleKind } from './ui/board';
 import { Effects } from './ui/effects';
 import { mountScene } from './ui/scene';
 import { ALL_OPEN, dailyPendingRecord, dailyResultScreen, gameScreen, resultScreen, setPageSound, startScreen, todayDaily, unlocked, type ClearResult, type DailyResult, type RankingView } from './ui/screens';
@@ -250,19 +250,23 @@ function play(level: number | 'daily'): void {
   };
   render(true);
 
-  // 가만히 있으면(7초) 정원사가 쉬는 동작을 차례로(모자 벗고 땀 닦기 → 두리번 → 기지개), 9초마다 다음 동작.
-  // 움직이거나 되돌리면 바로 멈추고 다시 센다. 일시정지·판을 깬 뒤·화면을 떠나 있으면 하지 않는다
-  const IDLE = ['wipe', 'look', 'stretch'] as const;
+  // 가만히 있으면(8초) 정원사가 쉬는 동작 하나를 하고, 10초마다 다른 동작(바로 앞과 같은 것은 빼고 무작위:
+  // 땀 닦기 · 두리번 · 기지개 · 하품 · 모자 부채질). 움직이거나 되돌리면 바로 멈추고 다시 센다.
+  // 일시정지·판을 깬 뒤·화면을 떠나 있으면 하지 않는다
   let idleTimer: ReturnType<typeof setTimeout> | undefined;
-  let idleNext = 0;
+  let idleLast: IdleKind | null = null;
   const idleAct = () => {
-    if (!paused && !game.done && !document.hidden) board.idle(IDLE[idleNext++ % IDLE.length]);
-    idleTimer = setTimeout(idleAct, 9000);
+    if (!paused && !game.done && !document.hidden) {
+      const choices = IDLE_KINDS.filter((k) => k !== idleLast);
+      idleLast = choices[Math.floor(Math.random() * choices.length)];
+      board.idle(idleLast);
+    }
+    idleTimer = setTimeout(idleAct, 10000);
   };
   const poke = () => {
     board.idle(null);
     clearTimeout(idleTimer);
-    idleTimer = setTimeout(idleAct, 7000);
+    idleTimer = setTimeout(idleAct, 8000);
   };
   poke();
 

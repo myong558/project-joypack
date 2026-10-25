@@ -15,6 +15,8 @@ const LEAF = '#5f7f45';
 const LEAF_L = '#a7c27a';
 const STEM = '#58743e';
 const n = (v: number) => Math.round(v * 10) / 10;
+/** 각도를 -180~180 으로(봉오리 ↔ 핀 모습 사이를 가까운 쪽으로 돌아 양쪽으로 고르게 펼쳐지게) */
+const norm = (a: number) => ((((a + 180) % 360) + 360) % 360) - 180;
 
 type Shape = 'oval' | 'point' | 'round' | 'notch' | 'cup' | 'strap' | 'heart';
 
@@ -55,6 +57,14 @@ interface PetalOpts {
 
 class Plate {
   parts: string[] = [];
+  /** 잔꽃이 모인 꽃: 봉오리일 때 꽃잎 위에 연두빛을 덮었다가 피면서 걷혀 꽃 색이 차오른다(styles.css .fl .bd) */
+  tint = false;
+
+  /** 꽃자루: 줄기(또는 꽃대)에서 잔꽃 하나까지 잇는 가는 선 */
+  pedicel(x1: number, y1: number, x2: number, y2: number, w = 0.6): this {
+    this.parts.push(`<path d="M${n(x1)} ${n(y1)}Q${n((x1 + x2) / 2)} ${n(Math.min(y1, y2) - 1)} ${n(x2)} ${n(y2)}" fill="none" stroke="${STEM}" stroke-width="${w}" stroke-linecap="round"/>`);
+    return this;
+  }
 
   stem(d: string, width = 1.4): this {
     // 도감: 왼쪽에 빛 받은 밝은 줄을 더해 줄기가 둥글게 보이게
@@ -85,7 +95,9 @@ class Plate {
   /** 움직이는 꽃잎 하나. (x,y)가 꽃잎이 붙은 자리, ang 이 활짝 핀 각도 */
   petal(x: number, y: number, ang: number, L: number, W: number, o: PetalOpts): this {
     const d = petalD(o.shape ?? 'oval', L, W);
-    const closed = o.closed ?? ang * 0.12;
+    ang = norm(ang);
+    // 봉오리: 꽃잎이 길이는 거의 그대로 좁게 오므라져 위(가운데)로 모인다(styles.css .fl.closed .pt)
+    const closed = norm(o.closed ?? ang * 0.12);
     // 꽃잎 결: 도감은 가운데 결 + 양옆 결, 게임은 없음
     const side = `<path d="M0 ${n(-L * 0.1)}Q${n(W * 0.2)} ${n(-L * 0.4)} ${n(W * 0.28)} ${n(-L * 0.66)}M0 ${n(-L * 0.1)}Q${n(-W * 0.2)} ${n(-L * 0.4)} ${n(-W * 0.28)} ${n(-L * 0.66)}" fill="none" stroke="${INK}" stroke-width=".22" stroke-opacity=".25"/>`;
     // 도감은 결을 더 촘촘히(바깥쪽 가는 결 둘 더)
@@ -97,7 +109,7 @@ class Plate {
     this.parts.push(
       `<g transform="translate(${n(x)} ${n(y)})${sy}"><g class="pt" style="--r:${n(ang)}deg;--c:${n(closed)}deg;--s:${o.cs ?? 0.45};--d:${o.delay ?? 0}ms">` +
         `<path d="${d}" fill="${o.c}" fill-opacity=".9" stroke="${INK}" stroke-width=".42" stroke-opacity=".75"/>` +
-        `<path d="${d}" fill="${o.l}" fill-opacity=".55" transform="translate(0 ${n(-L * 0.28)}) scale(.55)"/>${shade}${vein}</g></g>`,
+        `<path d="${d}" fill="${o.l}" fill-opacity=".55" transform="translate(0 ${n(-L * 0.28)}) scale(.55)"/>${shade}${vein}${this.tint ? `<path class="bd" d="${d}" fill="#a3c27a" stroke="#6c8c45" stroke-width=".35"/>` : ''}</g></g>`,
     );
     return this;
   }
@@ -106,19 +118,32 @@ class Plate {
   ring(x: number, y: number, count: number, L: number, W: number, o: PetalOpts & { start?: number; jitter?: number }, step = 40): this {
     for (let i = 0; i < count; i++) {
       const a = (o.start ?? 0) + (360 / count) * i + (o.jitter ? Math.sin(i * 7.3) * o.jitter : 0);
-      this.petal(x, y, a, L * (1 - (o.jitter ? Math.abs(Math.cos(i * 3.1)) * 0.08 : 0)), W, { ...o, closed: o.closed ?? a, delay: (o.delay ?? 0) + i * step });
+      this.petal(x, y, a, L * (1 - (o.jitter ? Math.abs(Math.cos(i * 3.1)) * 0.08 : 0)), W, { ...o, closed: o.closed ?? norm(a) * 0.15, delay: (o.delay ?? 0) + i * step });
+    }
+    return this;
+  }
+
+  /**
+   * 꽃받침·총포(초록): 봉오리일 때는 위로 서서 오므린 꽃잎을 감싸고, 피면 아래로 젖혀져 꽃잎 뒤로 조금 보인다. 꽃잎보다 먼저 그린다
+   */
+  calyx(x: number, y: number, count: number, L: number, W: number, sy = 1): this {
+    for (let i = 0; i < count; i++) {
+      const k = count > 1 ? i / (count - 1) - 0.5 : 0;
+      this.petal(x, y, 180 + k * 150, L, W, { shape: 'point', c: '#6c8c45', l: '#a9c27a', closed: k * 46, cs: 0.95, sy, vein: false, delay: 0 });
     }
     return this;
   }
 
   disc(x: number, y: number, r: number, c: string, l: string, dots = 0, sy = 1): this {
-    let s = `<g transform="translate(${n(x)} ${n(y)}) scale(1 ${sy})"><circle r="${r}" fill="${c}" stroke="${INK}" stroke-width=".4" stroke-opacity=".7"/><circle r="${n(r * 0.55)}" cx="${n(-r * 0.2)}" cy="${n(-r * 0.25)}" fill="${l}" fill-opacity=".5"/>`;
+    let s = `<g transform="translate(${n(x)} ${n(y)}) scale(1 ${sy})"><g class="dc">`;
+    s += `<circle r="${r}" fill="${c}" stroke="${INK}" stroke-width=".4" stroke-opacity=".7"/><circle r="${n(r * 0.55)}" cx="${n(-r * 0.2)}" cy="${n(-r * 0.25)}" fill="${l}" fill-opacity=".5"/>`;
     for (let i = 0; i < dots; i++) {
       const a = i * 2.39996;
       const rr = r * 0.88 * Math.sqrt((i + 0.5) / dots);
       s += `<circle cx="${n(Math.cos(a) * rr)}" cy="${n(Math.sin(a) * rr)}" r=".5" fill="${INK}" fill-opacity=".55"/>`;
     }
-    this.parts.push(`${s}</g>`);
+    // 가운데(꽃술)는 .dc 묶음: 봉오리일 때 오므린 꽃잎 속에 작게 숨었다가 꽃잎과 함께 펼쳐진다
+    this.parts.push(`${s}</g></g>`);
     return this;
   }
 
@@ -138,9 +163,12 @@ class Plate {
   }
 }
 
-/** 꽃 머리 하나를 한 묶음으로 키웠다 줄였다(봉오리 때 꽃 전체가 작아 보이게) */
-const head = (x: number, y: number, inner: Plate, delay = 0) =>
-  `<g transform="translate(${x} ${y})"><g class="hd" style="--d:${delay}ms">${inner}</g></g>`;
+/**
+ * 꽃 머리 하나를 한 묶음으로(봉오리 때 살짝 작게). neck 은 꽃 머리 밑으로 이어 그리는 줄기 길이:
+ * 줄기 끝이 꽃 머리 가운데보다 아래에서 끝나는 꽃은 핀 꽃잎이 가려 주지만 봉오리일 때 떠 보이므로 머리 밑동까지 잇는다
+ */
+const head = (x: number, y: number, inner: Plate, delay = 0, neck = 0) =>
+  `${neck ? new Plate().stem(`M${x} ${y + neck}V${y}`, 1.6) : ''}<g transform="translate(${x} ${y})"><g class="hd" style="--d:${delay}ms">${inner}</g></g>`;
 
 const DRAW: Record<FlowerId, () => Plate> = {
   tulip: () => {
@@ -160,9 +188,12 @@ const DRAW: Record<FlowerId, () => Plate> = {
   hyacinth: () => {
     const p = new Plate().stem('M50 116V44', 2).leaf(49, 116, -20, 50, 10, 0.25).leaf(51, 116, 18, 46, 10, -0.2).leaf(50, 116, 2, 40, 9, 0.05);
     const h = new Plate();
+    h.tint = true;
+    p.stem('M50 46V40', 1.6);
     for (let i = 0; i < 13; i++) {
       const y = 70 - i * 2.4;
       const x = 50 + (i % 2 ? 6 : -6) * (1 - i / 18);
+      p.pedicel(50, y + 1.5, x, y);
       h.ring(x, y, 4, 6.4, 5, { shape: 'oval', c: '#7a6bbf', l: '#c9c0f0', start: 45, vein: false, delay: 500 - i * 30 } as PetalOpts, 20);
     }
     return p.raw(h.toString());
@@ -170,8 +201,10 @@ const DRAW: Record<FlowerId, () => Plate> = {
   lily: () => {
     const p = new Plate().leaf(46, 116, -18, 70, 22, 0.15).leaf(54, 116, 16, 64, 20, -0.15).stem('M50 116C50 80 56 50 82 46', 1);
     const h = new Plate();
+    h.tint = true;
+    // 꽃자루: 휘어진 꽃대(위 곡선)에서 아래로 처져 방울 꽃 꼭대기(y + 9)에 닿음
     [[55, 50], [61.5, 47], [68, 45.5], [74.5, 46], [80, 49]].forEach(([x, y], i) => {
-      h.raw(`<path d="M${x} ${y - 4}V${y + 1}" stroke="${STEM}" stroke-width=".6"/>`);
+      h.raw(`<path d="M${x - 1.5} ${y - 3}Q${x + 1.5} ${y + 2} ${x} ${y + 9}" fill="none" stroke="${STEM}" stroke-width=".7"/>`);
       h.petal(x, y + 9, 180, 9, 10, { shape: 'cup', c: '#f4f1e6', l: '#ffffff', closed: 180, cs: 0.55, delay: i * 120 });
     });
     return p.raw(h.toString());
@@ -179,17 +212,18 @@ const DRAW: Record<FlowerId, () => Plate> = {
   pansy: () => {
     const p = new Plate().stem('M50 116C48 100 46 84 50 66').leaf(49, 108, -40, 22, 14, 0.2).leaf(49, 98, 38, 20, 13, -0.2);
     const h = new Plate()
+      .calyx(0, 0, 5, 12, 6)
       .petal(0, 0, -25, 22, 20, { shape: 'round', c: '#5a3f8f', l: '#9d86cf', delay: 0 })
       .petal(0, 0, 25, 22, 20, { shape: 'round', c: '#5a3f8f', l: '#9d86cf', delay: 80 })
       .petal(0, 0, -95, 19, 17, { shape: 'round', c: '#e8c546', l: '#fbeaa0', delay: 160 })
       .petal(0, 0, 95, 19, 17, { shape: 'round', c: '#e8c546', l: '#fbeaa0', delay: 240 })
       .petal(0, 0, 180, 21, 22, { shape: 'round', c: '#efcf52', l: '#fff0a6', delay: 320 })
       .raw(`<path d="M0 2L-3 9M0 2L0 11M0 2L3 9" stroke="#3b2a55" stroke-width=".6" stroke-opacity=".7"/><circle r="1.6" fill="#f5e27a" stroke="${INK}" stroke-width=".3"/>`);
-    return p.raw(head(50, 56, h));
+    return p.raw(head(50, 56, h, 0, 10));
   },
   peony: () => {
     const p = new Plate().stem('M50 116C50 96 50 80 50 64', 1.8).leaf(50, 104, -50, 30, 14, 0.25).leaf(50, 98, 48, 28, 13, -0.25).leaf(50, 112, -20, 24, 10, 0.2);
-    const h = new Plate();
+    const h = new Plate().calyx(0, 0, 5, 18, 12, 0.82);
     const rings: [number, number, number, string, string][] = [
       [9, 24, 20, '#e48ba2', '#f8c9d4'],
       [7, 18, 18, '#de7d97', '#f7c1cf'],
@@ -197,18 +231,31 @@ const DRAW: Record<FlowerId, () => Plate> = {
     ];
     rings.forEach(([cnt, L, W, c, l], k) => h.ring(0, 0, cnt, L, W, { shape: 'round', c, l, start: k * 20, sy: 0.82, delay: 200 * (2 - k), cs: 0.4 } as PetalOpts, 50));
     h.disc(0, -1, 4, '#f3d15a', '#fff2a6', 0, 0.8);
-    return p.raw(head(50, 50, h));
+    return p.raw(head(50, 50, h, 0, 14));
   },
   forgetmenot: () => {
     const p = new Plate().stem('M50 116C50 96 44 80 36 64', 1).stem('M50 106C54 92 62 80 66 66', 1).stem('M50 98C50 86 51 74 52 56', 1).leaf(50, 112, -55, 22, 8, 0.2).leaf(50, 104, 50, 20, 8, -0.2);
     const h = new Plate();
     const spots = [[36, 60], [30, 66], [40, 54], [66, 62], [72, 56], [62, 56], [52, 52], [47, 46], [57, 46], [44, 62]];
+    h.tint = true;
+    // 꽃자루: 가장 가까운 가지 끝에서 잔꽃마다
+    const tips = [[36, 64], [66, 66], [52, 56]];
+    for (const [x, y] of spots) {
+      const [tx, ty] = tips.reduce((a, b) => (Math.hypot(b[0] - x, b[1] - y) < Math.hypot(a[0] - x, a[1] - y) ? b : a));
+      if (Math.hypot(tx - x, ty - y) > 1) p.pedicel(tx, ty, x, y);
+    }
     spots.forEach(([x, y], i) => h.ring(x, y, 5, 4.6, 4.6, { shape: 'round', c: '#5c8fd0', l: '#bcd6f4', start: i * 13, vein: false, delay: i * 70 } as PetalOpts, 15).disc(x, y, 1.1, '#f2d35b', '#fff'));
     return p.raw(h.toString());
   },
   hydrangea: () => {
     const p = new Plate().stem('M50 116C50 100 50 86 50 72', 2).leaf(50, 108, -62, 34, 22, 0.2).leaf(50, 104, 60, 32, 21, -0.2);
     const h = new Plate();
+    h.tint = true;
+    for (let i = 0; i < 17; i++) {
+      const a0 = i * 2.39996;
+      const r0 = 17 * Math.sqrt((i + 0.5) / 17);
+      p.pedicel(50, 73, 50 + Math.cos(a0) * r0 * 1.2, 54 + Math.sin(a0) * r0 * 0.9, 0.7);
+    }
     for (let i = 0; i < 17; i++) {
       const a = i * 2.39996;
       const r = 17 * Math.sqrt((i + 0.5) / 17);
@@ -222,7 +269,10 @@ const DRAW: Record<FlowerId, () => Plate> = {
     const p = new Plate().stem('M50 116C49 90 46 66 40 40', 0.9).stem('M50 116C51 90 52 64 54 34', 0.9).stem('M50 116C52 92 58 70 66 46', 0.9).leaf(50, 116, -30, 26, 4, 0.15).leaf(50, 116, 28, 24, 4, -0.15).leaf(50, 116, -5, 22, 4, 0.05);
     const h = new Plate();
     const spikes: [number, number, number][] = [[40, 40, -14], [54, 34, 2], [66, 46, 18]];
+    h.tint = true;
     spikes.forEach(([x, y, a], s) => {
+      // 꽃대 축: 잔꽃이 붙는 선을 그려 줄기와 잇는다
+      p.stem(`M${x} ${y}L${n(x + Math.sin((a * Math.PI) / 180) * 21)} ${n(y + 21 * Math.cos((a * Math.PI) / 180))}`, 0.8);
       for (let i = 0; i < 7; i++) {
         const t = i * 3.4;
         const px = x - Math.sin((a * Math.PI) / 180) * -t;
@@ -257,19 +307,20 @@ const DRAW: Record<FlowerId, () => Plate> = {
   },
   sunflower: () => {
     const p = new Plate().stem('M50 116C50 96 52 80 52 68', 2.4).leaf(50, 106, -60, 30, 22, 0.3).leaf(51, 96, 58, 28, 20, -0.3);
-    const h = new Plate().ring(0, 0, 20, 21, 7, { shape: 'point', c: '#e8b528', l: '#fbe08a', start: 0, cs: 0.35 } as PetalOpts, 25).disc(0, 0, 11, '#6b4220', '#9c6a3a', 45);
-    return p.raw(head(52, 48, h));
+    const h = new Plate().calyx(0, 0, 7, 17, 9).ring(0, 0, 20, 21, 7, { shape: 'point', c: '#e8b528', l: '#fbe08a', start: 0, cs: 0.35 } as PetalOpts, 25).disc(0, 0, 11, '#6b4220', '#9c6a3a', 45);
+    return p.raw(head(52, 48, h, 0, 20));
   },
   cosmos: () => {
     const p = new Plate().stem('M50 116C47 96 46 78 52 58', 0.9).foliage(
       `<path d="M48 100L38 92M38 92L33 94M38 92L36 86M49 88L60 80M60 80L65 82M60 80L60 74M47 106L58 100" stroke="${LEAF}" stroke-width=".8" fill="none" stroke-linecap="round"/>`,
     );
-    const h = new Plate().ring(0, 0, 8, 22, 15, { shape: 'notch', c: '#de7fa8', l: '#f7c6db', start: 10 } as PetalOpts, 50).disc(0, 0, 4.5, '#e9b730', '#fbe38a', 14);
-    return p.raw(head(52, 52, h));
+    const h = new Plate().calyx(0, 0, 6, 13, 7).ring(0, 0, 8, 22, 15, { shape: 'notch', c: '#de7fa8', l: '#f7c6db', start: 10 } as PetalOpts, 50).disc(0, 0, 4.5, '#e9b730', '#fbe38a', 14);
+    return p.raw(head(52, 52, h, 0, 6));
   },
   lycoris: () => {
     const p = new Plate().stem('M50 116V58', 1.4);
     const h = new Plate();
+    h.tint = true;
     for (let i = 0; i < 6; i++) {
       const a = -150 + i * 60;
       h.petal(0, 0, a, 20, 4, { shape: 'strap', c: '#c23a32', l: '#ef7c6c', closed: a * 0.2, cs: 0.4, delay: i * 70 });
@@ -281,39 +332,42 @@ const DRAW: Record<FlowerId, () => Plate> = {
   },
   gujeolcho: () => {
     const p = new Plate().stem('M50 116C50 96 48 80 50 62', 1).leaf(50, 106, -55, 16, 10, 0.3).leaf(50, 98, 52, 15, 10, -0.3);
-    const h = new Plate().ring(0, 0, 14, 19, 7, { shape: 'round', c: '#f4e6ea', l: '#ffffff', start: 0 } as PetalOpts, 35).disc(0, 0, 5, '#e6b02d', '#fde28c', 16);
-    return p.raw(head(50, 56, h));
+    const h = new Plate().calyx(0, 0, 6, 12, 6).ring(0, 0, 14, 19, 7, { shape: 'round', c: '#f4e6ea', l: '#ffffff', start: 0 } as PetalOpts, 35).disc(0, 0, 5, '#e6b02d', '#fde28c', 16);
+    return p.raw(head(50, 56, h, 0, 6));
   },
   dahlia: () => {
     const p = new Plate().stem('M50 116C50 98 50 82 50 66', 1.8).leaf(50, 104, -58, 26, 15, 0.25).leaf(50, 96, 56, 24, 14, -0.25);
     const h = new Plate()
+      .calyx(0, 0, 6, 15, 8, 0.9)
       .ring(0, 0, 12, 24, 10, { shape: 'point', c: '#a8304a', l: '#e4788c', start: 0, cs: 0.35, sy: 0.9 } as PetalOpts, 30)
       .ring(0, 0, 10, 17, 9, { shape: 'point', c: '#b93a54', l: '#ec8a9c', start: 18, cs: 0.35, sy: 0.9, delay: 250 } as PetalOpts, 30)
       .ring(0, 0, 8, 10, 7, { shape: 'point', c: '#c44a62', l: '#f3a1ae', start: 8, cs: 0.35, sy: 0.9, delay: 500 } as PetalOpts, 30)
       .disc(0, 0, 2.6, '#7c2134', '#c9576b', 0, 0.9);
-    return p.raw(head(50, 52, h));
+    return p.raw(head(50, 52, h, 0, 14));
   },
   aster: () => {
     const p = new Plate().stem('M50 116C51 98 50 82 50 64', 1).leaf(50, 104, -50, 22, 9, 0.2).leaf(50, 94, 48, 20, 9, -0.2);
     const h = new Plate()
+      .calyx(0, 0, 7, 13, 5)
       .ring(0, 0, 22, 20, 4, { shape: 'strap', c: '#7b4fa8', l: '#c3a1e4', start: 0, jitter: 4 } as PetalOpts, 18)
       .ring(0, 0, 16, 13, 3.6, { shape: 'strap', c: '#8d5fba', l: '#d2b4ee', start: 10, delay: 300 } as PetalOpts, 18)
       .disc(0, 0, 4.5, '#e8b631', '#fbe590', 14);
-    return p.raw(head(50, 56, h));
+    return p.raw(head(50, 56, h, 0, 8));
   },
   mum: () => {
     const p = new Plate().stem('M50 116C50 98 50 84 50 70', 1.6).leaf(50, 108, -58, 22, 14, 0.25).leaf(50, 100, 56, 22, 14, -0.25);
-    const h = new Plate();
+    const h = new Plate().calyx(0, 0, 6, 14, 7, 0.75);
     for (let k = 0; k < 4; k++) h.ring(0, 0, 14 - k * 2, 22 - k * 4.5, 6, { shape: 'oval', c: ['#d98a2a', '#e09a32', '#e8ad3e', '#efc153'][k], l: '#fbe0a0', start: k * 11, sy: 0.75 - k * 0.08, cs: 0.4, delay: (3 - k) * 160 } as PetalOpts, 25);
-    return p.raw(head(50, 58, h));
+    return p.raw(head(50, 58, h, 0, 12));
   },
   camellia: () => {
     const p = new Plate().stem('M50 116C48 100 48 86 50 72', 1.8).leaf(50, 104, -62, 26, 15, 0.2, '#3f6a3c', '#86ad6f').leaf(50, 98, 58, 26, 15, -0.2, '#3f6a3c', '#86ad6f').leaf(50, 86, -30, 22, 13, 0.2, '#3f6a3c', '#86ad6f');
     const h = new Plate()
+      .calyx(0, 0, 5, 13, 10, 0.85)
       .ring(0, 0, 6, 22, 22, { shape: 'round', c: '#b22a38', l: '#e5707a', start: 0, sy: 0.85, cs: 0.4 } as PetalOpts, 70)
       .ring(0, 0, 5, 14, 15, { shape: 'round', c: '#c2333f', l: '#ee8a91', start: 30, sy: 0.85, cs: 0.4, delay: 300 } as PetalOpts, 60);
     h.raw(`<g class="pt" style="--r:0deg;--c:0deg;--s:.4;--d:600ms">${Array.from({ length: 9 }, (_, i) => `<path d="M0 3L${n(-5 + i * 1.25)} -6" stroke="#f2d27a" stroke-width=".7"/>`).join('')}${Array.from({ length: 9 }, (_, i) => `<circle cx="${n(-5 + i * 1.25)}" cy="${n(-6.5 + Math.abs(i - 4) * 0.35)}" r=".9" fill="#f0c94c" stroke="${INK}" stroke-width=".2"/>`).join('')}</g>`);
-    return p.raw(head(50, 56, h));
+    return p.raw(head(50, 56, h, 0, 16));
   },
   cyclamen: () => {
     const p = new Plate().stem('M48 112C46 80 44 62 40 48', 0.9).stem('M52 112C56 84 62 66 64 56', 0.9);
@@ -332,7 +386,7 @@ const DRAW: Record<FlowerId, () => Plate> = {
       .ring(0, 0, 7, 28, 13, { shape: 'point', c: '#b8222f', l: '#e2606a', start: 0, sy: 0.85, cs: 0.4 } as PetalOpts, 60)
       .ring(0, 0, 6, 17, 10, { shape: 'point', c: '#c62d39', l: '#ec7a83', start: 26, sy: 0.85, cs: 0.4, delay: 350 } as PetalOpts, 60);
     for (let i = 0; i < 5; i++) h.raw(`<circle cx="${n(Math.cos(i * 1.26) * 2.6)}" cy="${n(Math.sin(i * 1.26) * 2.2)}" r="1.1" fill="#e8c43a" stroke="#6a5a1a" stroke-width=".25"/>`);
-    return p.raw(head(50, 58, h));
+    return p.raw(head(50, 58, h, 0, 16));
   },
   hellebore: () => {
     const p = new Plate().stem('M50 116C50 96 52 82 56 70', 1.2);
@@ -341,7 +395,7 @@ const DRAW: Record<FlowerId, () => Plate> = {
       .ring(0, 0, 5, 20, 20, { shape: 'round', c: '#f1ede0', l: '#ffffff', start: 0, sy: 0.85 } as PetalOpts, 80)
       .disc(0, 0, 4, '#b6c977', '#e2ecb0', 0, 0.85);
     for (let i = 0; i < 12; i++) h.raw(`<g class="pt" style="--r:0deg;--c:0deg;--s:.3;--d:500ms"><path d="M0 0L${n(Math.cos(i * 0.52) * 7)} ${n(Math.sin(i * 0.52) * 6)}" stroke="#e7c64c" stroke-width=".55"/></g>`);
-    return p.raw(head(56, 64, h));
+    return p.raw(head(56, 64, h, 0, 6));
   },
   snowdrop: () => {
     const p = new Plate().stem('M50 116C50 90 51 64 54 46Q58 38 64 42', 1).leaf(49, 116, -8, 58, 5, 0.1, '#6f8f6a', '#b8cdb0').leaf(51, 116, 10, 52, 5, -0.1, '#6f8f6a', '#b8cdb0');
@@ -358,10 +412,11 @@ const DRAW: Record<FlowerId, () => Plate> = {
       `<path d="M50 104L38 96M38 96L34 97M38 96L37 91M50 98L62 90M62 90L66 92M62 90L62 85M50 110L40 106M50 110L60 105" stroke="${LEAF}" stroke-width=".9" fill="none" stroke-linecap="round"/>`,
     );
     const h = new Plate()
+      .calyx(0, 0, 6, 14, 7, 0.6)
       .ring(0, 0, 9, 21, 10, { shape: 'oval', c: '#e2b81f', l: '#fff0a0', start: -80, sy: 0.6, cs: 0.4 } as PetalOpts, 50)
       .ring(0, -2, 7, 16, 9, { shape: 'oval', c: '#ebc42e', l: '#fff4b0', start: -60, sy: 0.65, cs: 0.4, delay: 300 } as PetalOpts, 50)
       .disc(0, -3, 4, '#c9921a', '#f3d36a', 10, 0.6);
-    return p.raw(head(50, 72, h));
+    return p.raw(head(50, 72, h, 0, 4));
   },
 };
 

@@ -84,7 +84,7 @@ function openModal(host: HTMLElement, content: HTMLElement, label: string, reope
 function heroDemo(): string {
   return `<div class="demo">
     <span class="d-sign"><b>${t('app.title')}</b></span>
-    <i class="d-wall"><i class="d-win"></i></i><i class="d-beam"></i>
+    <i class="d-wall"><i class="d-win"></i></i><i class="d-beam"></i><i class="d-ray"></i>
     <span class="d-pot"><span class="glow"></span><span class="plant">${flowerSvg('tulip', false, 'game')}</span>${POT}</span>
     <span class="d-man">${GARDENER}</span>
   </div>`;
@@ -284,7 +284,7 @@ export function openDex(host: HTMLElement, save: SaveData, start: number | null,
     const apply = () => {
       // 꽃은 바싹 움츠린 봉오리로 펼쳐 놓고, 카드가 다 뒤집힌 뒤 꽃잎이 차례로 벌어지며 핀다(styles.css .dex .fl.closed)
       front.innerHTML = isOpen ? `<div class="plate">${flowerSvg(f.id, false, 'dex')}</div>` : '';
-      if (isOpen) setTimeout(() => front.querySelector('.fl')?.classList.remove('closed'), reducedMotion.matches ? 0 : 320);
+      if (isOpen) setTimeout(() => front.querySelector('.fl')?.classList.remove('closed'), reducedMotion.matches ? 0 : 480);
       if (!isOpen) {
         title.textContent = '???';
         by.textContent = t('dex.locked');
@@ -303,13 +303,22 @@ export function openDex(host: HTMLElement, save: SaveData, start: number | null,
       }
     };
     const wasUp = flip.classList.contains('up');
+    // 다 뒤집힌 앞면은 3D 를 풀어 평면으로(.flat): 3D 층 속에서 꽃이 피면 브라우저가 낮은 해상도로 그려 흐려 보인다
+    const flatten = () => isOpen && flip.classList.add('flat');
+    // 평면을 풀 때는 전환 없이 바로 3D 자세로(풀면서 한 바퀴 도는 것 방지)
+    if (flip.classList.contains('flat')) {
+      flip.style.transition = 'none';
+      flip.classList.remove('flat');
+      void flip.offsetWidth;
+      flip.style.transition = '';
+    }
     pageSound?.();
     // 앞면끼리 바꿀 때는 옆으로 세워(90°) 안 보이는 순간에 그림을 갈아 끼우고 다시 펼친다(첫 회전은 끝 자세를 붙잡아 한 프레임 비침 방지)
     if (wasUp && isOpen && !reducedMotion.matches) {
       const out = flip.animate([{ transform: 'rotateY(180deg)' }, { transform: 'rotateY(270deg)' }], { duration: 120, easing: 'ease-in', fill: 'forwards' });
       out.onfinish = () => {
         apply();
-        flip.animate([{ transform: 'rotateY(90deg)' }, { transform: 'rotateY(180deg)' }], { duration: 180, easing: 'cubic-bezier(.3,1.4,.5,1)' });
+        flip.animate([{ transform: 'rotateY(90deg)' }, { transform: 'rotateY(180deg)' }], { duration: 180, easing: 'cubic-bezier(.3,1.4,.5,1)' }).onfinish = flatten;
         out.cancel();
       };
     } else {
@@ -317,6 +326,7 @@ export function openDex(host: HTMLElement, save: SaveData, start: number | null,
       if (isOpen) apply();
       else setTimeout(apply, wasUp ? 130 : 0);
       flip.classList.toggle('up', isOpen);
+      setTimeout(flatten, reducedMotion.matches ? 0 : 440);
     }
   };
   const items = [...box.querySelectorAll<HTMLButtonElement>('.dex-item')];
