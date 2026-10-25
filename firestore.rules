@@ -10,6 +10,7 @@
 //   ■ 업다운      games/updown/scores-{50|100|200}/{id}   기록 1건 = 문서 1개
 //   ■ 두더지잡기  games/hammer/rankings/{classic|daily-YYYY-MM-DD}   순위표 1개 = 문서 1개
 //   ■ 타임 투 플립 games/timetoflip/rankings/{classic|daily-YYYY-MM-DD}   순위표 1개 = 문서 1개
+//   ■ 온실 정원   games/glasshouse/rankings/{garden|daily-YYYY-MM-DD}   순위표 1개 = 문서 1개(이름마다 한 줄)
 // =====================================================================================================
 rules_version = '2';
 service cloud.firestore {
@@ -207,6 +208,103 @@ service cloud.firestore {
         && request.resource.data.entries is list
         && resource.data.entries is list
         && ttfInsert(resource.data.entries, request.resource.data.entries);
+      allow delete: if false;
+    }
+    // -------------------------------------------------------------------------------------------------
+    // ■ 게임: 온실 정원 (glasshouse)
+    //   경로   games/glasshouse/rankings/garden (정원 점수) · daily-YYYY-MM-DD (오늘의 정원, 아래 ghDaily…)
+    //   모양   순위표 1개 = 문서 1개 { entries: [{ name, score, flowers, date }, ...] } (점수 높은 순 1~10위)
+    //   권한   누구나 읽기. 등록은 "새 기록 1개를 끼운 것"만: 빈자리에 더하기 · 10위를 밀어내기 ·
+    //          같은 이름의 예전(더 낮은) 줄을 바꾸기(정원 점수는 판을 깰수록 오르는 누적 점수라 한 사람이 여러 줄을 차지하지 않게). 지우기 금지
+    //   점수   flowers(깬 판) 1~24. 판 점수는 100~1000 의 10점 단위라 정원 점수는 10의 배수이고 flowers × 100 이상 flowers × 1000 이하
+    //          (games/glasshouse/src/game/engine.ts levelScore 를 바꾸면 같이 고친다)
+    // -------------------------------------------------------------------------------------------------
+    match /games/glasshouse/rankings/{board} {
+      function ghEntry(e) {
+        return e is map
+          && e.keys().hasOnly(['name', 'score', 'flowers', 'date'])
+          && allowedName(e.name)
+          && e.flowers is int && e.flowers >= 1 && e.flowers <= 24
+          && e.score is int && e.score % 10 == 0 && e.score >= e.flowers * 100 && e.score <= e.flowers * 1000
+          && e.date is string && e.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$');
+      }
+      function ghSorted(e) {
+        return (e.size() < 2 || e[0].score >= e[1].score)
+          && (e.size() < 3 || e[1].score >= e[2].score)
+          && (e.size() < 4 || e[2].score >= e[3].score)
+          && (e.size() < 5 || e[3].score >= e[4].score)
+          && (e.size() < 6 || e[4].score >= e[5].score)
+          && (e.size() < 7 || e[5].score >= e[6].score)
+          && (e.size() < 8 || e[6].score >= e[7].score)
+          && (e.size() < 9 || e[7].score >= e[8].score)
+          && (e.size() < 10 || e[8].score >= e[9].score);
+      }
+      function ghInsert(old, next) {
+        let added = next.removeAll(old);
+        let dropped = old.removeAll(next);
+        return added.size() == 1
+          && ghEntry(added[0])
+          && ghSorted(next)
+          && next.size() <= 10
+          && ((dropped.size() == 0 && old.size() < 10 && next.size() == old.size() + 1)
+            || (dropped.size() == 1 && next.size() == old.size()
+              && ((dropped[0].name == added[0].name && dropped[0].score < added[0].score)
+                || (old.size() == 10 && dropped[0] == old[9] && added[0].score > old[9].score))));
+      }
+
+      // 오늘의 정원(daily-YYYY-MM-DD): { entries: [{ name, moves, time, date }, ...] } 이동 수 적은 순, 같으면 시간(ms) 짧은 순.
+      // 판은 날마다 정해져 있어(games/glasshouse/src/game/daily-data.ts) 이동 수 1~999, 시간 1초~하루, 날짜는 문서 날짜와 같아야 한다.
+      // 등록 방식은 정원 점수와 같다(이름마다 가장 좋은 한 줄)
+      function ghDailyBoard() {
+        return board.matches('^daily-[0-9]{4}-[0-9]{2}-[0-9]{2}$');
+      }
+      function ghDailyEntry(e) {
+        return e is map
+          && e.keys().hasOnly(['name', 'moves', 'time', 'date'])
+          && allowedName(e.name)
+          && e.moves is int && e.moves >= 1 && e.moves <= 999
+          && e.time is int && e.time >= 1000 && e.time <= 86400000
+          && e.date is string && board == 'daily-' + e.date;
+      }
+      // a 가 b 보다 앞서는지(같으면 먼저 올린 b 가 앞)
+      function ghAhead(a, b) {
+        return a.moves < b.moves || (a.moves == b.moves && a.time < b.time);
+      }
+      function ghDailySorted(e) {
+        return (e.size() < 2 || !ghAhead(e[1], e[0]))
+          && (e.size() < 3 || !ghAhead(e[2], e[1]))
+          && (e.size() < 4 || !ghAhead(e[3], e[2]))
+          && (e.size() < 5 || !ghAhead(e[4], e[3]))
+          && (e.size() < 6 || !ghAhead(e[5], e[4]))
+          && (e.size() < 7 || !ghAhead(e[6], e[5]))
+          && (e.size() < 8 || !ghAhead(e[7], e[6]))
+          && (e.size() < 9 || !ghAhead(e[8], e[7]))
+          && (e.size() < 10 || !ghAhead(e[9], e[8]));
+      }
+      function ghDailyInsert(old, next) {
+        let added = next.removeAll(old);
+        let dropped = old.removeAll(next);
+        return added.size() == 1
+          && ghDailyEntry(added[0])
+          && ghDailySorted(next)
+          && next.size() <= 10
+          && ((dropped.size() == 0 && old.size() < 10 && next.size() == old.size() + 1)
+            || (dropped.size() == 1 && next.size() == old.size()
+              && ((dropped[0].name == added[0].name && ghAhead(added[0], dropped[0]))
+                || (old.size() == 10 && dropped[0] == old[9] && ghAhead(added[0], old[9])))));
+      }
+
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['entries'])
+        && request.resource.data.entries is list
+        && request.resource.data.entries.size() == 1
+        && ((board == 'garden' && ghEntry(request.resource.data.entries[0]))
+          || (ghDailyBoard() && ghDailyEntry(request.resource.data.entries[0])));
+      allow update: if request.resource.data.keys().hasOnly(['entries'])
+        && request.resource.data.entries is list
+        && resource.data.entries is list
+        && ((board == 'garden' && ghInsert(resource.data.entries, request.resource.data.entries))
+          || (ghDailyBoard() && ghDailyInsert(resource.data.entries, request.resource.data.entries)));
       allow delete: if false;
     }
   }

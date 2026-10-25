@@ -73,8 +73,8 @@ type Fetcher = (board: string, limit: number) => Promise<Row[]>;
  * 순위표 1개 = 문서 1개 방식(기준서 1.6 새 게임 기본) 게임의 읽기. games/<id>/rankings/classic · daily-YYYY-MM-DD
  * 새 게임이 이 방식이면 FETCHERS 에 boardDoc('<id>') 한 줄만 더한다
  */
-function boardDoc(gameId: string): { key: (board: string) => string; fetch: Fetcher } {
-  const doc = (board: string) => (board === 'daily' ? `daily-${dateKey()}` : 'classic');
+function boardDoc(gameId: string, classic = 'classic'): { key: (board: string) => string; fetch: Fetcher } {
+  const doc = (board: string) => (board === 'daily' ? `daily-${dateKey()}` : classic);
   return {
     key: doc,
     async fetch(board, limit) {
@@ -128,6 +128,26 @@ const FETCHERS: Record<string, { key: (board: string) => string; fetch: Fetcher 
   // 두더지잡기·타임 투 플립: 순위표 1개 = 문서 1개({ entries: [...] }). 오늘의 챌린지는 날짜마다 새 문서다
   hammer: boardDoc('hammer'),
   timetoflip: boardDoc('timetoflip'),
+  // 온실 정원: 정원 점수는 garden 문서(점수 높은 순), 오늘의 정원은 daily-YYYY-MM-DD 문서(이동 수 적은 순 → 시간 짧은 순, 횟수·시간으로 보임)
+  glasshouse: {
+    key: (board) => (board === 'daily' ? `daily-${dateKey()}` : 'garden'),
+    async fetch(board, limit) {
+      if (board !== 'daily') return boardDoc('glasshouse', 'garden').fetch(board, limit);
+      const res = await request(`games/glasshouse/rankings/daily-${dateKey()}`);
+      if (res.status === 404) return [];
+      if (!res.ok) throw new Error(`firestore ${res.status}`);
+      type Value = { stringValue?: string; integerValue?: string; mapValue?: { fields: Record<string, Value> } };
+      const data = (await res.json()) as { fields?: { entries?: { arrayValue?: { values?: Value[] } } } };
+      return (data.fields?.entries?.arrayValue?.values ?? [])
+        .map((v) => ({
+          name: v.mapValue?.fields.name?.stringValue ?? '',
+          tries: Number(v.mapValue?.fields.moves?.integerValue ?? 0),
+          time: Number(v.mapValue?.fields.time?.integerValue ?? 0),
+        }))
+        .sort((a, b) => a.tries - b.tries || a.time - b.time)
+        .slice(0, limit);
+    },
+  },
 };
 
 export function hasRanking(gameId: string): boolean {

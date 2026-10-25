@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "author": "Myong Bum Soo",
   "license": "UNLICENSED",
-  "description": "조이팩 공통 모듈: 공통 설정, 랭킹 이름 규칙, 서비스 워커 등록, 게임 캐시 확인, 공통 상단 메뉴(topbar.css)",
+  "description": "조이팩 공통 모듈: 공통 설정, 랭킹 이름 규칙, 서비스 워커 등록, 게임 캐시 확인, 공통 상단 메뉴(topbar.css), 효과음 목록 재생기(sfx.js)",
   "main": "joypack.js",
   "types": "joypack.d.ts",
   "exports": {
@@ -12,6 +12,10 @@
       "types": "./joypack.d.ts",
       "default": "./joypack.js"
     },
-    "./topbar.css": "./topbar.css"
+    "./topbar.css": "./topbar.css",
+    "./sfx.js": {
+      "types": "./sfx.d.ts",
+      "default": "./sfx.js"
+    }
   }
 }

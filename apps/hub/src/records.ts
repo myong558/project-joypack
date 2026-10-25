@@ -23,6 +23,13 @@ const READERS: Record<string, (game: GameMeta) => string | null> = {
     const save = readJson('timetoflip:v1') as { best?: number; bestStage?: number } | null;
     return save?.best ? t('best.timetoflip', { score: formatNumber(save.best), stage: save.bestStage || 1 }) : null;
   },
+  // glasshouse:v1 = { levels: [판마다 { moves, score, petals } | null], ... }. 정원 점수(판 점수 합)와 핀 꽃 수
+  glasshouse() {
+    const save = readJson('glasshouse:v1') as { levels?: ({ score?: number } | null)[] } | null;
+    const done = (save?.levels ?? []).filter((l) => l && typeof l.score === 'number');
+    if (!done.length) return null;
+    return t('best.glasshouse', { score: formatNumber(done.reduce((n, l) => n + (l!.score ?? 0), 0)), n: done.length });
+  },
 };
 
 /**
@@ -45,6 +52,13 @@ const CLEARERS: Record<string, () => void> = {
     if (!save) return;
     Object.assign(save, { best: 0, bestStage: 0, daily: null, dex: [], items: [], pairs: 0 });
     localStorage.setItem('timetoflip:v1', JSON.stringify(save));
+  },
+  glasshouse() {
+    const save = readJson('glasshouse:v1') as Record<string, unknown> | null;
+    if (!save) return;
+    // 판 기록은 비워 두면 게임이 불러올 때 24칸을 null 로 채운다
+    Object.assign(save, { levels: [], seen: [], daily: null });
+    localStorage.setItem('glasshouse:v1', JSON.stringify(save));
   },
 };
 

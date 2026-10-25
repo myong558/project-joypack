@@ -4,7 +4,7 @@
 
 이 문서는 게임이 하나 늘 때마다 고칩니다. 새 게임까지 포함한 모든 게임을 다시 보고, 공통 요소는 1·2장과 8장에, 정체성(게임에 맞게 고르는 톤·색·캐릭터 등)은 3장 등록부에 반영합니다(9장 "문서 키우기").
 
-- 문서 버전: **1.50** (2026-10-25, 업다운 v1.15.5 · 두더지잡기 v1.0.2 · 타임 투 플립 v1.2.0 · 허브 v1.33.6 기준)
+- 문서 버전: **1.52** (2026-10-25, 업다운 v1.15.5 · 두더지잡기 v1.0.2 · 타임 투 플립 v1.2.0 · 온실 정원 v0.2.0 · 허브 v1.33.10 기준)
 - **조이팩과 모든 게임은 상업적으로 씁니다(광고, 구글 플레이·앱스토어).** 10장 "상업 배포·마켓 기준"은 모든 단계에서 지키는 필수 기준입니다.
 - 저장소 구조·배포·서비스 워커 같은 플랫폼 설명은 루트 [README.md](../README.md)에 있습니다. 이 문서는 "게임 하나를 어떻게 만드는가"만 다룹니다.
 
@@ -95,6 +95,7 @@
 - 화면 높이에 비례하는 크기(`dvh` 등)는 설치 앱에서 1~2초 뒤 높이가 조금 바뀌면 다시 계산돼 화면이 덜컥 움직입니다. 휴대폰에서는 처음 연 높이로 정해 두고 폭이 바뀔 때만 다시 잽니다(업다운 `--vh-px`, 시작 화면 여백 고정). 화면에 다 안 들어가면 줄이거나(두더지잡기 `--fit`) 안쪽 스크롤로 맞춥니다. 화면 높이를 꽉 채워 맞추는 게임은 `Joypack.trackViewport()` 를 부르고 html·body·게임 영역 높이를 `var(--jp-vh, 100dvh)` 로 둡니다(설치 앱에서 조이팩 → 게임으로 넘어올 때 css 화면 높이가 실제보다 크게 잡혀 아래가 잘리던 문제, 두더지잡기 v0.11.3에서 확인). 또 화면 맨 아래에 꼭 보여야 할 것이 있는 게임은 `Joypack.guardBottom()` 을 부르고 아래 여백을 `max(env(safe-area-inset-bottom), var(--jp-bottom-guard, 0px))` 로 둡니다(설치 앱이 내비게이션 바 높이를 0으로 알려 줄 때 대비).
 - 첫 실행 인트로 연출(1~1.5초, 누르면 건너뜀, 동작 줄이기면 생략)을 둡니다.
 - 결과 화면에 들어온 직후 0.6초 동안은 누름을 막아, 플레이하던 손가락이 버튼을 잘못 누르지 않게 합니다. 결과 화면에 `locked` 클래스를 0.6초 붙여 버튼·등록 카드에 `pointer-events: none`, 키보드(Enter·스페이스)도 그동안 무시합니다.
+- **판을 차례로 여는 퍼즐**(정해진 판을 하나씩 깨는 게임, 온실 정원)은 결과 화면의 가장 큰 단추를 "다시 하기" 대신 **"다음 판"**(Enter)으로 하고, "다시 하기"(R)는 바로 옆에 둡니다. 판을 깨는 것이 목표라 같은 판을 다시 하는 일이 드물기 때문입니다. 끝없는 판·점수 경쟁 게임은 지금처럼 "다시 하기"가 가장 큰 단추입니다.
 
 ### 1.4 설정 (게임 안 설정 창)
 
@@ -163,7 +164,7 @@
 
 - 효과음 51개(기존 3게임 39개 + 새 후보 12개)와 진동 18개(새 후보 6개)가 상황 묶음(누름·맞힘·특별·실패·큰 사건·시간·흐름·끝)별로 들어 있습니다. 항목마다 느낌·쓰는 곳·쓴 게임·합성 방법(`recipe`)이 있습니다.
 - **견본 페이지**: 배포 주소 `/sounds/`(로컬은 `pnpm preview` 뒤 http://localhost:4170/project-joypack/sounds/). 휴대폰으로 열어 소리를 듣고 진동을 느껴 보고 고릅니다(허브에 연결하지 않고 미리 캐시하지 않는 제작용 페이지).
-- **새 게임 만들 때**: 게임의 순간(누름·맞힘·실패·특별·시간·끝…)마다 목록에서 어울리는 소리·진동을 고르고, 게임 소리 결(정체성)에 맞게 음높이·파형을 바꿔도 됩니다. `recipe` 는 `packages/shared/sfx.js` 의 `playRecipe(ctx, recipe)` 로 그대로 울리거나 게임 `audio.ts` 에 옮겨 적습니다. 쓴 항목은 `usedBy` 에 게임을 더합니다.
+- **새 게임 만들 때**: 게임의 순간(누름·맞힘·실패·특별·시간·끝…)마다 목록에서 어울리는 소리·진동을 고르고, 게임 소리 결(정체성)에 맞게 음높이·파형을 바꿔도 됩니다. `recipe` 는 `packages/shared/sfx.js` 의 `playRecipe(ctx, recipe)` 로 그대로 울리거나(Vite 게임은 `import { playRecipe } from '@joypack/shared/sfx.js'`, 타입 `sfx.d.ts` 포함, 온실 정원 `audio.ts` 가 본보기) 게임 `audio.ts` 에 옮겨 적습니다. 쓴 항목은 `usedBy` 에 게임을 더합니다.
 - **목록에 없는 더 좋은 효과**를 만들었으면 같은 커밋에서 목록에 항목을 더합니다(id `<게임>/<이름>`, 아직 안 쓴 후보는 `new/<이름>`). 기존 게임에 더 잘 맞는 새 효과가 생기면 바꿔 넣는 것도 열려 있습니다(바꾼 게임 버전 올림).
 - **⛔ 저작권**: 소리는 **직접 합성(`synth`) 또는 CC0 파일만**. CC0 파일은 `file`·`url`·`author`·`license` 를 적고 README 8.1·`LICENSE` 에도 기록합니다. 출처 모르는 소리·CC-BY·비상업·"무료 효과음" 사이트 자체 약관 소리, 유명 게임·기기 소리 흉내(마리오 동전·젤다 비밀·팩맨·소닉 링·윈도우·아이폰·카카오톡 알림음 등)는 쓰지 않습니다. 진동 패턴(켜짐·쉼 ms)은 창작물이 아니라 저작권이 없습니다.
 - **강제 장치**: `pnpm build` 가 `scripts/check-sounds.mjs` 로 목록(출처·recipe·진동 패턴)과 배포본의 모든 소리 파일(mp3·wav·ogg 등)을 검사합니다. 목록의 CC0 항목에 없는 소리 파일이 하나라도 있으면 **빌드가 실패**합니다.
@@ -272,6 +273,7 @@
 | 업다운 `updown` | 차분한 숫자 퍼즐, 깔끔·납작한 카드 | Jua | 스킨마다 바뀜: 봄 자홍 `#b02a82` · 여름 초록 `#0b7a5c` · 가을 적갈 `#b04a12` · 겨울 보라 `#5b49ae` (허브 카드색 파랑 `#0f66ff`) | 캐릭터 없음, 빨강▲·파랑▼ 아이콘 | 계절(봄·여름·가을·겨울): 벚꽃잎·물방울·낙엽·눈송이 | 맑은 삼각파 두 음, 도미솔도 | 다이얼 눈금 톡, UP/DOWN 방향 진동, 좁혀지는 숫자 막대·온도 힌트 |
 | 두더지잡기 `hammer` | 왁자지껄 아케이드, 통통한 만화 | Jua 하나(제목·버튼·숫자·본문) | 주황 `#ff7a3d`(정원) · 사막 `#d9622b` · 밀림 분홍 `#e2557a` · 설산 파랑 `#3b82d6` (허브 카드색 주황 `#ff7a3d`) | 갈색 두더지 8종(굵은 갈색 외곽선 만화풍), 망치 | 장소(정원·사막·밀림·설산): 하늘·산·땅 겹 배경 | 통통 튀는 타격음, 폭발 노이즈 | 납작 눌림·충격 고리·흙 파티클·히트 스톱 |
 | 타임 투 플립 `timetoflip` | 째깍째깍 경쾌한 시간 퍼즐, 둥근 카드, 배경에 뒤집히며 떠오르는 카드 층 | Do Hyeon(본문·숫자) + Dongle Bold(제목·팝업) | 스킨마다 바뀜: 아침 청록 `#0b7785` · 한낮 파랑 `#1b64c4` · 노을 주홍 `#c2410c` · 밤 보라 `#5b46d6` (허브 카드색 청록 `#0b7785`, 아이콘 바탕은 진한 남보라로 구분) | 시간 막대 끝 미니멀 스톱워치(바늘 하나, 외우는 동안은 눈으로 바뀜), 로고는 카드 세 장 시연(보라 육각형 짝) + 진한 글자 카드 제목, 카드 48장: 도형 → 팝아트 → 팝아트로 본 명화 → 서양화 원본 → 흑백 수묵화로 갈수록 어려움(명화는 메트로폴리탄·시카고·암스테르담 미술관 CC0·퍼블릭 도메인 + 국립중앙박물관 공공누리 1유형), 조이팩 로고 얼굴 메달 카드 뒷면 + 지나가는 빛줄기, 특수 카드(시계·돋보기)는 은 액자 · 황금 카드는 금 액자 + ★ | 시간대(아침·한낮·노을·밤): 캔버스 한 장에 하늘·빛·빛망울·반짝이(휴대폰 깜박임 방지), 그 위에 실제 카드 그림이 흔들리며 떠올라 뒤집힘(옅게, 가까운 층은 흐릿하게) | 마림바 같은 사인파 + 배음, 콤보마다 음이 한 칸씩 오름 | 3D 카드 뒤집기, 콤보 음계, `+초` 시간 팝업 |
+| 온실 정원 `glasshouse` | 차분한 유리 온실 퍼즐(화분 밀기 + 햇살 줄기), 옛 식물 도감 | Gowun Dodum(본문·숫자) + Gowun Batang Bold(제목·꽃 이름·학명 기울임) | 정원 초록 `#3b7a4a`(단추·제목) + 계절 꽃 강조색 하나: 봄 튤립 `#c4524a` · 여름 수국 `#4f63c4` · 가을 달리아 `#b5532a` · 겨울 동백 `#a8323e` (허브 카드색 초록 `#3b7a4a`, 아이콘 바탕은 진한 흙빛) | 위에서 본 밀짚모자 정원사(얼굴 없음), 테라코타 화분(왼쪽 빛·오른쪽 그늘 입체, 습성 도장), 벽돌 화단 턱·돌바닥, 꽃 24종은 식물 도감 삽화풍(가는 먹선 + 물감 겹칠, 코드로 그린 SVG, 꽃잎이 실제로 벌어지는 개화), 로고는 화분을 햇살 속에 밀어 튤립이 피는 시연 | 계절빛(봄·여름·가을·겨울): 캔버스 한 장에 하늘·아치형 온실 창틀·햇살 줄기·빛 속 먼지·잎 무리(겨울엔 유리 밖 눈), 천장 덩굴·계절 꽃잎 DOM. 자동은 게임 중 그 정원의 계절 | 낮은 테라코타 긁힘, 맑은 종(습성 맞음), 흩어지는 마림바(개화) — 공통 `sfx.js` 로 목록 recipe | 화분 밀기 톡·햇빛 고리·꽃대가 섬, 언 물길 미끄러짐, 개화 |
 
 - 대표색은 게임 안 강조색(`--primary`·`--accent`)이고, 허브 카드색은 `games.json` 의 `color` 입니다. 두 게임 모두 스킨마다 강조색이 바뀌므로, 새 게임도 스킨에 따라 강조색을 바꿔도 됩니다.
 
@@ -366,6 +368,9 @@ games/<id>/
 | 장난감 버튼(두께·눌림) | `games/updown/css/style.css` `.difficulty`, `apps/hub/src/styles.css` `.card` | 아래 두께 그림자, 누르면 `translateY` |
 | 허브 연결 | `games.json`, `apps/hub/src/records.ts`·`rankings.ts`·`i18n.ts` | 6장 체크리스트 |
 | 공통 모듈 | `packages/shared/joypack.js`(+ `.d.ts`), `topbar.css` | 1.2 표 |
+| 칸 퍼즐·풀이기·판 만들기 | `games/glasshouse/src/game/rules.ts`·`solver.ts`, `tools/levelgen.ts`, `tests/levels.test.ts`·`balance.test.ts` | 칸 규칙을 DOM 없이, 너비 우선 풀이기로 기준 이동 수, 무작위 판을 풀어 골라 고정, 모의 플레이 봇(깨는 데 가까워지는 수를 실력 확률로) |
+| 넘기는 책 도감·삽화 그림 | `games/glasshouse/src/ui/screens.ts` `openDex`, `ui/flowers.ts`, `styles.css` `.book`·`.sheet` | 쪽 넘김(책등 축 rotateY), 꽃잎마다 핀·오므린 각도(`--r`·`--c`)로 한 그림에서 개화 움직임 |
+| 효과음 목록 그대로 울리기 | `games/glasshouse/src/audio.ts` | `@joypack/shared/sfx.js` `playRecipe` |
 
 ---
 
@@ -469,6 +474,11 @@ games/<id>/
 | 헤드리스 확인을 PC 로 흉내 | PC 전용 안내가 보여 실제와 다름 | 휴대폰 크기는 터치(`pointer: coarse`)로(점검 도구가 함) |
 | 큰 움직이는 층 여러 장 | 휴대폰에서 스킨을 바꾸거나 창을 열 때 창이 통째로 1~2프레임 빠져 깜박임(PC·헤드리스에서는 안 보임) | 흐린 빛 배경은 캔버스 한 장(1.10), `backdrop-filter`·`background-attachment: fixed` 쓰지 않음. 의심되면 휴대폰 화면 녹화를 프레임으로 나눠 봄 |
 | 파일 줄바꿈(CRLF) | 스크립트로 바꿀 문자열을 못 찾음 | 파일 편집은 편집 도구로, 스크립트면 `\r\n` 을 고려 |
+| 키프레임 한 곳에만 쓴 opacity | 로고 시연의 화분이 8초 내내 점점 흐려짐(100% 에만 `opacity: 0`) | 값을 바꾸는 키프레임 앞 구간 끝에도 `opacity: 1` 을 적음(온실 정원 v0.1.0) |
+| 날마다 새 퍼즐 판을 기기에서 풀이기로 고르기 | 온실 정원 오늘의 정원 판 하나 고르는 데 PC에서도 1~9초(휴대폰은 몇 배), 시간 제한을 두면 기기마다 다른 판이 나옴 | 판을 미리 만들어 날짜 순 목록으로 넣고(`tools/dailygen.ts` → `daily-data.ts`), 테스트로 다시 풀어 확인(온실 정원 v0.2.0) |
+| `.screen` 의 `align-items: center` + grid | 게임 판 칸(`1fr`)이 남은 높이를 안 쓰고 내용 높이로 줄어 판이 작게 그려짐 | 게임 화면 grid 에 `align-items: stretch` |
+| grid 행 `1fr` 안의 큰 그림 | 낮은 가로 화면에서 도감 쪽이 위아래로 넘쳐 제목이 화면 밖 | 행을 `minmax(0, 1fr)` 로, 그림은 `min-height: 0` |
+| 개발 도구를 Node 로 직접 실행 | `node tools/x.ts` 가 확장자 없는 import 를 못 찾음 | Node 로도 도는 파일끼리는 `./rules.ts` 처럼 확장자를 적고 tsconfig `allowImportingTsExtensions` |
 
 ---
 
@@ -501,39 +511,40 @@ games/<id>/
 
 어디에 구현돼 있는지와 공통화 상태입니다. **"게임마다 따로"인 것이 두 게임 이상에 같은 모양으로 있으면 공통화 후보**입니다.
 
-| 요소 | 업다운 | 두더지잡기 | 타임 투 플립 | 상태 |
-| --- | --- | --- | --- | --- |
-| 공통 설정 읽기·쓰기 | `Joypack.get/set`, 바꾼 항목만 씀. 예전 키(`updown.theme` 등)에도 같이 씀(이사 전 저장 호환. 첫 화면 깜빡임 방지 `<head>` 스크립트는 `joypack.theme` 를 먼저 읽음) | `Joypack.get/set`, 바꾼 항목만 씀. `project-hammer:v1` 에도 사본 | `Joypack.get/set`, 바꾼 항목만 씀(예전 키 없음) | ✅ 공통 모듈. 새 게임은 예전 키 없음(1.8) |
-| 서비스 워커·오프라인 | `Joypack.registerSW` | `Joypack.registerSW` | `Joypack.registerSW` | ✅ 공통 모듈 |
-| 공유 링크·설치 안내 띠 | `shareUrl`·`inviteBar` | `shareUrl`·`inviteBar` | `shareUrl`·`inviteBar` | ✅ 공통 모듈 |
-| 위 메뉴(조이팩 목록·언어·랭킹·설정, 자리 포함) | `.jp-top-btn` + `Joypack.topIcon`(아이콘은 `data-top-icon` 으로 시작할 때 넣음) | `.jp-top-btn` + `Joypack.topIcon`(크기는 `--u` 에 묶음) | `.jp-top-btn` + `Joypack.topIcon`(크기는 공통 기본값) | ✅ 공통 모듈(`topbar.css`, 허브도 같이 씀, 1.8) |
-| 설정 창 | `index.html` dialog, 언어·소리 한 줄 | `screens.ts` 모달, 항목마다 한 줄 | `screens.ts` 모달, 항목마다 한 줄 | 🟡 게임마다(순서·이름은 1.4로 통일, 내 기록 지우기는 맨 아래) |
-| 설정 맨 아래 버전 | 빌드가 `__APP_VERSION__` 을 채움 | Vite `define` `__APP_VERSION__` | Vite `define` `__APP_VERSION__` | ✅ 같은 자리 표시 이름(1.4) |
-| 결과 화면 0.6초 누름 막기 | `#screen-result.locked` | `.result.locked` + 키 무시 | `.result.locked` + 키 무시 | ✅ 동작 통일(1.3) |
-| 기록 공유하기(결과 화면) | `Joypack.shareResult` | `Joypack.shareResult` | `Joypack.shareResult` | ✅ 공통 모듈(이미지 + 조이팩 주소 한 번에) |
-| 결과 이미지 | 캔버스로 직접 그림(1080²) | `html-to-image` 결과 화면 복제 | `html-to-image` 결과 화면 복제(두더지잡기 `share.ts` 와 거의 같음) | 🟠 공통화 후보(두더지잡기·타임 투 플립 `captureResult` 가 거의 같음) |
-| 랭킹 저장 방식 | 기록 1건 = 문서 1개 + 색인(REST) | 순위표 = 문서 1개(SDK lite) | 순위표 = 문서 1개(SDK lite), 줄에 `stage`(도달한 판) 더함 | 🟡 업다운만 다름, 새 게임은 순위표 문서(1.6) |
-| 랭킹 등록 대기·순위표 사본·8초 제한 | `updown.pending`·`updown.rankings`(난이도별) | `project-hammer:v1` 의 `pending`·`rankings` | `timetoflip:v1` 의 `pending`(점수·판)·`rankings` | 🟡 동작 통일(1.6), 코드는 게임마다 |
-| 랭킹 창·등록 카드 UI | 게임마다 | 게임마다 | 게임마다(두더지잡기 것을 옮겨 판 칸만 더함) | 🟠 공통화 후보, 세 게임째 복사(규칙: TOP 10, A–Z 5자, 등록 대기) |
-| 효과음 | `fx.js` 합성 | `audio.ts` 합성 | `audio.ts` 합성(마림바 사인파, 콤보 음계) | 🟡 게임마다(소리 결은 정체성). 모두 `sounds/catalog.json` 목록에 있음, 새 게임은 `packages/shared/sfx.js` `playRecipe` 로 목록 recipe 를 울릴 수 있음 |
-| 진동 | `fx.js` 패턴표 | `main.ts` 직접 | `main.ts` 직접 | 🟠 공통화 후보(1.7 단계표를 함수로: `Joypack.vibrate('tick')`) |
-| 스킨 "자동"(날짜마다) | 날짜 해시로 계절 | 날짜 시드로 장소 | 날짜 시드로 시간대 | 🟡 규칙 같음, 묶음은 정체성 |
-| 인트로 연출 | 있음 | 있음 | 있음(제목 글자 카드 뒤집기) | 🟡 게임마다 |
-| 글꼴 | Jua(서브셋) | Jua 하나(공용 서브셋 스크립트) | Do Hyeon(본문·숫자) + Dongle Bold(제목·팝업), 서브셋 스크립트 | 🟡 게임마다(정체성), 규칙은 1.10 |
-| 움직이는 배경 | 계절 입자(벚꽃잎·물방울·낙엽·눈송이) | 하늘·산·땅 겹 배경 | 먼 빛망울 + 중간·가까운 층 뒤집히는 카드, 게임 중 흐리게, PC 마우스 시차 | 🟡 게임마다(정체성), 규칙은 1.10 |
-| 내 기록 지우기 | 설정(전체·난이도별) | 설정(전체) | 설정(전체) | 🟡 범위 규칙은 통일(1.4) |
-| 기본 언어 | `Joypack.deviceLang()` | `Joypack.deviceLang()` | `Joypack.deviceLang()` | ✅ 공통 모듈(1.4) |
-| 랭킹 이름 입력 | `Joypack.initialsInput`(결과·랭킹 창) | `Joypack.initialsInput`(등록 카드) | `Joypack.initialsInput`(등록 카드) | ✅ 공통 모듈(1.6, 허브 설정도) |
-| 화면 높이 맞추기 | `--vh-px` 고정 + 안쪽 스크롤 | `trackViewport`·`guardBottom` + `--fit` 줄이기 | `trackViewport`·`guardBottom` + `safe center` 안쪽 스크롤, 카드 크기는 판 자리에 맞춰 JS 로 계산(`board.ts` `layout`) | 🟡 방식은 게임마다, 규칙은 1.3 |
-| 가로 낮은 화면 | 두 칸 배치(시작 2×2·게임·결과) | 가로 배치 + `safe center` 스크롤 | 시작·결과 두 칸, 게임은 왼쪽 상태 칸 + 오른쪽 판(판은 행·열을 바꿔 크게) | 🟡 게임마다, 규칙은 1.9 |
-| 화면 크기 점검 목록 | `screen-check.mjs` | `screen-check.mjs` | `screen-check.mjs` | ✅ 도구 공통(`pnpm check:screens`, 7.1) |
-| 허브 연결(최고 기록·지우기·순위 읽기) | `records.ts`·`rankings.ts` 에 직접 | 같음 | `records.ts` 직접, 순위 읽기는 `rankings.ts` `boardDoc('timetoflip')` 한 줄 | 🟠 순위 읽기는 순위표 문서 방식이면 `boardDoc(id)` 로 합침(허브 v1.25.0). 최고 기록·지우기는 게임이 늘면 `joypack.meta.js` 방식 검토 |
+| 요소 | 업다운 | 두더지잡기 | 타임 투 플립 | 온실 정원 | 상태 |
+| --- | --- | --- | --- | --- | --- |
+| 공통 설정 읽기·쓰기 | `Joypack.get/set`, 바꾼 항목만 씀. 예전 키(`updown.theme` 등)에도 같이 씀(이사 전 저장 호환. 첫 화면 깜빡임 방지 `<head>` 스크립트는 `joypack.theme` 를 먼저 읽음) | `Joypack.get/set`, 바꾼 항목만 씀. `project-hammer:v1` 에도 사본 | `Joypack.get/set`, 바꾼 항목만 씀(예전 키 없음) | `Joypack.get/set`, 바꾼 항목만 씀(예전 키 없음) | ✅ 공통 모듈. 새 게임은 예전 키 없음(1.8) |
+| 서비스 워커·오프라인 | `Joypack.registerSW` | `Joypack.registerSW` | `Joypack.registerSW` | `Joypack.registerSW` | ✅ 공통 모듈 |
+| 공유 링크·설치 안내 띠 | `shareUrl`·`inviteBar` | `shareUrl`·`inviteBar` | `shareUrl`·`inviteBar` | `shareUrl`·`inviteBar` | ✅ 공통 모듈 |
+| 위 메뉴(조이팩 목록·언어·랭킹·설정, 자리 포함) | `.jp-top-btn` + `Joypack.topIcon`(아이콘은 `data-top-icon` 으로 시작할 때 넣음) | `.jp-top-btn` + `Joypack.topIcon`(크기는 `--u` 에 묶음) | `.jp-top-btn` + `Joypack.topIcon`(크기는 공통 기본값) | `.jp-top-btn` + `Joypack.topIcon`(시작 화면, 게임 중은 자체 HUD) | ✅ 공통 모듈(`topbar.css`, 허브도 같이 씀, 1.8) |
+| 설정 창 | `index.html` dialog, 언어·소리 한 줄 | `screens.ts` 모달, 항목마다 한 줄 | `screens.ts` 모달, 항목마다 한 줄 | `screens.ts` 모달, 항목마다 한 줄 | 🟡 게임마다(순서·이름은 1.4로 통일, 내 기록 지우기는 맨 아래) |
+| 설정 맨 아래 버전 | 빌드가 `__APP_VERSION__` 을 채움 | Vite `define` `__APP_VERSION__` | Vite `define` `__APP_VERSION__` | Vite `define` `__APP_VERSION__` | ✅ 같은 자리 표시 이름(1.4) |
+| 결과 화면 0.6초 누름 막기 | `#screen-result.locked` | `.result.locked` + 키 무시 | `.result.locked` + 키 무시 | `.result.locked` + 키 무시 | ✅ 동작 통일(1.3) |
+| 기록 공유하기(결과 화면) | `Joypack.shareResult` | `Joypack.shareResult` | `Joypack.shareResult` | `Joypack.shareResult` | ✅ 공통 모듈(이미지 + 조이팩 주소 한 번에) |
+| 결과 이미지 | 캔버스로 직접 그림(1080²) | `html-to-image` 결과 화면 복제 | `html-to-image` 결과 화면 복제(두더지잡기 `share.ts` 와 거의 같음) | `html-to-image` 결과 화면 복제(세 번째 같은 코드) | 🟠 공통화 후보(두더지잡기·타임 투 플립 `captureResult` 가 거의 같음) |
+| 랭킹 저장 방식 | 기록 1건 = 문서 1개 + 색인(REST) | 순위표 = 문서 1개(SDK lite) | 순위표 = 문서 1개(SDK lite), 줄에 `stage`(도달한 판) 더함 | 순위표 = 문서 1개(SDK lite), 탭 둘 `garden`(정원 점수)·`daily-YYYY-MM-DD`(오늘의 정원: 이동 수 → 시간 순), 이름마다 한 줄(누적 점수라) | 🟡 업다운만 다름, 새 게임은 순위표 문서(1.6) |
+| 랭킹 등록 대기·순위표 사본·8초 제한 | `updown.pending`·`updown.rankings`(난이도별) | `project-hammer:v1` 의 `pending`·`rankings` | `timetoflip:v1` 의 `pending`(점수·판)·`rankings` | `glasshouse:v1` 의 `pending`·`dailyPending`(그날만)·`rankings` | 🟡 동작 통일(1.6), 코드는 게임마다 |
+| 랭킹 창·등록 카드 UI | 게임마다 | 게임마다 | 게임마다(두더지잡기 것을 옮겨 판 칸만 더함) | 게임마다(타임 투 플립 것을 옮김, 오늘의 정원 탭은 이동·시간 칸) | 🟠 공통화 후보, 세 게임째 복사(규칙: TOP 10, A–Z 5자, 등록 대기) |
+| 효과음 | `fx.js` 합성 | `audio.ts` 합성 | `audio.ts` 합성(마림바 사인파, 콤보 음계) | 공통 `sfx.js` `playRecipe` 로 목록 recipe 를 그대로 울림(첫 게임) | 🟡 게임마다(소리 결은 정체성). 모두 `sounds/catalog.json` 목록에 있음, 새 게임은 `packages/shared/sfx.js` `playRecipe` 로 목록 recipe 를 울릴 수 있음 |
+| 진동 | `fx.js` 패턴표 | `main.ts` 직접 | `main.ts` 직접 | `main.ts` 직접 | 🟠 공통화 후보(1.7 단계표를 함수로: `Joypack.vibrate('tick')`) |
+| 스킨 "자동"(날짜마다) | 날짜 해시로 계절 | 날짜 시드로 장소 | 날짜 시드로 시간대 | 게임 중은 그 정원의 계절, 시작 화면은 달력 계절(같은 날 같음) | 🟡 규칙 같음, 묶음은 정체성 |
+| 인트로 연출 | 있음 | 있음 | 있음(제목 글자 카드 뒤집기) | 있음(로고 = 시연, 소개·단추가 차례로 떠오름) | 🟡 게임마다 |
+| 글꼴 | Jua(서브셋) | Jua 하나(공용 서브셋 스크립트) | Do Hyeon(본문·숫자) + Dongle Bold(제목·팝업), 서브셋 스크립트 | Gowun Batang Bold(제목·꽃 이름) + Gowun Dodum(본문·숫자), 서브셋 스크립트 | 🟡 게임마다(정체성), 규칙은 1.10 |
+| 움직이는 배경 | 계절 입자(벚꽃잎·물방울·낙엽·눈송이) | 하늘·산·땅 겹 배경 | 먼 빛망울 + 중간·가까운 층 뒤집히는 카드, 게임 중 흐리게, PC 마우스 시차 | 캔버스 한 장(하늘·온실 창틀·햇살 줄기·먼지·잎 무리, 겨울엔 유리 밖 눈) + 덩굴·꽃잎 DOM, 게임 중 흐리게·DOM 숨김, PC 마우스 시차 | 🟡 게임마다(정체성), 규칙은 1.10 |
+| 내 기록 지우기 | 설정(전체·난이도별) | 설정(전체) | 설정(전체) | 설정(전체: 판 기록·도감) | 🟡 범위 규칙은 통일(1.4) |
+| 기본 언어 | `Joypack.deviceLang()` | `Joypack.deviceLang()` | `Joypack.deviceLang()` | `Joypack.deviceLang()` | ✅ 공통 모듈(1.4) |
+| 랭킹 이름 입력 | `Joypack.initialsInput`(결과·랭킹 창) | `Joypack.initialsInput`(등록 카드) | `Joypack.initialsInput`(등록 카드) | `Joypack.initialsInput`(등록 카드) | ✅ 공통 모듈(1.6, 허브 설정도) |
+| 화면 높이 맞추기 | `--vh-px` 고정 + 안쪽 스크롤 | `trackViewport`·`guardBottom` + `--fit` 줄이기 | `trackViewport`·`guardBottom` + `safe center` 안쪽 스크롤, 카드 크기는 판 자리에 맞춰 JS 로 계산(`board.ts` `layout`) | `trackViewport`·`guardBottom`, 판 칸 크기를 판 자리에 맞춰 JS 로 계산(`board.ts` `layout`) | 🟡 방식은 게임마다, 규칙은 1.3 |
+| 가로 낮은 화면 | 두 칸 배치(시작 2×2·게임·결과) | 가로 배치 + `safe center` 스크롤 | 시작·결과 두 칸, 게임은 왼쪽 상태 칸 + 오른쪽 판(판은 행·열을 바꿔 크게) | 시작·결과 두 칸, 게임은 왼쪽 상태·안내·되돌리기 + 오른쪽 판 | 🟡 게임마다, 규칙은 1.9 |
+| 화면 크기 점검 목록 | `screen-check.mjs` | `screen-check.mjs` | `screen-check.mjs` | `screen-check.mjs`(결과는 풀이기 길을 키로 입력) | ✅ 도구 공통(`pnpm check:screens`, 7.1) |
+| 허브 연결(최고 기록·지우기·순위 읽기) | `records.ts`·`rankings.ts` 에 직접 | 같음 | `records.ts` 직접, 순위 읽기는 `rankings.ts` `boardDoc('timetoflip')` 한 줄 | `records.ts` 직접(정원 점수·핀 꽃), 순위 읽기는 정원 점수 `boardDoc('glasshouse', 'garden')` + 오늘의 정원 따로(이동·시간을 업다운처럼 횟수·시간 줄로) | 🟠 순위 읽기는 순위표 문서 방식이면 `boardDoc(id)` 로 합침(허브 v1.25.0). 최고 기록·지우기는 게임이 늘면 `joypack.meta.js` 방식 검토 |
 
 ### 공통화 대기 목록 (다음에 게임을 만들 때 함께 처리하면 좋은 것)
 
-1. `Joypack.vibrate(level)`: 1.7 진동 세기표를 공통 모듈 함수로(진동 설정 확인 포함). 세 게임 모두 직접 부름.
-2. 랭킹 클라이언트·랭킹 창 UI: 순위표 문서 방식으로 공통 패키지화(`packages/ranking`). 두더지잡기·타임 투 플립의 `online.ts`·`ranking.ts`·`screens.ts`(`openModal`·`rankEntryForm`·`openRanking`)가 거의 같다(타임 투 플립은 줄에 `stage` 를 더함). 업다운 이전은 데이터 이전이 필요하므로 별도 판단.
-4. 결과 이미지 `captureResult`(html-to-image 복제 찍기): 두더지잡기·타임 투 플립 `share.ts` 가 거의 같다 → 공통 모듈 함수로(복제본에서 뺄 선택자·브랜드 붙일 자리만 인자로).
+1. `Joypack.vibrate(level)`: 1.7 진동 세기표를 공통 모듈 함수로(진동 설정 확인 포함). 네 게임 모두 직접 부름.
+2. 랭킹 클라이언트·랭킹 창 UI: 순위표 문서 방식으로 공통 패키지화(`packages/ranking`). 두더지잡기·타임 투 플립의 `online.ts`·`ranking.ts`·`screens.ts`(`openModal`·`rankEntryForm`·`openRanking`)가 거의 같다(타임 투 플립은 줄에 `stage` 를 더함, 온실 정원은 줄에 `flowers`, 오늘의 정원 탭은 점수 대신 이동·시간 순·이름마다 한 줄 — 네 번째 복사라 다음 게임 전에 하는 것을 권함). 업다운 이전은 데이터 이전이 필요하므로 별도 판단.
+4. 결과 이미지 `captureResult`(html-to-image 복제 찍기): 두더지잡기·타임 투 플립·온실 정원 `share.ts` 가 거의 같다(세 게임째) → 공통 모듈 함수로(복제본에서 뺄 선택자·브랜드 붙일 자리만 인자로).
+5. 효과음 재생: 온실 정원은 목록 recipe 를 공통 `sfx.js` 로 그대로 울린다(이번에 `@joypack/shared/sfx.js` 내보내기·타입 추가). 다른 세 게임의 `audio.ts`·`fx.js` 직접 합성도 같은 recipe 라 옮길 수 있음(소리는 같게, 코드만 줄어듦).
 3. 허브 연결 메타: 게임이 `games/<id>/joypack.meta.ts`(최고 기록 읽기·지우기·순위 읽기)를 내보내고 허브가 자동으로 모음 → 6장 2~4번이 사라짐.
 
 ---
@@ -555,6 +566,8 @@ games/<id>/
 
 | 문서 버전 | 날짜 | 내용 |
 | --- | --- | --- |
+| 1.52 | 2026-10-25 | 온실 정원 오늘의 정원(v0.2.0): 날마다 새 판을 풀이기로 미리 만든 목록(`daily-data.ts`, 휴대폰에서 만들면 몇 초씩 걸려서), 순위표 `daily-YYYY-MM-DD`(이동 → 시간 순, 이름마다 한 줄). 8장 현황표 랭킹 줄 갱신. 허브 순위 읽기 `boardDoc` 에 문서 이름 인자(온실 정원 정원 점수가 `classic` 을 읽던 것 고침, v1.33.10) |
+| 1.51 | 2026-10-25 | 네 번째 게임 온실 정원(`glasshouse` v0.1.0, 개발자 모드): 3.1 등록부·8장 현황표 열 추가, 1.3 에 "판을 차례로 여는 퍼즐은 결과 화면 큰 단추 = 다음 판" 예외, 1.7 공통 `@joypack/shared/sfx.js` 가져오기(타입 추가), 5.1 칸 퍼즐·풀이기·책 도감 본보기, 7.2 함정 4개, 공통화 대기 갱신(랭킹 UI 네 번째·결과 이미지 세 번째 복사, 효과음 재생 5번) |
 | 1.50 | 2026-10-25 | 명화 출처 넓힘(타임 투 플립 v1.2.0): 메트로폴리탄 외에 시카고 미술관(CC0)·암스테르담 국립미술관(Public Domain Mark)·국립중앙박물관(공공누리 **1유형**만, 출처 표시 의무 → 도감 작가 줄 + 배포본 `art-credits.txt`). 모나리자(루브르)·진주 귀걸이 소녀(마우리츠하위스)·별이 빛나는 밤(MoMA)처럼 상업 이용이 명시되지 않은 소장처, 위키백과 사본, 공공누리 2~4유형은 쓰지 않음. 4색 팝아트 처리는 얼굴이 크게 나온 초상에서만 알아보기 쉬움(어두운 군중 그림은 덩어리가 됨) |
 | 1.0 | 2026-10-21 | 업다운·두더지잡기 분석으로 처음 작성 |
 | 1.49 | 2026-10-25 | 11장 "첫 버전 품질 기준" 추가: 세 게임 분석과 타임 투 플립 첫 버전 뒤 수정 45건 분류로 제작자 성향표(11.1)·재미 설계(11.2, 재미의 세 기둥·끝나는 판·모의 플레이·실력 점수·치팅 막기)·디자인 기준(11.3, 세련·입체·로고 = 시연)·요소마다 이유(11.4)·출시 전 도구(11.5)·첫 버전 자체 검수(11.6). 0장 순서·4장 양식·7장·9장에 연결 |

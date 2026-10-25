@@ -54,5 +54,23 @@
         { "id": "daily", "name": { "ko": "오늘의 챌린지", "en": "Daily" } }
       ]
     }
+  },
+  {
+    "id": "glasshouse",
+    "name": { "ko": "온실 정원", "en": "Glasshouse Garden" },
+    "desc": { "ko": "햇살 길을 읽고 화분을 밀어 꽃 피우기", "en": "Read the sunbeams and push pots to bloom" },
+    "path": "games/glasshouse/",
+    "icon": "games/glasshouse/public/favicon.svg",
+    "color": "#3b7a4a",
+    "status": "preview",
+    "added": "2026-10-25",
+    "ranking": {
+      "path": "games/glasshouse/rankings",
+      "default": "garden",
+      "boards": [
+        { "id": "garden", "name": { "ko": "정원 점수", "en": "Garden score" } },
+        { "id": "daily", "name": { "ko": "오늘의 정원", "en": "Today's Garden" } }
+      ]
+    }
   }
 ]

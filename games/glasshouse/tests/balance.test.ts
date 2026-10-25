@@ -1,0 +1,82 @@
+import { describe, expect, it } from 'vitest';
+import { levelScore, petals } from '../src/game/engine';
+import { LEVELS, seasonOf } from '../src/game/levels';
+import { parse, type Dir } from '../src/game/rules';
+import { explore } from '../src/game/solver';
+import { mulberry32 } from './rng';
+
+/**
+ * 모의 플레이(기준서 11.2-3): 실력별 봇으로 판마다 걸리는 시간·이동 수·꽃잎을 잰다.
+ * 봇은 걸음마다 skill 확률로 깨는 데 가까워지는 수를 두고, 아니면 아무 데로나 움직인다.
+ * 다시는 못 깨는 상태에 빠지면 몇 걸음 헤매다(알아채는 시간) 살아 있던 곳까지 되돌린다(되돌리기는 이동 수도 되돌림).
+ * 시간 = 손이 움직인 걸음 × 0.4초 + 화분을 민 번마다 생각하는 시간(실력별) + 막힘마다 다시 생각 6초
+ */
+const SKILLS = { 서툼: [0.55, 4], 보통: [0.7, 3], 잘함: [0.85, 2], 고수: [0.96, 1.2] } as const;
+
+function play(level: number, [skill, think]: readonly [number, number], seed: number) {
+  const { board, start } = parse(LEVELS[level].rows);
+  const g = explore(board, start, 2_000_000)!;
+  const rng = mulberry32(seed);
+  const path: number[] = [0];
+  let hands = 0;
+  let pushes = 0;
+  const pushed = (a: number, b: number) => g.states[a].pots.some((p, k) => p !== g.states[b].pots[k]);
+  let stuck = 0;
+  let lost = 0;
+  for (let guard = 0; guard < 6000; guard++) {
+    const cur = path[path.length - 1];
+    if (g.toGoal[cur] === 0) break;
+    if (g.toGoal[cur] < 0) {
+      // 막힌 걸 알아채기까지 몇 걸음 더 헤맨다
+      if (++lost < 4) {
+        const opts = [0, 1, 2, 3].map((d) => g.next[cur * 4 + d]).filter((j) => j >= 0);
+        if (opts.length) {
+          path.push(opts[Math.floor(rng() * opts.length)]);
+          hands++;
+          continue;
+        }
+      }
+      while (path.length > 1 && g.toGoal[path[path.length - 1]] < 0) path.pop();
+      stuck++;
+      lost = 0;
+      continue;
+    }
+    const moves = ([0, 1, 2, 3] as Dir[]).map((d) => g.next[cur * 4 + d]).filter((j) => j >= 0);
+    const good = moves.filter((j) => g.toGoal[j] === g.toGoal[cur] - 1);
+    const next = rng() < skill && good.length ? good[Math.floor(rng() * good.length)] : moves[Math.floor(rng() * moves.length)];
+    if (pushed(cur, next)) pushes++;
+    path.push(next);
+    hands++;
+  }
+  const moves = path.length - 1;
+  const par = LEVELS[level].par;
+  return { solved: g.toGoal[path[path.length - 1]] === 0, moves, seconds: hands * 0.4 + pushes * think + stuck * 6, petals: petals(par, moves), score: levelScore(par, moves) };
+}
+
+describe('모의 플레이', () => {
+  it('실력별로 모든 판을 깰 수 있고, 한 판은 30초~3분 안팎', () => {
+    const rows: string[] = [];
+    for (const [name, skill] of Object.entries(SKILLS)) {
+      let total = 0;
+      let petalSum = 0;
+      let scoreSum = 0;
+      const bySeason: Record<string, number[]> = { spring: [], summer: [], autumn: [], winter: [] };
+      for (let i = 0; i < LEVELS.length; i++) {
+        const runs = Array.from({ length: 12 }, (_, k) => play(i, skill, i * 100 + k + 1));
+        expect(runs.every((r) => r.solved)).toBe(true);
+        const sec = runs.reduce((n, r) => n + r.seconds, 0) / runs.length;
+        bySeason[seasonOf(i)].push(sec);
+        total += sec;
+        petalSum += runs.reduce((n, r) => n + r.petals, 0) / runs.length;
+        scoreSum += runs.reduce((n, r) => n + r.score, 0) / runs.length;
+      }
+      const avg = (l: number[]) => Math.round(l.reduce((a, b) => a + b, 0) / l.length);
+      rows.push(
+        `${name}: 판 평균 ${Math.round(total / 24)}초 (봄 ${avg(bySeason.spring)} · 여름 ${avg(bySeason.summer)} · 가을 ${avg(bySeason.autumn)} · 겨울 ${avg(bySeason.winter)}초), 24판 ${Math.round(total / 60)}분, 꽃잎 ${petalSum.toFixed(0)}/72, 정원 점수 ${Math.round(scoreSum)}`,
+      );
+      if (name === '보통') expect(total / 24).toBeLessThan(180);
+      if (name === '고수') expect(petalSum).toBeGreaterThan(50);
+    }
+    console.log(rows.join('\n'));
+  }, 300_000);
+});
