@@ -12,6 +12,16 @@ export const screens = [
       await p.wait(2500);
     },
   },
+  // 카드 아래 기록이 가장 길 때(온실 정원 24판 모두 1,000점). 미리보기 게임은 카드가 없어 모든 카드 칩에 그 글을 넣어 본다
+  {
+    name: 'main-long-record',
+    async go(p) {
+      await p.eval(
+        "document.querySelectorAll('.card-foot .chip').forEach((c) => { c.className = 'chip best'; c.textContent = '총점 24,000점 · 꽃 24/24'; }); true",
+      );
+      await p.wait(300);
+    },
+  },
   { name: 'ranking', go: (p) => p.click('[data-open="ranking"]') },
   { name: 'settings', go: (p) => p.click('[data-open="settings"]') },
   // 설정의 게임 데이터(내 기록·오프라인 저장)를 펼친 모습. 게임이 많을 때를 보려고 줄을 8개로 늘려 찍는다
