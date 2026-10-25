@@ -1,4 +1,4 @@
-/* 온실 정원 화면. 색은 모두 토큰(:root 변수)으로, 스킨(계절빛)마다 하늘·햇살·꽃 강조색, 컬러 모드마다 밝기만 바뀐다 */
+/* 온실 정원 화면. 색은 모두 토큰(:root 변수)으로, 스킨(날씨 톤)마다 하늘·햇살·강조색, 컬러 모드마다 밝기만 바뀐다 */
 
 /* 글꼴 두 가지(둘 다 SIL OFL 1.1, 상업 이용 가능, 라이선스 파일 public/fonts/ 에 함께 배포)
  *   GowunDodum   본문·숫자·버튼: 단정하고 부드러운 고딕이라 차분한 퍼즐·도감 글에 맞는다
@@ -22,7 +22,7 @@
 }
 
 :root {
-  /* 계절마다 바뀌는 값(아래 [data-skin]). -l 라이트, -d 다크 */
+  /* 스킨(날씨 톤)마다 바뀌는 값(아래 [data-skin]). -l 라이트, -d 다크 */
   --sky-a-l: #eef3e4;
   --sky-b-l: #f6efdf;
   --sky-a-d: #101c16;
@@ -62,40 +62,46 @@
   color-scheme: light;
 }
 
-:root[data-skin='spring'] {
-  --sky-a-l: #eef4e2;
-  --sky-b-l: #f8f0e2;
-  --sky-a-d: #0f1c16;
-  --sky-b-d: #1d2a21;
+/* 맑음: 파란 하늘·흰 구름·금빛 햇살 줄기 */
+:root[data-skin='clear'] {
+  --sky-a-l: #dcebf0;
+  --sky-b-l: #f7f1e0;
+  --sky-a-d: #0c1820;
+  --sky-b-d: #1b2a20;
   --accent: #c4524a;
   --ai-l: #a8403a;
   --ai-d: #f0998f;
-  --sun-l: #ffe7a6;
+  --sun-l: #ffe39a;
+  --sun-d: #ffd27a;
 }
-:root[data-skin='summer'] {
-  --sky-a-l: #e2f0ef;
-  --sky-b-l: #eef5e6;
-  --sky-a-d: #0c1a1b;
-  --sky-b-d: #13261f;
-  --accent: #4f63c4;
-  --ai-l: #4152ad;
-  --ai-d: #a9b6ff;
-  --sun-l: #fff1b0;
+/* 비: 잿빛 하늘·유리를 타고 흐르는 빗방울·흐린 빛 */
+:root[data-skin='rain'] {
+  --sky-a-l: #cfd9dc;
+  --sky-b-l: #e9eee7;
+  --sky-a-d: #0a1316;
+  --sky-b-d: #152120;
+  --accent: #3f72a8;
+  --ai-l: #335f8e;
+  --ai-d: #9cc4f0;
+  --sun-l: #f1f0dc;
+  --sun-d: #d9e2d0;
 }
-:root[data-skin='autumn'] {
-  --sky-a-l: #f4e8d2;
-  --sky-b-l: #efe2c9;
-  --sky-a-d: #1d150e;
-  --sky-b-d: #2a1d14;
+/* 노을: 보랏빛 위·주홍빛 아래, 낮게 걸린 해와 길게 눕는 햇살 */
+:root[data-skin='dusk'] {
+  --sky-a-l: #e6d3e2;
+  --sky-b-l: #fbe0c2;
+  --sky-a-d: #1a1226;
+  --sky-b-d: #2c1b16;
   --accent: #b5532a;
   --ai-l: #9a4421;
   --ai-d: #f2a77c;
-  --sun-l: #ffd48a;
-  --sun-d: #ffc06a;
+  --sun-l: #ffbe7a;
+  --sun-d: #ffa860;
 }
-:root[data-skin='winter'] {
-  --sky-a-l: #e5ecf2;
-  --sky-b-l: #f2f1ec;
+/* 눈: 차가운 푸른 하늘·유리 밖에 내리는 눈·창 모서리 성에 */
+:root[data-skin='snow'] {
+  --sky-a-l: #dfe8f1;
+  --sky-b-l: #f3f2ee;
   --sky-a-d: #0e1520;
   --sky-b-d: #18202a;
   --accent: #a8323e;
@@ -373,7 +379,7 @@ button {
     transform: rotate(3.5deg);
   }
 }
-/* 가까운 층: 그 계절 꽃잎이 크게·살짝 흐릿하게 내려옴 */
+/* 가까운 층: 온실 안을 떠도는 꽃잎이 크게·살짝 흐릿하게 내려옴(노을은 마른 잎, 눈은 유리 밖 큰 눈송이, 비는 없음) */
 .bit {
   position: absolute;
   top: -40px;
@@ -386,11 +392,14 @@ button {
   filter: blur(0.6px);
   animation: fall var(--d) linear var(--t) infinite;
 }
-:root[data-skin='autumn'] .bit {
+:root[data-skin='dusk'] .bit {
   border-radius: 10% 70% 10% 70%;
   background: #c47a32;
 }
-:root[data-skin='winter'] .bit {
+:root[data-skin='rain'] .bit {
+  display: none;
+}
+:root[data-skin='snow'] .bit {
   border-radius: 50%;
   width: calc(var(--s) * 0.5);
   height: calc(var(--s) * 0.5);
@@ -830,17 +839,17 @@ body:has(.screen.game) .scene .layer {
   border-radius: 50%;
   box-shadow: inset 0 -3px 0 rgb(0 0 0 / 0.15);
 }
-.skin-dot[data-swatch='spring'] {
-  background: radial-gradient(circle at 35% 35%, #f0a39b, #c4524a);
+.skin-dot[data-swatch='clear'] {
+  background: linear-gradient(170deg, #9cc8e0 20%, #fff2c2 60%, #ffd36a);
 }
-.skin-dot[data-swatch='summer'] {
-  background: radial-gradient(circle at 35% 35%, #aab6f2, #4f63c4);
+.skin-dot[data-swatch='rain'] {
+  background: repeating-linear-gradient(105deg, transparent 0 4px, rgb(255 255 255 / 0.55) 4px 5px), linear-gradient(180deg, #8a9ba3, #c7d2d0);
 }
-.skin-dot[data-swatch='autumn'] {
-  background: radial-gradient(circle at 35% 35%, #eab088, #b5532a);
+.skin-dot[data-swatch='dusk'] {
+  background: radial-gradient(circle at 50% 78%, #ffd08a 18%, transparent 20%), linear-gradient(180deg, #a98bb8, #f2a07a 70%, #f6c37e);
 }
-.skin-dot[data-swatch='winter'] {
-  background: radial-gradient(circle at 35% 35%, #ee9aa2, #a8323e);
+.skin-dot[data-swatch='snow'] {
+  background: radial-gradient(circle at 30% 35%, #fff 8%, transparent 10%), radial-gradient(circle at 68% 60%, #fff 7%, transparent 9%), radial-gradient(circle at 45% 80%, #fff 6%, transparent 8%), linear-gradient(180deg, #a9bfd6, #e6edf4);
 }
 .reset-section .btn {
   margin-top: 8px;
@@ -862,24 +871,49 @@ body:has(.screen.game) .scene .layer {
   font-size: 11px;
 }
 
-/* 정원 고르기 */
-.season + .season {
-  margin-top: 14px;
-}
-.season h3 small {
-  font-weight: 400;
+/* 정원 고르기: 정원 24곳을 꽃 카드로(좁으면 4줄, 넓으면 6줄) */
+.picker h2 small {
   font-family: 'GowunDodum', sans-serif;
+  font-weight: 400;
   font-size: 13px;
   color: var(--muted);
-  margin-left: 4px;
 }
-.season ul {
+.gardens {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 6px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
   margin: 0;
   padding: 0;
   list-style: none;
+}
+@media (min-width: 520px) {
+  .gardens {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+.tile-btn .name {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  width: 100%;
+  min-height: 2.4em;
+  margin: 1px 0 3px;
+  font-family: 'GowunBatang', serif;
+  font-weight: 700;
+  font-size: 11.5px;
+  line-height: 1.2;
+  text-align: center;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+}
+.tile-btn:disabled .name {
+  color: var(--muted);
+}
+.tile-btn.next {
+  border-color: color-mix(in srgb, var(--sun) 80%, var(--leaf));
+  background: color-mix(in srgb, var(--sun) 22%, var(--sheet));
 }
 .tile-btn {
   position: relative;
@@ -903,8 +937,9 @@ body:has(.screen.game) .scene .layer {
 .tile-btn .mini {
   display: grid;
   place-items: center;
-  width: 100%;
-  aspect-ratio: 5 / 6;
+  width: 76%;
+  margin-top: 12px;
+  aspect-ratio: 1;
   color: var(--muted);
 }
 .tile-btn .mini svg {
@@ -1234,8 +1269,8 @@ body:has(.screen.game) .scene .layer {
   background: color-mix(in srgb, var(--leaf) 10%, color-mix(in srgb, var(--ink) 5%, transparent));
   box-shadow: inset 0 1px 3px rgb(20 30 20 / 0.12);
 }
-.dex section {
-  margin-top: 12px;
+.dex-sets > ul {
+  margin-top: 10px;
 }
 .dex h3 {
   margin: 0 0 6px;
@@ -1349,8 +1384,8 @@ body:has(.screen.game) .scene .layer {
     min-height: 0;
     margin-top: 0;
   }
-  .dex section:first-child {
-    margin-top: 0;
+  .dex-sets > ul {
+    margin-top: 8px;
   }
 }
 

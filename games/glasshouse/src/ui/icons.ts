@@ -42,11 +42,11 @@ export const THEME_ICONS: Record<Theme, string> = {
   dark: svg('<path d="M20 14A8 8 0 1 1 10 4a6 6 0 0 0 10 10z"/>'),
 };
 
-/** 스킨(계절빛) 단추: 그 계절 꽃 색 동그라미 */
+/** 스킨(날씨 톤) 단추: 그 톤의 하늘색 동그라미 */
 export const SKIN_ICONS: Record<SkinSetting, string> = {
   auto: svg('<path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v4h-4"/>'),
-  spring: `<span class="skin-dot" data-swatch="spring" aria-hidden="true"></span>`,
-  summer: `<span class="skin-dot" data-swatch="summer" aria-hidden="true"></span>`,
-  autumn: `<span class="skin-dot" data-swatch="autumn" aria-hidden="true"></span>`,
-  winter: `<span class="skin-dot" data-swatch="winter" aria-hidden="true"></span>`,
+  clear: `<span class="skin-dot" data-swatch="clear" aria-hidden="true"></span>`,
+  rain: `<span class="skin-dot" data-swatch="rain" aria-hidden="true"></span>`,
+  dusk: `<span class="skin-dot" data-swatch="dusk" aria-hidden="true"></span>`,
+  snow: `<span class="skin-dot" data-swatch="snow" aria-hidden="true"></span>`,
 };

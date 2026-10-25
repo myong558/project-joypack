@@ -1,8 +1,8 @@
-import { FLOWERS, type FlowerId, type Season } from '../flora';
+import { FLOWERS, type FlowerId } from '../flora';
 import { t, type MessageKey } from '../i18n';
 
 /**
- * 정원 24개(계절마다 6개). 판은 tools/levelgen.ts 로 만든 후보 가운데 기준 이동 수가 계절·순서마다 정한 범위에 들고
+ * 정원 24개. 판은 tools/levelgen.ts 로 만든 후보 가운데 기준 이동 수가 계절·순서마다 정한 범위에 들고
  * 막히는 길이 많은(어려움 점수가 높은) 판을 골라 쉬운 판부터 놓았다(봄 화분 1~2개 → 겨울 3개). par 는 풀이기(solver.ts)가 찾은 가장 적은 이동 수이고 tests/levels.test.ts 가 다시 확인한다.
  * 기호는 rules.ts 맨 위 설명. 판 하나에 꽃 하나(FLOWERS 순서 그대로)가 도감에 열린다
  */
@@ -45,14 +45,14 @@ export const LEVELS: LevelDef[] = [
   L(23, 57, ['##v####', '#..o..#', '>.#.o@#', '#...o##', '#..#..#', '>....##', '##....#', '#######']), // 임시 판(빠른 생성)
 ];
 
-export const seasonOf = (i: number): Season => FLOWERS[i].season;
-export const levelName = (i: number) => `${t(`season.${seasonOf(i)}`)} ${(i % 6) + 1}`;
+/** 판 이름: 정원 번호(정원 7) */
+export const levelName = (i: number) => t('level.name', { n: i + 1 });
 
 /** 그 판에서 처음 알려 줄 것(판 위 한 줄) */
 export const TIPS: Partial<Record<number, MessageKey>> = { 0: 'tip.l1', 1: 'tip.l2', 2: 'tip.l3' };
 
 /**
- * 화분마다 피울 꽃: 첫 화분은 그 판의 꽃, 나머지는 앞 판들에서 가장 최근에 핀 꽃부터(첫 판들은 같은 계절의 다음 꽃)
+ * 화분마다 피울 꽃: 첫 화분은 그 판의 꽃, 나머지는 앞 판들에서 가장 최근에 핀 꽃부터(첫 판은 다음 꽃)
  */
 export function speciesFor(level: number, count: number): FlowerId[] {
   const before = FLOWERS.slice(0, level).reverse();
@@ -61,16 +61,12 @@ export function speciesFor(level: number, count: number): FlowerId[] {
 }
 
 /**
- * 오늘의 정원 화분마다 피울 꽃: 그 판 계절 꽃 가운데 이미 도감에 연 꽃을 먼저(아직 못 본 꽃을 미리 보이지 않게),
- * 날마다 돌아가며 고른다. opened 는 도감에 열린 판 번호
+ * 오늘의 정원 화분마다 피울 꽃: 이미 도감에 연 꽃 가운데서(아직 못 본 꽃을 미리 보이지 않게) 날마다 돌아가며 고른다.
+ * 연 꽃이 화분 수보다 적으면(출시 전 확인용) 앞 정원의 꽃부터. opened 는 도감에 열린 판 번호
  */
-export function dailySpecies(season: Season, count: number, day: number, opened: (i: number) => boolean): FlowerId[] {
-  const pools = [
-    FLOWERS.filter((f, i) => f.season === season && opened(i)),
-    FLOWERS.filter((_, i) => opened(i)),
-    FLOWERS.filter((f) => f.season === season),
-  ];
-  const pool = pools.find((p) => p.length >= count) ?? FLOWERS;
+export function dailySpecies(count: number, day: number, opened: (i: number) => boolean): FlowerId[] {
+  const seen = FLOWERS.filter((_, i) => opened(i));
+  const pool = seen.length >= count ? seen : FLOWERS.slice(0, 6);
   const start = ((day % pool.length) + pool.length) % pool.length;
   return Array.from({ length: count }, (_, k) => pool[(start + k) % pool.length].id);
 }

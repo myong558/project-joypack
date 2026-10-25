@@ -4,14 +4,14 @@ import { Sound } from './audio';
 import { FLOWER } from './flora';
 import { Game, levelScore, petals } from './game/engine';
 import { dailyLevel, dateKey, dayIndex } from './game/daily';
-import { LEVELS, TIPS, dailySpecies, seasonOf, speciesFor } from './game/levels';
+import { LEVELS, TIPS, dailySpecies, speciesFor } from './game/levels';
 import type { Dir } from './game/rules';
 import { setLang, t } from './i18n';
 import { fetchBoard, fetchDaily, submitDaily, submitEntry } from './online';
 import { BOARD, clock, dailyAhead, placeOf, placeOfDaily, type DailyEntry, type RankEntry } from './ranking';
 import { shareResult } from './share';
 import { dailyOpen, emptyRecords, flowerCount, gardenScore, loadSave, writeSave } from './storage';
-import { applySkin, applyTheme, calendarSeason, resolveSkin } from './theme';
+import { applySkin, applyTheme, resolveSkin, todaySkin } from './theme';
 import { BoardView } from './ui/board';
 import { Effects } from './ui/effects';
 import { mountScene } from './ui/scene';
@@ -132,7 +132,7 @@ function showStart(settings?: 'open' | 'reset', settingsFocus?: string, opening 
   mount(
     startScreen({
       save,
-      todaySkin: calendarSeason(now),
+      todaySkin: todaySkin(now),
       settings,
       settingsFocus,
       opening,
@@ -186,7 +186,7 @@ function play(level: number | 'daily'): void {
   const def = daily ?? LEVELS[level as number];
   // 출시 전 확인용으로 아직 안 열린 판을 바로 연 경우는 기록에 남기지 않는다(오늘의 정원은 순위표 등록도 막음)
   const test = daily ? !dailyOpen(save) : ALL_OPEN() && (level as number) > 0 && !save.levels[(level as number) - 1] && !save.levels[level as number];
-  applySkin(resolveSkin(save.skin, new Date(), daily ? daily.season : seasonOf(level as number)));
+  applySkin(resolveSkin(save.skin, new Date(), daily ? 0 : (level as number) + 1));
   const game = new Game(def.rows);
   const view = gameScreen({
     level: daily ? null : (level as number),
@@ -202,7 +202,7 @@ function play(level: number | 'daily'): void {
   });
   mount(view.el);
   const species = daily
-    ? dailySpecies(daily.season, game.state.pots.length, dayIndex(daily.date), (i) => !!save.levels[i])
+    ? dailySpecies(game.state.pots.length, dayIndex(daily.date), (i) => !!save.levels[i])
     : speciesFor(level as number, game.state.pots.length);
   const board = new BoardView(view.boardHost, game.board, species, game.state);
   const fx = new Effects(view.stage);

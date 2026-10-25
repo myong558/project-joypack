@@ -1,5 +1,5 @@
-import { FLOWER, FLOWERS, SEASONS, type Flower, type Habit, type Season } from '../flora';
-import { LEVELS, levelName, seasonOf } from '../game/levels';
+import { FLOWER, FLOWERS, type Flower, type Habit } from '../flora';
+import { LEVELS, levelName } from '../game/levels';
 import { LANGS, getLang, iga, t, type Lang } from '../i18n';
 import { NAME_MAX, RANK_SIZE, cleanName, clock, isValidName, pendingRecord, placeOf, placeOfDaily, type DailyEntry, type DailyRecord } from '../ranking';
 import { captureResult, type ShareOutcome } from '../share';
@@ -194,31 +194,27 @@ export function startScreen(opts: StartOptions): HTMLElement {
 
 /* ---------- 정원 고르기 ---------- */
 
+/**
+ * 정원 24곳을 꽃 카드로(계절 구분 없이). 핀 정원은 그 꽃이 핀 그림·이름·꽃잎, 다음에 가꿀 정원은 봉오리와 이름,
+ * 아직 안 열린 정원은 자물쇠만. 꽃을 보고 다시 가꿀 정원을 고른다
+ */
 function openPicker(host: HTMLElement, save: SaveData, onPlay: (level: number) => void): void {
   const box = html(`
     <div class="picker">
       ${closeButton()}
-      <h2>${ICONS.grid} ${t('pick.title')}</h2>
-      <div class="seasons">
-        ${SEASONS.map(
-          (s) => `<section class="season" data-season="${s}">
-            <h3>${t(`season.${s}`)} <small>${t(`season.${s}Idea`)}</small></h3>
-            <ul>${LEVELS.map((lv, i) => ({ lv, i }))
-              .filter(({ i }) => seasonOf(i) === s)
-              .map(({ lv, i }) => {
-                const rec = save.levels[i];
-                const open = unlocked(save, i);
-                const label = open ? t('pick.level', { season: t(`season.${s}`), n: (i % 6) + 1, state: rec ? t('pick.cleared', { p: rec.petals }) : t('pick.open') }) : `${levelName(i)} — ${t('pick.locked')}`;
-                return `<li><button type="button" class="tile-btn${rec ? ' done' : ''}" data-level="${i}" ${open ? '' : 'disabled'} aria-label="${label}">
-                  <b>${(i % 6) + 1}</b>
-                  <span class="mini">${rec || ALL_OPEN() ? flowerSvg(lv.flower, true, 'game') : open ? flowerSvg(lv.flower, false, 'game') : ICONS.lock}</span>
-                  ${rec ? petalRow(rec.petals) : '<span class="petals"></span>'}
-                </button></li>`;
-              })
-              .join('')}</ul>
-          </section>`,
-        ).join('')}
-      </div>
+      <h2>${ICONS.grid} ${t('pick.title')} <small>${save.levels.filter(Boolean).length}/${LEVELS.length}</small></h2>
+      <ul class="gardens">${LEVELS.map((lv, i) => {
+        const rec = save.levels[i];
+        const open = unlocked(save, i);
+        const name = text(FLOWER[lv.flower]).name;
+        const label = open ? t('pick.level', { name: levelName(i), flower: name, state: rec ? t('pick.cleared', { p: rec.petals }) : t('pick.open') }) : `${levelName(i)} — ${t('pick.locked')}`;
+        return `<li><button type="button" class="tile-btn${rec ? ' done' : ''}${open && !rec ? ' next' : ''}" data-level="${i}" ${open ? '' : 'disabled'} aria-label="${label}">
+          <b>${i + 1}</b>
+          <span class="mini">${rec || ALL_OPEN() ? flowerSvg(lv.flower, true, 'game') : open ? flowerSvg(lv.flower, false, 'game') : ICONS.lock}</span>
+          <span class="name">${open ? name : '?'}</span>
+          ${rec ? petalRow(rec.petals) : '<span class="petals"></span>'}
+        </button></li>`;
+      }).join('')}</ul>
     </div>`);
   const close = openModal(host, box, t('pick.title'), undefined, 'wide');
   box.querySelectorAll<HTMLButtonElement>('[data-level]').forEach((b) =>
@@ -232,7 +228,7 @@ function openPicker(host: HTMLElement, save: SaveData, onPlay: (level: number) =
   box.querySelector<HTMLButtonElement>(`[data-level="${next < 0 ? 0 : next}"]`)?.focus();
 }
 
-/* ---------- 식물 도감(큰 카드 + 계절별 작은 카드) ---------- */
+/* ---------- 식물 도감(큰 카드 + 작은 카드 24장) ---------- */
 
 const monthsText = (f: Flower) => (f.months[0] === f.months[1] ? t('dex.month', { a: f.months[0] }) : t('dex.months', { a: f.months[0], b: f.months[1] }));
 const HABIT_KEY: Record<Habit, 'habit.sun' | 'habit.shade' | 'habit.moist'> = { sun: 'habit.sun', shade: 'habit.shade', moist: 'habit.moist' };
@@ -241,7 +237,7 @@ const HABIT_KEY: Record<Habit, 'habit.sun' | 'habit.shade' | 'habit.moist'> = { 
 const DEX_BACK = `<svg viewBox="0 0 40 40" aria-hidden="true" focusable="false"><path d="M6 37V18a14 14 0 0 1 28 0v19z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 4v33M6 23h28" stroke="currentColor" stroke-width="1.4"/><path d="M20 33c-6-1-8.5-6-7.5-10.5 4.5 .3 7.5 4.5 7.5 10.5zm0 0c6-1 8.5-6 7.5-10.5-4.5 .3-7.5 4.5-7.5 10.5z" fill="currentColor"/></svg>`;
 
 /**
- * 도감(타임 투 플립 도감과 같은 짜임): 위 가운데 큰 카드(처음엔 뒷면) + 그 아래 설명, 아래쪽에 계절별 작은 카드 여섯 장씩.
+ * 도감(타임 투 플립 도감과 같은 짜임): 위 가운데 큰 카드(처음엔 뒷면) + 그 아래 설명, 아래쪽에 정원 순서대로 작은 카드 24장.
  * 작은 카드를 누르면 큰 카드가 뒤집혀 그 꽃의 사실적인 도감 그림(flowerSvg 'dex')으로 바뀌고 이름·학명·꽃말·피는 때·원산지·설명이 나온다.
  * 작은 카드는 게임 화분과 같은 약식 그림. 큰 카드·설명 칸은 크기가 고정이라 글 길이가 달라도 덜컥이지 않는다.
  * start 를 주면(결과 화면 "도감") 그 꽃을 펼친 채 연다
@@ -265,19 +261,11 @@ export function openDex(host: HTMLElement, save: SaveData, start: number | null,
         </div>
       </div>
       <div class="dex-sets">
-        ${SEASONS.map((season) => {
-          const idx = FLOWERS.map((_, i) => i).filter((i) => seasonOf(i) === season);
-          return `<section>
-            <h3>${t(`season.${season}`)} <small>${idx.filter(open).length}/${idx.length}</small></h3>
-            <ul>${idx
-              .map((i) => {
-                const label = open(i) ? text(FLOWERS[i]).name : `${levelName(i)} — ${t('dex.locked')}`;
-                const fresh = !!save.levels[i] && !save.seen.includes(i);
-                return `<li><button class="dex-item${open(i) ? '' : ' locked'}${fresh ? ' new' : ''}" type="button" data-i="${i}" aria-pressed="false" aria-label="${label}">${open(i) ? flowerSvg(FLOWERS[i].id, true, 'game') : ICONS.lock}</button></li>`;
-              })
-              .join('')}</ul>
-          </section>`;
-        }).join('')}
+        <ul>${FLOWERS.map((f, i) => {
+          const label = open(i) ? text(f).name : `${levelName(i)} — ${t('dex.locked')}`;
+          const fresh = !!save.levels[i] && !save.seen.includes(i);
+          return `<li><button class="dex-item${open(i) ? '' : ' locked'}${fresh ? ' new' : ''}" type="button" data-i="${i}" aria-pressed="false" aria-label="${label}">${open(i) ? flowerSvg(f.id, true, 'game') : ICONS.lock}</button></li>`;
+        }).join('')}</ul>
       </div>
     </div>`);
 
@@ -300,7 +288,7 @@ export function openDex(host: HTMLElement, save: SaveData, start: number | null,
         title.textContent = '???';
         by.textContent = t('dex.locked');
         facts.innerHTML = '&nbsp;';
-        desc.textContent = t('dex.lockedDesc', { season: t(`season.${seasonOf(i)}`), n: (i % 6) + 1 });
+        desc.textContent = t('dex.lockedDesc', { n: i + 1 });
         return;
       }
       const tx = text(f);
@@ -684,7 +672,7 @@ export function gameScreen(opts: { level: number | null; par: number; onPause: (
         ${
           opts.level === null
             ? `<p class="hud-level daily"><small>${t('hud.today')}</small><b class="clock" role="timer" aria-label="${t('hud.time')}">0:00</b></p>`
-            : `<p class="hud-level"><small>${t(`season.${seasonOf(opts.level)}`)}</small><b>${(opts.level % 6) + 1}</b></p>`
+            : `<p class="hud-level"><small>${t('level.short')}</small><b>${opts.level + 1}</b></p>`
         }
         <p class="hud-moves"><small>${t('hud.moves')}</small><b class="moves">0</b><span>/</span><small>${t('hud.par')}</small><b class="par">${opts.par}</b></p>
         <button class="restart-btn hud-btn" data-act="restart" aria-label="${t('hud.restart')}" title="${t('hud.restart')}">${ICONS.restart}</button>
@@ -744,8 +732,7 @@ export interface ClearResult {
 }
 
 function goalText(r: ClearResult): string {
-  const s = seasonOf(r.level);
-  if (r.moves <= r.par) return r.level % 6 === 5 ? `${t('goal.perfect')} · ${t('goal.season', { season: t(`season.${s}`) })}` : t('goal.perfect');
+  if (r.moves <= r.par) return t('goal.perfect');
   if (r.moves - r.par <= 6) return t('goal.near', { n: r.moves - r.par });
   return t('goal.par', { par: r.par });
 }
@@ -764,8 +751,7 @@ export function resultScreen(opts: {
   const lv = LEVELS[r.level];
   const f = FLOWER[lv.flower];
   const tx = text(f);
-  const nextSeason = r.level < LEVELS.length - 1 && seasonOf(r.level + 1) !== seasonOf(r.level) ? seasonOf(r.level + 1) : null;
-  const nextLabel = !opts.onNext ? t('result.last') : nextSeason ? t('result.nextSeason', { season: t(`season.${nextSeason}`) }) : t('result.next');
+  const nextLabel = opts.onNext ? t('result.next') : t('result.last');
   const el = html(`
     <main class="screen result">
       <div class="col main-col">
@@ -859,7 +845,6 @@ export function resultScreen(opts: {
   return el;
 }
 
-export type { Season };
 
 /* ---------- 오늘의 정원 결과 ---------- */
 

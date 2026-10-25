@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { levelScore, petals } from '../src/game/engine';
-import { LEVELS, seasonOf } from '../src/game/levels';
+import { LEVELS } from '../src/game/levels';
 import { parse, type Dir } from '../src/game/rules';
 import { explore } from '../src/game/solver';
 import { mulberry32 } from './rng';
@@ -60,19 +60,19 @@ describe('모의 플레이', () => {
       let total = 0;
       let petalSum = 0;
       let scoreSum = 0;
-      const bySeason: Record<string, number[]> = { spring: [], summer: [], autumn: [], winter: [] };
+      const byTier: number[][] = [[], [], [], []];
       for (let i = 0; i < LEVELS.length; i++) {
         const runs = Array.from({ length: 12 }, (_, k) => play(i, skill, i * 100 + k + 1));
         expect(runs.every((r) => r.solved)).toBe(true);
         const sec = runs.reduce((n, r) => n + r.seconds, 0) / runs.length;
-        bySeason[seasonOf(i)].push(sec);
+        byTier[Math.floor(i / 6)].push(sec);
         total += sec;
         petalSum += runs.reduce((n, r) => n + r.petals, 0) / runs.length;
         scoreSum += runs.reduce((n, r) => n + r.score, 0) / runs.length;
       }
       const avg = (l: number[]) => Math.round(l.reduce((a, b) => a + b, 0) / l.length);
       rows.push(
-        `${name}: 판 평균 ${Math.round(total / 24)}초 (봄 ${avg(bySeason.spring)} · 여름 ${avg(bySeason.summer)} · 가을 ${avg(bySeason.autumn)} · 겨울 ${avg(bySeason.winter)}초), 24판 ${Math.round(total / 60)}분, 꽃잎 ${petalSum.toFixed(0)}/72, 정원 점수 ${Math.round(scoreSum)}`,
+        `${name}: 판 평균 ${Math.round(total / 24)}초 (정원 1~6 ${avg(byTier[0])} · 7~12 ${avg(byTier[1])} · 13~18 ${avg(byTier[2])} · 19~24 ${avg(byTier[3])}초), 24판 ${Math.round(total / 60)}분, 꽃잎 ${petalSum.toFixed(0)}/72, 정원 점수 ${Math.round(scoreSum)}`,
       );
       if (name === '보통') expect(total / 24).toBeLessThan(180);
       if (name === '고수') expect(petalSum).toBeGreaterThan(50);
