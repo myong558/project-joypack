@@ -14,7 +14,7 @@ export const screens = [
   },
   { name: 'ranking', go: (p) => p.click('[data-open="ranking"]') },
   { name: 'settings', go: (p) => p.click('[data-open="settings"]') },
-  // 설정의 게임 데이터(내 기록·오프라인 저장)를 펼친 모습. 게임이 많을 때(5개 넘으면 목록 안 스크롤)를 보려고 줄을 8개로 늘려 찍는다
+  // 설정의 게임 데이터(내 기록·오프라인 저장)를 펼친 모습. 게임이 많을 때를 보려고 줄을 8개로 늘려 찍는다
   {
     name: 'settings-data',
     async go(p) {

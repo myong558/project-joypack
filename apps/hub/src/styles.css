@@ -1489,22 +1489,19 @@ a.card:active .card-play {
   margin-bottom: -4px;
 }
 
-/* 게임 줄은 높이를 같게(글 3줄 · 버튼 2개) 해서 펼쳤을 때 5개까지 보이고 그 아래는 목록 안에서 스크롤 */
+/* 펼치면 모두 보인다(안쪽 스크롤을 두면 설정 창과 이중 스크롤이 돼 휴대폰에서 손가락이 갇힌다).
+   게임이 15개쯤 넘으면 게임 데이터를 따로 여는 창으로 옮긴다(CLAUDE.md "게임이 늘면 먼저 다시 추천할 것") */
 .data-group .storage {
-  --row: 72px;
-  max-height: calc(var(--row) * 5);
   margin-top: 10px;
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
 }
 
+/* 게임 줄은 높이를 같게(글 3줄 · 버튼 2개) */
 .storage li {
   display: flex;
   align-items: center;
   gap: 10px;
   box-sizing: border-box;
-  height: var(--row);
+  height: 72px;
 }
 
 .storage li + li {

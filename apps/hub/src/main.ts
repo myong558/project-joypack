@@ -690,7 +690,7 @@ function toggle(name: string, on: boolean, label: string): string {
 }
 
 // 설정 "게임 데이터"(내 기록·오프라인 저장): 게임이 늘면 길어지고 자주 쓰지 않으므로 접어 두고 접힌 줄에 이 요약을 보인다.
-// 게임마다 한 줄에 기록·저장 상태(왼쪽)와 지우기 버튼 두 개(오른쪽)를 함께 둔다(같은 게임 목록을 두 번 그리지 않게). 5개 넘으면 목록 안에서 스크롤
+// 게임마다 한 줄에 기록·저장 상태(왼쪽)와 지우기 버튼 두 개(오른쪽)를 함께 둔다(같은 게임 목록을 두 번 그리지 않게)
 const dataSummary = () => t('data.summary', { n: live.length, saved: live.filter((g) => cached.get(g.id)).length });
 
 async function openSettings(): Promise<void> {
