@@ -57,7 +57,9 @@ class Plate {
   parts: string[] = [];
 
   stem(d: string, width = 1.4): this {
-    this.parts.push(`<path d="${d}" fill="none" stroke="${STEM}" stroke-width="${width}" stroke-linecap="round"/><path d="${d}" fill="none" stroke="${INK}" stroke-width=".35" stroke-opacity=".5" transform="translate(.5 0)"/>`);
+    // 도감: 왼쪽에 빛 받은 밝은 줄을 더해 줄기가 둥글게 보이게
+    const shine = detail === 'dex' ? `<path d="${d}" fill="none" stroke="${LEAF_L}" stroke-width="${n(width * 0.35)}" stroke-opacity=".7" stroke-linecap="round" transform="translate(${n(-width * 0.25)} 0)"/>` : '';
+    this.parts.push(`<path d="${d}" fill="none" stroke="${STEM}" stroke-width="${width}" stroke-linecap="round"/>${shine}<path d="${d}" fill="none" stroke="${INK}" stroke-width=".35" stroke-opacity=".5" transform="translate(.5 0)"/>`);
     return this;
   }
 
@@ -70,6 +72,8 @@ class Plate {
     this.parts.push(
       `<g transform="translate(${n(x)} ${n(y)}) rotate(${ang})"><path d="${d}" fill="${c}" fill-opacity=".82" stroke="${INK}" stroke-width=".45" stroke-opacity=".7"/>` +
         `<path d="${d}" fill="${l}" fill-opacity=".45" transform="translate(${n(-w * 0.25)} ${n(-L * 0.12)}) scale(.6 .75)"/>` +
+        // 가운데 잎맥 한쪽은 그늘(잎이 살짝 접혀 빛을 한쪽만 받음)
+        `<path d="M0 0C${n(w * 1.4 + k)} ${n(-L * 0.3)} ${n(w + k)} ${n(-L * 0.85)} ${n(k * 1.2)} ${n(-L)}Q${n(k * 0.5)} ${n(-L * 0.55)} 0 0Z" fill="${INK}" fill-opacity=".16"/>` +
         `<path d="M0 0Q${n(k * 0.5)} ${n(-L * 0.55)} ${n(k * 1.15)} ${n(-L * 0.96)}" fill="none" stroke="${INK}" stroke-width=".35" stroke-opacity=".55"/>` +
         // 곁맥: 가운데 잎맥에서 비스듬히 갈라지는 가는 선 셋씩
         [0.3, 0.5, 0.7].map((t) => `<path d="M${n(k * t * 0.9)} ${n(-L * t)}l${n(w * 0.7)} ${n(-L * 0.12)}M${n(k * t * 0.9)} ${n(-L * t)}l${n(-w * 0.7)} ${n(-L * 0.12)}" stroke="${INK}" stroke-width=".22" stroke-opacity=".35"/>`).join('') +
@@ -84,12 +88,16 @@ class Plate {
     const closed = o.closed ?? ang * 0.12;
     // 꽃잎 결: 도감은 가운데 결 + 양옆 결, 게임은 없음
     const side = `<path d="M0 ${n(-L * 0.1)}Q${n(W * 0.2)} ${n(-L * 0.4)} ${n(W * 0.28)} ${n(-L * 0.66)}M0 ${n(-L * 0.1)}Q${n(-W * 0.2)} ${n(-L * 0.4)} ${n(-W * 0.28)} ${n(-L * 0.66)}" fill="none" stroke="${INK}" stroke-width=".22" stroke-opacity=".25"/>`;
-    const vein = o.vein === false || detail === 'game' ? '' : `<path d="M0 ${n(-L * 0.08)}V${n(-L * 0.72)}" stroke="${INK}" stroke-width=".3" stroke-opacity=".35"/>${L > 8 ? side : ''}`;
+    // 도감은 결을 더 촘촘히(바깥쪽 가는 결 둘 더)
+    const fine = `<path d="M0 ${n(-L * 0.15)}Q${n(W * 0.36)} ${n(-L * 0.42)} ${n(W * 0.42)} ${n(-L * 0.58)}M0 ${n(-L * 0.15)}Q${n(-W * 0.36)} ${n(-L * 0.42)} ${n(-W * 0.42)} ${n(-L * 0.58)}" fill="none" stroke="${INK}" stroke-width=".16" stroke-opacity=".2"/>`;
+    const vein = o.vein === false || detail === 'game' ? '' : `<path d="M0 ${n(-L * 0.08)}V${n(-L * 0.72)}" stroke="${INK}" stroke-width=".3" stroke-opacity=".35"/>${L > 8 ? side : ''}${L > 14 ? fine : ''}`;
+    // 도감: 꽃잎 밑동은 그늘져 짙고, 가장자리는 빛이 비쳐 밝은 테
+    const shade = detail === 'dex' ? `<path d="${d}" fill="${INK}" fill-opacity=".17" transform="scale(.62 .4)"/><path d="${d}" fill="none" stroke="#fff" stroke-width=".5" stroke-opacity=".35" transform="scale(.9)"/>` : '';
     const sy = o.sy ? ` scale(1 ${o.sy})` : '';
     this.parts.push(
       `<g transform="translate(${n(x)} ${n(y)})${sy}"><g class="pt" style="--r:${n(ang)}deg;--c:${n(closed)}deg;--s:${o.cs ?? 0.45};--d:${o.delay ?? 0}ms">` +
         `<path d="${d}" fill="${o.c}" fill-opacity=".9" stroke="${INK}" stroke-width=".42" stroke-opacity=".75"/>` +
-        `<path d="${d}" fill="${o.l}" fill-opacity=".55" transform="translate(0 ${n(-L * 0.28)}) scale(.55)"/>${vein}</g></g>`,
+        `<path d="${d}" fill="${o.l}" fill-opacity=".55" transform="translate(0 ${n(-L * 0.28)}) scale(.55)"/>${shade}${vein}</g></g>`,
     );
     return this;
   }
@@ -382,6 +390,18 @@ export function flowerSvg(id: FlowerId, open = true, kind: FlowerDetail = 'dex')
   // 게임 칸에서는 꽃 머리 둘레를 조금 더 바짝(반지름의 85%) 잘라 크게 보이게
   const [cx, cy, r0] = FOCUS[id];
   const r = kind === 'game' ? Math.round(r0 * 0.85) : r0;
-  const box = kind === 'game' ? `${cx - r} ${cy - r} ${r * 2} ${r * 2}` : '0 0 100 120';
-  return `<svg class="fl ${kind}${open ? '' : ' closed'}" viewBox="${box}" aria-hidden="true" focusable="false">${body}</svg>`;
+  return `<svg class="fl ${kind}${open ? '' : ' closed'}" viewBox="${kind === 'game' ? `${cx - r} ${cy - r} ${r * 2} ${r * 2}` : dexBox(cx, cy)}" aria-hidden="true" focusable="false">${body}</svg>`;
+}
+
+/** 튤립 꽃 머리 높이(도감 판에서 꽃 머리가 오는 자리) */
+const DEX_HEAD = FOCUS.tulip[1];
+
+/**
+ * 도감 판: 줄기 밑(판 아래 끝)은 그대로 두고, 꽃 머리가 튤립과 같은 높이·가운데에 오도록 판을 키워 자른다.
+ * 꽃 머리가 낮은 꽃(복수초·크리스마스로즈)은 그만큼 크게 보인다
+ */
+function dexBox(cx: number, cy: number): string {
+  const k = Math.min(1, (120 - cy) / (120 - DEX_HEAD));
+  const w = 100 * k;
+  return `${n(cx - w / 2)} ${n(120 - 120 * k)} ${n(w)} ${n(120 * k)}`;
 }
