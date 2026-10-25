@@ -866,19 +866,22 @@ a.card:active .card-play {
   white-space: nowrap;
 }
 
+/* 예약 카드 자물쇠 단추: 짙은 입체 단추(위 빛·아래 두께) 위 은빛 금속 자물쇠 */
 .card.teaser .card-play {
-  background: var(--surface-2);
-  color: var(--muted);
-  box-shadow: none;
+  background: radial-gradient(circle at 35% 28%, #4a4560, #1d1a2e 70%);
+  box-shadow:
+    0 3px 0 #0d0b18,
+    0 5px 10px rgb(0 0 0 / 0.4),
+    inset 0 1px 0 rgb(255 255 255 / 0.18);
 }
 
-/* 자물쇠: ▶ 동그라미(34px) 안에서 잘 보이게 크게 */
+/* 자물쇠: ▶ 동그라미(34px) 안에서 잘 보이게 크게(색은 그림 안 그라데이션) */
 .card.teaser .card-play svg {
-  width: 20px;
-  height: 20px;
+  width: 21px;
+  height: 21px;
   margin-left: 0;
-  fill: none;
-  stroke-width: 2.3;
+  fill: initial;
+  stroke: none;
 }
 
 @keyframes teaser-wobble {

@@ -43,7 +43,11 @@ const ICON = {
   download: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10.5l5 5 5-5M5 19.5h14"/></svg>',
   check: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
   share: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="m8.2 10.8 7.6-4.1M8.2 13.2l7.6 4.1"/></svg>',
-  lock: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
+  // 예약 카드 자물쇠: 은빛 금속(그라데이션 몸통·고리 + 열쇠 구멍)
+  lock:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="lock-body" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".45" stop-color="#c9ced8"/><stop offset="1" stop-color="#7c8496"/></linearGradient><linearGradient id="lock-shackle" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#e8ebf0"/><stop offset="1" stop-color="#8d94a3"/></linearGradient></defs>' +
+    '<path d="M8.2 11V8.2a3.8 3.8 0 0 1 7.6 0V11" fill="none" stroke="url(#lock-shackle)" stroke-width="2.8" stroke-linecap="round"/><rect x="5.2" y="10.4" width="13.6" height="10.4" rx="2.6" fill="url(#lock-body)"/>' +
+    '<circle cx="12" cy="15.4" r="1.6" fill="#1d1a2e"/><path d="M11.2 16.2h1.6l.5 2.6h-2.6z" fill="#1d1a2e"/></svg>',
   sparkle: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5c.6 4.2 2.3 6 6.5 6.5-4.2.6-5.9 2.3-6.5 6.5-.6-4.2-2.3-5.9-6.5-6.5 4.2-.5 5.9-2.3 6.5-6.5z"/><path d="M18.5 15.5c.3 1.8 1 2.6 2.5 3-1.5.3-2.2 1.1-2.5 3-.3-1.9-1-2.7-2.5-3 1.5-.4 2.2-1.2 2.5-3z"/></svg>',
 };
 
