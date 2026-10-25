@@ -250,6 +250,22 @@ function play(level: number | 'daily'): void {
   };
   render(true);
 
+  // 가만히 있으면(7초) 정원사가 쉬는 동작을 차례로(모자 벗고 땀 닦기 → 두리번 → 기지개), 9초마다 다음 동작.
+  // 움직이거나 되돌리면 바로 멈추고 다시 센다. 일시정지·판을 깬 뒤·화면을 떠나 있으면 하지 않는다
+  const IDLE = ['wipe', 'look', 'stretch'] as const;
+  let idleTimer: ReturnType<typeof setTimeout> | undefined;
+  let idleNext = 0;
+  const idleAct = () => {
+    if (!paused && !game.done && !document.hidden) board.idle(IDLE[idleNext++ % IDLE.length]);
+    idleTimer = setTimeout(idleAct, 9000);
+  };
+  const poke = () => {
+    board.idle(null);
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(idleAct, 7000);
+  };
+  poke();
+
   const stopWalk = () => {
     if (walking) clearTimeout(walking);
     walking = null;
@@ -257,6 +273,7 @@ function play(level: number | 'daily'): void {
 
   const move = (dir: Dir) => {
     if (paused || game.done) return;
+    poke();
     const r = game.move(dir);
     if (!r.moved) {
       board.bump(dir);
@@ -270,6 +287,7 @@ function play(level: number | 'daily'): void {
       sound.play('push');
       vibrate(35);
       board.place(game.state, dir);
+      board.push();
       fx.shake('tiny');
     } else {
       sound.play('step');
@@ -283,6 +301,7 @@ function play(level: number | 'daily'): void {
     if (game.done) return;
     stopWalk();
     game.restart();
+    poke();
     board.place(game.state, 2);
     sound.play('undo');
     render(true);
@@ -292,6 +311,7 @@ function play(level: number | 'daily'): void {
   const undo = () => {
     stopWalk();
     if (paused || !game.undo()) return;
+    poke();
     sound.play('undo');
     vibrate(12);
     board.place(game.state, null);
@@ -332,6 +352,8 @@ function play(level: number | 'daily'): void {
     if (tick) clearInterval(tick);
     if (view.clock) view.clock.textContent = clock(elapsed());
     view.el.classList.add('cleared');
+    clearTimeout(idleTimer);
+    board.idle(null);
     const f = FLOWER[daily ? species[0] : LEVELS[level as number].flower];
     later(260, () => {
       sound.play('bloom');
@@ -443,6 +465,7 @@ function play(level: number | 'daily'): void {
   document.addEventListener('visibilitychange', onVisibility);
   teardown = () => {
     stopWalk();
+    clearTimeout(idleTimer);
     if (tick) clearInterval(tick);
     ro.disconnect();
     timers.forEach(clearTimeout);

@@ -606,6 +606,22 @@ body:has(.screen.game) .scene .layer {
   transform: translateX(0);
   animation: d-man 8s infinite;
 }
+/* 시연 정원사: 밀 때(18~26%) 팔이 앞으로 나옴 */
+.d-man .g-arm {
+  animation: d-arm 8s infinite;
+}
+@keyframes d-arm {
+  0%,
+  13%,
+  32%,
+  100% {
+    transform: translateY(-8px);
+  }
+  17%,
+  27% {
+    transform: translateY(3px);
+  }
+}
 .d-man svg {
   width: 100%;
   height: 100%;
@@ -629,15 +645,15 @@ body:has(.screen.game) .scene .layer {
 @keyframes d-man {
   0%,
   18% {
-    transform: translateX(0) rotate(90deg);
+    transform: translateX(0) rotate(-90deg);
   }
   26%,
   94% {
-    transform: translateX(calc(var(--dc) * 1)) rotate(90deg);
+    transform: translateX(calc(var(--dc) * 1)) rotate(-90deg);
     opacity: 1;
   }
   100% {
-    transform: translateX(0) rotate(90deg);
+    transform: translateX(0) rotate(-90deg);
     opacity: 0;
   }
 }
@@ -1763,6 +1779,165 @@ body:has(.screen.game) .scene .layer {
   transform: rotate(var(--face, 0deg));
   transition: transform 0.12s;
 }
+/* 정원사 부분 움직임(board.ts GARDENER). 모자는 늘 아주 살짝 흔들리고(무광 짚 모자가 숨 쉬듯), 화분을 밀면 팔이 앞으로 나온다 */
+.g-hat {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: hat-sway 3.6s ease-in-out infinite alternate;
+}
+@keyframes hat-sway {
+  from {
+    transform: rotate(-2.5deg) scale(1);
+  }
+  to {
+    transform: rotate(2.5deg) scale(1.02);
+  }
+}
+.g-arm {
+  transform: translateY(-8px);
+  transition: transform 0.12s ease-out;
+}
+.g-arm.l {
+  transform-origin: 13.5px 22.5px;
+}
+.g-arm.r {
+  transform-origin: 26.5px 22.5px;
+}
+.gardener.push .g-arm {
+  transform: translateY(3px);
+}
+/* 모자를 벗어 들 때 칸 밖으로 나가도 잘리지 않게 */
+.gardener svg,
+.d-man svg {
+  overflow: visible;
+}
+.g-hand,
+.g-drop {
+  opacity: 0;
+}
+.g-all {
+  transform-origin: 20px 20px;
+}
+/* 쉬는 동작 1: 모자를 옆으로 벗어 들고 이마의 땀을 손으로 닦아 털어 냄 */
+.gardener.idle-wipe .g-hat {
+  animation: wipe-hat 2.8s ease-in-out;
+}
+@keyframes wipe-hat {
+  0% {
+    transform: none;
+  }
+  16%,
+  74% {
+    transform: translate(13px, -10px) rotate(28deg) scale(1.04);
+  }
+  100% {
+    transform: none;
+  }
+}
+.gardener.idle-wipe .g-hand {
+  animation: wipe-hand 2.8s ease-in-out;
+}
+@keyframes wipe-hand {
+  0%,
+  22% {
+    opacity: 0;
+    transform: translate(7px, 6px);
+  }
+  30% {
+    opacity: 1;
+    transform: translate(4px, 0);
+  }
+  40% {
+    transform: translate(-4px, -1px);
+  }
+  50% {
+    transform: translate(4px, 0);
+  }
+  60% {
+    transform: translate(-4px, -1px);
+  }
+  68% {
+    opacity: 1;
+    transform: translate(3px, 0);
+  }
+  78%,
+  100% {
+    opacity: 0;
+    transform: translate(7px, 6px);
+  }
+}
+.gardener.idle-wipe .g-drop {
+  animation: wipe-drop 2.8s ease-out;
+}
+@keyframes wipe-drop {
+  0%,
+  62% {
+    opacity: 0;
+    transform: none;
+  }
+  68% {
+    opacity: 1;
+  }
+  88%,
+  100% {
+    opacity: 0;
+    transform: translate(7px, -5px);
+  }
+}
+/* 쉬는 동작 2: 두리번(몸을 왼쪽·오른쪽으로 돌려 봄) */
+.gardener.idle-look .g-all {
+  animation: look 2.4s ease-in-out;
+}
+@keyframes look {
+  0%,
+  100% {
+    transform: none;
+  }
+  22%,
+  40% {
+    transform: rotate(-30deg);
+  }
+  60%,
+  78% {
+    transform: rotate(30deg);
+  }
+}
+/* 쉬는 동작 3: 기지개(두 팔을 양옆으로 쭉 뻗고 모자가 살짝 들림) */
+.gardener.idle-stretch .g-arm.l {
+  animation: stretch-l 2.4s ease-in-out;
+}
+.gardener.idle-stretch .g-arm.r {
+  animation: stretch-r 2.4s ease-in-out;
+}
+@keyframes stretch-l {
+  0%,
+  100% {
+    transform: translateY(-8px);
+  }
+  25%,
+  70% {
+    transform: translateY(0) rotate(95deg);
+  }
+}
+@keyframes stretch-r {
+  0%,
+  100% {
+    transform: translateY(-8px);
+  }
+  25%,
+  70% {
+    transform: translateY(0) rotate(-95deg);
+  }
+}
+.gardener.idle-stretch .g-hat {
+  animation: stretch-hat 2.4s ease-in-out;
+}
+@keyframes stretch-hat {
+  25%,
+  70% {
+    transform: translateY(-1px) scale(1.05);
+  }
+}
 .gardener.bump svg {
   animation: bump 0.16s;
 }
@@ -1842,6 +2017,16 @@ body:has(.screen.game) .scene .layer {
 }
 .fl.game.closed .pt {
   transform: rotate(var(--c)) scale(calc(var(--s) + 0.3));
+}
+/* 도감 큰 카드: 봉오리를 더 바싹 움츠렸다가(꽃잎은 작게 오므리고 꽃 머리도 작게) 활짝 피어 대비가 크게 */
+.dex .fl.closed .pt {
+  transform: rotate(calc(var(--c) * 0.6)) scale(calc(var(--s) * 0.55));
+}
+.dex .fl.closed .hd {
+  transform: scale(0.22);
+}
+.dex .fl .pt {
+  transition-duration: 2.2s;
 }
 .demo .fl .hd {
   transition: none;
@@ -2120,6 +2305,11 @@ body:has(.screen.game) .scene .layer {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .g-hat,
+  .g-arm,
+  .g-all,
+  .g-hand,
+  .g-drop,
   .demo *,
   .opening .logo,
   .opening .tagline,
@@ -2130,7 +2320,7 @@ body:has(.screen.game) .scene .layer {
     transform: translateX(calc(var(--dc) * 2));
   }
   .d-man {
-    transform: translateX(calc(var(--dc) * 1)) rotate(90deg);
+    transform: translateX(calc(var(--dc) * 1)) rotate(-90deg);
   }
   .d-pot .glow {
     opacity: 1;
@@ -2198,6 +2388,11 @@ body:has(.screen.game) .scene .layer {
 /* 랭킹 창 탭 */
 .rank-tabs {
   margin: -4px 0 0;
+}
+/* 랭킹 창: 높이를 정해 두고(내용이 길면 창 안에서 스크롤) 위쪽 맞춤. 정원 점수 ↔ 오늘의 정원, 등록 칸이 있고 없음,
+ * 불러오는 중 ↔ 오프라인처럼 내용이 달라져도 창 크기·탭 위치가 그대로 */
+.modal.rank-modal {
+  height: min(calc(var(--jp-vh, 100dvh) - 32px), 720px);
 }
 .rank-tabs > button {
   min-height: 42px;

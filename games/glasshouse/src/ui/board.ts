@@ -22,17 +22,36 @@ export const POT = `<svg class="pot-body" viewBox="0 0 40 26" aria-hidden="true"
 <path d="M6.5 9.6h27l-3 11.9q-.4 1.8-2.3 1.8H11.8q-1.9 0-2.3-1.8zM3.5 3h33v6.6h-33z" fill="none" stroke="#5a2c18" stroke-width=".5" stroke-opacity=".6"/>
 </svg>`;
 
-/** 정원사: 위에서 본 밀짚모자(얼굴 없음). 모자 띠의 매듭이 뒤쪽을 가리켜 보는 방향을 알린다 */
-const GARDENER = `<svg viewBox="0 0 40 40" aria-hidden="true" focusable="false">
+/**
+ * 정원사: 위에서 본 밀짚모자(얼굴 없음). 앞쪽(그림 아래)으로 팔이 나오고, 모자 띠 매듭이 뒤쪽(그림 위)을 가리킨다.
+ * 부분마다 묶음을 나눠 CSS 로 움직인다(styles.css .gardener): .g-hat 모자(늘 아주 살짝 흔들림, 쉬는 동작 때 벗음),
+ * .g-arm 팔(화분을 밀 때 앞으로 쭉), .g-head 모자 밑 머리, .g-hand 땀 닦는 손, .g-drop 땀방울, .g-all 몸 전체(두리번)
+ * 짚 결: 챙에 방사선 결 + 엇갈린 점선 고리, 꼭대기에 점선 고리. 광택 없이 짚 색 두 겹으로 무광
+ */
+export const GARDENER = `<svg viewBox="0 0 40 40" aria-hidden="true" focusable="false">
 <ellipse cx="21" cy="23" rx="15" ry="14" fill="rgb(40 30 20 / .22)"/>
+<g class="g-all">
+<g class="g-arm l"><path d="M13.5 22.5L12.5 33" stroke="#3f5a45" stroke-width="3.4" stroke-linecap="round"/><circle cx="12.4" cy="34" r="2.3" fill="#e2ad85" stroke="#9a6a48" stroke-width=".5"/></g>
+<g class="g-arm r"><path d="M26.5 22.5L27.5 33" stroke="#3f5a45" stroke-width="3.4" stroke-linecap="round"/><circle cx="27.6" cy="34" r="2.3" fill="#e2ad85" stroke="#9a6a48" stroke-width=".5"/></g>
 <ellipse cx="20" cy="21" rx="9" ry="12" fill="#3f5a45"/>
-<circle cx="20" cy="20" r="14.5" fill="#d8b46a"/>
-<circle cx="20" cy="20" r="14.5" fill="none" stroke="#9a7434" stroke-width=".8"/>
-<circle cx="20" cy="20" r="11.5" fill="none" stroke="#b8924a" stroke-width=".5" stroke-dasharray="1.6 1.4"/>
-<circle cx="20" cy="20" r="8" fill="#e6c57d"/>
-<path d="M14 15a8 8 0 0 1 11-1" fill="none" stroke="#fff3cf" stroke-width="1.4" stroke-linecap="round" opacity=".7"/>
+<g class="g-head"><circle cx="20" cy="21" r="6.6" fill="#4a3324"/><path d="M15.5 19.5q4.5-4 9 0" fill="none" stroke="#6b4a30" stroke-width="1.2" stroke-linecap="round"/></g>
+<g class="g-hat">
+<circle cx="20" cy="20" r="14.5" fill="#cfa862"/>
+<circle cx="20" cy="20" r="13.2" fill="#d6b06a"/>
+<path d="M29.4 20.0L34.0 20.0M29.1 22.4L33.5 23.6M28.1 24.7L32.1 27.0M26.6 26.6L29.9 29.9M24.7 28.1L27.0 32.1M22.4 29.1L23.6 33.5M20.0 29.4L20.0 34.0M17.6 29.1L16.4 33.5M15.3 28.1L13.0 32.1M13.4 26.6L10.1 29.9M11.9 24.7L7.9 27.0M10.9 22.4L6.5 23.6M10.6 20.0L6.0 20.0M10.9 17.6L6.5 16.4M11.9 15.3L7.9 13.0M13.4 13.4L10.1 10.1M15.3 11.9L13.0 7.9M17.6 10.9L16.4 6.5M20.0 10.6L20.0 6.0M22.4 10.9L23.6 6.5M24.7 11.9L27.0 7.9M26.6 13.4L29.9 10.1M28.1 15.3L32.1 13.0M29.1 17.6L33.5 16.4" stroke="#a9843f" stroke-width=".55" stroke-opacity=".55"/>
+<circle cx="20" cy="20" r="12.2" fill="none" stroke="#b8924a" stroke-width=".6" stroke-dasharray="1.3 1.1"/>
+<circle cx="20" cy="20" r="10.6" fill="none" stroke="#b8924a" stroke-width=".5" stroke-dasharray="1.1 1.3" stroke-dashoffset=".6"/>
+<circle cx="20" cy="20" r="14.5" fill="none" stroke="#8f6a2e" stroke-width=".9"/>
+<circle cx="20" cy="20" r="8" fill="#dcb872"/>
+<circle cx="20" cy="20" r="6.2" fill="none" stroke="#b8924a" stroke-width=".55" stroke-dasharray="1 1"/>
+<circle cx="20" cy="20" r="4.2" fill="none" stroke="#b8924a" stroke-width=".55" stroke-dasharray=".9 1"/>
+<circle cx="20" cy="20" r="1.6" fill="#c9a256"/>
 <circle cx="20" cy="20" r="8.6" fill="none" stroke="var(--accent)" stroke-width="2"/>
-<path d="M20 28.6l-2.4 6.4 2.4-1.6 2.4 1.6z" fill="var(--accent)"/>
+<path d="M20 11.4l-2.4-6.4 2.4 1.6 2.4-1.6z" fill="var(--accent)"/>
+</g>
+<circle class="g-hand" cx="20" cy="26" r="2.4" fill="#e2ad85" stroke="#9a6a48" stroke-width=".5"/>
+<path class="g-drop" d="M27 20q1.6 2.6 0 3.6q-1.6-1 0-3.6z" fill="#8fd0f2" stroke="#3f86b0" stroke-width=".4"/>
+</g>
 </svg>`;
 
 export interface PotView {
@@ -45,6 +64,7 @@ export class BoardView {
   readonly pots: PotView[] = [];
   private readonly gardener: HTMLElement;
   private facing: Dir = 2;
+  private pushTimer: ReturnType<typeof setTimeout> | undefined;
 
   constructor(
     host: HTMLElement,
@@ -127,6 +147,23 @@ export class BoardView {
     state.pots.forEach((c, i) => at(this.pots[i].el, c));
     at(this.gardener, state.player);
     this.gardener.style.setProperty('--face', `${[180, 270, 0, 90][this.facing]}deg`);
+  }
+
+  /** 화분을 밀 때: 모자 밖으로 두 팔이 쭉 나와 미는 모습(이어 밀면 팔을 계속 뻗고 있음) */
+  push(): void {
+    this.idle(null);
+    this.gardener.classList.add('push');
+    clearTimeout(this.pushTimer);
+    this.pushTimer = setTimeout(() => this.gardener.classList.remove('push'), 240);
+  }
+
+  /** 가만히 있을 때 쉬는 동작 하나(모자 벗고 땀 닦기 · 두리번 · 기지개). null 이면 멈춤 */
+  idle(kind: 'wipe' | 'look' | 'stretch' | null): void {
+    this.gardener.classList.remove('idle-wipe', 'idle-look', 'idle-stretch');
+    if (kind) {
+      void this.gardener.offsetWidth;
+      this.gardener.classList.add(`idle-${kind}`);
+    }
   }
 
   /** 막혔을 때 정원사가 그쪽으로 살짝 부딪힘 */

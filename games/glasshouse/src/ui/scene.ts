@@ -180,37 +180,40 @@ function palm(ctx: CanvasRenderingContext2D, stem: Path2D, x: number, y: number,
   }
 }
 
-/** 전나무 가지: 가지 선을 따라 짧은 바늘잎이 양쪽으로, 위쪽 바늘 끝에 성에(frost) */
+/** 겨울 앙상한 가지: 가는 가지 선에 드문드문 짧은 바늘잎(두 마디에 한 쌍), 곁가지 둘, 가지 위에 쌓인 눈 덩이(frost) */
 function fir(stem: Path2D, frost: Path2D, x: number, y: number, ang: number, len: number, bend: number, needle: number, twigs = true): void {
-  const N = 16;
+  const N = 14;
   const step = len / N;
   stem.moveTo(x, y);
   const pts: [number, number, number][] = [];
   for (let k = 1; k <= N; k++) {
     const s = k / N;
-    const a = ang + bend * s;
+    const a = ang + bend * s + Math.sin(k * 1.7) * 0.06;
     x += Math.cos(a) * step;
     y += Math.sin(a) * step;
     stem.lineTo(x, y);
     pts.push([x, y, a]);
   }
   pts.forEach(([px, py, a], k) => {
-    const n = needle * (1 - (k / N) * 0.45);
-    for (const d of [-1.05, -0.75, 0.75, 1.05]) {
-      const ex = px + Math.cos(a + d) * n, ey = py + Math.sin(a + d) * n;
-      stem.moveTo(px, py);
-      stem.lineTo(ex, ey);
-      // 위를 향한 바늘 끝에만 성에
-      if (ey < py - n * 0.4 && k % 2 === 0) {
-        frost.moveTo(ex + 1.6, ey);
-        frost.arc(ex, ey, 1.6, 0, Math.PI * 2);
+    if (k % 2 === 0) {
+      const n = needle * 0.6 * (1 - (k / N) * 0.5);
+      for (const d of [-0.9, 0.9]) {
+        stem.moveTo(px, py);
+        stem.lineTo(px + Math.cos(a + d) * n, py + Math.sin(a + d) * n);
       }
+    }
+    // 가지 위쪽에 쌓인 눈 덩이(세 마디에 하나)
+    if (k % 3 === 1) {
+      const r = needle * 0.22 * (1 - (k / N) * 0.4);
+      const nx = Math.sin(a) * r * 0.8, ny = -Math.abs(Math.cos(a)) * r * 0.8;
+      frost.moveTo(px + nx + r, py + ny);
+      frost.ellipse(px + nx, py + ny, r * 1.4, r, a, 0, Math.PI * 2);
     }
   });
   if (!twigs) return;
-  for (const [t, side] of [[0.3, 1], [0.5, -1], [0.68, 1]] as const) {
+  for (const [t, side] of [[0.35, 1], [0.62, -1]] as const) {
     const [px, py, a] = pts[Math.floor(N * t)];
-    fir(stem, frost, px, py, a + side * 0.75, len * 0.32, -side * 0.2, needle * 0.75, false);
+    fir(stem, frost, px, py, a + side * 0.7, len * 0.3, -side * 0.15, needle * 0.8, false);
   }
 }
 
@@ -564,8 +567,8 @@ function paint(canvas: HTMLCanvasElement, rnd: () => number): void {
         palm(ctx, fstem, rx - S * 0.1, h + 8, ang, S * (0.8 + (i % 3) * 0.1), -0.7);
       }
     } else if (weather === 'snow') {
-      // 양옆에서 비스듬히 들어온 전나무 가지(바늘잎은 선으로 그려 굵게 칠함)
-      stemWidth = 1.7;
+      // 양옆에서 비스듬히 들어온 앙상한 겨울 가지(드문 바늘잎, 가지 위에 쌓인 눈)
+      stemWidth = 1.3;
       for (let i = 0; i < 3; i++) fir(fstem, frost, lx, h - S * (0.15 + i * 0.32), -0.55 - i * 0.12 + gust(i * 0.6), S * (1 - i * 0.15), 0.25, S * 0.07);
       for (let i = 0; i < 3; i++) fir(fstem, frost, rx, h - S * (0.05 + i * 0.34), Math.PI + 0.5 + i * 0.12 + gust(4 + i * 0.6), S * (0.95 - i * 0.15), -0.25, S * 0.07);
     } else {
@@ -597,7 +600,7 @@ function paint(canvas: HTMLCanvasElement, rnd: () => number): void {
     ctx.lineWidth = S * 0.05;
     ctx.stroke(trunk);
     if (weather === 'snow') {
-      ctx.fillStyle = rgba(WHITE, (dark ? 0.55 : 0.9) * gameK);
+      ctx.fillStyle = rgba(WHITE, (dark ? 0.6 : 0.95) * gameK);
       ctx.fill(frost);
     }
     ctx.strokeStyle = rgba(mix(leaf, b, 0.6), (dark ? 0.35 : 0.5) * gameK);

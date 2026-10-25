@@ -6,7 +6,7 @@ import { captureResult, type ShareOutcome } from '../share';
 import { flowerCount, gardenScore, nextLevel, petalCount, type SaveData } from '../storage';
 import { SKIN_SETTINGS, THEMES, type Skin, type SkinSetting, type Theme } from '../theme';
 import { countUp, reducedMotion } from './effects';
-import { POT } from './board';
+import { GARDENER, POT } from './board';
 import { flowerSvg } from './flowers';
 import { ICONS, SUN_ICON, SKIN_ICONS, THEME_ICONS } from './icons';
 
@@ -86,7 +86,7 @@ function heroDemo(): string {
     <span class="d-sign"><b>${t('app.title')}</b></span>
     <i class="d-wall"><i class="d-win"></i></i><i class="d-beam"></i>
     <span class="d-pot"><span class="glow"></span><span class="plant">${flowerSvg('tulip', false, 'game')}</span>${POT}</span>
-    <span class="d-man"><svg viewBox="0 0 40 40" focusable="false"><circle cx="20" cy="20" r="14.5" fill="#d8b46a" stroke="#9a7434" stroke-width=".8"/><circle cx="20" cy="20" r="8" fill="#e6c57d"/><circle cx="20" cy="20" r="8.6" fill="none" stroke="var(--accent)" stroke-width="2"/></svg></span>
+    <span class="d-man">${GARDENER}</span>
   </div>`;
 }
 
@@ -282,7 +282,9 @@ export function openDex(host: HTMLElement, save: SaveData, start: number | null,
     const f = FLOWERS[i];
     const isOpen = open(i);
     const apply = () => {
-      front.innerHTML = isOpen ? `<div class="plate">${flowerSvg(f.id, true, 'dex')}</div>` : '';
+      // 꽃은 바싹 움츠린 봉오리로 펼쳐 놓고, 카드가 다 뒤집힌 뒤 꽃잎이 차례로 벌어지며 핀다(styles.css .dex .fl.closed)
+      front.innerHTML = isOpen ? `<div class="plate">${flowerSvg(f.id, false, 'dex')}</div>` : '';
+      if (isOpen) setTimeout(() => front.querySelector('.fl')?.classList.remove('closed'), reducedMotion.matches ? 0 : 320);
       if (!isOpen) {
         title.textContent = '???';
         by.textContent = t('dex.locked');
@@ -645,7 +647,8 @@ export function openRanking(host: HTMLElement, view: RankingView, mark: number |
     }),
   );
   select(board);
-  openModal(host, box, t('ranking.title'), '[data-tab][aria-pressed="true"]');
+  // 창 높이를 고정해(styles.css .rank-modal) 탭·기록 등록 칸·목록이 바뀌어도 탭 단추가 위아래로 움직이지 않게
+  openModal(host, box, t('ranking.title'), '[data-tab][aria-pressed="true"]', 'rank-modal');
 }
 
 /* ---------- 게임 화면 ---------- */
