@@ -958,7 +958,7 @@ h2 .icon-pic {
   font-size: 11px;
 }
 
-/* 정원 고르기: 정원 24곳을 꽃 카드로(좁으면 4줄, 넓으면 6줄). 제목·닫기는 고정, 카드 목록만 스크롤 */
+/* 꽃 고르기: 판 24개를 꽃 카드로(좁으면 4줄, 넓으면 6줄). 제목·닫기는 고정, 카드 목록만 스크롤 */
 .modal.pick-modal {
   display: flex;
   flex-direction: column;
@@ -1563,6 +1563,17 @@ h2 .icon-pic {
   font-size: 12px;
   color: var(--muted);
   white-space: nowrap;
+}
+/* 게임 중 위쪽: 번호 + 꽃 이름("7 물망초"). 영어 꽃 이름은 길어 두 줄까지 접는다(Forget-me-not, Lily of the Valley) */
+.hud-flower {
+  min-width: 0;
+}
+:root[lang='en'] .hud-flower {
+  align-self: center;
+  max-width: 6.2em;
+  font-size: 11px;
+  line-height: 1.1;
+  white-space: normal;
 }
 .hud-level b {
   font-family: 'Jua', sans-serif;

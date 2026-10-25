@@ -25,6 +25,9 @@ function closeButton(): string {
 const pressed = (on: boolean) => `aria-pressed="${on}"`;
 const text = (f: Flower) => f[getLang()];
 /** 꽃잎 표시(꽃잎 3장 중 받은 만큼 채움) */
+/** 이어 가꾸기 단추 옆 표시: 몇 번째 꽃인지 번호 + 그 꽃 이름("7 · 물망초") */
+const levelTag = (i: number) => `${i + 1} · ${text(FLOWER[LEVELS[i].flower]).name}`;
+
 const petalRow = (n: number) => `<span class="petals" role="img" aria-label="${t('pick.cleared', { p: n })}">${[1, 2, 3].map((i) => `<i class="${i <= n ? 'on' : ''}"></i>`).join('')}</span>`;
 
 /**
@@ -145,7 +148,7 @@ export function startScreen(opts: StartOptions): HTMLElement {
       </div>
       <div class="col side-col">
         <button class="btn primary big" data-play>
-          ${next < 0 ? t('start.allDone') : `<span>${next === 0 ? t('start.play') : t('start.continue')}</span><small>${levelName(next)}</small>`}
+          ${next < 0 ? t('start.allDone') : `<span>${next === 0 ? t('start.play') : t('start.continue')}</span><small>${levelTag(next)}</small>`}
         </button>
         <button class="btn daily-btn" data-daily>
           ${ICONS.calendar}<span class="daily-text"><b>${t('start.daily')}</b><small>${
@@ -184,11 +187,11 @@ export function startScreen(opts: StartOptions): HTMLElement {
   return el;
 }
 
-/* ---------- 정원 고르기 ---------- */
+/* ---------- 꽃 고르기 ---------- */
 
 /**
- * 정원 24곳을 꽃 카드로(계절 구분 없이). 핀 정원은 그 꽃이 핀 그림·이름·꽃잎, 다음에 가꿀 정원은 봉오리와 이름,
- * 아직 안 열린 정원은 자물쇠만. 꽃을 보고 다시 가꿀 정원을 고른다
+ * 꽃 고르기: 판 24개를 꽃 카드로(계절 구분 없이). 핀 꽃은 그 꽃이 핀 그림·이름·꽃잎, 다음에 피울 꽃은 봉오리와 이름,
+ * 아직 안 열린 꽃은 자물쇠만. 꽃을 보고 다시 피울 꽃을 고른다
  */
 function openPicker(host: HTMLElement, save: SaveData, onPlay: (level: number) => void): void {
   const box = html(`
@@ -687,7 +690,7 @@ export function gameScreen(opts: { level: number | null; par: number; onPause: (
         ${
           opts.level === null
             ? `<p class="hud-level daily"><small>${t('hud.today')}</small><b class="clock" role="timer" aria-label="${t('hud.time')}">0:00</b></p>`
-            : `<p class="hud-level"><small>${t('level.short')}</small><b>${opts.level + 1}</b></p>`
+            : `<p class="hud-level"><b>${opts.level + 1}</b><small class="hud-flower">${text(FLOWER[LEVELS[opts.level].flower]).name}</small></p>`
         }
         <p class="hud-moves"><small>${t('hud.moves')}</small><b class="moves">0</b><span>/</span><small>${t('hud.par')}</small><b class="par">${opts.par}</b></p>
         <button class="restart-btn hud-btn" data-act="restart" aria-label="${t('hud.restart')}" title="${t('hud.restart')}">${ICONS.restart}</button>
