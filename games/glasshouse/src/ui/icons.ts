@@ -1,4 +1,3 @@
-import type { Habit } from '../flora';
 import type { SkinSetting, Theme } from '../theme';
 
 /** 선 아이콘(24×24, currentColor). 위 메뉴 아이콘은 공통 모듈 Joypack.topIcon 을 쓴다 */
@@ -29,12 +28,8 @@ export const ICONS = {
   vibrateOff: svg('<rect x="8" y="4" width="8" height="16" rx="2"/><path d="M3 3l18 18"/>'),
 };
 
-/** 화분 습성 표시(화분 도장·안내 칩): 햇살(해와 빛살) · 그늘(나무 그늘) · 물가(물방울) */
-export const HABIT_ICON: Record<Habit, string> = {
-  sun: `<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="4" fill="#f2b632" stroke="#9a6a10" stroke-width=".8"/><path d="M10 1.8v2.6M10 15.6v2.6M1.8 10h2.6M15.6 10h2.6M4.2 4.2l1.8 1.8M14 14l1.8 1.8M4.2 15.8L6 14M14 6l1.8-1.8" stroke="#c98a14" stroke-width="1.6" stroke-linecap="round"/></svg>`,
-  shade: `<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="10" cy="8" r="6" fill="#4f7552" stroke="#2c4630" stroke-width=".8"/><path d="M6.5 6.2a4 4 0 0 1 4-2.4" stroke="#9dc08c" stroke-width="1.2" fill="none" stroke-linecap="round"/><path d="M10 13v5" stroke="#6b4a2a" stroke-width="2" stroke-linecap="round"/><ellipse cx="10" cy="18.2" rx="6" ry="1.2" fill="#2c4630" opacity=".45"/></svg>`,
-  moist: `<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M10 2C13 7 15.5 9.6 15.5 12.6a5.5 5.5 0 0 1-11 0C4.5 9.6 7 7 10 2Z" fill="#5aa3c9" stroke="#24607e" stroke-width=".8"/><path d="M7.4 12.4a2.8 2.8 0 0 0 2 2.6" stroke="#d6efff" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg>`,
-};
+/** 햇살 자리 안내 칩의 해 그림 */
+export const SUN_ICON = `<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="4" fill="#f2b632" stroke="#9a6a10" stroke-width=".8"/><path d="M10 1.8v2.6M10 15.6v2.6M1.8 10h2.6M15.6 10h2.6M4.2 4.2l1.8 1.8M14 14l1.8 1.8M4.2 15.8L6 14M14 6l1.8-1.8" stroke="#c98a14" stroke-width="1.6" stroke-linecap="round"/></svg>`;
 
 export const THEME_ICONS: Record<Theme, string> = {
   system: svg('<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>'),

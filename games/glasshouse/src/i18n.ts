@@ -31,11 +31,6 @@ const ko = {
   'level.name': '정원 {n}',
   'level.short': '정원',
   'pick.cleared': '꽃잎 {p}장',
-
-  'habit.sun': '햇볕 잘 드는 곳',
-  'habit.shade': '반그늘',
-  'habit.moist': '축축한 물가',
-
   'legend.spot': '햇살 자리',
   'legend.rule': '창 앞 햇살 자리마다 화분을 놓으면 꽃이 펴요',
 
@@ -88,7 +83,6 @@ const ko = {
   'dex.meaning': '꽃말',
   'dex.bloom': '피는 때',
   'dex.origin': '원산지',
-  'dex.habit': '좋아하는 곳',
   'dex.months': '{a}~{b}월',
   'dex.month': '{a}월',
   'dex.locked': '아직 피지 않은 꽃',
@@ -183,11 +177,6 @@ const en: Record<MessageKey, string> = {
   'level.name': 'Garden {n}',
   'level.short': 'Garden',
   'pick.cleared': '{p} petals',
-
-  'habit.sun': 'Full sun',
-  'habit.shade': 'Part shade',
-  'habit.moist': 'Moist ground',
-
   'legend.spot': 'Sunny spot',
   'legend.rule': 'Put a pot on every sunny spot by a window to bloom',
 
@@ -240,7 +229,6 @@ const en: Record<MessageKey, string> = {
   'dex.meaning': 'Meaning',
   'dex.bloom': 'Blooms',
   'dex.origin': 'Native to',
-  'dex.habit': 'Likes',
   'dex.months': '{a}–{b}',
   'dex.month': '{a}',
   'dex.locked': 'Not yet in bloom',

@@ -1,4 +1,4 @@
-import { FLOWER, FLOWERS, type Flower, type Habit } from '../flora';
+import { FLOWER, FLOWERS, type Flower } from '../flora';
 import { LEVELS, levelName } from '../game/levels';
 import { LANGS, getLang, iga, t, type Lang } from '../i18n';
 import { NAME_MAX, RANK_SIZE, cleanName, clock, isValidName, pendingRecord, placeOf, placeOfDaily, type DailyEntry, type DailyRecord } from '../ranking';
@@ -8,7 +8,7 @@ import { SKIN_SETTINGS, THEMES, type Skin, type SkinSetting, type Theme } from '
 import { countUp, reducedMotion } from './effects';
 import { POT } from './board';
 import { flowerSvg } from './flowers';
-import { HABIT_ICON, ICONS, SKIN_ICONS, THEME_ICONS } from './icons';
+import { ICONS, SUN_ICON, SKIN_ICONS, THEME_ICONS } from './icons';
 
 const LANG_LABEL: Record<Lang, string> = { ko: '한국어', en: 'English' };
 
@@ -231,7 +231,6 @@ function openPicker(host: HTMLElement, save: SaveData, onPlay: (level: number) =
 /* ---------- 식물 도감(큰 카드 + 작은 카드 24장) ---------- */
 
 const monthsText = (f: Flower) => (f.months[0] === f.months[1] ? t('dex.month', { a: f.months[0] }) : t('dex.months', { a: f.months[0], b: f.months[1] }));
-const HABIT_KEY: Record<Habit, 'habit.sun' | 'habit.shade' | 'habit.moist'> = { sun: 'habit.sun', shade: 'habit.shade', moist: 'habit.moist' };
 
 /** 큰 카드 뒷면: 온실 아치 창 안의 새싹(도감 표지) */
 const DEX_BACK = `<svg viewBox="0 0 40 40" aria-hidden="true" focusable="false"><path d="M6 37V18a14 14 0 0 1 28 0v19z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 4v33M6 23h28" stroke="currentColor" stroke-width="1.4"/><path d="M20 33c-6-1-8.5-6-7.5-10.5 4.5 .3 7.5 4.5 7.5 10.5zm0 0c6-1 8.5-6 7.5-10.5-4.5 .3-7.5 4.5-7.5 10.5z" fill="currentColor"/></svg>`;
@@ -294,7 +293,7 @@ export function openDex(host: HTMLElement, save: SaveData, start: number | null,
       const tx = text(f);
       title.textContent = tx.name;
       by.innerHTML = `<i>${f.sci}</i> · ${t('dex.meaning')} ${tx.meaning}`;
-      facts.innerHTML = `${t('dex.bloom')} ${monthsText(f)} · ${t('dex.origin')} ${tx.origin} · <span class="habit-ico">${HABIT_ICON[f.habit]}</span>${t(HABIT_KEY[f.habit])}`;
+      facts.innerHTML = `${t('dex.bloom')} ${monthsText(f)} · ${t('dex.origin')} ${tx.origin}`;
       desc.textContent = tx.desc;
       if (save.levels[i]) {
         onSeen?.(i);
@@ -689,7 +688,7 @@ export function gameScreen(opts: { level: number | null; par: number; onPause: (
         </div>
       </div>
       <div class="dock">
-        <ul class="legend"><li><span class="habit-ico">${HABIT_ICON.sun}</span><span><b>${t('legend.spot')}</b> ${t('legend.rule')}</span></li></ul>
+        <ul class="legend"><li><span class="sun-ico">${SUN_ICON}</span><span><b>${t('legend.spot')}</b> ${t('legend.rule')}</span></li></ul>
         <button class="btn undo-btn" data-act="undo" aria-label="${t('hud.undo')}">${ICONS.undo}<span>${t('hud.undo')}</span></button>
       </div>
     </main>`);
