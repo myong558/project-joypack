@@ -1131,8 +1131,16 @@ h1 .word:nth-child(2) .tc-in {
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 1.8l3 6.4 7 .9-5.1 4.8 1.3 6.9L12 17.4l-6.2 3.4 1.3-6.9L2 9.1l7-.9z' fill='%23ffd84d' stroke='%237a4a00' stroke-width='1.6' stroke-linejoin='round'/%3E%3Cpath d='M9.6 7.6l2.4-4.4' stroke='%23fffbe0' stroke-width='1.4' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
   filter: drop-shadow(0 1px 1px rgb(60 35 0 / 0.5));
 }
+/* 특수 카드(시계·돋보기): 보통 카드 바탕 + 둘레 은 액자. 황금 카드(금 액자)와 금·은으로 이어지는 한 세트 */
 .card.special .front {
-  background: linear-gradient(160deg, #e6fbff, #b5edf4);
+  border: calc(var(--cw, 64px) * 0.07) solid transparent;
+  background:
+    linear-gradient(var(--card-front), var(--card-front)) padding-box,
+    linear-gradient(145deg, #ffffff 0%, #d5dbe3 28%, #8c96a4 52%, #eef1f5 74%, #7a8493 100%) border-box;
+}
+.card.special .front svg,
+.mini-card.special svg {
+  width: 100%;
 }
 /* 닮은 카드: 색 있는 그림은 색만 바꾸고, 색이 없는 수묵화(.ink)는 좌우를 뒤집는다 */
 .card.twin .front > :not(.ink) {
@@ -2190,10 +2198,16 @@ h1 .word:nth-child(2) .tc-in {
   height: auto;
   aspect-ratio: 0.78;
 }
-/* 특수 카드 칸(시계·돋보기·황금): 게임판과 같은 바탕. 큰 카드에서는 그림을 가운데 작게 */
+/* 특수 카드 칸(시계·돋보기·황금): 게임판과 같은 모습(은 액자·금 액자). 큰 카드에서는 그림을 가운데 작게 */
 .mini-card.special,
 .dex-big .front.special {
-  background: linear-gradient(160deg, #e6fbff, #b5edf4);
+  border: 4px solid transparent;
+  background:
+    linear-gradient(var(--card-front), var(--card-front)) padding-box,
+    linear-gradient(145deg, #ffffff 0%, #d5dbe3 28%, #8c96a4 52%, #eef1f5 74%, #7a8493 100%) border-box;
+}
+.dex-big .front.special {
+  border-width: 10px;
 }
 /* 도감의 황금 칸도 게임판 황금 카드처럼: 보통 카드 바탕 + 둘레 금 액자, 가운데 ★ */
 .mini-card.gold,

@@ -11,8 +11,6 @@ const INK = '#2b2233';
 const eye = (x: number, y: number, r = 2.6) =>
   `<circle cx="${x}" cy="${y}" r="${r}" fill="${INK}"/><circle cx="${x + r * 0.35}" cy="${y - r * 0.35}" r="${r * 0.35}" fill="#fff"/>`;
 const eyes = (x1: number, x2: number, y: number, r?: number) => eye(x1, y, r) + eye(x2, y, r);
-const shine = (x: number, y: number, rx = 3, ry = 5, rot = -25) =>
-  `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="#fff" opacity=".45" transform="rotate(${rot} ${x} ${y})"/>`;
 const line = (d: string, color: string, w = 3) =>
   `<path d="${d}" fill="none" stroke="${color}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`;
 
@@ -84,21 +82,50 @@ const PHOTOS = import.meta.glob<string>('../art/*.webp', { eager: true, query: '
 const photoUrl = (face: string) => PHOTOS[`../art/${face}.webp`];
 const INK_FACES = new Set<string>(FACE_SETS.find((s) => s.id === 'ink')!.faces);
 
-const SPECIALS: Record<SpecialId, string> = {
-  clock:
-    `<circle cx="17" cy="14" r="7" fill="#f59e0b"/><circle cx="47" cy="14" r="7" fill="#f59e0b"/>` +
-    `<circle cx="32" cy="34" r="21" fill="#fff" stroke="#0b7785" stroke-width="5"/>` +
-    Array.from({ length: 12 }, (_, i) => {
+/* ---------- 특수 카드(시계·돋보기): 청록 입체 아이콘 + 금 포인트(종·다리·바늘 중심·손잡이 고리). 카드는 은 액자(styles.css .card.special) ---------- */
+
+// 그라데이션 id 는 그림마다 새로(같은 id 가 여러 번 있으면 숨은 첫 그림의 정의를 따라가 색이 빠질 수 있음)
+let specialSeq = 0;
+const lin = (id: string, stops: [number, string][], x2 = 0, y2 = 1) =>
+  `<linearGradient id="${id}" x1="0" y1="0" x2="${x2}" y2="${y2}">${stops.map(([o, c]) => `<stop offset="${o}" stop-color="${c}"/>`).join('')}</linearGradient>`;
+const TEAL_RIM: [number, string][] = [[0, '#2bb3c4'], [1, '#0b6a77']];
+const GOLD_PART: [number, string][] = [[0, '#ffe58a'], [1, '#c98a06']];
+const ground = (cx: number, cy: number, rx: number) => `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="2.4" fill="#2a2433" opacity=".14"/>`;
+
+const SPECIALS: Record<SpecialId, () => string> = {
+  clock: () => {
+    const id = `sp${specialSeq++}`;
+    const ticks = Array.from({ length: 12 }, (_, i) => {
       const a = (i * Math.PI) / 6;
-      return `<circle cx="${32 + Math.cos(a) * 15}" cy="${34 + Math.sin(a) * 15}" r="${i % 3 ? 1 : 1.8}" fill="#0b7785"/>`;
-    }).join('') +
-    line('M32 34V23M32 34l7 4', INK, 3) +
-    `<circle cx="32" cy="34" r="2.4" fill="#ef4444"/>`,
-  peek:
-    line('M41 41l14 14', '#475569', 7) +
-    `<circle cx="28" cy="28" r="17" fill="#bae6fd" stroke="#475569" stroke-width="5"/>` +
-    eyes(22, 34, 28, 2.6) +
-    shine(21, 19, 3, 5),
+      const r1 = i % 3 ? 12.6 : 11.2;
+      return `<line x1="${32 + Math.cos(a) * r1}" y1="${36 + Math.sin(a) * r1}" x2="${32 + Math.cos(a) * 14}" y2="${36 + Math.sin(a) * 14}" stroke="#0b6a77" stroke-width="${i % 3 ? 1 : 1.8}" stroke-linecap="round"/>`;
+    }).join('');
+    return (
+      `<defs>${lin(`${id}r`, TEAL_RIM)}${lin(`${id}g`, GOLD_PART)}</defs>` +
+      ground(32, 60, 15) +
+      line('M22 52l-3.5 5M42 52l3.5 5', '#c98a06', 3) +
+      `<path d="M12.5 21.5a7 7 0 0 1 10-5.5z" fill="url(#${id}g)"/><path d="M51.5 21.5a7 7 0 0 0-10-5.5z" fill="url(#${id}g)"/>` +
+      `<rect x="30" y="12" width="4" height="5" rx="1.4" fill="#c98a06"/>` +
+      `<circle cx="32" cy="36" r="18" fill="url(#${id}r)"/><circle cx="32" cy="36" r="15" fill="#fff"/>` +
+      `<path d="M21 31a11.5 11.5 0 0 1 15-8.5" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none" opacity=".5"/>` +
+      ticks +
+      line('M32 36V26.5M32 36l5.8 3.8', '#20283a', 2.2) +
+      `<circle cx="32" cy="36" r="2" fill="#f5b301"/>` +
+      `<path d="M18.5 28.5a15.5 15.5 0 0 1 10-9" stroke="#fff" stroke-width="1.8" stroke-linecap="round" fill="none" opacity=".55"/>`
+    );
+  },
+  peek: () => {
+    const id = `sp${specialSeq++}`;
+    return (
+      `<defs>${lin(`${id}r`, TEAL_RIM)}${lin(`${id}g`, GOLD_PART)}<radialGradient id="${id}l" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff"/><stop offset=".7" stop-color="#d8f6ff"/><stop offset="1" stop-color="#9bdcf0"/></radialGradient></defs>` +
+      ground(34, 58, 17) +
+      line('M38.5 38.5l12 12', '#20283a', 6.5) +
+      `<path d="M36.5 36.5l3.6 3.6" stroke="url(#${id}g)" stroke-width="8"/>` +
+      `<circle cx="28" cy="28" r="17" fill="url(#${id}r)"/><circle cx="28" cy="28" r="13.4" fill="url(#${id}l)"/>` +
+      eyes(23, 33, 30, 2.3) +
+      `<path d="M19.5 24a9.5 9.5 0 0 1 8-6.5" stroke="#fff" stroke-width="2.4" stroke-linecap="round" fill="none" opacity=".85"/>`
+    );
+  },
 };
 
 /** 카드 앞면 그림. 도형·특수 카드는 64×64 SVG, 팝아트는 카드 비율 SVG, 명화는 그림 파일(동양화는 .ink: 닮은 카드가 좌우 뒤집힘) */
@@ -107,7 +134,7 @@ export function faceSvg(face: FaceId | SpecialId): string {
   if (pop) return `<svg class="art" viewBox="0 0 50 64" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">${pop}</svg>`;
   const url = photoUrl(face);
   if (url) return `<img class="art${INK_FACES.has(face) ? ' ink' : ''}" src="${url}" alt="" draggable="false" decoding="async">`;
-  const body = SHAPES[face] ?? SPECIALS[face as SpecialId];
+  const body = SHAPES[face] ?? SPECIALS[face as SpecialId]();
   return `<svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">${body}</svg>`;
 }
 
