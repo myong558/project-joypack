@@ -295,7 +295,10 @@
     temp.hidden = !game.thermo;
     if (!game.thermo) {
       const cost = UpDown.thermoCost(game);
-      $('thermo-open-label').textContent = cost ? t('thermo.openCost', { cost: cost }) : t('thermo.open');
+      // 버튼 글자 "온도계" + 점수 차감 꼬리표 "−250점"(무엇이 빠지는지 숫자만으로는 알기 어려워 단위를 붙임, 연습 판은 꼬리표 없음)
+      $('thermo-open-label').textContent = t('thermo.open');
+      $('thermo-open-cost').hidden = !cost;
+      $('thermo-open-cost').textContent = cost ? t('thermo.openCost', { cost: cost }) : '';
       button.classList.toggle('blocked', status !== 'ready');
       return;
     }

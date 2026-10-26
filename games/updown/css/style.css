@@ -898,10 +898,36 @@ button:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 
+/* 기록 아래·다이얼 위: 판 이름(전체 범위) 알약 + 좁혀지는 숫자 막대 */
+.play-meter {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+
+/* 높이가 낮은 세로 화면: 알약과 막대를 한 줄로(알약 왼쪽, 막대 오른쪽) 합쳐 다이얼 자리를 남긴다 */
+@media (orientation: portrait) and (max-height: 700px) {
+  .play-meter {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .play-meter .play-level {
+    flex: none;
+    padding: 0 10px;
+    font-size: 0.95rem;
+  }
+
+  .play-meter .range-bar {
+    flex: 1 1 auto;
+  }
+}
+
 /* 좁혀지는 숫자 막대(app.js 의 renderBar): 처음 범위 전체 중 아직 가능한 칸만 밝게 남는다. */
 .range-bar {
   position: relative;
-  grid-column: 1 / -1;
   height: 12px;
   overflow: hidden;
   background: var(--surface-alt);
@@ -961,10 +987,9 @@ button:focus-visible {
   }
 }
 
-/* 판 이름(1 ~ 100, 연습 · 1 ~ 345): 카드 아래 가운데의 알약 모양 */
+/* 판 이름(1 ~ 100, 연습 · 1 ~ 345): 막대 위 가운데의 작은 알약 */
 .play-level {
-  grid-column: 1 / -1;
-  justify-self: center;
+  align-self: center;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -975,7 +1000,7 @@ button:focus-visible {
   color: var(--text);
   border: 1px solid var(--pill-line);
   border-radius: 999px;
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 700;
 }
 
@@ -1055,18 +1080,41 @@ button:focus-visible {
 }
 
 /* 작은 알약 버튼. 누르는 칸은 40px 높이로 넉넉하게 */
+/* 온도계 버튼: 옆의 알약 표시(판 이름 등)와 헷갈리지 않게 보조 버튼처럼 흰 바탕·대표색 테두리·그림자를 주고,
+   점수 차감은 오른쪽 꼬리표(−250점)로 따로 보인다. 누르면 공통 규칙대로 살짝 눌린다 */
 .thermo-open {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   min-height: 40px;
-  padding: 0 14px;
-  background: var(--pill-bg);
+  padding: 0 6px 0 12px;
+  background: var(--surface);
   color: var(--text);
-  border: 1px solid var(--pill-line);
+  border: 2px solid var(--action);
   border-radius: 999px;
+  box-shadow: var(--shadow-button);
   font-size: 0.95rem;
   font-weight: 700;
+  cursor: pointer;
+}
+
+.thermo-open:not(:has(.thermo-cost:not([hidden]))) {
+  padding-right: 14px;
+}
+
+.thermo-cost {
+  padding: 2px 8px;
+  background: color-mix(in srgb, var(--up) 12%, transparent);
+  color: var(--up);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (hover: hover) {
+  .thermo-open:not(.blocked):hover {
+    background: color-mix(in srgb, var(--action) 8%, var(--surface));
+  }
 }
 
 .thermo-open .icon {
@@ -2325,8 +2373,9 @@ h1.lost {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     grid-template-rows: auto auto minmax(0, 1fr);
+    /* 높이가 낮아 왼쪽에 막대 줄을 더 둘 수 없다 → 오른쪽 숫자 상자 바로 위(위 카드와 같은 줄)에 둔다 */
     grid-template-areas:
-      'status form'
+      'status meter'
       'hint form'
       'history form';
     column-gap: 28px;
@@ -2359,6 +2408,12 @@ h1.lost {
   #screen-play .history {
     grid-area: history;
     min-height: 72px;
+  }
+
+  #screen-play .play-meter {
+    grid-area: meter;
+    align-self: center;
+    gap: 4px;
   }
 
   #screen-play .guess-form {
@@ -2466,11 +2521,12 @@ h1.lost {
   #screen-play {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
     grid-template-areas:
       'status status'
       'history hint'
-      'history form';
+      'history form'
+      'meter form';
     align-content: center;
     column-gap: 48px;
     margin-block: auto;
@@ -2487,6 +2543,10 @@ h1.lost {
 
   #screen-play .history {
     grid-area: history;
+  }
+
+  #screen-play .play-meter {
+    grid-area: meter;
   }
 
   /* 오른쪽 칸: 힌트 아래에 숫자 상자와 다이얼을 크게 놓는다. */
