@@ -756,6 +756,9 @@ body:has(.screen.game) .scene .layer {
   flex: none;
   width: 1.5em;
   height: 1.5em;
+  /* 바구니 밑·책 리본이 아래로 처져 그림 가운데가 글자보다 낮아 보임: 잉크 가운데를 글자 가운데에 맞춤(단추·창 제목 모두 약 0.15em) */
+  position: relative;
+  top: -0.15em;
 }
 h2 .icon-pic {
   width: 1.25em;
