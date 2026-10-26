@@ -30,7 +30,7 @@
   <link rel="stylesheet" href="css/style.css">
   <script>
     // 첫 화면을 그리기 전에 컬러 모드·계절 스킨을 적용해 깜빡임을 막는다.
-    // js/app.js 의 applyTheme, js/skins.js 의 dailySkin 과 같은 규칙(기본은 기기 설정 · 날마다 무작위 스킨).
+    // js/app.js 의 applyTheme, js/skins.js 의 dailySkin 과 같은 규칙(기본은 기기 설정 · 날마다 무작위 스킨, 연속 같은 스킨 없음).
     (function () {
       var root = document.documentElement;
       var themePref = 'system';
@@ -44,14 +44,43 @@
         root.dataset.theme = 'dark';
       }
       var skins = ['spring', 'summer', 'autumn', 'winter'];
-      if (skins.indexOf(skin) < 0) {
-        var now = new Date();
-        var x = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) / 86400000;
-        x = Math.imul(x ^ (x >>> 16), 0x45d9f3b);
-        x = Math.imul(x ^ (x >>> 16), 0x45d9f3b);
-        x ^= x >>> 16;
-        skin = skins[(x >>> 0) % skins.length];
+      // 자동: 공통 규칙 Joypack.dailyPick('updown', …)(아래 함수는 그 글자 그대로의 복사본. 날마다 무작위, 이틀 연속 같은 스킨 없음)
+      /* dailyPick: begin — 허브·업다운 index.html 의 첫 화면 스크립트에 같은 글자 그대로 복사돼 있다(packages/shared/tests 가 같은지 검사) */
+      function dailyPick(salt, count, date) {
+        date = date || new Date();
+        var day = Math.floor(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 864e5);
+        if (count < 2) return 0;
+        var seed = 2166136261;
+        for (var c = 0; c < salt.length; c++) seed = Math.imul(seed ^ salt.charCodeAt(c), 16777619);
+        function mix(n) {
+          n = Math.imul(n ^ (n >>> 16), 0x45d9f3b);
+          n = Math.imul(n ^ (n >>> 16), 0x45d9f3b);
+          return (n ^ (n >>> 16)) >>> 0;
+        }
+        function order(block) {
+          var list = [];
+          for (var k = 0; k < count; k++) list.push(k);
+          for (var i = count - 1; i > 0; i--) {
+            var j = mix((seed + block * 31 + i) | 0) % (i + 1);
+            var tmp = list[i];
+            list[i] = list[j];
+            list[j] = tmp;
+          }
+          return list;
+        }
+        // 두 개면 번갈아(묶음 경계 바꾸기가 다음 묶음과 겹칠 수 있어 따로)
+        if (count === 2) return (day + (mix(seed) & 1)) % 2;
+        var block = Math.floor(day / count);
+        var list = order(block);
+        if (list[0] === order(block - 1)[count - 1]) {
+          var t0 = list[0];
+          list[0] = list[1];
+          list[1] = t0;
+        }
+        return list[day - block * count];
       }
+      /* dailyPick: end */
+      if (skins.indexOf(skin) < 0) skin = skins[dailyPick('updown', skins.length)];
       root.dataset.skin = skin;
       // PC 화면 확대 배수(css 의 --pc-zoom): 내용이 화면 위아래를 채우도록 화면 높이 / 600 으로 키우되,
       // 확대 뒤 가상 폭이 900px(PC 배치 기준) 아래로 내려가지 않게 한다. 휴대폰 배치에서는 쓰지 않는다.

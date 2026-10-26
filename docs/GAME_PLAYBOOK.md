@@ -4,7 +4,7 @@
 
 이 문서는 게임이 하나 늘 때마다 고칩니다. 새 게임까지 포함한 모든 게임을 다시 보고, 공통 요소는 1·2장과 8장에, 정체성(게임에 맞게 고르는 톤·색·캐릭터 등)은 3장 등록부에 반영합니다(9장 "문서 키우기").
 
-- 문서 버전: **1.61** (2026-10-26, 업다운 v1.15.5 · 두더지잡기 v1.0.2 · 타임 투 플립 v1.2.0 · 온실정원 v0.5.0 · 허브 v1.33.11 기준)
+- 문서 버전: **1.62** (2026-10-26, 업다운 v1.15.5 · 두더지잡기 v1.0.2 · 타임 투 플립 v1.2.0 · 온실정원 v0.5.0 · 허브 v1.33.11 기준)
 - **조이팩과 모든 게임은 상업적으로 씁니다(광고, 구글 플레이·앱스토어).** 10장 "상업 배포·마켓 기준"은 모든 단계에서 지키는 필수 기준입니다.
 - 저장소 구조·배포·서비스 워커 같은 플랫폼 설명은 루트 [README.md](../README.md)에 있습니다. 이 문서는 "게임 하나를 어떻게 만드는가"만 다룹니다.
 
@@ -106,7 +106,7 @@
 | --- | --- | --- |
 | 1 | 컬러 모드 | 기기 설정 / 라이트 / 다크. 기본은 기기 설정 |
 | 2 | 언어 | 한국어 / English. 저장값 없으면 **기기(휴대폰·PC) 설정 언어**: 한국어면 한국어, 그 밖의 언어는 모두 영어. `Joypack.deviceLang()` 을 씀(조이팩·모든 게임 같은 규칙) |
-| 3 | 스킨 | **게임마다 고유한 스킨 묶음**(3장). 기본은 "자동"(날짜마다 바뀜, 같은 날은 모두 같은 스킨) |
+| 3 | 스킨 | **게임마다 고유한 스킨 묶음**(3장). 기본은 "자동": 공용 `Joypack.dailyPick(<게임 id>, 스킨 수, 날짜)` 로 고른다(날마다 무작위, 같은 날은 모두 같은 스킨, **이틀 연속 같은 스킨 없음**, 스킨 수만큼의 날 안에 모든 스킨이 한 번씩). 조이팩 오늘의 톤도 같은 규칙(`hub`). 첫 화면 깜빡임 방지 스크립트에 복사본이 있으면 `/* dailyPick: begin … end */` 를 글자 그대로 두고 `packages/shared/tests` 가 같은지 검사한다 |
 | 4 | 소리·진동 | 효과음 켜기/끄기, 진동 켜기/끄기. **진동을 지원하지 않는 기기(아이폰 등)에는 진동 항목을 숨김.** 화면 흔들림은 설정 항목이 아님(1.7) |
 | 5 | 내 기록 지우기 | 이 기기의 최고 기록·수집 기록만. **온라인 랭킹·설정·등록 대기 기록은 남김.** 확인 문구에 "온라인 랭킹은 그대로" 명시 |
 | 6 | 버전 | 맨 아래 `버전 vX.Y.Z`(`package.json` version). Vite 게임은 `define` 의 `__APP_VERSION__`, 빌드 없는 게임은 코드에 `'__APP_VERSION__'` 을 두면 `scripts/build.mjs` 가 채움. 캐시 이름 등 다른 값으로 버전을 짐작하지 않음. 바로 밑에 작은 글씨로 **저작권 표기 `Joypack.COPYRIGHT`**(© 2026 Myong Bum Soo. All rights reserved.)를 그대로 넣음(문구를 게임에 직접 쓰지 않음) |
@@ -361,7 +361,7 @@ games/<id>/
 | 시작 흐름·화면 전환 | `games/hammer/src/main.ts` | `mount`·`showStart`·`play`·결과 연결, `registerSW`·`inviteBar`·`trackViewport`·`guardBottom` 부르는 곳 |
 | 화면(시작·게임·결과·대화 상자) | `games/hammer/src/ui/screens.ts` | `startScreen`(위 메뉴 `.jp-topbar`), `openModal`(딤·Esc·초점), `fitStart`(화면에 맞춰 줄이기), `rankEntryForm`(등록 카드), `resultScreen`(0.6초 누름 막기) |
 | 랭킹 | `games/hammer/src/online.ts`, `ranking.ts` | 순위표 문서 1개·트랜잭션 등록·8초 제한, TOP 10·동점·등록 대기·사본 |
-| 저장·설정 | `games/hammer/src/storage.ts`, `theme.ts` | `<id>:v1` 한 키, 공통 설정은 `Joypack.get/set`, 스킨 "자동"(날짜 시드) |
+| 저장·설정 | `games/hammer/src/storage.ts`, `theme.ts` | `<id>:v1` 한 키, 공통 설정은 `Joypack.get/set`, 스킨 "자동"(`Joypack.dailyPick`) |
 | 결과 공유 이미지 | `games/hammer/src/share.ts` | `html-to-image` 로 결과 화면 복제를 찍어 `Joypack.shareResult` |
 | 소리·연출 | `games/hammer/src/audio.ts`, `ui/effects.ts` | Web Audio 합성, 팝업·파티클·흔들림·히트 스톱 |
 | 글꼴 고르기·서브셋 | `fonts/catalog.json`, `scripts/font-subset.mjs`, `games/timetoflip/package.json` `font`, `src/styles.css` 맨 위 `@font-face` | 목록에서 id 고르기, 화면 글자만 서브셋·라이선스 복사, `size-adjust` |
@@ -536,7 +536,7 @@ games/<id>/
 | 랭킹 창·등록 카드 UI | 게임마다 | 게임마다 | 게임마다(두더지잡기 것을 옮겨 판 칸만 더함) | 게임마다(타임 투 플립 것을 옮김, 오늘의 정원 탭은 이동·시간 칸) | 🟠 공통화 후보, 세 게임째 복사(규칙: TOP 10, A–Z 5자, 등록 대기) |
 | 효과음 | `fx.js` 합성 | `audio.ts` 합성 | `audio.ts` 합성(마림바 사인파, 콤보 음계) | 공통 `sfx.js` `playRecipe` 로 목록 recipe 를 그대로 울림(첫 게임) | 🟡 게임마다(소리 결은 정체성). 모두 `sounds/catalog.json` 목록에 있음, 새 게임은 `packages/shared/sfx.js` `playRecipe` 로 목록 recipe 를 울릴 수 있음 |
 | 진동 | `fx.js` 패턴표 | `main.ts` 직접 | `main.ts` 직접 | `main.ts` 직접 | 🟠 공통화 후보(1.7 단계표를 함수로: `Joypack.vibrate('tick')`) |
-| 스킨 "자동"(날짜마다) | 날짜 해시로 계절 | 날짜 시드로 장소 | 날짜 시드로 시간대 | 게임 중은 그 정원의 계절, 시작 화면은 달력 계절(같은 날 같음) | 🟡 규칙 같음, 묶음은 정체성 |
+| 스킨 "자동"(날짜마다) | `Joypack.dailyPick` 로 계절 | `Joypack.dailyPick` 로 장소 | `Joypack.dailyPick` 로 시간대 | 시작 화면은 `Joypack.dailyPick` 날씨 톤, 정원에 들어가면 정원마다 한 칸씩 다음 톤 | 🟢 공통(연속 같은 스킨 없음), 묶음은 정체성 |
 | 인트로 연출 | 있음 | 있음 | 있음(제목 글자 카드 뒤집기) | 있음(로고 = 시연, 소개·단추가 차례로 떠오름) | 🟡 게임마다 |
 | 글꼴 | Jua(서브셋) | Jua 하나(공용 서브셋 스크립트) | Do Hyeon(본문·숫자) + Dongle Bold(제목·팝업), 서브셋 스크립트 | Jua(화면 전체) + Gowun Dodum(긴 설명 글), 서브셋 스크립트 | 🟡 게임마다(정체성), 규칙은 1.10 |
 | 움직이는 배경 | 계절 입자(벚꽃잎·물방울·낙엽·눈송이) | 하늘·산·땅 겹 배경 | 먼 빛망울 + 중간·가까운 층 뒤집히는 카드, 게임 중 흐리게, PC 마우스 시차 | 캔버스 한 장(하늘·해·구름·먼 언덕·온실 창틀·날씨·햇살 줄기·먼지·선반 화분·모서리 큰 잎, 잎은 층마다 경로 하나로 한 번에 칠함) + 덩굴·꽃잎 DOM, 게임 중 흐리게·DOM 숨김, PC 마우스 시차 | 🟡 게임마다(정체성), 규칙은 1.10 |
@@ -576,6 +576,7 @@ games/<id>/
 
 | 문서 버전 | 날짜 | 내용 |
 | --- | --- | --- |
+| 1.62 | 2026-10-26 | 스킨 "자동"·조이팩 오늘의 톤을 공용 `Joypack.dailyPick` 하나로(날마다 무작위, 이틀 연속 같은 스킨 없음, 스킨 수만큼의 날마다 고르게). 온실정원도 차례대로 → 같은 규칙(정원마다 한 칸씩 넘기기는 유지). 첫 화면 스크립트 복사본 검사 `packages/shared/tests` |
 | 1.61 | 2026-10-26 | 판 바로가기는 공용 `Joypack.devJump()`(개발자 모드 + 출시 화면 보기 꺼짐): 정식 공개 뒤에도 개발자 모드에서 보임, "TEST" 칸은 `devMode()`. 도감 전부 열기 등은 `devTools()` 그대로(11.5). 타임 투 플립·온실정원 |
 | 1.60 | 2026-10-26 | 이니셜 등록 뒤 "랭킹 보기" 버튼을 최대 220px·가운데로 모든 게임 통일(1.6) |
 | 1.59 | 2026-10-26 | 글꼴 빠짐 방지(1.10): 넣는 글자 규칙을 `scripts/font-text.mjs` 한 곳으로(기본 세트 ASCII·자음모음·기호 약 100개 + 공통 모듈·`games.json`·CSS), 허브·업다운도 공용 서브셋 스크립트로. `fonts.lock.json` + `scripts/check-glyphs.mjs` 로 `pnpm build` 가 빠진 글자를 검사(내 PC는 자동으로 다시 만듦, CI 는 실패). 공통 `topbar.css` 에 버튼·입력칸 `font-family: inherit`. Jua 에 없는 기호 86자는 Gothic A1 Bold 기호 채움(약 8 KB, `unicode-range`, 허브·업다운·두더지잡기), 목록에 `gothic-a1-bold`(role `symbols`) 추가. 한글 2,350자 전체는 Jua 약 350 KB(3배)라 넣지 않음. 7.2 함정 추가 |

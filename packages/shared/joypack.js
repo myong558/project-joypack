@@ -507,6 +507,46 @@
     return devMode() && !releaseView();
   }
 
+  // ── 날마다 바뀌는 자동 스킨(조이팩 오늘의 톤·모든 게임 스킨 "자동", 기준서 1.4) ──
+  // 날짜로 정해지는 무작위 번호(0 ~ count-1): 같은 날은 어느 기기에서나 같고, 이틀 연속 같은 번호는 나오지 않는다.
+  // count 일씩 묶어 그 묶음 안에서 count 개를 섞은 순서대로 쓴다(앞 묶음 마지막 날과 겹치면 첫 두 날을 바꿈) → 고르게 돌아감.
+  // salt(게임 id)마다 섞는 순서가 달라 같은 날 게임끼리 같은 순서가 되지 않는다. 기기 날짜(자정) 기준
+  /* dailyPick: begin — 허브·업다운 index.html 의 첫 화면 스크립트에 같은 글자 그대로 복사돼 있다(packages/shared/tests 가 같은지 검사) */
+  function dailyPick(salt, count, date) {
+    date = date || new Date();
+    var day = Math.floor(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 864e5);
+    if (count < 2) return 0;
+    var seed = 2166136261;
+    for (var c = 0; c < salt.length; c++) seed = Math.imul(seed ^ salt.charCodeAt(c), 16777619);
+    function mix(n) {
+      n = Math.imul(n ^ (n >>> 16), 0x45d9f3b);
+      n = Math.imul(n ^ (n >>> 16), 0x45d9f3b);
+      return (n ^ (n >>> 16)) >>> 0;
+    }
+    function order(block) {
+      var list = [];
+      for (var k = 0; k < count; k++) list.push(k);
+      for (var i = count - 1; i > 0; i--) {
+        var j = mix((seed + block * 31 + i) | 0) % (i + 1);
+        var tmp = list[i];
+        list[i] = list[j];
+        list[j] = tmp;
+      }
+      return list;
+    }
+    // 두 개면 번갈아(묶음 경계 바꾸기가 다음 묶음과 겹칠 수 있어 따로)
+    if (count === 2) return (day + (mix(seed) & 1)) % 2;
+    var block = Math.floor(day / count);
+    var list = order(block);
+    if (list[0] === order(block - 1)[count - 1]) {
+      var t0 = list[0];
+      list[0] = list[1];
+      list[1] = t0;
+    }
+    return list[day - block * count];
+  }
+  /* dailyPick: end */
+
   // ── 랭킹 탭 공통 기준(조이팩 전체 랭킹·모든 게임 랭킹 창, 기준서 1.6) ──
   // 랭킹 창을 열 때 처음 고를 탭: ① 등록 대기 기록이 있는 탭(여럿이면 최근 탭, 아니면 첫 번째) → ② 최근 탭(방금 한 판 또는 마지막으로 본 탭 중 나중)
   // → ③ 기본 탭. 한 기기 안에서 조이팩과 모든 게임이 같은 값을 읽고 써서, 어디서 열어도 이어진다.
@@ -597,6 +637,7 @@
     prerelease: prerelease,
     devTools: devTools,
     devJump: devJump,
+    dailyPick: dailyPick,
     topIcon: topIcon,
     deviceLang: deviceLang,
     guardBottom: guardBottom,

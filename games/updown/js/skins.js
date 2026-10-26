@@ -7,12 +7,9 @@
 
   // 자동(기본) 스킨: 기기 날짜마다 무작위로 하나를 고른다. 같은 날에는 몇 번을 열어도 같은 스킨이다.
   // 날짜 번호를 섞어(정수 해시) 고르며, index.html 의 첫 화면 스크립트도 같은 계산을 한다.
+  // 자동 스킨: 조이팩 공통 규칙(날마다 무작위, 이틀 연속 같은 스킨 없음). index.html 첫 화면 스크립트도 같은 규칙
   function dailySkin(date) {
-    let x = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86400000;
-    x = Math.imul(x ^ (x >>> 16), 0x45d9f3b);
-    x = Math.imul(x ^ (x >>> 16), 0x45d9f3b);
-    x ^= x >>> 16;
-    return SKINS[(x >>> 0) % SKINS.length];
+    return SKINS[Joypack.dailyPick('updown', SKINS.length, date)];
   }
 
   // fall: 한 프레임에 움직이는 세로 거리(음수면 위로 떠오름), size: 크기 범위(px).

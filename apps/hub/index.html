@@ -36,37 +36,46 @@
         document.documentElement.dataset.theme = dark ? 'dark' : 'light';
       })();
       // 오늘의 톤(스킨): 5개 중 날짜마다 하나. 같은 날은 모두 같은 톤이고, 이틀 연속 같은 톤은 나오지 않는다.
-      // 5일씩 묶어 그 묶음 안에서 5개를 섞은 순서대로 쓴다(앞 묶음 마지막 날과 겹치면 첫 두 날을 바꿈).
+      // 모든 게임의 스킨 "자동"과 같은 공통 규칙 Joypack.dailyPick('hub', …)(아래 함수는 그 글자 그대로의 복사본, 기준서 1.4).
       // 사용자가 고르는 설정은 없다. joypack.hubSkin 은 개발자 모드(joypack.preview)에서만 쓰는 톤 미리보기 값(src/skins.ts).
       (function () {
         var SKINS = ['grape', 'candy', 'soda', 'lemon', 'mint'];
-        function hash(n) {
-          n = Math.imul(n ^ (n >>> 16), 0x45d9f3b);
-          n = Math.imul(n ^ (n >>> 16), 0x45d9f3b);
-          return (n ^ (n >>> 16)) >>> 0;
-        }
-        function order(block) {
-          var list = SKINS.slice();
-          for (var i = list.length - 1; i > 0; i--) {
-            var j = hash(block * 31 + i) % (i + 1);
-            var tmp = list[i];
-            list[i] = list[j];
-            list[j] = tmp;
+        /* dailyPick: begin — 허브·업다운 index.html 의 첫 화면 스크립트에 같은 글자 그대로 복사돼 있다(packages/shared/tests 가 같은지 검사) */
+        function dailyPick(salt, count, date) {
+          date = date || new Date();
+          var day = Math.floor(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 864e5);
+          if (count < 2) return 0;
+          var seed = 2166136261;
+          for (var c = 0; c < salt.length; c++) seed = Math.imul(seed ^ salt.charCodeAt(c), 16777619);
+          function mix(n) {
+            n = Math.imul(n ^ (n >>> 16), 0x45d9f3b);
+            n = Math.imul(n ^ (n >>> 16), 0x45d9f3b);
+            return (n ^ (n >>> 16)) >>> 0;
           }
-          return list;
-        }
-        function skinOf(day) {
-          var block = Math.floor(day / 5);
+          function order(block) {
+            var list = [];
+            for (var k = 0; k < count; k++) list.push(k);
+            for (var i = count - 1; i > 0; i--) {
+              var j = mix((seed + block * 31 + i) | 0) % (i + 1);
+              var tmp = list[i];
+              list[i] = list[j];
+              list[j] = tmp;
+            }
+            return list;
+          }
+          // 두 개면 번갈아(묶음 경계 바꾸기가 다음 묶음과 겹칠 수 있어 따로)
+          if (count === 2) return (day + (mix(seed) & 1)) % 2;
+          var block = Math.floor(day / count);
           var list = order(block);
-          if (list[0] === order(block - 1)[4]) {
-            var tmp = list[0];
+          if (list[0] === order(block - 1)[count - 1]) {
+            var t0 = list[0];
             list[0] = list[1];
-            list[1] = tmp;
+            list[1] = t0;
           }
-          return list[day - block * 5];
+          return list[day - block * count];
         }
-        var now = new Date();
-        var today = skinOf(Math.floor(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) / 864e5));
+        /* dailyPick: end */
+        var today = SKINS[dailyPick('hub', SKINS.length)];
         var preview = null;
         try {
           var dev = localStorage.getItem('joypack.preview');

@@ -1,5 +1,3 @@
-import { dateSeed } from './game/rng';
-
 export type Theme = 'system' | 'light' | 'dark';
 export const THEMES: Theme[] = ['system', 'light', 'dark'];
 
@@ -11,7 +9,8 @@ export const SKIN_SETTINGS: SkinSetting[] = ['auto', ...SKINS];
 
 /** 자동이면 날짜마다 바뀐다. 같은 날에는 어디서나 같은 스킨 */
 export function resolveSkin(setting: SkinSetting, date: Date): Skin {
-  return setting === 'auto' ? SKINS[dateSeed(date) % SKINS.length] : setting;
+  // 자동: 조이팩 공통 규칙(날마다 무작위, 이틀 연속 같은 스킨 없음, 기준서 1.4)
+  return setting === 'auto' ? SKINS[Joypack.dailyPick('timetoflip', SKINS.length, date)] : setting;
 }
 
 export function applyTheme(theme: Theme): void {

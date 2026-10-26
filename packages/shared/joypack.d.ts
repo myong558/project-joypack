@@ -23,6 +23,8 @@ export interface JoypackApi {
   devTools(): boolean;
   /** 판 바로가기(모든 판 열기·판별 바로 시작)를 보일지: 개발자 모드이고 "출시 화면" 보기가 꺼져 있을 때. 정식 공개 뒤에도 보인다(바로가기 판은 기록·랭킹에 안 남김) */
   devJump(): boolean;
+  /** 날짜로 정해지는 무작위 번호(0 ~ count-1). 같은 날은 어디서나 같고 이틀 연속 같은 번호는 없음(자동 스킨용). salt 는 게임 id */
+  dailyPick(salt: string, count: number, date?: Date): number;
   /** 공통 상단 메뉴 아이콘 SVG 문자열 */
   topIcon(name: TopIcon): string;
   /** 기본 언어: 기기 설정 언어가 한국어면 'ko', 그 밖은 모두 'en' */

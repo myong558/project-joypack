@@ -10,16 +10,16 @@ export type Skin = (typeof SKINS)[number];
 export type SkinSetting = 'auto' | Skin;
 export const SKIN_SETTINGS: SkinSetting[] = ['auto', ...SKINS];
 
-/** 날짜 번호(1970-01-01부터 며칠째, 그 기기 날짜). 같은 날에는 어디서나 같다 */
-const dayNumber = (date: Date) => Math.floor(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86400000);
+/** 오늘의 톤 번호: 조이팩 공통 규칙(날마다 무작위, 이틀 연속 같은 톤 없음, 기준서 1.4) */
+const todayIndex = (date: Date) => Joypack.dailyPick('glasshouse', SKINS.length, date);
 
-/** 오늘의 톤: 날마다 차례로 바뀐다 */
-export const todaySkin = (date: Date): Skin => SKINS[dayNumber(date) % SKINS.length];
+/** 오늘의 톤 */
+export const todaySkin = (date: Date): Skin => SKINS[todayIndex(date)];
 
 /** 자동이면 처음 화면은 오늘의 톤, 정원에 들어가면 정원마다 다음 톤으로 돌아가 지루하지 않게. 고르면 그 톤으로 고정 */
 export function resolveSkin(setting: SkinSetting, date: Date, garden?: number): Skin {
   if (setting !== 'auto') return setting;
-  return SKINS[(dayNumber(date) + (garden ?? 0)) % SKINS.length];
+  return SKINS[(todayIndex(date) + (garden ?? 0)) % SKINS.length];
 }
 
 export function applyTheme(theme: Theme): void {
