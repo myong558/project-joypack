@@ -2213,12 +2213,24 @@ h2 .icon-pic {
 .board.cleared .pot .plant {
   transform: scale(1.06);
 }
-/* 꽃이 다 핀 뒤 마무리 동작(판·도감 큰 카드·결과 카드 모두 같음): 꽃잎만 제 각도 쪽으로 살짝 더 젖혀졌다 돌아옴(크기는 그대로), 꽃 전체는 움직이지 않음.
+/* 꽃이 다 핀 뒤 마무리 동작(판·도감 큰 카드·결과 카드 모두 같음, 0.5초, 크기는 그대로·줄기와 잎은 가만히):
+ * 꽃잎은 제 각도 쪽으로 살짝 더 젖혀졌다 돌아오고, 동시에 꽃 머리(.hd)가 줄기와 만나는 아래 가운데를 기준으로 4° 기울었다 반대로 2° 돌아옴.
+ * 꽃 머리 그룹이 없는 잔꽃(.fl.spray: 히아신스·은방울꽃·물망초·수국·라벤더)은 잔꽃 하나하나가 같은 각도로 기욺.
  * 판은 board.flourish 가 .board.done, 도감·결과는 screens.ts bloomThenFlourish 가 .fl.flourish 를 붙임 */
 @media (prefers-reduced-motion: no-preference) {
   .board.done .pot .fl .pt,
   .fl.flourish .pt {
     animation: pt-done 0.5s ease-in-out;
+  }
+  .board.done .pot .fl .hd,
+  .fl.flourish .hd {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    animation: hd-tilt 0.5s ease-in-out;
+  }
+  .board.done .pot .fl.spray .pt,
+  .fl.spray.flourish .pt {
+    animation-name: pt-tilt;
   }
 }
 @keyframes pt-done {
@@ -2226,7 +2238,26 @@ h2 .icon-pic {
   100% {
     transform: rotate(var(--r));
   }
-  /* 제 각도 쪽으로 더 젖혀짐(× 1.1)과 함께 모든 꽃잎이 같은 쪽으로 살짝 기울었다(+4°) 반대로 조금(−2°) 돌아옴. 잔꽃처럼 각도가 0인 꽃잎도 기울어 보임 */
+  40% {
+    transform: rotate(calc(var(--r) * 1.1));
+  }
+  75% {
+    transform: rotate(calc(var(--r) * 0.96));
+  }
+}
+@keyframes hd-tilt {
+  40% {
+    transform: rotate(4deg);
+  }
+  75% {
+    transform: rotate(-2deg);
+  }
+}
+@keyframes pt-tilt {
+  0%,
+  100% {
+    transform: rotate(var(--r));
+  }
   40% {
     transform: rotate(calc(var(--r) * 1.1 + 4deg));
   }

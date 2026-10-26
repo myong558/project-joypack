@@ -456,7 +456,8 @@ export function flowerSvg(id: FlowerId, open = true, kind: FlowerDetail = 'dex')
   // 게임 칸에서는 꽃 머리 둘레를 조금 더 바짝(반지름의 85%) 잘라 크게 보이게
   const [cx, cy, r0] = FOCUS[id];
   const r = kind === 'game' ? Math.round(r0 * 0.85) : r0;
-  return `<svg class="fl ${kind}${open ? '' : ' closed'}" viewBox="${kind === 'game' ? `${cx + (GAME_SHIFT[id] ?? 0) - r} ${cy - r} ${r * 2} ${r * 2}` : dexBox(cx, cy)}" aria-hidden="true" focusable="false">${body}</svg>`;
+  // spray: 꽃 머리 그룹(.hd) 없이 잔꽃만 있는 꽃(마무리 동작에서 잔꽃마다 기욺, styles.css .fl.spray)
+  return `<svg class="fl ${kind}${body.includes('class="hd"') ? '' : ' spray'}${open ? '' : ' closed'}" viewBox="${kind === 'game' ? `${cx + (GAME_SHIFT[id] ?? 0) - r} ${cy - r} ${r * 2} ${r * 2}` : dexBox(cx, cy)}" aria-hidden="true" focusable="false">${body}</svg>`;
 }
 
 /** 튤립 꽃 머리 높이(도감 판에서 꽃 머리가 오는 자리) */
