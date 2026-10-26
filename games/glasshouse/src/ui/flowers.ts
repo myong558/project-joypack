@@ -460,7 +460,7 @@ export function flowerSvg(id: FlowerId, open = true, kind: FlowerDetail = 'dex')
   const [cx, cy, r0] = FOCUS[id];
   const r = kind === 'game' ? Math.round(r0 * 0.85) : r0;
   // spray: 꽃 머리 그룹(.hd) 없이 잔꽃만 있는 꽃(마무리 동작에서 잔꽃마다 기욺, styles.css .fl.spray)
-  return `<svg class="fl ${kind}${body.includes('class="hd"') ? '' : ' spray'}${open ? '' : ' closed'}" viewBox="${kind === 'game' ? `${cx + (GAME_SHIFT[id] ?? 0) - r} ${cy + (GAME_LIFT[id] ?? 0) - r} ${r * 2} ${r * 2}` : dexBox(cx, cy)}" aria-hidden="true" focusable="false">${body}</svg>`;
+  return `<svg class="fl ${kind}${body.includes('class="hd"') ? '' : ' spray'}${open ? '' : ' closed'}" viewBox="${kind === 'game' ? `${cx + (GAME_SHIFT[id] ?? 0) - r} ${cy + (GAME_LIFT[id] ?? 0) - r} ${r * 2} ${r * 2}` : dexBox(cx, cy, id)}" aria-hidden="true" focusable="false">${body}</svg>`;
 }
 
 /** 튤립 꽃 머리 높이(도감 판에서 꽃 머리가 오는 자리) */
@@ -470,8 +470,10 @@ const DEX_HEAD = FOCUS.tulip[1];
  * 도감 판: 줄기 밑(판 아래 끝)은 그대로 두고, 꽃 머리가 튤립과 같은 높이·가운데에 오도록 판을 키워 자른다.
  * 꽃 머리가 낮은 꽃(복수초·크리스마스로즈)은 그만큼 크게 보인다
  */
-function dexBox(cx: number, cy: number): string {
+function dexBox(cx: number, cy: number, id: FlowerId): string {
   const k = Math.min(1, (120 - cy) / (120 - DEX_HEAD));
   const w = 100 * k;
-  return `${n(cx - w / 2)} ${n(120 - 120 * k)} ${n(w)} ${n(120 * k)}`;
+  // 꽃 위 빈 곳을 판 높이의 9% 잘라 냄(꽃 그림 맨 위가 가장 높은 꽃도 11.7% 아래라 잘리지 않음). 봉선화는 위까지 잎·봉오리가 있어 그대로
+  const cut = id === 'balsam' ? 0 : 0.09 * 120 * k;
+  return `${n(cx - w / 2)} ${n(120 - 120 * k + cut)} ${n(w)} ${n(120 * k - cut)}`;
 }

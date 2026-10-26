@@ -1288,12 +1288,13 @@ h2 .icon-pic {
   gap: 8px;
 }
 /* 큰 카드: 오래된 식물 도감 한 쪽(미색 종이 + 겹줄 테두리 속 삽화). 뒷면은 햇살 드는 온실 아치 창 표지.
- * 창 높이의 약 3분의 1(키 큰 화면일수록 크게), 가로:세로 = 25:32 */
+ * 창 높이의 약 3분의 1 아래(키 큰 화면일수록 크게), 가로:세로 = 25:29. 꽃 위 빈 곳을 잘라 낸 만큼(flowers.ts dexBox) 낮게 해
+ * 아래 꽃 카드 목록이 스크롤 없이 더 보이게(v0.7.14, 예전 36%·최대 340px·25:32) */
 .dex-big {
   flex: none;
   position: relative;
-  height: clamp(192px, calc(var(--jp-vh, 100dvh) * 0.36), 340px);
-  aspect-ratio: 25 / 32;
+  height: clamp(176px, calc(var(--jp-vh, 100dvh) * 0.31), 290px);
+  aspect-ratio: 25 / 29;
   perspective: 900px;
 }
 .dex-flip {
@@ -1487,7 +1488,7 @@ h2 .icon-pic {
 /* 키가 낮은 휴대폰: 큰 카드를 조금 줄여 목록 두 줄 자리를 남긴다 */
 @media (max-height: 700px) and (orientation: portrait) {
   .dex-big {
-    height: calc(var(--jp-vh, 100dvh) * 0.3);
+    height: calc(var(--jp-vh, 100dvh) * 0.27);
   }
   .dex-info {
     height: 8.2rem;
