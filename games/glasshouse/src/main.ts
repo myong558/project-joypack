@@ -366,7 +366,8 @@ function play(level: number | 'daily'): void {
       board.bloom();
       board.pots.forEach((p, i) => later(260 + i * 320, () => fx.petals(p.el, accentOf(f.id))));
     });
-    later(2600, () => finish());
+    // 마지막 화분 꽃이 다 핀 뒤(시작 260 + board.bloom 200 + 화분마다 320, 꽃잎이 벌어지는 데 약 2.2초) 2초 동안 핀 꽃을 보여 주고 결과 화면
+    later(260 + 200 + (board.pots.length - 1) * 320 + 2200 + 2000, () => finish());
   };
 
   const finish = () => {
