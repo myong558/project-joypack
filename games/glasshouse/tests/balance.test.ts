@@ -8,7 +8,7 @@ import { mulberry32 } from './rng';
 /**
  * 모의 플레이(기준서 11.2-3): 실력별 봇으로 판마다 걸리는 시간·이동 수·꽃잎을 잰다.
  * 봇은 걸음마다 skill 확률로 깨는 데 가까워지는 수를 두고, 아니면 아무 데로나 움직인다.
- * 다시는 못 깨는 상태에 빠지면 몇 걸음 헤매다(알아채는 시간) 살아 있던 곳까지 되돌린다(되돌리기는 이동 수도 되돌림).
+ * 다시는 못 깨는 상태에 빠지면 몇 걸음 헤매다(알아채는 시간) 처음부터 다시 한다(되돌리기 없음, v0.7.15. 처음부터 하면 이동 수도 0부터).
  * 시간 = 손이 움직인 걸음 × 0.4초 + 화분을 민 번마다 생각하는 시간(실력별) + 막힘마다 다시 생각 6초
  */
 const SKILLS = { 서툼: [0.55, 4], 보통: [0.7, 3], 잘함: [0.85, 2], 고수: [0.96, 1.2] } as const;
@@ -36,7 +36,7 @@ function play(level: number, [skill, think]: readonly [number, number], seed: nu
           continue;
         }
       }
-      while (path.length > 1 && g.toGoal[path[path.length - 1]] < 0) path.pop();
+      path.length = 1;
       stuck++;
       lost = 0;
       continue;

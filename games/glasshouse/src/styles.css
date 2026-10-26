@@ -1682,17 +1682,7 @@ h2 .icon-pic {
   margin-right: 2px;
   vertical-align: -0.28em;
 }
-.undo-btn {
-  min-height: 52px;
-  padding: 0 18px;
-  font-size: 16px;
-  flex: none;
-}
-.undo-btn .icon {
-  width: 1.4em;
-  height: 1.4em;
-}
-/* 가장 작은 폰(폭 360px 아래): 위 막대 간격을 줄이고, 되돌리기는 아이콘만(이름은 aria-label) */
+/* 가장 작은 폰(폭 360px 아래): 위 막대 간격을 줄임 */
 @media (max-width: 359px) {
   .hud {
     gap: 6px;
@@ -1704,12 +1694,6 @@ h2 .icon-pic {
   .hud-moves b {
     font-size: 20px;
     min-width: 1.2em;
-  }
-  .undo-btn {
-    padding: 0 14px;
-  }
-  .undo-btn span {
-    display: none;
   }
 }
 .pause-menu {

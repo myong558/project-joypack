@@ -8,7 +8,6 @@ export const ICONS = {
   close: svg('<path d="M6 6l12 12M18 6L6 18"/>'),
   pause: svg('<path d="M9 5v14M15 5v14" stroke-width="3"/>'),
   restart: svg('<path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 4.5v3.7h3.7"/>'),
-  undo: svg('<path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/>'),
   home: svg('<path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/>'),
   share: svg('<path d="M12 15V4M8 8l4-4 4 4M5 13v6h14v-6"/>'),
   trophy: svg('<path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 20h8"/>'),

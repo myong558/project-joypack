@@ -197,7 +197,6 @@ function play(level: number | 'daily'): void {
       setPaused(false);
       restart();
     },
-    onUndo: () => undo(),
     onQuit: () => showStart(),
   });
   mount(view.el);
@@ -231,7 +230,6 @@ function play(level: number | 'daily'): void {
   const render = (initial = false) => {
     view.moves.textContent = String(game.moves);
     view.moves.classList.toggle('over', game.moves > def.par);
-    view.undo.disabled = !game.canUndo;
     const lit = game.lit;
     const stuck = game.stuck;
     board.mood(lit, stuck);
@@ -310,16 +308,6 @@ function play(level: number | 'daily'): void {
     sound.play('undo');
     render(true);
     lastLit = game.lit;
-  };
-
-  const undo = () => {
-    stopWalk();
-    if (paused || !game.undo()) return;
-    poke();
-    sound.play('undo');
-    vibrate(12);
-    board.place(game.state, null);
-    render();
   };
 
   /** 멀리 있는 칸을 누르면 화분을 밀지 않는 가장 짧은 길로 걸어간다(걸음마다 이동 수에 들어감) */
@@ -424,9 +412,6 @@ function play(level: number | 'daily'): void {
       e.preventDefault();
       stopWalk();
       move(d);
-    } else if (e.key === 'z' || e.key === 'Z' || e.key === 'Backspace') {
-      e.preventDefault();
-      undo();
     } else if (e.key === 'r' || e.key === 'R') restart();
   };
   // 판 위에서 밀기(한 칸 · 손을 떼지 않고 계속 밀면 일정 거리마다 한 칸 더) 또는 칸 누르기(옆 칸이면 한 걸음, 멀면 걸어감)

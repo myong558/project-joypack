@@ -687,14 +687,13 @@ export interface GameView {
   boardHost: HTMLElement;
   moves: HTMLElement;
   note: HTMLElement;
-  undo: HTMLButtonElement;
   /** 오늘의 정원에서 걸린 시간(그 밖에는 null) */
   clock: HTMLElement | null;
   showPause(show: boolean): void;
 }
 
 /** level 이 null 이면 오늘의 정원(판 번호 자리에 걸린 시간) */
-export function gameScreen(opts: { level: number | null; par: number; onPause: () => void; onResume: () => void; onRestart: () => void; onUndo: () => void; onQuit: () => void }): GameView {
+export function gameScreen(opts: { level: number | null; par: number; onPause: () => void; onResume: () => void; onRestart: () => void; onQuit: () => void }): GameView {
   const el = html(`
     <main class="screen game">
       <div class="hud">
@@ -720,7 +719,6 @@ export function gameScreen(opts: { level: number | null; par: number; onPause: (
       </div>
       <div class="dock">
         <ul class="legend"><li><span><b><span class="sun-ico">${SUN_ICON}</span>${t('legend.spot')}</b> ${t('legend.rule')}</span></li></ul>
-        <button class="btn undo-btn" data-act="undo" aria-label="${t('hud.undo')}">${ICONS.undo}<span>${t('hud.undo')}</span></button>
       </div>
     </main>`);
   const q = <T extends HTMLElement = HTMLElement>(s: string) => el.querySelector<T>(s)!;
@@ -728,7 +726,6 @@ export function gameScreen(opts: { level: number | null; par: number; onPause: (
   q('.pause-btn').addEventListener('click', opts.onPause);
   q('[data-act="resume"]').addEventListener('click', opts.onResume);
   el.querySelectorAll('[data-act="restart"]').forEach((b) => b.addEventListener('click', opts.onRestart));
-  q('[data-act="undo"]').addEventListener('click', opts.onUndo);
   q('[data-act="quit"]').addEventListener('click', opts.onQuit);
   return {
     el,
@@ -736,7 +733,6 @@ export function gameScreen(opts: { level: number | null; par: number; onPause: (
     boardHost: q('.board-host'),
     moves: q('.moves'),
     note: q('.note-line'),
-    undo: q<HTMLButtonElement>('.undo-btn'),
     clock: el.querySelector<HTMLElement>('.clock'),
     showPause(show) {
       pauseMenu.hidden = !show;
