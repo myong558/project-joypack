@@ -1,13 +1,12 @@
 /**
  * 판 만들기 도구(배포에 안 들어감). 무작위 온실 방을 만들어 풀이기로 풀고, 쉬운 길이 없는 판만 남긴다.
- *   node tools/levelgen.ts <계절 spring|summer|autumn|winter> <화분 수> <밀기 최소-최대> <개수> [시드] [최대 폭] [이동 최소-최대]
+ *   node tools/levelgen.ts <방 크기 단계 1~4> <화분 수> <밀기 최소-최대> <개수> [시드] [최대 폭] [이동 최소-최대]
  * 고른 판은 src/game/levels.ts 에 옮겨 적고 tests/levels.test.ts 가 다시 풀어 기준 이동 수를 확인한다.
  * 방 만들기·거르기는 오늘의 정원 판 만들기(tools/dailygen.ts)와 같은 src/game/roomgen.ts 를 쓴다
  */
-import type { Season } from '../src/flora';
-import { makeRoom, rate, type Candidate } from '../src/game/roomgen.ts';
+import { makeRoom, rate, type Candidate, type RoomSize } from '../src/game/roomgen.ts';
 
-const season = (process.argv[2] ?? 'spring') as Season;
+const size = Number(process.argv[2] ?? 1) as RoomSize;
 const pots = Number(process.argv[3] ?? 1);
 const [minPush, maxPush] = (process.argv[4] ?? '3-99').split('-').map(Number);
 const want = Number(process.argv[5] ?? 6);
@@ -18,7 +17,7 @@ const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
 
 const found: Candidate[] = [];
 for (let tries = 0; tries < 40000 && found.length < want * 25; tries++) {
-  const rows = makeRoom(season, rnd, { pots, maxW });
+  const rows = makeRoom(size, rnd, { pots, maxW });
   const c = rows && rate(rows, 250_000, [minPush, maxPush]);
   if (c && c.moves >= minMove && c.moves <= maxMove) found.push(c);
 }

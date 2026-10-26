@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DAILY, DAILY_START } from '../src/game/daily-data';
-import { dailyLevel, dayIndex, seasonOfKey, unpack } from '../src/game/daily';
+import { dailyLevel, dayIndex, sizeOfKey, unpack } from '../src/game/daily';
 import { LEVELS, dailySpecies } from '../src/game/levels';
 import { lit, parse } from '../src/game/rules';
 import { explore, solve } from '../src/game/solver';
@@ -8,21 +8,28 @@ import { dailyAhead, insertDaily, placeOfDaily, sanitizeDaily, type DailyEntry }
 
 /** 오늘의 정원: 미리 만든 판 목록(tools/dailygen.ts)이 정해 둔 판과 같은 기준을 지키는지 */
 describe('오늘의 정원 판', () => {
-  it('2027년 끝까지 날마다 한 판(그 전에 목록을 늘린다)', () => {
+  it('2028년 끝까지 날마다 한 판(그 전에 목록을 늘린다), 목록 길이는 7의 배수(다시 돌아도 요일 단계가 맞음)', () => {
     expect(DAILY_START <= '2026-10-25').toBe(true);
-    expect(dayIndex('2027-12-31')).toBeLessThan(DAILY.length);
+    expect(dayIndex('2028-12-31')).toBeLessThan(DAILY.length);
+    expect(DAILY.length % 7).toBe(0);
+  });
+
+  it('요일 리듬: 월·화 1 → 수·목 2 → 금·토 3 → 일 4', () => {
+    // 2026-10-26 월요일
+    expect(['2026-10-26', '2026-10-27', '2026-10-28', '2026-10-29', '2026-10-30', '2026-10-31', '2026-11-01'].map(sizeOfKey)).toEqual([1, 1, 2, 2, 3, 3, 4]);
   });
 
   it('같은 판이 두 날 나오지 않는다', () => {
     expect(new Set(DAILY).size).toBe(DAILY.length);
   });
 
-  it('모든 판: 칸 100개 미만, 처음엔 햇살 자리에 화분이 없고, 판 계절 = 그날 계절, 기준 이동 14~40', () => {
+  it('모든 판: 칸 100개 미만, 처음엔 햇살 자리에 화분이 없고, 방 크기 단계 = 그날 요일 단계, 기준 이동 14~40', () => {
     DAILY.forEach((line, i) => {
-      const { season, par, rows } = unpack(line);
+      const { size, par, rows } = unpack(line);
       const date = new Date(2026, 9, 25 + i);
       const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-      expect(season, key).toBe(seasonOfKey(key));
+      // 요일 리듬 전(v0.7.0 전)에 이미 지난 두 날은 그날 순위표와 맞게 옛 판(가을 크기 = 단계 3) 그대로
+      expect(size, key).toBe(key < '2026-10-27' ? 3 : sizeOfKey(key));
       expect(par).toBeGreaterThanOrEqual(14);
       expect(par).toBeLessThanOrEqual(40);
       const { board, start } = parse(rows);

@@ -1,4 +1,3 @@
-import type { Season } from '../flora';
 import { lit, parse, solved, type Board } from './rules.ts';
 import { explore, solve } from './solver.ts';
 
@@ -26,17 +25,19 @@ const inner = (g: string[][], w: number, h: number) => {
   return c;
 };
 
-/** 계절이 갈수록 방이 넓어지고 화분이 는다(오늘의 정원은 그날 계절의 방) */
-export const SPECS: Record<Season, Spec> = {
-  spring: { w: [6, 7], h: [6, 7], pots: [1, 2], walls: [1, 3] },
-  summer: { w: [6, 8], h: [6, 8], pots: [2], walls: [2, 4] },
-  autumn: { w: [7, 8], h: [7, 8], pots: [2, 3], walls: [2, 5] },
-  winter: { w: [7, 8], h: [7, 9], pots: [3], walls: [3, 6] },
+/** 방 크기 단계 1~4: 단계가 오를수록 방이 넓어지고 화분이 는다(오늘의 정원은 요일마다 정한 단계) */
+export type RoomSize = 1 | 2 | 3 | 4;
+
+const SPECS: Record<RoomSize, Spec> = {
+  1: { w: [6, 7], h: [6, 7], pots: [1, 2], walls: [1, 3] },
+  2: { w: [6, 8], h: [6, 8], pots: [2], walls: [2, 4] },
+  3: { w: [7, 8], h: [7, 8], pots: [2, 3], walls: [2, 5] },
+  4: { w: [7, 8], h: [7, 9], pots: [3], walls: [3, 6] },
 };
 
-/** 방 하나(글자 줄). 놓을 자리가 없으면 null. pots 를 주면 계절 기본 화분 수 대신 쓴다 */
-export function makeRoom(season: Season, r: Rng, opts: { pots?: number; maxW?: number } = {}): string[] | null {
-  const spec = SPECS[season];
+/** 방 하나(글자 줄). 놓을 자리가 없으면 null. pots 를 주면 단계 기본 화분 수 대신 쓴다 */
+export function makeRoom(size: RoomSize, r: Rng, opts: { pots?: number; maxW?: number } = {}): string[] | null {
+  const spec = SPECS[size];
   const w = Math.min(opts.maxW ?? 8, int(r, ...spec.w));
   const h = int(r, ...spec.h);
   const g: string[][] = Array.from({ length: h }, (_, y) => Array.from({ length: w }, (_, x) => (x === 0 || y === 0 || x === w - 1 || y === h - 1 ? '#' : '.')));

@@ -53,8 +53,6 @@ export const petalCount = (save: SaveData) => save.levels.reduce((n, r) => n + (
 /** 처음부터 차례로: 아직 안 깬 첫 판(모두 깼으면 -1) */
 export const nextLevel = (save: SaveData) => save.levels.findIndex((r) => !r);
 
-/** 오늘의 정원은 봄 정원 여섯을 모두 피우면 열린다(햇살·그늘 규칙을 다 배운 뒤. 계절 요소는 판 위 안내 한 줄로 알려 줌) */
-
 const dailyRecord = (raw: unknown): (DailyRecord & { date: string }) | null => {
   const r = raw as (DailyRecord & { date: string }) | null;
   return r && Number.isInteger(r.moves) && r.moves > 0 && Number.isInteger(r.time) && r.time >= 0 && typeof r.date === 'string' ? { moves: r.moves, time: r.time, date: r.date } : null;

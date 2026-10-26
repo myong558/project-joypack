@@ -8,9 +8,6 @@ export type FlowerId =
   | 'cosmos' | 'lycoris' | 'gujeolcho' | 'dahlia' | 'aster' | 'mum'
   | 'camellia' | 'cyclamen' | 'poinsettia' | 'hellebore' | 'snowdrop' | 'adonis';
 
-/** 판 방 크기 단계(roomgen.ts·오늘의 정원 생성에만 씀, 꽃·스킨과는 상관없음) */
-export type Season = 'spring' | 'summer' | 'autumn' | 'winter';
-
 interface Text {
   name: string;
   meaning: string;

@@ -11,7 +11,7 @@ describe('정원 24개', () => {
     expect(LEVELS.map((l) => l.flower)).toEqual(FLOWERS.map((f) => f.id));
   });
 
-  it('계절이 갈수록 화분이 늘어난다(봄 1~2 · 여름 2 · 가을 2~3 · 겨울 3)', () => {
+  it('뒤로 갈수록 화분이 늘어난다(1~6 화분 1~2 · 7~12 2 · 13~18 2~3 · 19~24 3)', () => {
     const pots = LEVELS.map((l) => parse(l.rows).start.pots.length);
     for (let i = 1; i < 24; i++) expect(pots[i]).toBeGreaterThanOrEqual(pots[i - 1]);
     expect(pots[0]).toBe(1);
