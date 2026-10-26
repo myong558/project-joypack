@@ -2386,7 +2386,8 @@ h2 .icon-pic {
   gap: 12px;
   width: 100%;
   padding: 12px 14px;
-  border-radius: 6px 12px 12px 6px;
+  /* 네 모서리 같게(예전 책등처럼 왼쪽만 6px 이던 것은 어긋나 보여 큰 쪽으로) */
+  border-radius: 12px;
   color: var(--paper-ink);
   background: radial-gradient(120% 100% at 40% 40%, var(--paper) 62%, var(--paper-edge) 100%);
   box-shadow: inset 0 0 0 1px rgb(90 60 30 / 0.15), 0 2px 0 #d9c7a0, 0 8px 20px rgb(0 0 0 / 0.2);
