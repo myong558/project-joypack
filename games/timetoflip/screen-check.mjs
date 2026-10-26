@@ -1,8 +1,8 @@
 // 화면 크기 점검(pnpm check:screens timetoflip)에서 찍을 화면들. 쓰는 법은 scripts/screen-check/run.mjs
 export const base = 'games/timetoflip/';
 
-// 도감을 일부 채운 기록(도감 창에 그림·잠긴 칸이 섞여 보이게)
-const SAVE = `localStorage.setItem('timetoflip:v1', JSON.stringify({ ...JSON.parse(localStorage.getItem('timetoflip:v1') || '{}'), dex: ['circle', 'triangle', 'square', 'diamond', 'hexagon', 'lips', 'bolt', 'heart', 'berceuse', 'wave'], best: 12340, bestStage: 6 }))`;
+// 도감을 일부 채운 기록(도감 창에 그림·잠긴 칸이 섞여 보이게). 공개 전에도 "곧 공개" 화면에 막히지 않게 개발자 미리보기를 켠다
+const SAVE = `localStorage.setItem('joypack.preview', 'on'); localStorage.setItem('timetoflip:v1', JSON.stringify({ ...JSON.parse(localStorage.getItem('timetoflip:v1') || '{}'), dex: ['circle', 'triangle', 'square', 'diamond', 'hexagon', 'lips', 'bolt', 'heart', 'berceuse', 'wave'], best: 12340, bestStage: 6 }))`;
 
 // 판 위에서 짝 하나를 찾아 누른다(그림이 같은 두 장. 닮은 카드는 class 로 구분)
 const MATCH_ONE = `(() => {
@@ -25,6 +25,8 @@ export const screens = [
   { name: 'ranking', setup: SAVE, go: (p) => p.click('[data-ranking]') },
   { name: 'settings', setup: SAVE, go: (p) => p.click('.settings-btn') },
   { name: 'dex', setup: SAVE, go: (p) => p.click('[data-dex]') },
+  // 그림 카드를 골라 큰 카드가 액자 안에서 앞면으로 뒤집힌 모습(제목·설명 포함)
+  { name: 'dex-card', setup: SAVE, go: async (p) => (await p.click('[data-dex]'), await p.click('.dex-item[data-face="wave"]'), p.wait(600)) },
   { name: 'play', setup: SAVE, go: async (p) => (await play(p), p.eval(MATCH_ONE), p.wait(300)) },
   { name: 'pause', setup: SAVE, go: async (p) => (await play(p), p.click('.pause-btn')) },
   // 짝 하나를 맞혀 점수를 낸 뒤 시간(40초 + 보너스)이 다 가면 결과 화면. 순위표가 비어 있으면 등록 칸이 함께 나온다(가장 긴 결과)

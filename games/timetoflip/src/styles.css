@@ -2066,9 +2066,10 @@ h1 .word:nth-child(2) .tc-in {
   box-shadow: 0 4px 0 var(--depth), 0 10px 22px rgb(42 36 51 / 0.2);
 }
 /* 큰 카드는 고풍 앤티크 금 액자(ui/frame.ts) 안에 들어간다. 액자는 늘 그 자리에 있고 안의 카드만 뒤집힌다.
- * 액자 그림(200×250)의 창(25,29 · 150×192)이 카드와 꼭 맞게 바깥으로 키우고, 그만큼 둘레에 자리를 둔다 */
+ * 액자 그림(200×250)의 창(25,29 · 150×192)이 카드와 꼭 맞게 바깥으로 키우고, 그만큼 둘레에 자리를 둔다.
+ * 아래는 액자 그림자와 제목 사이 숨 쉴 틈(10px)을 더 둔다(액자 밑에 제목이 바로 붙어 보이던 것) */
 .dex-big {
-  margin: calc(var(--cw) * 0.2) calc(var(--cw) * 0.17);
+  margin: calc(var(--cw) * 0.2 + 2px) calc(var(--cw) * 0.17) calc(var(--cw) * 0.2 + 10px);
 }
 .dex-frame {
   position: absolute;
@@ -2284,10 +2285,11 @@ h1 .word:nth-child(2) .tc-in {
     border-bottom: 0;
     gap: 6px;
   }
+  /* 액자까지 위아래가 왼쪽 칸 높이 안에 다 들어오게 화면 높이에 맞춰 줄인다(가장 낮은 가로 화면에서 액자 아래가 잘리던 것) */
   .dex-big {
-    --cw: 92px;
-    width: 92px;
-    height: 118px;
+    --cw: min(92px, (var(--jp-vh, 100dvh) - 128px) * 0.58);
+    width: var(--cw);
+    height: calc(var(--cw) * 1.28);
   }
   .dex-info {
     height: auto;
