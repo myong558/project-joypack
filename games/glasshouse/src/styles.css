@@ -2221,11 +2221,12 @@ h2 .icon-pic {
   100% {
     transform: rotate(var(--r));
   }
+  /* 제 각도 쪽으로 더 젖혀짐(× 1.1)과 함께 모든 꽃잎이 같은 쪽으로 살짝 기울었다(+4°) 반대로 조금(−2°) 돌아옴. 잔꽃처럼 각도가 0인 꽃잎도 기울어 보임 */
   40% {
-    transform: rotate(calc(var(--r) * 1.1));
+    transform: rotate(calc(var(--r) * 1.1 + 4deg));
   }
   75% {
-    transform: rotate(calc(var(--r) * 0.96));
+    transform: rotate(calc(var(--r) * 0.96 - 2deg));
   }
 }
 .board.cleared .beam {
