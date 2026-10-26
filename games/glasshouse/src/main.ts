@@ -364,10 +364,12 @@ function play(level: number | 'daily'): void {
       vibrate([60, 50, 60, 50, 220]);
       fx.shake('small');
       board.bloom();
-      board.pots.forEach((p, i) => later(260 + i * 320, () => fx.petals(p.el, accentOf(f.id))));
+      later(260, () => board.pots.forEach((p) => fx.petals(p.el, accentOf(f.id))));
     });
-    // 마지막 화분 꽃이 다 핀 뒤(시작 260 + board.bloom 200 + 화분마다 320, 꽃잎이 벌어지는 데 약 2.2초) 2초 동안 핀 꽃을 보여 주고 결과 화면
-    later(260 + 200 + (board.pots.length - 1) * 320 + 2200 + 2000, () => finish());
+    // 모든 화분 꽃이 함께 다 피면(시작 260 + board.bloom 200 + 판 위 꽃잎이 벌어지는 데 약 1.3초, styles.css .pot .fl) 마무리 동작(0.5초),
+    // 그 뒤 1초 동안 핀 꽃을 보여 주고 결과 화면
+    later(260 + 200 + 1300, () => board.flourish());
+    later(260 + 200 + 1300 + 500 + 1000, () => finish());
   };
 
   const finish = () => {

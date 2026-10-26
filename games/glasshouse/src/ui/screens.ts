@@ -23,6 +23,18 @@ function closeButton(): string {
 }
 
 const pressed = (on: boolean) => `aria-pressed="${on}"`;
+
+/**
+ * 봉오리를 delay 뒤에 피우고, 다 핀 뒤(openMs: 꽃잎이 벌어지는 시간 + 꽃잎마다 늦게 시작하는 시간) 판과 같은 마무리 동작(styles.css .fl.flourish).
+ * 도감 큰 카드 2.2초 · 결과 카드 1.8초(styles.css .fl .pt), 꽃잎마다 늦게 시작하는 시간은 꽃에 따라 0~0.95초
+ */
+function bloomThenFlourish(fl: Element | null, delay: number, openMs: number): void {
+  if (!fl) return;
+  setTimeout(() => {
+    fl.classList.remove('closed');
+    setTimeout(() => fl.classList.add('flourish'), reducedMotion.matches ? 0 : openMs);
+  }, delay);
+}
 const text = (f: Flower) => f[getLang()];
 /** 꽃잎 표시(꽃잎 3장 중 받은 만큼 채움) */
 /** 이어 가꾸기 단추 옆 표시: 몇 번째 꽃인지 번호 + 그 꽃 이름("7 · 물망초") */
@@ -280,7 +292,7 @@ export function openDex(host: HTMLElement, save: SaveData, start: number | null,
     const apply = () => {
       // 꽃은 바싹 움츠린 봉오리로 펼쳐 놓고, 카드가 다 뒤집힌 뒤 꽃잎이 차례로 벌어지며 핀다(styles.css .dex .fl.closed)
       front.innerHTML = isOpen ? `<div class="plate">${flowerSvg(f.id, false, 'dex')}</div>` : '';
-      if (isOpen) setTimeout(() => front.querySelector('.fl')?.classList.remove('closed'), reducedMotion.matches ? 0 : 480);
+      if (isOpen) bloomThenFlourish(front.querySelector('.fl'), reducedMotion.matches ? 0 : 480, 2600);
       if (!isOpen) {
         title.textContent = '???';
         by.textContent = t('dex.locked');
@@ -811,8 +823,8 @@ export function resultScreen(opts: {
   // 판을 깨는 순간 화면을 누르던 손가락이 버튼을 잘못 누르지 않도록 0.6초 동안 막는다(키 입력은 main.ts)
   el.classList.add('locked');
   setTimeout(() => el.classList.remove('locked'), 600);
-  // 결과 카드의 꽃도 한 번 더 천천히 핀다
-  requestAnimationFrame(() => setTimeout(() => q('.bloom-card .fl').classList.remove('closed'), 120));
+  // 결과 카드의 꽃도 한 번 더 천천히 피고 마무리 동작
+  requestAnimationFrame(() => bloomThenFlourish(q('.bloom-card .fl'), 120, 2200));
   countUp(q('.level-score'), r.score);
 
   // 정원 점수가 10위 안에 들면 결과 화면에서 바로 이름을 받는다. 그냥 넘어가도 등록 대기로 남는다
@@ -928,7 +940,7 @@ export function dailyResultScreen(opts: { result: DailyResult; onRetry: () => vo
   const q = (s: string) => el.querySelector<HTMLElement>(s)!;
   el.classList.add('locked');
   setTimeout(() => el.classList.remove('locked'), 600);
-  requestAnimationFrame(() => setTimeout(() => q('.bloom-card .fl').classList.remove('closed'), 120));
+  requestAnimationFrame(() => bloomThenFlourish(q('.bloom-card .fl'), 120, 2200));
 
   let entryForm: HTMLElement | null = null;
   const showEntry = (place: number) => {

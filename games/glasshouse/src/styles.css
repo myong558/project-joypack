@@ -619,6 +619,11 @@ body:has(.screen.game) .scene .layer {
 }
 /* 시연 화분도 판의 화분과 같은 배치(.pot-body · .plant), 꽃은 늘 곧게 */
 .d-pot .plant {
+  /* 로고 칸은 위가 나무 간판이라 판 화분(.plant)처럼 위로 넘치지 않게 예전 자리. 튤립은 꽃 머리가 작아 화분에 가리지 않음 */
+  left: 13%;
+  top: -4%;
+  width: 74%;
+  height: 74%;
   transform: none;
   filter: none;
 }
@@ -2162,12 +2167,13 @@ h2 .icon-pic {
   aspect-ratio: 40 / 26;
   translate: -50% 0;
 }
+/* 꽃 머리가 화분 테두리(칸 높이 46%) 위에 다 보이게 조금 작게·높이 둔다. 줄기는 화분 뒤로 들어가 화분 밖으로 나오지 않음 */
 .plant {
   position: absolute;
-  left: 13%;
-  top: -4%;
-  width: 74%;
-  height: 74%;
+  left: 17%;
+  top: -13%;
+  width: 66%;
+  height: 66%;
   transform-origin: 50% 100%;
   transform: scale(0.9);
   filter: saturate(0.7) brightness(0.95);
@@ -2201,6 +2207,26 @@ h2 .icon-pic {
 }
 .board.cleared .pot .plant {
   transform: scale(1.06);
+}
+/* 꽃이 다 핀 뒤 마무리 동작(판·도감 큰 카드·결과 카드 모두 같음): 꽃 그림이 한 번 살짝 커졌다 좌우로 흔들리고 제자리, 그림 아래(줄기 밑) 기준.
+ * 판은 board.flourish 가 .board.done, 도감·결과는 screens.ts flourish 가 .fl.flourish 를 붙임 */
+@media (prefers-reduced-motion: no-preference) {
+  .board.done .pot .fl,
+  .fl.flourish {
+    transform-origin: 50% 100%;
+    animation: fl-done 0.5s ease-out;
+  }
+}
+@keyframes fl-done {
+  30% {
+    transform: scale(1.09) rotate(-5deg);
+  }
+  60% {
+    transform: scale(1.02) rotate(4deg);
+  }
+  82% {
+    transform: rotate(-1.5deg);
+  }
 }
 .board.cleared .beam {
   opacity: 1;
@@ -2243,6 +2269,20 @@ h2 .icon-pic {
 }
 .fl.game.closed .pt {
   transform: rotate(var(--c)) scale(max(calc(var(--s) + 0.15), 0.6), calc(0.72 + var(--s) * 0.28));
+}
+/* 판 위 화분: 깨고 바로 다음으로 갈 수 있게 빨리 핀다(꽃잎 0.9초, 꽃잎마다 늦게 시작하는 시간도 절반 → 늦어도 약 1.3초면 다 핌, main.ts clear) */
+.pot .fl .pt,
+.pot .fl .hd {
+  transition-duration: 0.9s;
+  transition-delay: calc(var(--d) * 0.5);
+}
+.pot .fl .bd {
+  transition-duration: 0.8s;
+  transition-delay: calc(var(--d) * 0.5);
+}
+.pot .fl .dc {
+  transition-duration: 0.8s, 0.4s;
+  transition-delay: 0.12s, 0.18s;
 }
 /* 도감 큰 카드: 천천히 펼쳐져 피는 모습을 보여 줌 */
 .dex .fl .pt {
