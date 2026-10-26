@@ -1,12 +1,12 @@
 {
   "name": "updown",
-  "version": "1.15.5",
+  "version": "1.15.6",
   "author": "Myong Bum Soo",
   "license": "UNLICENSED",
   "private": true,
   "description": "조이팩 미니 게임: 업다운(숫자 맞추기). 빌드 없이 파일 그대로 배포한다.",
   "scripts": {
-    "font": "node --use-system-ca scripts/build-font.mjs"
+    "font": "node --use-system-ca ../../scripts/font-subset.mjs --license-dir=fonts jua=fonts/jua-subset.woff2 gothic-a1-bold=fonts/gothic-a1-bold-symbols.woff2=+jua"
   },
   "files": [
     "index.html",

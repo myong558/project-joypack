@@ -10,7 +10,7 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "icons": "node scripts/build-icons.mjs",
-    "font": "node --use-system-ca scripts/build-font.mjs"
+    "font": "node --use-system-ca ../../scripts/font-subset.mjs jua=src/fonts/jua-hub.woff2 gothic-a1-bold=src/fonts/gothic-a1-bold-symbols.woff2=+jua"
   },
   "dependencies": {
     "@joypack/shared": "workspace:*"

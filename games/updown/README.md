@@ -83,7 +83,6 @@ games/updown/
 │   └── app.js              화면 렌더링, 이벤트, 기록·설정 저장, 서비스 워커 등록
 ├── images/                 앱 아이콘, 링크 미리보기 이미지 og-image.png(1200×630)
 ├── fonts/                  웹폰트 Jua 서브셋과 라이선스(SIL OFL 1.1)
-├── scripts/build-font.mjs  웹폰트 서브셋 생성 (`pnpm font`)
 ├── screen-check.mjs        화면 크기 점검 화면 목록 (`pnpm check:screens updown`)
 └── docs/COLORS.md          색상 레퍼런스 (팔레트, 역할 토큰, 대비 기준)
 ```

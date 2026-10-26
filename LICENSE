@@ -11,6 +11,9 @@ notice above:
   (apps/hub/public/fonts/LICENSE-Jua.txt, games/updown/fonts/LICENSE-Jua.txt,
   games/hammer/public/fonts/LICENSE-Jua.txt, games/timetoflip/public/fonts/LICENSE-Jua.txt,
   games/glasshouse/public/fonts/LICENSE-Jua.txt)
+- Gothic A1 font (Bold, symbols subset) — SIL Open Font License 1.1
+  (apps/hub/public/fonts/LICENSE-GothicA1.txt, games/updown/fonts/LICENSE-GothicA1.txt,
+  games/hammer/public/fonts/LICENSE-GothicA1.txt)
 - Do Hyeon font — SIL Open Font License 1.1
   (games/timetoflip/public/fonts/LICENSE-DoHyeon.txt)
 - Dongle font — SIL Open Font License 1.1

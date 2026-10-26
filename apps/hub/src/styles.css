@@ -4,6 +4,14 @@
   src: url('./fonts/jua-hub.woff2') format('woff2');
   font-display: swap;
 }
+/* 기호 채움(Gothic A1 Bold, SIL OFL 1.1): Jua 에 없는 … → © ① ※ ℃ 등만 그린다(약 8 KB, 그 글자가 화면에 나올 때만 받음).
+ * 위 Jua 와 같은 이름·같은 굵기 설명이어야 한 글꼴처럼 섞여 쓰인다. unicode-range 는 pnpm font 출력(fonts.lock.json)과 같게, 기준서 1.10 */
+@font-face {
+  font-family: 'Jua';
+  src: url('./fonts/gothic-a1-bold-symbols.woff2') format('woff2');
+  font-display: swap;
+  unicode-range: U+60, U+A9, U+AE, U+B0-B3, U+B7, U+B9, U+BC-BE, U+D7, U+F7, U+2013-2014, U+2018-2019, U+2022, U+2025-2026, U+2030, U+203B, U+2103, U+2116, U+2122, U+2190-2194, U+21D2, U+2212, U+221E, U+2260, U+2264-2265, U+2460-2469, U+25A0-25A1, U+25B2-25B3, U+25B6-25B7, U+25BC-25BD, U+25C0-25C1, U+25C6-25C7, U+25CB, U+25CE-25CF, U+2660, U+2662-2664, U+2666-2667, U+266A, U+266C, U+2713-2716, U+3008-3011, U+3014-3015;
+}
 
 /* 기본 = 포도 톤. 톤(스킨)은 날마다 바뀐다(index.html). 톤마다 라이트·다크 두 벌 */
 :root {

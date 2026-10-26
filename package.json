@@ -1,7 +1,7 @@
 {
   "name": "joypack",
   "private": true,
-  "version": "1.34.8",
+  "version": "1.34.9",
   "author": "Myong Bum Soo",
   "license": "UNLICENSED",
   "description": "조이팩: 미니 게임 모음 웹앱",
@@ -19,7 +19,7 @@
     "check:screens": "node scripts/screen-check/run.mjs",
     "release": "node scripts/release.mjs",
     "setup:claude": "node scripts/setup-claude.mjs",
-    "font": "pnpm --filter hub font && pnpm --filter updown font"
+    "font": "pnpm -r --filter ./apps/** --filter ./games/** font"
   },
   "devDependencies": {
     "subset-font": "^2.9.0"

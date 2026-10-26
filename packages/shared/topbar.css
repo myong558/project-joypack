@@ -9,6 +9,13 @@
  *
  * 크기·색은 변수로 조정한다. 기본은 휴대폰 기준(단추 50px, 아이콘 26px, 글자 18px), PC(폭 900·높이 560 이상)는 60·31·21px.
  *   --jp-top-size, --jp-top-icon, --jp-top-font, --jp-top-accent(마우스 올림·초점·강조 색, 게임 대표색) */
+
+/* 글꼴 빠짐 방지(기준서 1.10): 버튼·입력칸은 브라우저 기본 글꼴을 쓰므로 게임 글꼴을 물려받게 한다.
+ * :where 로 우선순위 0 → 게임이 직접 정한 글꼴이 있으면 그것이 이긴다. 크기는 건드리지 않는다 */
+:where(button, input, select, textarea, option) {
+  font-family: inherit;
+}
+
 :root {
   --jp-top-size: 50px;
   --jp-top-icon: 26px;

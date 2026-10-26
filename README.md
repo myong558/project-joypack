@@ -75,7 +75,7 @@ project-joypack/
 │       │   ├── i18n.ts         한국어·영어 문구
 │       │   └── fonts/          Jua 서브셋(pnpm font)
 │       ├── public/             로고, 앱 아이콘, manifest, og-image
-│       └── scripts/            build-icons.mjs(로고 → PNG·og-image), build-font.mjs
+│       └── scripts/            build-icons.mjs(로고 → PNG·og-image)
 ├── games/
 │   ├── updown/                 업다운 (git subtree, 빌드 없음 → package.json "files" 를 그대로 복사)
 │   └── hammer/                 두더지잡기 (git subtree, vite build → dist/)
@@ -340,6 +340,7 @@ dist/                       → https://myong558.github.io/project-joypack/
 - [x] 복귀 연출 강화(허브 v1.20.1): 로고 상자 통통 대신 얼굴 부품(십자·버튼·입·볼)이 0.07초 간격으로 한 번씩 콩콩(로고를 누를 때와 같은 tile-jump), 이어서 반짝이가 처음 연출보다 멀리·크게 한 번 터짐(burst-big). 약 1초.
 - [x] 랭킹 탭 공통 기준·연동(허브 v1.21.0 · 업다운 v1.12.0 · 두더지잡기 v0.13.0): 조이팩 전체 랭킹과 각 게임 랭킹 창이 같은 기준으로 처음 탭을 고름 — 등록 대기 탭 → 최근 탭(방금 한 판·어디서든 마지막으로 본 탭) → `games.json` default. 기기 저장값 `joypack.rankBoard` 하나를 같이 써서 한쪽에서 고른 탭이 다른 쪽에도 이어짐. 공통 모듈 `Joypack.rankTab`·`setRankBoard`·`setRankPending`(오늘의 챌린지 대기는 그날만). 기준서 1.6·6장 10번.
 - [x] 상업 배포·마켓 기준(허브 v1.21.2 · 업다운 v1.13.0 · 두더지잡기 v0.14.0): 기준서 10장 신설(필수, 저작물·이름 상표·UGC·개인정보·연령 등급·도박 요소·마켓 등록·광고 자리, 10.8 검사), `CLAUDE.md` "상업 배포 기준" 필수 규칙. 랭킹 이름 금지어 필터 `Joypack.isAllowedName`(공통 모듈, 두 게임 등록 전 검사). README 8.1 을 상업 이용 점검표로, 8.3 출시 전 할 일(두더지잡기 영어 이름 상표 위험 등).
+- [x] 글꼴 빠짐 방지(허브 v1.34.9 · 업다운 v1.15.6 · 두더지잡기 v1.0.3 · 타임 투 플립 v1.2.4 · 온실정원 v0.7.3): 넣는 글자 규칙을 `scripts/font-text.mjs` 하나로(ASCII·한글 자음모음·자주 쓰는 기호 + 공통 모듈·`games.json`·CSS), 허브·업다운도 공용 서브셋 스크립트로. `pnpm build` 가 `fonts.lock.json` 으로 빠진 글자를 검사해 내 PC에서는 자동으로 다시 만들고 CI 는 실패(`scripts/check-glyphs.mjs`). Jua 에 원래 없는 기호 86자는 Gothic A1 Bold 기호 채움 글꼴(약 8 KB, `unicode-range`)로. 버튼·입력칸 `font-family: inherit`(공통 `topbar.css`). 한글 2,350자 전체는 Jua 약 350 KB(3배)라 넣지 않음(실측).
 - [x] 두더지잡기 영어 이름 "Whack-a-Mole" → "Mole Bonk"(상표 위험 해소, 허브 v1.21.3 · 두더지잡기 v0.14.1), 지원 연락처 `myong558@gmail.com` 확정(README 8.3).
 - [x] 랭킹 서버 규칙 강화(`firestore.rules`, 콘솔 게시 필요): 두더지잡기 순위표는 "기존 순위표 + 새 기록 1개"만 쓸 수 있게 해 남의 기록 지우기·바꿔치기를 막음(점수 1~20000, 점수 높은 순, 꽉 찼을 때만 꼴찌 1개 빠짐). 금지어 검사를 서버에서도(업다운·두더지잡기 모두, `allowedName`).
 - [x] 앱 설치 안내를 브라우저별로(허브 v1.23.0): 설치 창을 띄울 수 있는 건 Chrome 계열뿐이라, 그 밖의 브라우저는 맞는 방법을 안내(`manualGuide()`): 아이폰 Safari(아래 공유 → 홈 화면에 추가) · 아이폰 Chrome·Edge 등(주소창 옆 공유 버튼) · 맥 Safari(파일 → Dock에 추가) · 안드로이드 Firefox(메뉴 → 설치) · PC Firefox는 "설치를 지원하지 않아요, Chrome·Edge로 열어 주세요".
@@ -412,6 +413,7 @@ pnpm --filter hub icons  # 로고(apps/hub/public/logo.svg)를 바꾼 뒤 앱 �
 | 저작물 | 쓰는 곳 | 출처·라이선스 | 상업 이용 | 함께 배포하는 파일 |
 | --- | --- | --- | --- | --- |
 | Jua 글꼴 | 허브·업다운·두더지잡기(전체), 온실정원(화면 전체, 긴 설명 글만 Gowun Dodum), 타임 투 플립(위 메뉴 언어 단추) | SIL OFL 1.1(Reserved Font Name 없음 → 서브셋 허용) | 가능(글꼴만 따로 팔기는 불가) | 허브 `fonts/LICENSE-Jua.txt`(apps/hub/public), 업다운 `games/updown/fonts/LICENSE-Jua.txt`, 두더지잡기 `fonts/LICENSE-Jua.txt`, 타임 투 플립 `fonts/LICENSE-Jua.txt`, 온실정원 `fonts/LICENSE-Jua.txt` |
+| Gothic A1 글꼴(Bold, 기호 채움) | 허브·업다운·두더지잡기: Jua 에 없는 기호(… → © ① ※ ℃ 등 86자, 약 8 KB)만 | SIL OFL 1.1(© HanYang I&C, Reserved Font Name 없음 → 서브셋 허용), Google Fonts 저장소 원본 | 가능(글꼴만 따로 팔기는 불가) | 허브 `fonts/LICENSE-GothicA1.txt`(apps/hub/public), 업다운 `games/updown/fonts/LICENSE-GothicA1.txt`, 두더지잡기 `fonts/LICENSE-GothicA1.txt` |
 | Do Hyeon 글꼴 | 타임 투 플립(본문·숫자) | SIL OFL 1.1(Reserved Font Name 없음 → 서브셋 허용), Google Fonts 저장소 원본 | 가능(글꼴만 따로 팔기는 불가) | 타임 투 플립 `fonts/LICENSE-DoHyeon.txt`(games/timetoflip/public/fonts) |
 | 명화 카드 그림 32장 | 타임 투 플립(3판부터 나오는 카드 앞면) | 메트로폴리탄·시카고 미술관 Open Access(CC0 1.0), 암스테르담 국립미술관(Public Domain Mark 1.0), 국립중앙박물관(공공누리 제1유형: 출처 표시). 작품 번호·출처 `games/timetoflip/art-src/meta.json` | 가능(수정·상업 이용 자유. 공공누리 1유형 5점은 출처 표시 의무 → 도감 작가 줄 "국립중앙박물관" + 배포 파일) | 타임 투 플립 `art-credits.txt`(games/timetoflip/public, `art-src/credits.mjs` 로 만듦) |
 | Gowun Batang 글꼴(Bold) | 지금 쓰는 곳 없음(온실정원 v0.6.0 에서 Jua 로 바꿈, 목록에는 남김) | SIL OFL 1.1(© The Gowun Batang Project Authors, Reserved Font Name 없음 → 서브셋 허용), Google Fonts 저장소 원본 | 가능(글꼴만 따로 팔기는 불가) | 없음 |

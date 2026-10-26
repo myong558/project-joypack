@@ -5,6 +5,7 @@
 //   3. 공통 모듈 packages/shared/joypack.js·topbar.css → dist/shared/ (빌드 없는 게임이 불러옴)
 //   4. 게임마다 파일 목록 dist/games/<id>/files.json (경로 + 해시). 처음 열 때 이 목록 전체를 캐시한다
 //   5. 서비스 워커 dist/sw.js: 허브 파일만 미리 캐시, 게임은 처음 열 때 캐시 (scripts/sw-template.js)
+//   0. 검사: 글꼴 서브셋에 빠진 글자(scripts/check-glyphs.mjs, 내 PC에서는 자동으로 다시 만듦)
 //   6~8. 검사: 글꼴·효과음 상업 이용, 용량(게임 하나·허브 크기 상한, scripts/check-size.mjs)
 // 게임 하나만 고쳤을 때: pnpm build <id> → 허브와 그 게임만 다시 빌드하고 다른 게임은 지난 dist 를 그대로 쓴다(빠른 확인용).
 // 배포(CI)·커밋 전 최종 확인은 인자 없이 전체 빌드한다
@@ -14,6 +15,7 @@ import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statS
 import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkFonts } from './check-fonts.mjs';
+import { checkGlyphs } from './check-glyphs.mjs';
 import { checkIcons, teaserWarnings } from './check-icons.mjs';
 import { LIMITS, checkSize } from './check-size.mjs';
 import { checkSounds } from './check-sounds.mjs';
@@ -38,6 +40,9 @@ const hashOf = (file) => createHash('sha256').update(readFileSync(file)).digest(
 
 const only = process.argv[2];
 if (only && !readJson('games.json').some((g) => g.id === only)) throw new Error(`games.json 에 없는 게임: ${only}`);
+// 글꼴 서브셋에 빠진 글자가 없는지(문구를 고치고 pnpm font 를 잊어도 내 PC에서는 여기서 다시 만듦, CI 는 실패. scripts/check-glyphs.mjs)
+const glyphErrors = checkGlyphs();
+if (glyphErrors.length) throw new Error(`글꼴 빠진 글자 검사 실패:\n- ${glyphErrors.join('\n- ')}`);
 // 허브 카드 아이콘: 파일이 있고, 바탕색이 카드 그림판 색과 충분히 달라야 한다(scripts/check-icons.mjs, 기준서 6장 1번)
 const iconErrors = checkIcons();
 if (iconErrors.length) throw new Error(`허브 카드 아이콘 검사 실패:\n- ${iconErrors.join('\n- ')}`);
