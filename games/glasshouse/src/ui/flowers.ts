@@ -439,6 +439,9 @@ const FOCUS: Record<FlowerId, [number, number, number]> = {
 /** 게임 약식 그림 틀만 따로 옮길 꽃(x 방향): 은방울꽃은 도감에서는 잎까지 보이게 왼쪽, 게임 칸에서는 방울 꽃 줄 가운데 */
 const GAME_SHIFT: Partial<Record<FlowerId, number>> = { lily: 6 };
 
+/** 게임 약식 그림에서 꽃을 위로 올릴 만큼(판 좌표): 활짝 피면 아래 꽃잎이 화분 테두리 뒤로 들어가 잘려 보이던 꽃(마무리 동작 때 젖혀지는 만큼 여유 포함) */
+const GAME_LIFT: Partial<Record<FlowerId, number>> = { daffodil: 4, pansy: 4, iris: 5, sunflower: 4, camellia: 3, adonis: 4 };
+
 const cache = new Map<string, string>();
 
 /**
@@ -457,7 +460,7 @@ export function flowerSvg(id: FlowerId, open = true, kind: FlowerDetail = 'dex')
   const [cx, cy, r0] = FOCUS[id];
   const r = kind === 'game' ? Math.round(r0 * 0.85) : r0;
   // spray: 꽃 머리 그룹(.hd) 없이 잔꽃만 있는 꽃(마무리 동작에서 잔꽃마다 기욺, styles.css .fl.spray)
-  return `<svg class="fl ${kind}${body.includes('class="hd"') ? '' : ' spray'}${open ? '' : ' closed'}" viewBox="${kind === 'game' ? `${cx + (GAME_SHIFT[id] ?? 0) - r} ${cy - r} ${r * 2} ${r * 2}` : dexBox(cx, cy)}" aria-hidden="true" focusable="false">${body}</svg>`;
+  return `<svg class="fl ${kind}${body.includes('class="hd"') ? '' : ' spray'}${open ? '' : ' closed'}" viewBox="${kind === 'game' ? `${cx + (GAME_SHIFT[id] ?? 0) - r} ${cy + (GAME_LIFT[id] ?? 0) - r} ${r * 2} ${r * 2}` : dexBox(cx, cy)}" aria-hidden="true" focusable="false">${body}</svg>`;
 }
 
 /** 튤립 꽃 머리 높이(도감 판에서 꽃 머리가 오는 자리) */

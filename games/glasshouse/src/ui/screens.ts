@@ -719,7 +719,7 @@ export function gameScreen(opts: { level: number | null; par: number; onPause: (
         </div>
       </div>
       <div class="dock">
-        <ul class="legend"><li><span class="sun-ico">${SUN_ICON}</span><span><b>${t('legend.spot')}</b> ${t('legend.rule')}</span></li></ul>
+        <ul class="legend"><li><span><b><span class="sun-ico">${SUN_ICON}</span>${t('legend.spot')}</b> ${t('legend.rule')}</span></li></ul>
         <button class="btn undo-btn" data-act="undo" aria-label="${t('hud.undo')}">${ICONS.undo}<span>${t('hud.undo')}</span></button>
       </div>
     </main>`);
