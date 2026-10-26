@@ -2453,6 +2453,36 @@ button.dex-item:focus-visible {
   gap: 0.7em;
 }
 
+/* 개발자 모드 TEST 칸(설정 창 맨 위): 도감 모두 열기 안내와 출시 화면 단추. 출시 화면을 켜면 단추만 남는다 */
+.dev-section {
+  display: grid;
+  justify-items: start;
+  gap: 0.4em;
+  text-align: left;
+}
+
+.dev-note {
+  margin: 0;
+  font-size: max(14px, 0.6em);
+  color: var(--muted);
+}
+
+.dev-toggle {
+  min-height: 34px;
+  padding: 0 0.8em;
+  border: 1px dashed var(--accent);
+  border-radius: 99px;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  font-size: max(14px, 0.6em);
+  cursor: pointer;
+}
+
+.dev-toggle[aria-pressed='true'] {
+  border-style: solid;
+}
+
 .settings-grid {
   display: grid;
   gap: 0.7em;

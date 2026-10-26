@@ -117,6 +117,8 @@ export interface StartOptions {
   onTheme: (theme: Theme) => void;
   onSkin: (skin: SkinSetting) => void;
   onReset: () => void;
+  /** 개발자 모드 "출시 화면" 단추: 보기 방식을 바꾼 뒤 설정 창을 연 채로 다시 그린다 */
+  onRefresh: () => void;
   ranking: RankingView;
   /** 다시 그린 뒤 설정 창을 열어 둘지. 'reset'이면 초기화 완료 문구도 보인다 */
   settings?: 'open' | 'reset';
@@ -128,7 +130,8 @@ export interface StartOptions {
 
 export function startScreen(opts: StartOptions): HTMLElement {
   const { save } = opts;
-  const dex = new Set(save.dex);
+  // 개발자 모드(출시 화면 보기 꺼짐)면 도감을 모두 열어 보인다. 저장된 기록(save.dex)은 그대로 둔다
+  const dex = new Set<MoleKind>(Joypack.devJump() ? MOLE_ORDER : save.dex);
   const dailyBest = save.daily?.date === opts.today ? save.daily.best : 0;
   const lang = getLang();
   const otherLang = LANGS.find((l) => l !== lang)!;
@@ -297,7 +300,7 @@ function openDexBrowser(host: HTMLElement, kinds: MoleKind[], start: number, sav
 
   // 만난 두더지 설명을 모두 한 칸에 겹쳐 두고 지금 것만 보인다. 창 높이가 늘 가장 긴 설명에 맞춰져
   // 넘기기 버튼이 두더지마다 위아래로 움직이지 않는다(글꼴이 늦게 불러와지거나 창 크기가 바뀌어도 그대로)
-  const details = kinds.map((kind) => dexDetail(kind, save.kills[kind]));
+  const details = kinds.map((kind) => dexDetail(kind, save.kills[kind] ?? 0));
   const stack = html(`<div class="dex-stack"></div>`);
   stack.append(...details);
   const nav =
@@ -409,6 +412,12 @@ function settingsPanel(opts: StartOptions): HTMLElement {
     <div class="settings">
       ${closeButton()}
       <h2>${ICONS.gear} ${t('settings.title')}</h2>
+      ${
+        // 개발자 모드: 확인 도구(도감 모두 열기)와 출시 화면 단추. 테스트할 때 바로 누르도록 설정 창 맨 위에 둔다(기준서 11.5)
+        Joypack.devMode()
+          ? `<section class="dev-section"><h3>TEST</h3>${Joypack.devJump() ? `<p class="dev-note">${t('test.dexAll')}</p>` : ''}<button type="button" class="dev-toggle" data-release aria-pressed="${Joypack.releaseView()}">${Joypack.releaseView() ? t('test.devView') : t('test.releaseView')}</button></section>`
+          : ''
+      }
       <div class="settings-grid">
         <section>
           <h3>${t('theme.label')}</h3>
@@ -495,6 +504,11 @@ function settingsPanel(opts: StartOptions): HTMLElement {
     resetBtn.focus();
   });
   confirm.querySelector('[data-confirm]')!.addEventListener('click', opts.onReset);
+  // 개발자 모드: 출시 화면 보기 ↔ 개발 보기(도감 모두 열기를 숨기거나 다시 보임)
+  el.querySelector('[data-release]')?.addEventListener('click', () => {
+    Joypack.setReleaseView(!Joypack.releaseView());
+    opts.onRefresh();
+  });
   return el;
 }
 
