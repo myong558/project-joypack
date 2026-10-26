@@ -132,9 +132,9 @@ function heroDemo(): string {
 }
 
 /**
- * 출시 전 확인용(Joypack.devTools: 개발자 모드 + 미리보기 배포, 정식 공개하면 사라짐): 설정 창 맨 위 TEST 칸의 "N판부터 바로 시작" 단추(클래식, 기록·랭킹에 안 남음)
+ * 판 바로가기(Joypack.devJump: 개발자 모드이고 "출시 화면" 보기가 꺼져 있을 때, 정식 공개 뒤에도 보임): 설정 창 맨 위 TEST 칸의 "N판부터 바로 시작" 단추(클래식, 기록·랭킹에 안 남음)
  */
-const STAGE_JUMP = () => Joypack.devTools();
+const STAGE_JUMP = () => Joypack.devJump();
 
 export function startScreen(opts: StartOptions): HTMLElement {
   const { save } = opts;
@@ -334,8 +334,8 @@ function settingsPanel(opts: StartOptions): HTMLElement {
       ${closeButton()}
       <h2>${ICONS.gear} ${t('settings.title')}</h2>
       ${
-        // 미리보기 동안만: 출시 전 확인 도구. 테스트할 때 바로 누르도록 설정 창 맨 위에 둔다
-        Joypack.prerelease()
+        // 개발자 모드: 판 바로가기(정식 공개 뒤에도)·출시 화면 단추. 테스트할 때 바로 누르도록 설정 창 맨 위에 둔다
+        Joypack.devMode()
           ? `<section class="dev-section"><h3>TEST</h3>${STAGE_JUMP() ? `<p class="note">${t('test.jump')}</p><div class="stage-jump" role="group" aria-label="${t('test.jump')}">${[2, 3, 4, 5, 6, 7, 8].map((n) => `<button type="button" data-from="${n}">${n}</button>`).join('')}</div>` : ''}<button type="button" class="dev-toggle" data-release aria-pressed="${Joypack.releaseView()}">${Joypack.releaseView() ? t('test.devView') : t('test.releaseView')}</button></section>`
           : ''
       }

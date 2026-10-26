@@ -501,6 +501,11 @@
   function devTools() {
     return prerelease() && !releaseView();
   }
+  // 판 바로가기(모든 판 열기·판별 바로 시작)를 보일지: 개발자 모드이고 "출시 화면" 보기가 꺼져 있으면 정식 공개 뒤에도 보인다.
+  // 바로가기로 시작한 판은 각 게임이 최고 기록·랭킹에 남기지 않으므로 공개된 순위표에 영향이 없다
+  function devJump() {
+    return devMode() && !releaseView();
+  }
 
   // ── 랭킹 탭 공통 기준(조이팩 전체 랭킹·모든 게임 랭킹 창, 기준서 1.6) ──
   // 랭킹 창을 열 때 처음 고를 탭: ① 등록 대기 기록이 있는 탭(여럿이면 최근 탭, 아니면 첫 번째) → ② 최근 탭(방금 한 판 또는 마지막으로 본 탭 중 나중)
@@ -591,6 +596,7 @@
     setReleaseView: setReleaseView,
     prerelease: prerelease,
     devTools: devTools,
+    devJump: devJump,
     topIcon: topIcon,
     deviceLang: deviceLang,
     guardBottom: guardBottom,

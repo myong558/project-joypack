@@ -43,10 +43,10 @@ const levelTag = (i: number) => `${i + 1} · ${text(FLOWER[LEVELS[i].flower]).na
 const petalRow = (n: number) => `<span class="petals" role="img" aria-label="${t('pick.cleared', { p: n })}">${[1, 2, 3].map((i) => `<i class="${i <= n ? 'on' : ''}"></i>`).join('')}</span>`;
 
 /**
- * 출시 전 확인용(Joypack.devTools: 개발자 모드 + 미리보기 배포, 정식 공개하면 사라짐):
+ * 판 바로가기(Joypack.devJump: 개발자 모드이고 "출시 화면" 보기가 꺼져 있을 때, 정식 공개 뒤에도 보임):
  * 정원 24개를 모두 연 것처럼 고를 수 있고, 도감도 모든 쪽이 열려 보인다(저장된 기록은 그대로, 바로 연 판의 기록은 남지 않음)
  */
-export const ALL_OPEN = () => Joypack.devTools();
+export const ALL_OPEN = () => Joypack.devJump();
 
 /** 판을 고를 수 있는지: 첫 판이거나 앞 판을 깼을 때 */
 export const unlocked = (save: SaveData, i: number) => ALL_OPEN() || i === 0 || !!save.levels[i - 1] || !!save.levels[i];
@@ -370,8 +370,8 @@ function settingsPanel(opts: StartOptions): HTMLElement {
       ${closeButton()}
       <h2>${ICONS.gear} ${t('settings.title')}</h2>
       ${
-        // 미리보기 동안만: 출시 전 확인 도구. 테스트할 때 바로 누르도록 설정 창 맨 위에 둔다(시작 화면에 띄우면 작은 화면에서 위 메뉴·로고와 겹침)
-        Joypack.prerelease()
+        // 개발자 모드: 판 바로가기(정식 공개 뒤에도)·출시 화면 단추. 테스트할 때 바로 누르도록 설정 창 맨 위에 둔다(시작 화면에 띄우면 작은 화면에서 위 메뉴·로고와 겹침)
+        Joypack.devMode()
           ? `<section class="dev-section"><h3>TEST</h3>${ALL_OPEN() ? `<p class="note">${t('test.jump')}</p>` : ''}<button type="button" class="dev-toggle" data-release aria-pressed="${Joypack.releaseView()}">${Joypack.releaseView() ? t('test.devView') : t('test.releaseView')}</button></section>`
           : ''
       }
