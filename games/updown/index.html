@@ -270,9 +270,11 @@
     <section id="screen-play" class="screen" hidden>
       <div class="status">
         <!-- 라벨 글자 대신 아이콘으로 보여주고, 화면 읽기용 이름은 aria-label 로 준다. -->
-        <div class="status-item status-range" role="group" data-i18n-aria-label="play.range">
-          <svg class="icon status-icon" aria-hidden="true"><use href="#i-range"></use></svg>
-          <span id="range" class="status-value"></span>
+        <!-- 왼쪽 카드: 이번 판의 전체 범위(1 ~ 50). 연습 판은 아이콘 자리에 "연습" 표. 좁혀지는 범위는 다이얼 위 막대 쪽(#range)에 있다 -->
+        <div class="status-item status-range" role="group" data-i18n-aria-label="play.board">
+          <svg id="play-board-icon" class="icon status-icon" aria-hidden="true"><use href="#i-range"></use></svg>
+          <span id="play-practice" class="status-practice" data-i18n="play.practiceTag" hidden></span>
+          <span id="play-level" class="status-value"></span>
         </div>
         <div class="status-item status-tries" role="group" data-i18n-aria-label="play.triesLabel">
           <svg class="icon status-icon" aria-hidden="true"><use href="#i-retry"></use></svg>
@@ -298,10 +300,10 @@
       <!-- 시도 기록은 숫자 상자 위에서 위로 쌓인다. 다이얼은 화면 맨 아래에 고정돼 기록이 늘어도 움직이지 않는다. -->
       <ol id="history" class="history" data-i18n-aria-label="play.history"></ol>
 
-      <!-- 판 이름(전체 범위)과 좁혀지는 숫자 막대: 숫자를 고르는 다이얼 바로 위에 둬, 방금 넣은 기록 → 남은 범위 → 입력이 한눈에 이어진다.
+      <!-- 아직 가능한 범위(13 ~ 24)와 좁혀지는 숫자 막대: 숫자를 고르는 다이얼 바로 위에 둬, 방금 넣은 기록 → 남은 범위 → 입력이 한눈에 이어진다.
            막대는 처음 범위 전체 중 아직 가능한 칸만 밝게 남고, 추측한 자리에 눈금이 찍힌다(app.js 의 renderBar). -->
       <div class="play-meter">
-        <p id="play-level" class="play-level"></p>
+        <p class="play-level" role="group" data-i18n-aria-label="play.range"><span id="range"></span></p>
         <div id="range-bar" class="range-bar" aria-hidden="true">
           <span id="range-bar-live" class="range-bar-live"></span>
         </div>

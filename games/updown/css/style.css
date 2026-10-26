@@ -887,6 +887,18 @@ button:focus-visible {
   border-color: var(--line-sage);
 }
 
+/* 연습 판: 아이콘 자리에 작은 "연습" 표 */
+.status-practice {
+  padding: 1px 7px;
+  background: var(--pill-bg);
+  color: var(--text-muted);
+  border: 1px solid var(--pill-line);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 .status-icon {
   font-size: 1.5rem;
   color: var(--icon-accent);
@@ -898,31 +910,15 @@ button:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 
-/* 기록 아래·다이얼 위: 판 이름(전체 범위) 알약 + 좁혀지는 숫자 막대 */
+/* 기록 아래·다이얼 위 한 줄: 왼쪽에 아직 가능한 범위 알약(13 ~ 24), 오른쪽에 좁혀지는 숫자 막대 */
 .play-meter {
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 6px;
+  align-items: center;
+  gap: 8px;
 }
 
-/* 높이가 낮은 세로 화면: 알약과 막대를 한 줄로(알약 왼쪽, 막대 오른쪽) 합쳐 다이얼 자리를 남긴다 */
-@media (orientation: portrait) and (max-height: 700px) {
-  .play-meter {
-    flex-direction: row;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .play-meter .play-level {
-    flex: none;
-    padding: 0 10px;
-    font-size: 0.95rem;
-  }
-
-  .play-meter .range-bar {
-    flex: 1 1 auto;
-  }
+.play-meter .range-bar {
+  flex: 1 1 auto;
 }
 
 /* 좁혀지는 숫자 막대(app.js 의 renderBar): 처음 범위 전체 중 아직 가능한 칸만 밝게 남는다. */
@@ -987,15 +983,16 @@ button:focus-visible {
   }
 }
 
-/* 판 이름(1 ~ 100, 연습 · 1 ~ 345): 막대 위 가운데의 작은 알약 */
+/* 아직 가능한 범위(13 ~ 24): 막대 왼쪽의 작은 알약(글자 수가 바뀌어도 막대가 덜 흔들리게 최소 폭). 좁혀지면 #range 가 반짝인다 */
 .play-level {
-  align-self: center;
+  flex: none;
+  min-width: 5.5em;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 8px;
   margin: 0;
-  padding: 2px 16px;
+  padding: 2px 12px;
   background: var(--pill-bg);
   color: var(--text);
   border: 1px solid var(--pill-line);
@@ -2413,7 +2410,7 @@ h1.lost {
   #screen-play .play-meter {
     grid-area: meter;
     align-self: center;
-    gap: 4px;
+    gap: 8px;
   }
 
   #screen-play .guess-form {

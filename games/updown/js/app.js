@@ -227,7 +227,10 @@
   // animate 가 true 면 방금 나온 힌트의 애니메이션을 재생한다. 언어 전환 때는 재생하지 않는다.
   function renderPlay(animate) {
     const won = game.status === 'won';
-    $('play-level').textContent = levelName(game);
+    // 위 카드는 전체 범위(연습 판은 "연습" 표), 다이얼 위 알약은 아직 가능한 범위
+    $('play-level').textContent = t('board.level', { max: game.max });
+    $('play-practice').hidden = game.ranked;
+    $('play-board-icon').hidden = !game.ranked;
     $('range').textContent = won ? String(game.answer) : game.low + ' ~ ' + game.high;
     // 지금 몇 번째 추측인지(맞힌 뒤에는 맞힌 횟수)
     $('tries-count').textContent = t('play.tries', { n: game.guesses.length + (won ? 0 : 1) });
