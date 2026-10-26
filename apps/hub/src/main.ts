@@ -349,11 +349,14 @@ function nextStrip(): string {
 
 const skinName = (skin: Skin) => t(`skin.${skin}`);
 
-function renderHome(): void {
+/** 지난번에 그린 첫 화면 글. 같은 내용을 다시 그리면 카드 아이콘·로고의 둥실 움직임이 처음부터 다시 시작돼 끊겨 보이므로 건너뛴다 */
+let lastMarkup = '';
+/** force 가 false 면(requestRender) 내용이 같을 때 다시 그리지 않는다. 진입·복귀 연출은 늘 새로 그린다 */
+function renderHome(force = true): void {
   document.title = t('app.title');
   const otherLang = LANGS.find((l) => l !== getLang())!;
   const title = [...t('app.title')].map((ch, i) => `<span style="--i:${i}">${esc(ch)}</span>`).join('');
-  app.innerHTML = `
+  const markup = `
     <nav class="top jp-topbar" aria-label="${esc(t('app.title'))}">
       <div class="jp-topbar-group">
         <button class="jp-top-btn jp-top-pill lang-btn" data-lang="${otherLang}" aria-label="${t('settings.lang')}: ${LANG_LABEL[getLang()]} → ${LANG_LABEL[otherLang]}">${Joypack.topIcon('globe')}<span lang="${otherLang}">${LANG_LABEL[otherLang]}</span></button>
@@ -384,6 +387,9 @@ function renderHome(): void {
         previewOn() ? t('preview.foot') : t('app.title')
       } v${__APP_VERSION__}</span>
     </footer>`;
+  if (!force && markup === lastMarkup) return;
+  lastMarkup = markup;
+  app.innerHTML = markup;
 
   app.querySelectorAll<HTMLElement>('.games > .card').forEach((card, i) => card.style.setProperty('--n', String(i)));
   // "다음 게임" 띠는 마지막 카드 다음 차례로 올라온다(styles.css .intro .next-strip)
@@ -468,7 +474,7 @@ function requestRender(): void {
     renderWaiting = true;
     return;
   }
-  renderHome();
+  renderHome(false);
 }
 
 function startHome(): void {
@@ -975,13 +981,19 @@ void Promise.race([firstCheck, new Promise((r) => setTimeout(r, 300))]).then(sta
 // (되살아난 순위는 옛 값이라 보이지 않게)
 const closeDialogs = () => document.querySelectorAll<HTMLDialogElement>('dialog[open]').forEach((d) => d.close());
 window.addEventListener('pagehide', closeDialogs);
-window.addEventListener('pageshow', async (e) => {
+// 되살아난 옛 화면은 그 자리에서 애니메이션이 이어지다 새로 그릴 때 처음부터 다시 시작돼 끊겨 보였다(캐시 확인을 기다린 뒤 그렸음).
+// 그래서 되살아나자마자 곧바로 복귀 연출로 새로 그리고(조이팩 버튼으로 들어올 때와 같은 모양), 오프라인 저장 확인은 그 뒤에 해서 바뀐 게임이 있을 때만 다시 그린다
+const cachedKey = () => live.map((g) => `${g.id}:${cached.get(g.id) ?? false}`).join();
+window.addEventListener('pageshow', (e) => {
   if (!e.persisted) return;
   closeDialogs();
   window.scrollTo(0, 0);
   live = shownGames();
-  await refreshCached();
+  const before = cachedKey();
   playIntro(true);
+  void refreshCached().then(() => {
+    if (cachedKey() !== before) requestRender();
+  });
 });
 window.addEventListener('online', () => void refreshHome());
 window.addEventListener('offline', () => void refreshHome());
