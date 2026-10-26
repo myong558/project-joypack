@@ -1643,7 +1643,10 @@ h1.lost {
   display: none;
 }
 
+/* 등록 뒤 랭킹 보기 버튼: 가로를 꽉 채우지 않고 적당한 폭(최대 220px)으로 가운데. 모든 게임 같은 기준(기준서 1.6) */
 .result-rank-view {
+  align-self: center;
+  width: min(100%, 220px);
   padding-block: 10px;
 }
 
