@@ -194,7 +194,7 @@ export class BoardView {
     setTimeout(() => this.pots.forEach((p) => p.plant.querySelector('.fl')?.classList.remove('closed')), 200);
   }
 
-  /** 꽃이 다 핀 뒤 마무리 동작: 모든 꽃이 함께 살짝 커졌다 흔들려 피는 연출이 끝났음을 알림(styles.css .board.done) */
+  /** 꽃이 다 핀 뒤 마무리 동작: 모든 꽃의 꽃잎이 함께 살짝 젖혀졌다 돌아와 피는 연출이 끝났음을 알림(styles.css .board.done) */
   flourish(): void {
     this.el.classList.add('done');
   }

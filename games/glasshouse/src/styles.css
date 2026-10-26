@@ -2208,24 +2208,24 @@ h2 .icon-pic {
 .board.cleared .pot .plant {
   transform: scale(1.06);
 }
-/* 꽃이 다 핀 뒤 마무리 동작(판·도감 큰 카드·결과 카드 모두 같음): 꽃 그림이 한 번 살짝 커졌다 좌우로 흔들리고 제자리, 그림 아래(줄기 밑) 기준.
- * 판은 board.flourish 가 .board.done, 도감·결과는 screens.ts flourish 가 .fl.flourish 를 붙임 */
+/* 꽃이 다 핀 뒤 마무리 동작(판·도감 큰 카드·결과 카드 모두 같음): 꽃잎만 제 각도 쪽으로 살짝 더 젖혀졌다 돌아옴(크기는 그대로), 꽃 전체는 움직이지 않음.
+ * 판은 board.flourish 가 .board.done, 도감·결과는 screens.ts bloomThenFlourish 가 .fl.flourish 를 붙임 */
 @media (prefers-reduced-motion: no-preference) {
-  .board.done .pot .fl,
-  .fl.flourish {
-    transform-origin: 50% 100%;
-    animation: fl-done 0.5s ease-out;
+  .board.done .pot .fl .pt,
+  .fl.flourish .pt {
+    animation: pt-done 0.5s ease-in-out;
   }
 }
-@keyframes fl-done {
-  30% {
-    transform: scale(1.09) rotate(-5deg);
+@keyframes pt-done {
+  0%,
+  100% {
+    transform: rotate(var(--r));
   }
-  60% {
-    transform: scale(1.02) rotate(4deg);
+  40% {
+    transform: rotate(calc(var(--r) * 1.1));
   }
-  82% {
-    transform: rotate(-1.5deg);
+  75% {
+    transform: rotate(calc(var(--r) * 0.96));
   }
 }
 .board.cleared .beam {
