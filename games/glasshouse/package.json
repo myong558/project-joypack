@@ -1,7 +1,7 @@
 {
   "name": "glasshouse",
   "private": true,
-  "version": "0.9.0",
+  "version": "0.10.0",
   "author": "Myong Bum Soo",
   "license": "UNLICENSED",
   "type": "module",

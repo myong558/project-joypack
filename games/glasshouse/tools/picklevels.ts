@@ -1,44 +1,112 @@
 /**
- * 정원 24개 고르기(배포에 안 들어감). 판마다 방 크기 단계·화분 수·기준 이동 범위(난이도 곡선)를 정해 두고,
- * 무작위 방을 풀이기로 걸러 가장 어려운 판을 고른다. 결과 줄을 src/game/levels.ts 의 LEVELS 에 옮겨 적는다.
- *   node tools/picklevels.ts [판 번호 …]            고품질(상태 30만 개까지 · 화분 4개는 40만 개, 후보 12개 · 화분 4개는 6개 중 최고). 화분 3~4개 판은 하나에 몇 분~수십 분(30분에서 끊음)
- *   node tools/picklevels.ts --quick [판 번호 …]    임시 판(상태 6만 개까지, 이동 범위 넓게, 후보 4개). 판 하나에 1~2분
- * 판 번호마다 따로 돌려도 된다(동시에 여러 개: for i in 15 16 17; do node tools/picklevels.ts $i & done; wait)
+ * 정원 24개 고르기(배포에 안 들어감). 판마다 방 크기 단계·화분 수와 난이도(기준 이동 범위 또는 어려움 점수 범위)를 정해 두고,
+ * 무작위 방을 풀이기로 걸러 고른다. 결과 줄을 src/game/levels.ts 의 LEVELS 에 옮겨 적는다.
+ *   node tools/picklevels.ts [판 번호 …] [--seed N] [--min M]   고품질. 화분 4~5개 판은 하나에 수십 분(MINUTES 에서 끊음)
+ *   node tools/picklevels.ts --quick [판 번호 …]                  임시 판(상태 6만 개까지, 이동 범위 넓게, 후보 4개). 판 하나에 1~2분
+ * 판 번호(0부터)마다 따로 동시에 돌린다. 어려운 판은 --seed 를 바꿔 여러 개 돌리고 점수 높은 쪽을 쓴다(--min: 끊는 시간, 분)
  */
 import { makeRoom, rate, type Candidate, type RoomSize } from '../src/game/roomgen.ts';
 
-// [방 크기 단계, 화분, 이동 범위, 밀기 범위]. v0.9.0 난이도 곡선: 1~9 화분 1~2개(배우기), 10~20 화분 3개, 21~24 화분 4개(9×9까지 넓은 방)
-const PLAN: [RoomSize, number, [number, number], [number, number]][] = [
+type Range = [number, number];
+/** [방 크기 단계, 화분, 기준 이동 범위, 밀기 범위, 어려움 점수 범위(있으면 이것으로 고름)] */
+type Plan = [RoomSize, number, Range, Range, Range?];
+
+const ANY: Range = [1, 999];
+const PUSH: Range = [8, 200];
+// 1~6 은 규칙 배우기(기준 이동으로 고름). 7 부터는 2판마다 한 단계(방 크기·화분 수·벽 토막 통로가 늘어남),
+// 각 판은 어려움 점수(roomgen rate)가 정해 둔 범위에 드는 판 가운데 가장 높은 판. 끝 판 점수는 tools/levelclimb.ts 로 다듬어 v0.9.0 의 24(점수 306)의 약 2배(v0.10.0)
+const PLAN: Plan[] = [
   [1, 1, [9, 11], [3, 8]], [1, 1, [13, 16], [5, 10]], [1, 2, [17, 20], [6, 14]],
   [1, 2, [21, 24], [7, 16]], [1, 2, [25, 28], [8, 18]], [1, 2, [29, 32], [9, 20]],
-  [2, 2, [24, 27], [8, 18]], [2, 2, [28, 31], [9, 20]], [2, 2, [32, 35], [10, 22]],
-  [3, 3, [30, 36], [10, 24]], [3, 3, [34, 40], [11, 26]], [3, 3, [37, 43], [12, 28]],
-  [3, 3, [40, 46], [12, 30]], [4, 3, [42, 48], [13, 30]], [4, 3, [45, 51], [13, 32]],
-  [4, 3, [48, 54], [14, 34]], [4, 3, [50, 57], [15, 36]], [4, 3, [53, 60], [15, 38]],
-  [5, 3, [55, 64], [16, 40]], [5, 3, [52, 64], [16, 44]], [5, 4, [32, 40], [12, 36]],
-  [5, 4, [36, 44], [13, 40]], [5, 4, [40, 48], [14, 44]], [5, 4, [43, 56], [15, 50]],
+  [3, 2, ANY, PUSH, [170, 190]], [3, 2, ANY, PUSH, [190, 215]],
+  [4, 3, ANY, PUSH, [215, 237]], [4, 3, ANY, PUSH, [237, 260]],
+  [5, 3, ANY, PUSH, [260, 282]], [5, 3, ANY, PUSH, [282, 305]],
+  [6, 3, ANY, PUSH, [305, 330]], [6, 3, ANY, PUSH, [330, 355]],
+  [7, 4, ANY, PUSH, [355, 380]], [7, 4, ANY, PUSH, [380, 405]],
+  [8, 4, ANY, PUSH, [405, 415]], [8, 4, ANY, PUSH, [415, 430]],
+  [8, 4, ANY, PUSH, [430, 450]], [8, 4, ANY, PUSH, [450, 488]],
+  [9, 5, ANY, PUSH, [480, 490]], [9, 5, ANY, PUSH, [490, 500]],
+  [9, 5, ANY, PUSH, [500, 550]], [9, 5, ANY, PUSH, [550, 2000]],
 ];
 
 const args = process.argv.slice(2);
-const quick = args.includes('--quick');
-const only = args.filter((a) => a !== '--quick').map(Number);
 
-PLAN.forEach(([size, pots, [lo, hi], push], i) => {
+// --pool <결과.jsonl …>: tools/levelpool.ts·levelclimb.ts 로 모아 둔 후보에서 점수 범위가 있는 판을 고른다. 끝 판부터 거꾸로,
+// 판마다 그 단계·화분 수에서 범위 위쪽 끝을 넘지 않고 뒤 판보다 점수가 낮은 판 가운데 가장 높은 판(범위 아래쪽 끝보다 낮으면 "범위 밖" 표시).
+// 거꾸로 고르는 것은 가장 어려운 계열을 끝 판이 먼저 갖게 하려고
+if (args[0] === '--pool') {
+  const { readFileSync } = await import('node:fs');
+  const pool = args
+    .slice(1)
+    .flatMap((f) => readFileSync(f, 'utf8').trim().split('\n').filter(Boolean))
+    .map((l) => JSON.parse(l) as Candidate & { size: RoomSize });
+  // 다듬기(tools/levelclimb.ts)는 바깥 벽(창 배치)을 건드리지 않아 한 방에서 나온 판끼리 겉모습이 같다. 크기·바깥 벽이 같은 판은 한 번만 쓴다
+  const rim = (r: string[]) => [r.length, r[0], r[r.length - 1], ...r.map((x) => x[0] + x[x.length - 1])].join('|');
+  const used = new Set<string>();
+  const lines: string[] = [];
+  let next = Infinity;
+  for (let i = PLAN.length - 1; i >= 0; i--) {
+    const [size, pots, , , band] = PLAN[i];
+    if (!band) continue;
+    const mine = pool
+      .filter((c) => c.size === size && c.rows.join('').split('o').length - 1 === pots && !used.has(rim(c.rows)) && c.score <= band[1] && c.score < next)
+      .sort((a, b) => b.score - a.score);
+    const c = mine[0];
+    if (!c) {
+      lines.unshift(`${i} 못 찾음`);
+      continue;
+    }
+    used.add(rim(c.rows));
+    next = c.score;
+    lines.unshift(
+      `  L(${i}, ${c.moves}, [${c.rows.map((r) => `'${r}'`).join(', ')}]), // 밀기 ${c.pushes} 돌려 놓기 ${c.detours} 상태 ${c.states} 점수 ${c.score}${c.score < band[0] ? ' 범위 밖' : ''}`,
+    );
+  }
+  console.log(lines.join('\n'));
+  process.exit(0);
+}
+
+const quick = args.includes('--quick');
+const opt = (name: string) => {
+  const i = args.indexOf(name);
+  return i >= 0 ? Number(args[i + 1]) : undefined;
+};
+const seedOffset = opt('--seed') ?? 0;
+const minutes = opt('--min');
+const only = args.filter((a, i) => !a.startsWith('--') && !['--seed', '--min'].includes(args[i - 1])).map(Number);
+
+/** 상태 한도: 화분이 많을수록 상태가 많다 */
+const limitFor = (pots: number) => (pots >= 5 ? 2_000_000 : pots >= 4 ? 1_000_000 : 600_000);
+
+PLAN.forEach(([size, pots, [lo, hi], push, band], i) => {
   if (only.length && !only.includes(i)) return;
-  let seed = (quick ? 5000 : 1000) + i * (quick ? 104729 : 7919);
+  let seed = (quick ? 5000 : 1000) + i * (quick ? 104729 : 7919) + seedOffset * 15485863;
   const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
   const found: Candidate[] = [];
-  // 화분 4개(9×9 방)는 기준 이동이 긴 판이 드물어 후보 6개, 상태는 40만 개까지(쓸 수 있는 판은 대부분 그 안)
-  const [limit, want, slack] = quick ? [60_000, 4, 8] : pots >= 4 ? [400_000, 6, 0] : [300_000, 12, 0];
-  // 너무 오래 걸리면(30분) 그때까지 모은 후보 가운데서 고른다
-  const until = Date.now() + 30 * 60_000;
-  for (let t = 0; t < 30000 && found.length < want && !(found.length && Date.now() > until); t++) {
-    const rows = makeRoom(size, rnd, { pots, maxW: i < 6 ? 7 : 9 });
+  let best: Candidate | null = null;
+  const limit = quick ? 60_000 : limitFor(pots);
+  const want = quick ? 4 : band ? 8 : 12;
+  // 너무 오래 걸리면 그때까지 모은 후보 가운데서 고른다(범위 안 판이 하나도 없으면 범위 아래 가장 어려운 판, "범위 밖" 표시)
+  const until = Date.now() + (minutes ?? (pots >= 5 ? 90 : pots >= 4 ? 60 : 30)) * 60_000;
+  const t0 = Date.now();
+  for (let t = 0; t < 50_000_000 && found.length < want && Date.now() < until; t++) {
+    const rows = makeRoom(size, rnd, { pots, maxW: i < 6 ? 7 : 10 });
     const c = rows && rate(rows, limit, quick ? [8, 40] : push);
-    if (c && c.moves >= lo && c.moves <= hi + slack) found.push(c);
+    if (!c) continue;
+    if (band) {
+      if (c.score > band[1]) continue;
+      if (c.score >= band[0]) found.push(c);
+      else if (!best || c.score > best.score) best = c;
+    } else if (c.moves >= lo && c.moves <= hi + (quick ? 8 : 0)) found.push(c);
   }
   found.sort((a, b) => b.score - a.score);
-  const c = found[0];
+  const c = found[0] ?? best;
   const rows = c && `[${c.rows.map((r) => `'${r}'`).join(', ')}]`;
-  console.log(c ? `  L(${i}, ${c.moves}, ${rows}),${quick ? ' // 임시 판(빠른 생성)' : ''} // 밀기 ${c.pushes} 돌려 놓기 ${c.detours} 상태 ${c.states} 점수 ${c.score} 후보 ${found.length}` : `${i} 못 찾음`);
+  const tag = found.length ? '' : ' 범위 밖';
+  const mins = Math.round((Date.now() - t0) / 60_000);
+  console.log(
+    c
+      ? `  L(${i}, ${c.moves}, ${rows}),${quick ? ' // 임시 판(빠른 생성)' : ''} // 밀기 ${c.pushes} 돌려 놓기 ${c.detours} 상태 ${c.states} 점수 ${c.score} 후보 ${found.length}${tag} ${mins}분`
+      : `${i} 못 찾음`,
+  );
 });

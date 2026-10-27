@@ -14,6 +14,8 @@ interface Spec {
   pots: number[];
   /** 방 안에 세울 벽 칸 수 */
   walls: [number, number];
+  /** 벽 토막 길이(이만큼 한 줄로 이어 세워 통로·막다른 곳을 만듦, 없으면 한 칸씩) */
+  seg?: [number, number];
 }
 
 const int = (r: Rng, a: number, b: number) => a + Math.floor(r() * (b - a + 1));
@@ -25,8 +27,11 @@ const inner = (g: string[][], w: number, h: number) => {
   return c;
 };
 
-/** 방 크기 단계 1~5: 단계가 오를수록 방이 넓어지고 화분이 는다(오늘의 정원은 요일마다 정한 1~4 단계, 5 는 정원 끝 판만) */
-export type RoomSize = 1 | 2 | 3 | 4 | 5;
+/**
+ * 방 크기 단계 1~9: 단계가 오를수록 방이 넓어지고 화분이 늘고 구조가 복잡해진다(오늘의 정원은 요일마다 정한 1~4 단계).
+ * 6~9 는 정원 뒤쪽 판만: 벽을 2~4칸 토막으로 이어 세워 통로·막다른 곳이 많은 방(10×10까지, v0.10.0)
+ */
+export type RoomSize = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
 const SPECS: Record<RoomSize, Spec> = {
   1: { w: [6, 7], h: [6, 7], pots: [1, 2], walls: [1, 3] },
@@ -34,12 +39,16 @@ const SPECS: Record<RoomSize, Spec> = {
   3: { w: [7, 8], h: [7, 8], pots: [2, 3], walls: [2, 5] },
   4: { w: [7, 8], h: [7, 9], pots: [3], walls: [3, 6] },
   5: { w: [8, 9], h: [8, 9], pots: [3, 4], walls: [4, 8] },
+  6: { w: [8, 9], h: [8, 9], pots: [3], walls: [10, 16], seg: [2, 3] },
+  7: { w: [9, 10], h: [9, 10], pots: [4], walls: [12, 18], seg: [2, 3] },
+  8: { w: [10, 10], h: [10, 10], pots: [4], walls: [22, 30], seg: [2, 4] },
+  9: { w: [10, 10], h: [10, 10], pots: [5], walls: [26, 34], seg: [2, 4] },
 };
 
 /** 방 하나(글자 줄). 놓을 자리가 없으면 null. pots 를 주면 단계 기본 화분 수 대신 쓴다 */
 export function makeRoom(size: RoomSize, r: Rng, opts: { pots?: number; maxW?: number } = {}): string[] | null {
   const spec = SPECS[size];
-  const w = Math.min(opts.maxW ?? 9, int(r, ...spec.w));
+  const w = Math.min(opts.maxW ?? 10, int(r, ...spec.w));
   const h = int(r, ...spec.h);
   const g: string[][] = Array.from({ length: h }, (_, y) => Array.from({ length: w }, (_, x) => (x === 0 || y === 0 || x === w - 1 || y === h - 1 ? '#' : '.')));
   // 모서리를 깎아 네모가 아닌 방
@@ -49,11 +58,23 @@ export function makeRoom(size: RoomSize, r: Rng, opts: { pots?: number; maxW?: n
     g[cy][cx] = '#';
     if (r() < 0.5) g[cy][cx === 1 ? 2 : w - 3] = '#';
   }
-  for (let i = 0, n = int(r, ...spec.walls); i < n; i++) {
+  for (let i = 0, n = int(r, ...spec.walls); i < n; ) {
     const free = inner(g, w, h);
     if (!free.length) return null;
-    const [x, y] = pick(r, free);
+    let [x, y] = pick(r, free);
     g[y][x] = '#';
+    i++;
+    // 벽 토막: 한 방향으로 이어 세움(바닥이 아니면 멈춤)
+    if (spec.seg) {
+      const d = int(r, 0, 3);
+      for (let k = int(r, ...spec.seg) - 1; k > 0 && i < n; k--) {
+        x += [0, 1, 0, -1][d];
+        y += [-1, 0, 1, 0][d];
+        if (x < 1 || y < 1 || x > w - 2 || y > h - 2 || g[y][x] !== '.') break;
+        g[y][x] = '#';
+        i++;
+      }
+    }
   }
   // 창: 바깥 벽(구석 말고)에서 안쪽을 향함. 바로 앞(햇살 자리)이 바닥이고 다른 창의 자리와 겹치지 않아야 함
   const n = opts.pots ?? pick(r, spec.pots);

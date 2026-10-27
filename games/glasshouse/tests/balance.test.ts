@@ -29,7 +29,8 @@ function play(level: number, [skill, think]: readonly [number, number], seed: nu
   const pushed = (a: number, b: number) => g.states[a].pots.some((p, k) => p !== g.states[b].pots[k]);
   let stuck = 0;
   let lost = 0;
-  for (let guard = 0; guard < 6000; guard++) {
+  // 끝 판은 기준 이동 100번 넘고 서툰 봇은 여러 번 처음부터 다시 하므로 걸음 한도를 넉넉히
+  for (let guard = 0; guard < 200_000; guard++) {
     const cur = path[path.length - 1];
     if (g.toGoal[cur] === 0) break;
     if (g.toGoal[cur] < 0) {
@@ -60,8 +61,10 @@ function play(level: number, [skill, think]: readonly [number, number], seed: nu
 }
 
 describe('모의 플레이', () => {
-  it('실력별로 모든 판을 깰 수 있고, 한 판은 30초~3분 안팎', () => {
+  it('실력별로 모든 판을 깰 수 있고, 한 판은 30초~5분 안팎(끝 판은 더 김)', () => {
     const rows: string[] = [];
+    let avgNormal = 0;
+    let proPetals = 0;
     for (const [name, skill] of Object.entries(SKILLS)) {
       let total = 0;
       let petalSum = 0;
@@ -80,9 +83,12 @@ describe('모의 플레이', () => {
       rows.push(
         `${name}: 판 평균 ${Math.round(total / 24)}초 (정원 1~6 ${avg(byTier[0])} · 7~12 ${avg(byTier[1])} · 13~18 ${avg(byTier[2])} · 19~24 ${avg(byTier[3])}초), 24판 ${Math.round(total / 60)}분, 꽃잎 ${petalSum.toFixed(0)}/72, 정원 점수 ${Math.round(scoreSum)}`,
       );
-      if (name === '보통') expect(total / 24).toBeLessThan(180);
-      if (name === '고수') expect(petalSum).toBeGreaterThan(50);
+      if (name === '보통') avgNormal = total / 24;
+      if (name === '고수') proPetals = petalSum;
     }
     console.log(rows.join('\n'));
+    // v0.10.0 끝 판을 v0.9.0 보다 2배쯤 어렵게(사용자 요청) 해 보통 판 평균 3분 → 5분 안
+    expect(avgNormal).toBeLessThan(300);
+    expect(proPetals).toBeGreaterThan(50);
   }, 300_000);
 });

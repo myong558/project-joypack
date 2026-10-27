@@ -5,7 +5,7 @@ import { solved, step, type Board, type Dir, type State } from './rules.ts';
  * 상태마다 "앞으로 몇 걸음이면 깨는지"를 알려 준다. 화분끼리는 바꿔 놓아도 같은 상태로 본다(어느 화분이든 햇살 자리에 놓으면 됨)
  */
 
-/** 상태를 숫자 하나로(칸 100개 미만 · 화분 6개까지는 정확함) */
+/** 상태를 숫자 하나로(칸 100개까지(번호 0~99) · 화분 6개까지는 정확함) */
 export function stateKey(s: State): number {
   let k = s.player;
   for (const p of s.pots.slice().sort((a, b) => a - b)) k = k * 100 + p;
