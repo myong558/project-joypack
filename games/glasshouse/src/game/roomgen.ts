@@ -1,4 +1,4 @@
-import { lit, parse, solved, type Board } from './rules.ts';
+import { lit, parse, solved, step, type Board, type Dir, type State } from './rules.ts';
 import { explore, solve } from './solver.ts';
 
 /**
@@ -25,20 +25,21 @@ const inner = (g: string[][], w: number, h: number) => {
   return c;
 };
 
-/** 방 크기 단계 1~4: 단계가 오를수록 방이 넓어지고 화분이 는다(오늘의 정원은 요일마다 정한 단계) */
-export type RoomSize = 1 | 2 | 3 | 4;
+/** 방 크기 단계 1~5: 단계가 오를수록 방이 넓어지고 화분이 는다(오늘의 정원은 요일마다 정한 1~4 단계, 5 는 정원 끝 판만) */
+export type RoomSize = 1 | 2 | 3 | 4 | 5;
 
 const SPECS: Record<RoomSize, Spec> = {
   1: { w: [6, 7], h: [6, 7], pots: [1, 2], walls: [1, 3] },
   2: { w: [6, 8], h: [6, 8], pots: [2], walls: [2, 4] },
   3: { w: [7, 8], h: [7, 8], pots: [2, 3], walls: [2, 5] },
   4: { w: [7, 8], h: [7, 9], pots: [3], walls: [3, 6] },
+  5: { w: [8, 9], h: [8, 9], pots: [3, 4], walls: [4, 8] },
 };
 
 /** 방 하나(글자 줄). 놓을 자리가 없으면 null. pots 를 주면 단계 기본 화분 수 대신 쓴다 */
 export function makeRoom(size: RoomSize, r: Rng, opts: { pots?: number; maxW?: number } = {}): string[] | null {
   const spec = SPECS[size];
-  const w = Math.min(opts.maxW ?? 8, int(r, ...spec.w));
+  const w = Math.min(opts.maxW ?? 9, int(r, ...spec.w));
   const h = int(r, ...spec.h);
   const g: string[][] = Array.from({ length: h }, (_, y) => Array.from({ length: w }, (_, x) => (x === 0 || y === 0 || x === w - 1 || y === h - 1 ? '#' : '.')));
   // 모서리를 깎아 네모가 아닌 방
@@ -86,8 +87,23 @@ export interface Candidate {
   moves: number;
   pushes: number;
   states: number;
-  /** 어려움 점수(정수라 기기마다 같게 정렬됨): 밀기·이동이 많고, 막히는 상태가 많고, 깨는 상태가 적을수록 높다 */
+  /** 돌려 놓는 밀기: 가장 적은 이동 풀이에서 민 화분이 가장 가까운 햇살 자리에 더 가까워지지 않는 밀기 수(생각해야 하는 판일수록 많음) */
+  detours: number;
+  /** 어려움 점수(정수라 기기마다 같게 정렬됨): 돌려 놓는 밀기·밀기·이동이 많고, 막히는 상태가 많고, 깨는 상태가 적을수록 높다 */
   score: number;
+}
+
+/** 가장 적은 이동 풀이를 따라가며 돌려 놓는 밀기(민 화분이 가장 가까운 햇살 자리에 더 가까워지지 않음)를 센다 */
+function countDetours(board: Board, start: State, path: readonly Dir[]): number {
+  const near = (p: number) => Math.min(...board.spots.map((s) => Math.abs((s % board.w) - (p % board.w)) + Math.abs(Math.floor(s / board.w) - Math.floor(p / board.w))));
+  let s = start;
+  let n = 0;
+  for (const d of path) {
+    const r = step(board, s, d);
+    if (r.pushed >= 0 && near(r.state.pots[r.pushed]) >= near(s.pots[r.pushed])) n++;
+    s = r.state;
+  }
+  return n;
 }
 
 /**
@@ -110,6 +126,8 @@ export function rate(rows: string[], limit: number, push: [number, number]): Can
   let dead = 0;
   for (let i = 0; i < graph.states.length; i++) if (graph.toGoal[i] < 0) dead++;
   const goals = graph.states.filter((st) => solved(board, st.pots)).length;
-  const score = sol.pushes * 6 + sol.moves + Math.floor((dead * 40) / graph.states.length) - 4 * (32 - Math.clz32(goals + 1));
-  return { rows, moves: sol.moves, pushes: sol.pushes, states: graph.states.length, score };
+  // 돌려 놓는 밀기는 밀기 하나보다 크게 친다(v0.9.0: 길기만 하고 생각할 거리가 적은 판 대신, 화분을 먼저 비켜 두거나 돌려 넣어야 하는 판)
+  const detours = countDetours(board, start, sol.path);
+  const score = detours * 14 + sol.pushes * 6 + sol.moves + Math.floor((dead * 40) / graph.states.length) - 4 * (32 - Math.clz32(goals + 1));
+  return { rows, moves: sol.moves, pushes: sol.pushes, states: graph.states.length, detours, score };
 }

@@ -13,9 +13,15 @@ import { mulberry32 } from './rng';
  */
 const SKILLS = { 서툼: [0.55, 4], 보통: [0.7, 3], 잘함: [0.85, 2], 고수: [0.96, 1.2] } as const;
 
+/** 판마다 상태 그래프는 한 번만 만든다(화분 4개 판은 상태가 수십만 개) */
+const graphs = new Map<number, NonNullable<ReturnType<typeof explore>>>();
+
 function play(level: number, [skill, think]: readonly [number, number], seed: number) {
-  const { board, start } = parse(LEVELS[level].rows);
-  const g = explore(board, start, 2_000_000)!;
+  if (!graphs.has(level)) {
+    const { board, start } = parse(LEVELS[level].rows);
+    graphs.set(level, explore(board, start, 2_000_000)!);
+  }
+  const g = graphs.get(level)!;
   const rng = mulberry32(seed);
   const path: number[] = [0];
   let hands = 0;

@@ -1628,11 +1628,14 @@ h2 .icon-pic {
   width: 100%;
   min-height: 0;
   display: grid;
+  /* 열은 화면 폭에 맞춤(auto 열은 판만큼 넓어져, 9칸 폭 판이 폭 320px 폰에서 오른쪽이 잘렸다) */
+  grid-template-columns: minmax(0, 1fr);
 }
 .board-host {
   position: relative;
   display: grid;
   place-items: center;
+  min-width: 0;
   min-height: 0;
   outline: none;
   touch-action: none;

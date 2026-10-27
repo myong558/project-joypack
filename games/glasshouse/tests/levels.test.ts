@@ -4,18 +4,19 @@ import { LEVELS, speciesFor } from '../src/game/levels';
 import { lit, parse } from '../src/game/rules';
 import { explore, solve } from '../src/game/solver';
 
-/** 판마다: 풀리고, 기준 이동 수가 맞고, 처음엔 햇살 자리에 화분이 없고, 뒤 계절일수록 화분이 많다 */
+/** 판마다: 풀리고, 기준 이동 수가 맞고, 처음엔 햇살 자리에 화분이 없고, 뒤로 갈수록 화분이 많다 */
 describe('정원 24개', () => {
   it('판 수와 꽃이 맞물린다', () => {
     expect(LEVELS).toHaveLength(24);
     expect(LEVELS.map((l) => l.flower)).toEqual(FLOWERS.map((f) => f.id));
   });
 
-  it('뒤로 갈수록 화분이 늘어난다(1~6 화분 1~2 · 7~12 2 · 13~18 2~3 · 19~24 3)', () => {
+  it('뒤로 갈수록 화분이 늘어난다(1~6 화분 1~2 · 7~9 2 · 10~20 3 · 21~24 4)', () => {
     const pots = LEVELS.map((l) => parse(l.rows).start.pots.length);
     for (let i = 1; i < 24; i++) expect(pots[i]).toBeGreaterThanOrEqual(pots[i - 1]);
     expect(pots[0]).toBe(1);
-    expect(pots[23]).toBe(3);
+    expect(pots[9]).toBe(3);
+    expect(pots[23]).toBe(4);
   });
 
   LEVELS.forEach((lv, i) => {
