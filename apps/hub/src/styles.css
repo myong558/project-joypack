@@ -1714,8 +1714,10 @@ a.primary-btn {
   margin-top: 12px;
 }
 
+/* 위 다운로드 버튼에 딸린 도움말이라 버튼과 같은 가운데 축에 둔다(펼친 탭·단계는 그대로 가로 전체·왼쪽 정렬) */
 .install-how summary {
   display: flex;
+  justify-content: center;
   align-items: center;
   gap: 8px;
   padding: 8px 2px;
