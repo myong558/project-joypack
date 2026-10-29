@@ -1709,6 +1709,120 @@ a.primary-btn {
   font-size: 14px;
 }
 
+/* 앱으로 설치하는 방법: 접힌 한 줄 → 안드로이드·아이폰 탭 + 번호 단계(단계 안 작은 아이콘은 실제 버튼 모양) */
+.install-how {
+  margin-top: 12px;
+}
+
+.install-how summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 2px;
+  color: var(--brand);
+  font-size: 15px;
+  list-style: none;
+  cursor: pointer;
+}
+
+.install-how summary::-webkit-details-marker {
+  display: none;
+}
+
+.install-how summary::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  margin-bottom: 3px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 0.2s ease;
+}
+
+.install-how[open] summary::after {
+  margin-bottom: -3px;
+  transform: rotate(-135deg);
+}
+
+.install-how summary:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.how-tabs {
+  margin: 6px 0 10px;
+}
+
+.how-steps {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: how;
+}
+
+.how-steps li {
+  position: relative;
+  padding-left: 32px;
+  font-size: 15px;
+  line-height: 1.45;
+  counter-increment: how;
+}
+
+/* 단계 번호: 동그라미 안 숫자 */
+.how-steps li::before {
+  content: counter(how);
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--brand);
+  color: var(--brand-ink);
+  font-size: 13px;
+}
+
+.how-ico,
+.how-steps .mini-logo {
+  display: inline-block;
+  width: 1.15em;
+  height: 1.15em;
+  margin: 0 1px;
+  vertical-align: -0.2em;
+}
+
+.how-ico {
+  padding: 1px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--surface);
+  fill: var(--text);
+  stroke: none;
+}
+
+.how-ico.line {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.how-note {
+  margin: 10px 0 0;
+  font-size: 13px;
+}
+
+.install-card .install-how {
+  text-align: left;
+}
+
 .about p {
   margin: 0;
   font-size: 14px;

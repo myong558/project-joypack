@@ -1,9 +1,9 @@
 import '@joypack/shared/topbar.css';
 import './styles.css';
 import { GAMES, byNewest, iconUrl, isNew, isPublic, isScheduled, patternOf, type GameMeta } from './games';
-import { LANG_LABEL, LANGS, formatNumber, getLang, t } from './i18n';
+import { LANG_LABEL, LANGS, formatNumber, getLang, t, type MessageKey } from './i18n';
 import { FULL, TOP, cachedBoard, hasRanking, loadBoard, type Row } from './rankings';
-import { externalOpenUrl, installState, manualGuide, onInstallChange, promptInstall } from './install';
+import { externalOpenUrl, installState, isIos, manualGuide, onInstallChange, promptInstall } from './install';
 import { checkPassword, previewOn, setPreview } from './preview';
 import { bestRecord, canClearRecords, clearRecords } from './records';
 import { THEMES, applySettings, applyTheme, canVibrate, loadSettings, migrateLegacy, saveSetting, watchSystemTheme } from './settings';
@@ -186,6 +186,55 @@ function installGuide(): string {
   return '';
 }
 
+// ---------- 앱으로 설치하는 방법(기기별 단계 안내) ----------
+// 설정 "조이팩 앱" 칸과 첫 화면 설치 카드가 함께 쓴다. 안드로이드·아이폰 탭(지금 기기 쪽이 먼저), 단계마다 실제 버튼과 비슷한 작은 아이콘.
+// 기기 화면 사진은 OS 버전마다 달라지고 무거워 쓰지 않는다
+const HOW_ICON = {
+  // 안드로이드 Chrome 메뉴(세로 점 셋)
+  menu: '<svg class="how-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5.5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="18.5" r="1.8"/></svg>',
+  // iOS 공유(네모에 위 화살표)
+  share: '<svg class="how-ico line" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11M8 7.5l4-4 4 4M8.5 10.5H6v10h12v-10h-2.5"/></svg>',
+  // iOS 홈 화면에 추가(네모 안 더하기)
+  add: '<svg class="how-ico line" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8.5v7M8.5 12h7"/></svg>',
+};
+type HowOs = 'android' | 'ios';
+const HOW_STEPS = 4;
+
+function installHow(open = false): string {
+  const first: HowOs = isIos() ? 'ios' : 'android';
+  const icons = { ...HOW_ICON, app: smallLogo(18) };
+  const steps = (os: HowOs) => `
+    <div class="how-panel" data-how-panel="${os}" ${os === first ? '' : 'hidden'}>
+      <ol class="how-steps">${Array.from({ length: HOW_STEPS }, (_, i) => `<li>${t(`install.how.${os}${i + 1}` as MessageKey, icons)}</li>`).join('')}</ol>
+      <p class="hint how-note">${t(`install.how.${os}Note` as MessageKey)}</p>
+    </div>`;
+  return `
+    <details class="install-how" ${open ? 'open' : ''}>
+      <summary>${installState() === 'standalone' ? t('install.how.other') : t('install.how.title')}</summary>
+      <div class="seg how-tabs" role="radiogroup" aria-label="${t('install.how.title')}">
+        ${(['android', 'ios'] as const).map((os) => `<button type="button" role="radio" data-how="${os}" aria-checked="${os === first}">${t(`install.how.${os}`)}</button>`).join('')}
+      </div>
+      ${steps('android')}${steps('ios')}
+    </details>`;
+}
+
+/** 설치 방법 탭 전환 */
+function bindInstallHow(root: HTMLElement): void {
+  root.querySelectorAll<HTMLButtonElement>('[data-how]').forEach((tab) =>
+    tab.addEventListener('click', () => {
+      root.querySelectorAll<HTMLButtonElement>('[data-how]').forEach((b) => b.setAttribute('aria-checked', String(b === tab)));
+      root.querySelectorAll<HTMLElement>('[data-how-panel]').forEach((p) => (p.hidden = p.dataset.howPanel !== tab.dataset.how));
+    }),
+  );
+}
+
+/** 단계 안내로 다 설명되지 않는 브라우저(맥 Safari·Firefox·설치 안 되는 PC)·앱 안 브라우저만 한 줄 안내를 따로 보인다 */
+function extraGuide(): string {
+  if (installState() === 'inapp') return installGuide();
+  const kind = manualGuide();
+  return (installState() === 'ios' || installState() === 'manual') && ['macSafari', 'firefoxAndroid', 'unsupported'].includes(kind) ? installGuide() : '';
+}
+
 /** 설치 버튼: 설치 창을 띄우거나, 앱 안 브라우저면 기본 브라우저로 연다. 둘 다 못 하면 안내만 */
 function installButton(): string {
   const state = installState();
@@ -208,7 +257,7 @@ function installCard(): string {
         </div>
       </div>
       ${installButton()}
-      ${guide && installState() !== 'ready' ? `<p class="install-guide" data-guide hidden>${guide}</p>` : ''}
+      ${guide && installState() !== 'ready' ? `<div data-guide hidden>${extraGuide() ? `<p class="install-guide">${extraGuide()}</p>` : ''}${installHow(true)}</div>` : ''}
       <button class="text-btn" data-dismiss>${lbl(t('invite.later'))}</button>
     </section>`;
 }
@@ -226,6 +275,7 @@ function bindInstallCard(root: HTMLElement): void {
       if (guide) guide.hidden = false;
     }
   });
+  bindInstallHow(card);
   // 앱 안 브라우저에서는 안내를 처음부터 보여 준다(버튼이 바깥 브라우저로 넘기기만 하므로)
   if (installState() === 'inapp') card.querySelector<HTMLElement>('[data-guide]')?.removeAttribute('hidden');
   card.querySelector('[data-dismiss]')!.addEventListener('click', () => {
@@ -951,7 +1001,9 @@ function renderInstall(section: HTMLElement, showGuide = false): void {
       <p>${state === 'installed' ? t('install.installed') : t('install.desc')}</p>
     </div>
     ${state === 'installed' ? '' : button}
-    ${(showGuide || state === 'inapp') && guide ? `<p class="install-guide" role="status">${guide}</p>` : ''}`;
+    ${(showGuide || state === 'inapp') && extraGuide() ? `<p class="install-guide" role="status">${extraGuide()}</p>` : ''}
+    ${installHow(showGuide && !!guide)}`;
+  bindInstallHow(section);
   section.querySelector('[data-install]')?.addEventListener('click', async () => {
     // 브라우저가 설치 창을 준비해 두었으면 바로 띄우고, 아니면(아이폰 등) 직접 추가하는 방법을 보여 준다
     if (installState() === 'ready') await promptInstall();

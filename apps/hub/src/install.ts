@@ -33,7 +33,7 @@ window.addEventListener('appinstalled', () => {
   notify();
 });
 
-function isIos(): boolean {
+export function isIos(): boolean {
   // iPadOS 는 데스크톱 Safari 처럼 보이므로 터치 지원으로 가린다
   return /iphone|ipad|ipod/i.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
 }
