@@ -1774,6 +1774,12 @@ a.primary-btn {
   counter-increment: how;
 }
 
+/* 꼭 골라야 할 단추 이름("설치")은 대표색으로 강조(Jua 는 굵기가 하나라 굵게 대신 색) */
+.how-steps b {
+  color: var(--brand);
+  font-weight: inherit;
+}
+
 /* 단계 번호: 동그라미 안 숫자 */
 .how-steps li::before {
   content: counter(how);
