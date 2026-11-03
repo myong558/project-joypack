@@ -790,28 +790,54 @@ button:focus-visible {
   font-size: 1.75rem;
 }
 
-/* 직접 정하기(연습): 범위 버튼보다 낮은 점선 한 줄 버튼 */
+/* 직접 정하기(연습): 범위 버튼과 같은 장난감 버튼 모양이되 한 줄로 낮고 색은 중립(연습이라 범위 버튼보다 덜 눈에 띄게).
+   아래 두께가 있고 누르면 쑥 들어간다. 왼쪽 아이콘은 강조색 둥근 칸에 담는다. */
 .custom-start {
+  --depth: color-mix(in srgb, var(--line) 55%, var(--text) 45%);
   grid-column: 1 / -1;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: calc(var(--space) * 0.3 + 4px) 16px;
-  background: transparent;
+  gap: 10px;
+  margin-bottom: 4px; /* 아래 두께만큼 */
+  padding: calc(var(--space) * 0.25 + 3px) 14px calc(var(--space) * 0.25 + 3px) 10px;
+  background: linear-gradient(to bottom, color-mix(in srgb, #fff 55%, var(--surface)), var(--surface) 60%);
   color: var(--text);
-  border: 2px dashed var(--line);
-  border-radius: 14px;
+  border: 2px solid var(--line);
+  border-radius: 16px;
+  box-shadow:
+    0 4px 0 var(--depth),
+    0 8px 14px -8px color-mix(in srgb, var(--depth) 70%, transparent);
   font-size: 1.05rem;
   font-weight: 700;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+}
+
+:root[data-theme='dark'] .custom-start {
+  --depth: color-mix(in srgb, var(--line) 45%, #000 55%);
+  background: linear-gradient(to bottom, color-mix(in srgb, #fff 8%, var(--surface)), var(--surface) 60%);
 }
 
 .custom-start:hover {
   border-color: var(--primary);
 }
 
+.custom-start:not(:disabled):active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--depth);
+  filter: none;
+  transition-duration: 0.05s;
+}
+
 .custom-start .icon {
-  color: var(--icon);
-  font-size: 1.2rem;
+  flex: none;
+  box-sizing: content-box;
+  padding: 6px;
+  color: var(--action);
+  background: color-mix(in srgb, var(--action) 14%, transparent);
+  border-radius: 10px;
+  font-size: 1.1rem;
 }
 
 .custom-start-sub {
