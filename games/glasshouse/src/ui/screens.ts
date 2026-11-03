@@ -164,7 +164,7 @@ export function startScreen(opts: StartOptions): HTMLElement {
         </button>
         <button class="btn daily-btn" data-daily>
           ${ICONS.calendar}<span class="daily-text"><b>${t('start.daily')}</b><small>${
-            best ? t('start.dailyBest', { moves: best.moves, time: clock(best.time) }) : t('start.dailySub', { date: longDate(today) })
+            best ? t('start.dailyBest', { moves: best.moves, time: clock(best.time) }) : t('start.dailySub')
           }</small></span>${ICONS.arrow}
         </button>
         <div class="row two">

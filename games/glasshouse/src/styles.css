@@ -2681,7 +2681,7 @@ h2 .icon-pic {
 
 /* ---------- 오늘의 정원 ---------- */
 
-/* 시작 화면: 정원 고르기·도감 아래 한 줄 단추(제목 + 오늘 날짜 또는 오늘 기록) */
+/* 시작 화면 단추: 제목 + 설명(모든 사용자가 같은 판) 또는 오늘 기록을 한 줄에. 폭이 모자란 좁은 폰에서만 설명이 아랫줄로 */
 .daily-btn {
   width: 100%;
   justify-content: flex-start;
@@ -2697,20 +2697,25 @@ h2 .icon-pic {
 .daily-btn > .icon:last-child {
   margin-left: auto;
   color: var(--muted);
+  /* 오른쪽 화살표는 기본 선(2)보다 굵게 */
+  stroke-width: 2.8;
 }
 .daily-text {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 8px;
   min-width: 0;
   line-height: 1.3;
 }
 .daily-text b {
   font-family: 'Jua', 'GowunDodum', sans-serif;
-  font-size: 16px;
+  font-size: 17px;
+  white-space: nowrap;
 }
 .daily-text small {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 13px;
+  font-size: 15px;
+  white-space: nowrap;
   color: var(--muted);
 }
 
@@ -2758,7 +2763,7 @@ h2 .icon-pic {
   text-wrap: balance;
 }
 :root[lang='en'] .daily-text small {
-  font-size: 12px;
+  font-size: 14px;
   letter-spacing: -0.01em;
 }
 :root[lang='en'] .modal h2 {
