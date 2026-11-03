@@ -1,4 +1,4 @@
-import { FLOWER, FLOWERS, type Flower } from '../flora';
+import { FLOWER, FLOWERS, type Flower, type FlowerId } from '../flora';
 import { LEVELS, levelName } from '../game/levels';
 import { LANGS, getLang, iga, t, type Lang } from '../i18n';
 import { NAME_MAX, RANK_SIZE, cleanName, clock, isValidName, pendingRecord, placeOf, placeOfDaily, type DailyEntry, type DailyRecord } from '../ranking';
@@ -687,20 +687,18 @@ export interface GameView {
   boardHost: HTMLElement;
   moves: HTMLElement;
   note: HTMLElement;
-  /** 오늘의 정원에서 걸린 시간(그 밖에는 null) */
-  clock: HTMLElement | null;
   showPause(show: boolean): void;
 }
 
 /** level 이 null 이면 오늘의 정원(판 번호 자리에 걸린 시간) */
-export function gameScreen(opts: { level: number | null; par: number; onPause: () => void; onResume: () => void; onRestart: () => void; onQuit: () => void }): GameView {
+export function gameScreen(opts: { level: number | null; flower: FlowerId; par: number; onPause: () => void; onResume: () => void; onRestart: () => void; onQuit: () => void }): GameView {
   const el = html(`
     <main class="screen game">
       <div class="hud">
         <button class="pause-btn hud-btn" aria-label="${t('hud.pause')}" title="${t('hud.pause')}">${ICONS.pause}</button>
         ${
           opts.level === null
-            ? `<p class="hud-level daily"><small>${t('hud.time')}</small><b class="clock" role="timer">0:00</b></p>`
+            ? `<p class="hud-level daily"><small>${t('hud.todayFlower')}</small><b>${text(FLOWER[opts.flower]).name}</b></p>`
             : `<p class="hud-level"><b>${opts.level + 1}</b><small class="hud-flower">${text(FLOWER[LEVELS[opts.level].flower]).name}</small></p>`
         }
         <p class="hud-moves"><small>${t('hud.moves')}</small><b class="moves">0</b><span>/</span><small>${t('hud.par')}</small><b class="par">${opts.par}</b></p>
@@ -732,7 +730,6 @@ export function gameScreen(opts: { level: number | null; par: number; onPause: (
     boardHost: q('.board-host'),
     moves: q('.moves'),
     note: q('.note-line'),
-    clock: el.querySelector<HTMLElement>('.clock'),
     showPause(show) {
       pauseMenu.hidden = !show;
       el.classList.toggle('paused', show);

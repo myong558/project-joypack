@@ -8,7 +8,7 @@ import { LEVELS, TIPS, dailySpecies, speciesFor } from './game/levels';
 import type { Dir } from './game/rules';
 import { setLang, t } from './i18n';
 import { fetchBoard, fetchDaily, submitDaily, submitEntry } from './online';
-import { BOARD, clock, dailyAhead, placeOf, placeOfDaily, type DailyEntry, type RankEntry } from './ranking';
+import { BOARD, dailyAhead, placeOf, placeOfDaily, type DailyEntry, type RankEntry } from './ranking';
 import { shareResult } from './share';
 import { emptyRecords, flowerCount, gardenScore, loadSave, writeSave } from './storage';
 import { applySkin, applyTheme, resolveSkin, todaySkin } from './theme';
@@ -188,8 +188,12 @@ function play(level: number | 'daily'): void {
   const test = !daily && ALL_OPEN() && (level as number) > 0 && !save.levels[(level as number) - 1] && !save.levels[level as number];
   applySkin(resolveSkin(save.skin, new Date()));
   const game = new Game(def.rows);
+  const species = daily
+    ? dailySpecies(game.state.pots.length, dayIndex(daily.date), (i) => !!save.levels[i])
+    : speciesFor(level as number, game.state.pots.length);
   const view = gameScreen({
     level: daily ? null : (level as number),
+    flower: species[0],
     par: def.par,
     onPause: () => setPaused(true),
     onResume: () => setPaused(false),
@@ -200,17 +204,13 @@ function play(level: number | 'daily'): void {
     onQuit: () => showStart(),
   });
   mount(view.el);
-  const species = daily
-    ? dailySpecies(game.state.pots.length, dayIndex(daily.date), (i) => !!save.levels[i])
-    : speciesFor(level as number, game.state.pots.length);
   const board = new BoardView(view.boardHost, game.board, species, game.state);
   const fx = new Effects(view.stage);
   let paused = false;
-  // 오늘의 정원 시간: 일시정지(화면을 떠나면 저절로 멈춤) 동안은 세지 않는다
+  // 오늘의 정원 시간: 화면에는 안 보이고(차분한 퍼즐이라 재촉하지 않게) 순위의 동점 가르기에만 씀. 일시정지(화면을 떠나면 저절로 멈춤) 동안은 세지 않는다
   let spent = 0;
   let runAt: number | null = performance.now();
   const elapsed = () => Math.round(spent + (runAt === null ? 0 : performance.now() - runAt));
-  const tick = view.clock ? setInterval(() => (view.clock!.textContent = clock(elapsed())), 250) : null;
   let walking: ReturnType<typeof setTimeout> | null = null;
   const timers = new Set<ReturnType<typeof setTimeout>>();
   const later = (ms: number, fn: () => void) => {
@@ -341,8 +341,6 @@ function play(level: number | 'daily'): void {
     stopWalk();
     if (runAt !== null) spent += performance.now() - runAt;
     runAt = null;
-    if (tick) clearInterval(tick);
-    if (view.clock) view.clock.textContent = clock(elapsed());
     view.el.classList.add('cleared');
     clearTimeout(idleTimer);
     board.idle(null);
@@ -458,7 +456,6 @@ function play(level: number | 'daily'): void {
   teardown = () => {
     stopWalk();
     clearTimeout(idleTimer);
-    if (tick) clearInterval(tick);
     ro.disconnect();
     timers.forEach(clearTimeout);
     window.removeEventListener('keydown', onKey);

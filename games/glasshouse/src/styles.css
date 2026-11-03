@@ -2713,19 +2713,52 @@ h2 .icon-pic {
 }
 /* 설명도 제목과 같은 주아(고운돋움은 얇아 잘 안 읽힘), 색은 글자색을 조금 옅게 */
 .daily-text small {
-  overflow: hidden;
-  text-overflow: ellipsis;
   font-family: 'Jua', 'GowunDodum', sans-serif;
   font-size: 15px;
-  white-space: nowrap;
+  /* 잘리지 않게: 좁은 폰의 영어(Everyone plays the same garden)는 줄을 바꿈 */
+  text-wrap: balance;
   color: color-mix(in srgb, var(--ink) 62%, transparent);
 }
 
-/* 판 위: 판 번호 자리에 걸린 시간 */
+/* 판 위: 판 번호 자리에 "오늘의 꽃" 이름표를 위에 작게, 꽃 이름을 아래 크게(좁은 폰에서도 옆 "이동"을 덮지 않게 두 줄로 쌓음).
+ * 걸린 시간은 재지만 보여 주지 않음(결과·순위에서 보임). 영어 꽃 이름은 길어 두 줄까지 접는다 */
+.hud-level.daily {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  line-height: 1.1;
+}
+.hud-level.daily small {
+  font-size: 11px;
+}
 .hud-level.daily b {
-  font-family: 'GowunDodum', sans-serif;
-  font-size: 21px;
-  font-variant-numeric: tabular-nums;
+  font-size: 18px;
+  white-space: nowrap;
+}
+:root[lang='en'] .hud-level.daily b {
+  max-width: 7em;
+  font-size: 13px;
+  white-space: normal;
+}
+/* 작은 폰(폭 375px 아래)의 오늘의 정원: 한 줄이면 꽃 이름 칸이 좁아(320px 에서 46px 남짓) 긴 이름(크리스마스로즈 · Siberian Chrysanthemum)이
+ * 옆 "이동"을 덮는다. 가로 화면처럼 "이동 0 / 기준 18" 을 위 막대 둘째 줄로 내려 꽃 이름 칸을 넓힘 */
+@media (max-width: 374px) {
+  .screen.game .hud:has(.hud-level.daily) {
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+  }
+  .screen.game .hud:has(.hud-level.daily) .hud-level {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .screen.game .hud:has(.hud-level.daily) .hud-moves {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-content: center;
+  }
+  .screen.game .hud:has(.hud-level.daily) .restart-btn {
+    grid-column: 3;
+    grid-row: 1;
+  }
 }
 
 /* 랭킹 창 탭 */

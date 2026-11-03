@@ -38,7 +38,7 @@ const ko = {
   'hud.moves': '이동',
   'hud.par': '기준',
   'hud.restart': '처음부터',
-  'hud.time': '시간',
+  'hud.todayFlower': '오늘의 꽃',
   'hud.board': '온실 판: 화살표 키나 밀기로 정원사를 움직여요',
 
   'tip.l1': '화분을 밀어 창 앞 햇살 자리에 놓으세요',
@@ -181,7 +181,7 @@ const en: Record<MessageKey, string> = {
   'hud.moves': 'Moves',
   'hud.par': 'Par',
   'hud.restart': 'Restart',
-  'hud.time': 'Time',
+  'hud.todayFlower': "Today's flower",
   'hud.board': 'Glasshouse: move the gardener with arrow keys or swipes',
 
   'tip.l1': 'Push the pot onto the sunny spot by the window',
