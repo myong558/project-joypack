@@ -1027,6 +1027,19 @@ button:focus-visible {
   box-shadow: none;
 }
 
+/* 맨 앞·맨 뒤 칸은 바깥쪽을 1px 더 비우고(투명 테두리) 둥근 끝을 맞춰, 막대 왼쪽·오른쪽 끝 테두리도 둘레에 보이게 한다 */
+.range-bar.ticks .range-bar-pick.first {
+  border-left: 1px solid transparent;
+  border-radius: 999px 2px 2px 999px;
+  background-clip: padding-box;
+}
+
+.range-bar.ticks .range-bar-pick.last {
+  border-right: 1px solid transparent;
+  border-radius: 2px 999px 999px 2px;
+  background-clip: padding-box;
+}
+
 /* 아직 가능한 범위(13 ~ 24): 막대 왼쪽의 작은 알약(글자 수가 바뀌어도 막대가 덜 흔들리게 최소 폭). 좁혀지면 #range 가 반짝인다 */
 .play-level {
   flex: none;

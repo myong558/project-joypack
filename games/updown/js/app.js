@@ -1073,7 +1073,11 @@
     $('dial-thumb').setAttribute('cx', x);
     $('dial-thumb').setAttribute('cy', y);
     $('dial-fill').setAttribute('d', dialArc(angle));
-    $('range-bar-pick').style.left = barPos(barView, pick);
+    const barPick = $('range-bar-pick');
+    barPick.style.left = barPos(barView, pick);
+    // 눈금일 때 맨 앞·맨 뒤 칸은 막대 둥근 끝을 따라 칠한다(style.css 의 .range-bar.ticks .first/.last)
+    barPick.classList.toggle('first', pick === game.low);
+    barPick.classList.toggle('last', pick === game.high);
 
     const dial = $('dial');
     dial.setAttribute('aria-valuemin', game.low);
