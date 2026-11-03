@@ -18,10 +18,9 @@ const todayIndex = (date: Date) => Joypack.dailyPick('glasshouse', SKINS.length,
 /** 오늘의 톤 */
 export const todaySkin = (date: Date): Skin => SKINS[todayIndex(date)];
 
-/** 자동이면 처음 화면은 오늘의 톤, 정원에 들어가면 정원마다 다음 톤으로 돌아가 지루하지 않게. 고르면 그 톤으로 고정 */
-export function resolveSkin(setting: SkinSetting, date: Date, garden?: number): Skin {
-  if (setting !== 'auto') return setting;
-  return SKINS[(todayIndex(date) + (garden ?? 0)) % SKINS.length];
+/** 자동이면 오늘의 톤(시작 화면·정원 모두 같은 톤, 정원에 들어가도 바뀌지 않음), 고르면 그 톤으로 고정 */
+export function resolveSkin(setting: SkinSetting, date: Date): Skin {
+  return setting === 'auto' ? todaySkin(date) : setting;
 }
 
 export function applyTheme(theme: Theme): void {

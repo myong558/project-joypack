@@ -186,7 +186,7 @@ function play(level: number | 'daily'): void {
   const def = daily ?? LEVELS[level as number];
   // 출시 전 확인용으로 아직 안 열린 판을 바로 연 경우는 기록에 남기지 않는다(오늘의 정원은 순위표 등록도 막음)
   const test = !daily && ALL_OPEN() && (level as number) > 0 && !save.levels[(level as number) - 1] && !save.levels[level as number];
-  applySkin(resolveSkin(save.skin, new Date(), daily ? 0 : (level as number) + 1));
+  applySkin(resolveSkin(save.skin, new Date()));
   const game = new Game(def.rows);
   const view = gameScreen({
     level: daily ? null : (level as number),
