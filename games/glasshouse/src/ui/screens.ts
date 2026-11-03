@@ -700,7 +700,7 @@ export function gameScreen(opts: { level: number | null; par: number; onPause: (
         <button class="pause-btn hud-btn" aria-label="${t('hud.pause')}" title="${t('hud.pause')}">${ICONS.pause}</button>
         ${
           opts.level === null
-            ? `<p class="hud-level daily"><small>${t('hud.today')}</small><b class="clock" role="timer" aria-label="${t('hud.time')}">0:00</b></p>`
+            ? `<p class="hud-level daily"><small>${t('hud.time')}</small><b class="clock" role="timer">0:00</b></p>`
             : `<p class="hud-level"><b>${opts.level + 1}</b><small class="hud-flower">${text(FLOWER[LEVELS[opts.level].flower]).name}</small></p>`
         }
         <p class="hud-moves"><small>${t('hud.moves')}</small><b class="moves">0</b><span>/</span><small>${t('hud.par')}</small><b class="par">${opts.par}</b></p>

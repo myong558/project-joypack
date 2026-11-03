@@ -38,7 +38,6 @@ const ko = {
   'hud.moves': '이동',
   'hud.par': '기준',
   'hud.restart': '처음부터',
-  'hud.today': '오늘',
   'hud.time': '시간',
   'hud.board': '온실 판: 화살표 키나 밀기로 정원사를 움직여요',
 
@@ -183,7 +182,6 @@ const en: Record<MessageKey, string> = {
   'hud.moves': 'Moves',
   'hud.par': 'Par',
   'hud.restart': 'Restart',
-  'hud.today': 'Today',
   'hud.time': 'Time',
   'hud.board': 'Glasshouse: move the gardener with arrow keys or swipes',
 
