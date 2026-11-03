@@ -156,7 +156,6 @@ function play(mode: Mode, from = 1): void {
     daily,
     onPause: () => game.pause(),
     onResume: () => game.resume(),
-    onRestart: () => play(mode, from),
     onQuit: () => showStart(),
   });
   mount(view.el);

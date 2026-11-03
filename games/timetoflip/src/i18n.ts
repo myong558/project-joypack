@@ -66,15 +66,13 @@ const ko = {
   'hud.combo': '콤보',
   'hud.time': '남은 시간',
   'hud.pause': '일시정지',
-  'hud.restart': '바로 다시 시작',
   'card.down': '{n}번 카드',
   'card.up': '{n}번 카드: {name}',
   'card.gone': '{n}번 카드: 맞힘',
 
   'pause.title': '일시정지',
   'pause.resume': '계속하기',
-  'pause.restart': '다시 시작',
-  'pause.quit': '메인으로',
+  'pause.quit': '홈으로',
 
   'hud.peekHint': '위치를 기억하세요',
   'ready.note': '카드가 열리면 그림 위치를 외워요',
@@ -211,15 +209,13 @@ const en: Record<MessageKey, string> = {
   'hud.combo': 'Combo',
   'hud.time': 'Time left',
   'hud.pause': 'Pause',
-  'hud.restart': 'Restart now',
   'card.down': 'Card {n}',
   'card.up': 'Card {n}: {name}',
   'card.gone': 'Card {n}: matched',
 
   'pause.title': 'Paused',
   'pause.resume': 'Resume',
-  'pause.restart': 'Restart',
-  'pause.quit': 'Main menu',
+  'pause.quit': 'Home',
 
   'hud.peekHint': 'Remember the positions',
   'ready.note': 'When the cards open, memorize where each picture is',

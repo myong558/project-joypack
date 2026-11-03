@@ -665,7 +665,7 @@ export interface GameView {
   showMessage(text: string | null, variant?: string): void;
 }
 
-export function gameScreen(opts: { daily: boolean; onPause: () => void; onResume: () => void; onRestart: () => void; onQuit: () => void }): GameView {
+export function gameScreen(opts: { daily: boolean; onPause: () => void; onResume: () => void; onQuit: () => void }): GameView {
   const el = html(`
     <main class="screen game${opts.daily ? ' daily' : ''}">
       <div class="hud">
@@ -674,7 +674,6 @@ export function gameScreen(opts: { daily: boolean; onPause: () => void; onResume
         <p class="hud-combo" aria-hidden="true"></p>
         <p class="hud-note" aria-live="polite"></p>
         <p class="hud-score" aria-label="${t('hud.score')}"><small aria-hidden="true">${t('hud.score')}</small><b>0</b></p>
-        <button class="restart-btn hud-btn" data-act="quick-restart" aria-label="${t('hud.restart')}" title="${t('hud.restart')}">${ICONS.restart}</button>
         <div class="timer" role="timer" aria-label="${t('hud.time')}">
           <div class="timer-rail">
             <div class="timer-track"><div class="timer-bar"></div></div>
@@ -695,8 +694,7 @@ export function gameScreen(opts: { daily: boolean; onPause: () => void; onResume
         <div class="pause-menu" hidden>
           <h2>${t('pause.title')}</h2>
           <button class="btn primary" data-act="resume">${t('pause.resume')}</button>
-          <button class="btn" data-act="restart">${t('pause.restart')}</button>
-          <button class="btn ghost" data-act="quit">${t('pause.quit')}</button>
+          <button class="btn" data-act="quit">${t('pause.quit')}</button>
         </div>
       </div>
     </main>`);
@@ -707,9 +705,6 @@ export function gameScreen(opts: { daily: boolean; onPause: () => void; onResume
   let shownNum = -1;
   q('.pause-btn').addEventListener('click', opts.onPause);
   q('[data-act="resume"]').addEventListener('click', opts.onResume);
-  q('[data-act="restart"]').addEventListener('click', opts.onRestart);
-  // 빠른 재시작: 일시정지 없이 바로 새 판(같은 모드·같은 시작 판)
-  q('[data-act="quick-restart"]').addEventListener('click', opts.onRestart);
   q('[data-act="quit"]').addEventListener('click', opts.onQuit);
   return {
     el,
