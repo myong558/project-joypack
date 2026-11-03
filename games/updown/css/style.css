@@ -998,7 +998,7 @@ button:focus-visible {
   background: var(--down);
 }
 
-/* 다이얼로 고르는 중인 자리: 막대 안 작은 흰 점. 다이얼을 돌리면 부드럽게 미끄러진다 */
+/* 다이얼로 고르는 중인 자리: 막대 안 작은 흰 점. 다이얼을 돌리면 따라 움직인다 */
 .range-bar-pick {
   position: absolute;
   z-index: 1;
