@@ -467,14 +467,65 @@
     requestAnimationFrame(frame);
   }
 
+  // ── 결과 운 문구 ──
+  // 운이 큰 게임이라 결과 제목에 맞힌 횟수에 맞는 한마디를 띄운다. 정석 횟수(반씩 좁히면 반드시 맞히는 횟수, 1~100 이면 7번)와
+  // 비교해 6단계로 나누므로 직접 정한 범위에도 그대로 맞는다. 단계마다 문구 10개(i18n.js 의 luck.*).
+  const LUCK_KEY = 'updown.luck';
+  const LUCK_TONE = { miracle: 'good', jackpot: 'good', lucky: 'good', par: 'par', meh: 'bad', flop: 'bad' };
+
+  function luckTier(g) {
+    const tries = g.guesses.length;
+    const diff = UpDown.optimalTries(g.max) - tries; // + 면 정석보다 적게 맞힘
+    if (tries === 1) return 'miracle';
+    if (diff >= 3) return 'jackpot';
+    if (diff >= 1) return 'lucky';
+    if (diff === 0) return 'par';
+    if (diff >= -2) return 'meh';
+    return 'flop';
+  }
+
+  // 같은 문구가 자주 나오지 않게 단계마다 문구 순서를 섞어 차례로 꺼낸다(다 보기 전에는 다시 안 나옴).
+  // 섞은 순서와 꺼낸 자리를 기기에 남겨 게임을 껐다 켜도 이어서 꺼내고, 다시 섞을 때는 방금 본 문구가 맨 앞에 오지 않게 한다.
+  function pickLuck(tier) {
+    const count = t('luck.' + tier).length;
+    let saved = {};
+    try {
+      saved = JSON.parse(localStorage.getItem(LUCK_KEY)) || {};
+    } catch (e) {}
+    let bag = saved[tier];
+    const valid =
+      bag && Array.isArray(bag.order) && bag.order.length === count && bag.order.every((i) => Number.isInteger(i) && i >= 0 && i < count) && Number.isInteger(bag.next);
+    if (!valid || bag.next < 0 || bag.next >= count) {
+      const last = valid && bag.next > 0 ? bag.order[bag.next - 1] : -1;
+      const order = Array.from({ length: count }, (_, i) => i);
+      for (let i = count - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [order[i], order[j]] = [order[j], order[i]];
+      }
+      if (order[0] === last) order.push(order.shift());
+      bag = { order: order, next: 0 };
+    }
+    const index = bag.order[bag.next];
+    bag.next++;
+    saved[tier] = bag;
+    try {
+      localStorage.setItem(LUCK_KEY, JSON.stringify(saved));
+    } catch (e) {}
+    return { tier: tier, index: index };
+  }
+
+  function luckLine(g) {
+    return t('luck.' + g.luck.tier)[g.luck.index];
+  }
+
+  // 결과 화면: 트로피 → 운 문구 → 점수(+최고 기록) → 정답 숫자·횟수·시간 한 줄 → 랭킹 등록 → 버튼
   function renderResult() {
     $('result-art').className = 'result-art won';
     $('result-icon').firstElementChild.setAttribute('href', '#i-trophy');
-    $('result-title').textContent = t('result.won');
-    $('result-title').className = 'won';
-    $('result-answer').textContent = game.answer;
+    $('result-title').textContent = luckLine(game);
+    $('result-title').className = 'luck-' + LUCK_TONE[game.luck.tier];
     $('result-score').textContent = t('result.score', { score: fmt(game.score) });
-    $('result-detail').textContent = t('result.wonDetail', { tries: game.guesses.length, time: duration(game.time) });
+    $('result-detail').textContent = t('result.wonDetail', { answer: game.answer, tries: game.guesses.length, time: duration(game.time) });
     $('result-practice').hidden = game.ranked;
     const thermo = $('result-thermo');
     thermo.hidden = !game.thermo;
@@ -588,15 +639,17 @@
     ctx.fillStyle = color('--text-muted');
     ctx.fillText(level, center, 278);
 
-    ctx.font = font(96);
+    // 결과 화면과 같은 차례: 운 문구 → 점수(가장 크게) → 정답 숫자·횟수·시간
+    const tone = LUCK_TONE[game.luck.tier];
+    ctx.font = font(64);
+    ctx.fillStyle = color(tone === 'good' ? '--success' : tone === 'par' ? '--action-line' : '--text');
+    ctx.fillText(luckLine(game), center, 404, maxWidth);
+    ctx.font = font(190);
     ctx.fillStyle = color('--success');
-    ctx.fillText(t('result.won') + '  ' + t('result.score', { score: fmt(game.score) }), center, 404, maxWidth);
-    ctx.font = font(220);
-    ctx.fillStyle = color('--text');
-    ctx.fillText(String(game.answer), center, 574);
+    ctx.fillText(t('result.score', { score: fmt(game.score) }), center, 566, maxWidth);
     ctx.font = font(52);
     ctx.fillStyle = color('--text-muted');
-    ctx.fillText(t('result.wonDetail', { tries: game.guesses.length, time: duration(game.time) }), center, 716, maxWidth);
+    ctx.fillText(t('result.wonDetail', { answer: game.answer, tries: game.guesses.length, time: duration(game.time) }), center, 716, maxWidth);
 
     // 시도 기록: 추측한 숫자마다 UP(빨강 ▲)·DOWN(파랑 ▼)·정답(초록 ●) 칸. 칸이 넘치면 마지막 7개만 그린다.
     const shown = game.guesses.slice(-7);
@@ -1199,6 +1252,7 @@
   function finishGame() {
     const tries = game.guesses.length;
     game.score = UpDown.score(game.max, tries, game.time, game.thermo ? game.thermo.cost : 0);
+    game.luck = pickLuck(luckTier(game)); // 한 판에 한 번만 고른다(언어를 바꿔도 같은 문구의 번역)
     // 최고 점수는 랭킹 범위만 남긴다(연습 판은 남기지 않음). 랭킹 범위 판은 랭킹 창의 최근 탭으로도 남긴다
     if (game.ranked) Joypack.setRankBoard('updown', game.max);
     newBest = game.ranked && (!best[game.max] || game.score > best[game.max]);

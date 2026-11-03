@@ -1592,18 +1592,35 @@ button:focus-visible {
   animation-delay: 0.8s !important;
 }
 
-h1.won {
+/* 결과 제목 = 운 문구(app.js 의 renderResult). 길어도 두 줄 안에서 고르게 줄바꿈. 운이 좋으면 초록, 정석은 대표색, 아쉬우면 글자색 */
+#result-title {
+  max-width: 17em;
+  font-size: clamp(1.3rem, 6.2vw, 1.75rem);
+  font-size: min(clamp(1.3rem, 6.2vw, 1.75rem), 5.4 * var(--vh));
+  line-height: 1.3;
+  text-wrap: balance;
+  word-break: keep-all;
+}
+
+#result-title.luck-good {
   color: var(--success);
 }
 
-.answer {
-  margin: 0;
-  font-size: 4rem;
-  font-size: min(4rem, 12 * var(--vh));
-  line-height: 1.1;
-  font-weight: 800;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
+#result-title.luck-par {
+  color: var(--action-line);
+}
+
+#result-title.luck-bad {
+  color: var(--text);
+}
+
+/* 점수와 최고 기록 표를 한 줄에 */
+.result-score-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 4px 10px;
 }
 
 .lead {
@@ -1612,11 +1629,12 @@ h1.won {
   text-align: center;
 }
 
-/* 점수: 정답 숫자 아래 크게 */
+/* 점수: 결과 화면에서 가장 큰 글자 */
 .result-score {
   margin: 0;
   color: var(--success);
-  font-size: min(2.2rem, 7 * var(--vh));
+  font-size: min(3rem, 9.5 * var(--vh));
+  line-height: 1.1;
   font-weight: 800;
   text-align: center;
   font-variant-numeric: tabular-nums;
@@ -1640,14 +1658,24 @@ h1.won {
   font-size: 0.9rem;
 }
 
+/* 최고 기록: 점수 옆 작은 알약 */
 .new-best {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   margin: 0;
+  padding: 3px 10px;
   color: var(--success);
+  background: var(--pill-bg);
+  border: 1px solid var(--pill-line);
+  border-radius: 999px;
+  font-size: 0.9rem;
   font-weight: 700;
+}
+
+.new-best[hidden] {
+  display: none;
 }
 
 /* 결과 화면 랭킹 등록 칸(app.js 의 renderResultRank): 축하 문구 아래, 버튼 위. 대표색 테두리로 눈에 띄게 한다. */
