@@ -981,25 +981,6 @@ button:focus-visible {
   transition: none;
 }
 
-/* 추측한 자리 눈금: UP 빨강, DOWN 파랑. 남은 범위로 확대하면 막대와 함께 움직인다 */
-.range-bar-mark {
-  position: absolute;
-  inset-block: 1px;
-  width: 3px;
-  translate: -50% 0;
-  border-radius: 2px;
-  opacity: 0.9;
-  transition: left 0.45s cubic-bezier(0.2, 1.2, 0.4, 1);
-}
-
-.range-bar-mark.up {
-  background: var(--up);
-}
-
-.range-bar-mark.down {
-  background: var(--down);
-}
-
 /* 다이얼로 고르는 중인 자리: 막대 안 작은 흰 점. 다이얼을 돌리면 따라 움직인다 */
 .range-bar-pick {
   position: absolute;
@@ -1017,29 +998,6 @@ button:focus-visible {
 
 .range-bar.zoom .range-bar-pick {
   transition: left 0.45s cubic-bezier(0.2, 1.2, 0.4, 1);
-}
-
-.range-bar-pick[hidden] {
-  display: none;
-}
-
-/* 맞히면 정답 한 칸으로 모여 초록으로 터진다 */
-.range-bar.won .range-bar-live {
-  background: var(--success);
-  animation: bar-hit 0.6s ease-out 0.3s;
-}
-
-@keyframes bar-hit {
-  0% {
-    box-shadow: 0 0 0 0 var(--success);
-  }
-  40% {
-    box-shadow: 0 0 0 6px color-mix(in srgb, var(--success) 40%, transparent);
-    transform: scaleY(1.6);
-  }
-  100% {
-    box-shadow: 0 0 0 12px transparent;
-  }
 }
 
 /* 아직 가능한 범위(13 ~ 24): 막대 왼쪽의 작은 알약(글자 수가 바뀌어도 막대가 덜 흔들리게 최소 폭). 좁혀지면 #range 가 반짝인다 */
@@ -2636,8 +2594,7 @@ h1.lost {
   .dial-thumb,
   .dial-fill,
   .range-bar-pick,
-  .range-bar.zoom .range-bar-pick,
-  .range-bar-mark {
+  .range-bar.zoom .range-bar-pick {
     transition: none;
   }
 
@@ -2656,7 +2613,6 @@ h1.lost {
   .intro .difficulty,
   .intro .custom-start,
   .temp.pop,
-  .range-bar.won .range-bar-live,
   .history li.enter,
   .hint.pop,
   .hint.pop.up,
