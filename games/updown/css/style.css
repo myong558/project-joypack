@@ -981,7 +981,7 @@ button:focus-visible {
   transition: none;
 }
 
-/* 추측한 자리 눈금: UP 빨강, DOWN 파랑. 남은 범위로 확대될 때 막대와 함께 미끄러진다 */
+/* 추측한 자리 눈금: UP 빨강, DOWN 파랑. 남은 범위로 확대하면 막대와 함께 움직인다 */
 .range-bar-mark {
   position: absolute;
   inset-block: 1px;
