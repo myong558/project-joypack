@@ -634,11 +634,21 @@
     ctx.fillStyle = color('--text-muted');
     ctx.fillText(level, center, 278);
 
-    // 결과 화면과 같은 차례: 운 문구 → 점수(가장 크게) → 정답 숫자·횟수·시간
-    const tone = LUCK_TONE[game.luck.tier];
-    ctx.font = font(64);
-    ctx.fillStyle = color(tone === 'good' ? '--success' : tone === 'par' ? '--action-line' : '--text');
-    ctx.fillText(luckLine(game), center, 404, maxWidth);
+    // 결과 화면과 같은 차례: 운 문구(단계 색 테두리 + 옅은 바탕 알약) → 점수(가장 크게) → 정답 숫자·횟수·시간
+    const tone = color(LUCK_TONE[game.luck.tier] === 'good' ? '--success' : LUCK_TONE[game.luck.tier] === 'par' ? '--action' : '--text-muted');
+    ctx.font = font(56);
+    const line = luckLine(game);
+    const pillWidth = Math.min(maxWidth + 40, ctx.measureText(line).width + 88);
+    roundRect(ctx, center - pillWidth / 2, 360, pillWidth, 92, 46);
+    ctx.globalAlpha = 0.1;
+    ctx.fillStyle = tone;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = tone;
+    ctx.stroke();
+    ctx.fillStyle = tone;
+    ctx.fillText(line, center, 406, pillWidth - 64);
     ctx.font = font(190);
     ctx.fillStyle = color('--success');
     ctx.fillText(t('result.score', { score: fmt(game.score) }), center, 566, maxWidth);
