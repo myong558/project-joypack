@@ -2694,10 +2694,12 @@ h2 .icon-pic {
   color: var(--leaf-ink);
 }
 .daily-btn > .icon:last-child {
+  width: 1.6em;
+  height: 1.6em;
   margin-left: auto;
   color: var(--muted);
-  /* 오른쪽 화살표는 기본 선(2)보다 굵게 */
-  stroke-width: 2.8;
+  /* 오른쪽 화살표는 기본(1.2em·선 2)보다 크고 굵게 */
+  stroke-width: 2.6;
 }
 .daily-text {
   display: grid;
