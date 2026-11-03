@@ -102,7 +102,6 @@
   --sun-glow: rgb(255 236 140 / 0.65);
   --cloud: #ffffff;
   --particle: #ff9cbf;
-  --d1: '🌷'; --d2: '🌼'; --d3: '🍀'; --d4: '🌱'; --d5: '🌸'; --d6: '🐞'; --d7: '🌼'; --d8: '🌿';
 }
 
 :root[data-skin='desert'] {
@@ -122,7 +121,6 @@
   --sun-glow: rgb(255 190 110 / 0.75);
   --cloud: rgb(255 255 255 / 0.55);
   --particle: #f4d29a;
-  --d1: '🌵'; --d2: '☀️'; --d3: '🪨'; --d4: '🦂'; --d5: '🌵'; --d6: '🐫'; --d7: '🪨'; --d8: '🌾';
 }
 
 :root[data-skin='jungle'] {
@@ -142,7 +140,6 @@
   --sun-glow: rgb(255 255 200 / 0.5);
   --cloud: rgb(255 255 255 / 0.5);
   --particle: #fff27a;
-  --d1: '🌴'; --d2: '🦜'; --d3: '🌿'; --d4: '🍃'; --d5: '🌺'; --d6: '🐒'; --d7: '🍌'; --d8: '🍃';
 }
 
 :root[data-skin='snow'] {
@@ -162,7 +159,6 @@
   --sun-glow: rgb(255 255 255 / 0.85);
   --cloud: #f4f8fc;
   --particle: #ffffff;
-  --d1: '❄️'; --d2: '🏔️'; --d3: '🌲'; --d4: '⛄'; --d5: '❄️'; --d6: '🐧'; --d7: '🌲'; --d8: '🌨️';
 }
 
 [hidden] {
@@ -671,10 +667,6 @@ button.dex-item:focus-visible {
   opacity: 0.55;
 }
 
-.dex-emoji {
-  font-size: max(18px, 1.9em);
-}
-
 .toggles {
   display: flex;
   gap: 0.5em;
@@ -1006,13 +998,11 @@ button.dex-item:focus-visible {
 .h-shadow { fill: rgb(0 0 0 / 0.22); }
 .h-mound { fill: var(--dirt-dark); stroke: color-mix(in srgb, var(--dirt-dark) 55%, black); stroke-width: 1.2; }
 .h-mound-top { fill: var(--dirt); }
-.h-clump { fill: color-mix(in srgb, var(--dirt) 72%, white); stroke: color-mix(in srgb, var(--dirt-dark) 70%, black); stroke-width: 0.8; }
 .h-grass { fill: var(--grass-dark); stroke: color-mix(in srgb, var(--grass-dark) 60%, black); stroke-width: 0.7; stroke-linejoin: round; }
 .h-pit-wall { fill: color-mix(in srgb, var(--dirt-dark) 70%, black); stroke: color-mix(in srgb, var(--dirt-dark) 40%, black); stroke-width: 1.2; }
 .h-pit { fill: var(--pit); }
 .h-pit-deep { fill: #000; opacity: 0.55; }
 .h-root { fill: none; stroke: color-mix(in srgb, var(--dirt) 55%, var(--pit)); stroke-width: 1.1; stroke-linecap: round; }
-.h-stone { fill: color-mix(in srgb, var(--dirt) 45%, #9a9a9a); stroke: color-mix(in srgb, var(--dirt-dark) 60%, black); stroke-width: 0.5; }
 .h-rim-light { fill: none; stroke: color-mix(in srgb, var(--dirt) 55%, white); stroke-width: 1.4; stroke-linecap: round; }
 .h-lip { fill: var(--dirt); stroke: color-mix(in srgb, var(--dirt-dark) 55%, black); stroke-width: 1.2; stroke-linejoin: round; }
 .h-lip-top { fill: color-mix(in srgb, var(--dirt) 70%, white); }
@@ -2672,7 +2662,7 @@ button.dex-item:focus-visible {
   from { opacity: 0.2; }
 }
 
-/* 겹마다 포인터를 따라 밀리는 거리가 달라 깊이감이 생긴다 */
+/* 겹마다 포인터를 따라 밀리는 거리가 달라 깊이감이 생긴다(거리는 scene.ts 의 data-depth) */
 .scene-depth {
   position: absolute;
   left: -5vw;
@@ -2683,11 +2673,11 @@ button.dex-item:focus-visible {
   will-change: transform;
 }
 
-.scene-depth.far { --h: 50vh; --depth: -8px; --dur: 160s; }
-.scene-depth.mid { --h: 36vh; --depth: -18px; --dur: 90s; }
-.scene-depth.near { --h: 22vh; --depth: -32px; --dur: 50s; bottom: -1vh; }
-.scene-depth.sun-wrap { --depth: -4px; top: 0; height: auto; }
-.scene-depth.clouds { --depth: -6px; top: 0; height: auto; }
+.scene-depth.far { --h: 50vh; --dur: 160s; }
+.scene-depth.mid { --h: 36vh; --dur: 90s; }
+.scene-depth.near { --h: 22vh; --dur: 50s; bottom: -1vh; }
+.scene-depth.sun-wrap { top: 0; height: auto; }
+.scene-depth.clouds { top: 0; height: auto; }
 
 /* 타일 하나(높이의 3배 너비)만큼 흘렀다가 처음으로 돌아가 끊김 없이 이어진다 */
 .scene-strip {

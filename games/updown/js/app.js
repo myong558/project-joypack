@@ -1427,8 +1427,8 @@
   // 글자를 다 채운 뒤에 화면을 보이고 인트로를 시작한다(.booting, css). 스크립트가 늦게 오면 빈 글자로 먼저 그려졌다가
   // 1~2초 뒤 글자가 채워지며 위 버튼이 커지고 화면 전체가 덜컥 밀렸다
   document.querySelector('.app').classList.remove('booting');
-  // 인트로(css 의 .intro, 약 1.1초)가 끝난 뒤 클래스를 지운다. 여러 요소가 시차를 두고 움직여서 animationend 대신 타이머를 쓴다.
-  setTimeout(endIntro, 1400);
+  // 인트로(css 의 .intro, 마지막 '직접 정하기'가 약 1.01초에 끝남)가 끝난 뒤 클래스를 지운다. 여러 요소가 시차를 두고 움직여서 animationend 대신 타이머를 쓴다.
+  setTimeout(endIntro, 1100);
 
   // 서비스 워커는 조이팩 사이트에 하나(../../sw.js)다. HTTPS 와 localhost 에서만 등록되고, file:// 로 열면 게임만 동작한다.
   // 등록하면서 이 게임 파일 전체를 캐시하라고 알린다(처음 열 때 캐시, 이후에는 바뀐 파일만).

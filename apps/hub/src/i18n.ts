@@ -34,7 +34,6 @@ const ko = {
   'preview.foot': '개발자',
   'preview.hint': '켜면 이 기기의 첫 화면과 랭킹에 테스트 중인 게임이 보여요.',
   'offline.banner': '오프라인이에요. 한 번 열어 본 게임만 플레이할 수 있어요.',
-  'update.ready': '새 버전이 준비됐어요',
 
   'best.updown': '최고 {board} {score}점',
   'best.hammer': '최고 {score}점',
@@ -151,7 +150,6 @@ const en: Record<keyof typeof ko, string> = {
   'preview.foot': 'Developer',
   'preview.hint': 'When on, games still in testing show on the home screen and in rankings on this device.',
   'offline.banner': "You're offline. Only games you've opened before can be played.",
-  'update.ready': 'A new version is ready',
 
   'best.updown': 'Best {board} {score}',
   'best.hammer': 'Best {score}',

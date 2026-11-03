@@ -101,7 +101,7 @@ export function step(board: Board, s: State, dir: Dir): Step {
 }
 
 /**
- * 다시는 햇살 자리로 못 옮기는 화분(되돌리기 안내용): 햇살 자리가 아닌 구석(위아래 한 면 + 좌우 한 면이 벽)에 몰린 화분.
+ * 다시는 햇살 자리로 못 옮기는 화분("처음부터" 안내용): 햇살 자리가 아닌 구석(위아래 한 면 + 좌우 한 면이 벽)에 몰린 화분.
  * 화분은 당길 수 없어 구석에서는 영영 못 뺀다
  */
 export function stuckPots(board: Board, s: State): number[] {

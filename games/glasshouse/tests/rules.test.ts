@@ -44,19 +44,19 @@ describe('움직임', () => {
 describe('판 진행', () => {
   const ROOM = ['###v##', '#....#', '#..o.#', '#..@.#', '######'];
 
-  it('되돌리기는 이동 수도 되돌리고, 깨면 더 움직이지 않는다', () => {
+  it('처음부터 하면 이동 수도 0, 깨면 더 움직이지 않는다', () => {
     const g = new Game(ROOM);
     g.move(3);
     expect(g.moves).toBe(1);
-    g.undo();
+    g.restart();
     expect(g.moves).toBe(0);
+    expect(g.state).toEqual(g.start);
     // 화분을 위로 밀면 창 앞 햇살 자리에 들어가 깸
     const h = new Game(ROOM);
     h.move(0);
     expect(h.done).toBe(true);
     expect(h.lit).toEqual([true]);
     expect(h.move(2).moved).toBe(false);
-    expect(h.canUndo).toBe(false);
   });
 
   it('걸어서 갈 길은 화분을 피해 가장 짧게', () => {

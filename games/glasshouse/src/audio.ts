@@ -16,7 +16,8 @@ const R = {
   happy: [{ k: 'tone', f: 1047, dur: 0.5, wave: 'sine', vol: 0.1, attack: 0.01 }, { k: 'tone', f: 1568, dur: 0.4, wave: 'sine', vol: 0.05, attack: 0.01 }],
   // 햇살 자리에서 벗어남: 낮게 꺼짐
   unhappy: [{ k: 'tone', f: 520, to: 390, dur: 0.18, wave: 'sine', vol: 0.06 }],
-  undo: [{ k: 'tone', f: 900, to: 600, dur: 0.06, wave: 'triangle', vol: 0.05 }],
+  // 처음부터: 짧게 내려가는 톡
+  restart: [{ k: 'tone', f: 900, to: 600, dur: 0.06, wave: 'triangle', vol: 0.05 }],
   // new/sparkle + timetoflip/clear: 꽃이 핌
   bloom: [
     { k: 'mallet', f: 784, dur: 0.4, vol: 0.16 },

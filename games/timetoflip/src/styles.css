@@ -236,10 +236,6 @@ button {
   color: #fff;
   box-shadow: 0 4px 0 color-mix(in srgb, var(--danger) 60%, #000);
 }
-.btn.ghost {
-  background: transparent;
-  box-shadow: none;
-}
 .btn:disabled {
   opacity: 0.55;
   cursor: default;

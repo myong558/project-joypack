@@ -249,7 +249,7 @@ function play(level: number | 'daily'): void {
   render(true);
 
   // 가만히 있으면(8초) 정원사가 쉬는 동작 하나를 하고, 10초마다 다른 동작(바로 앞과 같은 것은 빼고 무작위:
-  // 땀 닦기 · 두리번 · 기지개 · 하품 · 모자 부채질). 움직이거나 되돌리면 바로 멈추고 다시 센다.
+  // 땀 닦기 · 두리번 · 기지개 · 하품 · 모자 부채질). 움직이거나 처음부터 하면 바로 멈추고 다시 센다.
   // 일시정지·판을 깬 뒤·화면을 떠나 있으면 하지 않는다
   let idleTimer: ReturnType<typeof setTimeout> | undefined;
   let idleLast: IdleKind | null = null;
@@ -305,7 +305,7 @@ function play(level: number | 'daily'): void {
     game.restart();
     poke();
     board.place(game.state, 2);
-    sound.play('undo');
+    sound.play('restart');
     render(true);
     lastLit = game.lit;
   };
@@ -402,7 +402,7 @@ function play(level: number | 'daily'): void {
     });
   };
 
-  // 입력: 화살표·WASD, Z·Backspace 되돌리기, R 처음부터, Esc·P 일시정지
+  // 입력: 화살표·WASD, R 처음부터, Esc·P 일시정지
   const onKey = (e: KeyboardEvent) => {
     if ((e.target as Element | null)?.closest?.('.modal')) return;
     if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') return setPaused(!paused);

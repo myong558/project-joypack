@@ -58,7 +58,6 @@
   --stone-2: #d4cbb8;
   --danger: #c2393c;
   --danger-ink: #b0302f;
-  --on-accent: #fff;
   --jp-top-accent: var(--leaf);
   color-scheme: light;
 }

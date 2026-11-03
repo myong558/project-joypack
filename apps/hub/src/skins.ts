@@ -15,12 +15,6 @@ export function todaySkin(): Skin {
   return isSkin(today) ? today : 'grape';
 }
 
-/** 지금 화면에 적용된 톤(임시 미리보기 포함) */
-export function currentSkin(): Skin {
-  const skin = document.documentElement.dataset.skin;
-  return isSkin(skin) ? skin : todaySkin();
-}
-
 // ---------- 개발자 모드: 설정에서 톤 미리보기 ----------
 // 개발자 모드(preview.ts)를 켠 기기에서만 설정에 보이고, index.html 도 개발자 모드일 때만 joypack.hubSkin 을 읽는다.
 // 개발자 모드를 끄면 고른 톤을 지운다(main.ts openPreviewSwitch). 평소에는 날마다 정해진 톤으로 고정.

@@ -1,13 +1,11 @@
 import { lit, parse, solved, step, stuckPots, type Board, type Dir, type State, type Step } from './rules.ts';
 
-/** 판 하나의 진행: 움직이기·되돌리기·처음부터, 이동 수. 화면은 move 가 돌려준 결과로 그린다 */
+/** 판 하나의 진행: 움직이기·처음부터, 이동 수. 화면은 move 가 돌려준 결과로 그린다 */
 export class Game {
   readonly board: Board;
   readonly start: State;
   state: State;
   moves = 0;
-  /** 되돌리기용 지난 상태(이동 수도 함께 되돌린다: 점수는 깬 순간의 이동 수) */
-  private history: State[] = [];
   done = false;
 
   constructor(rows: readonly string[]) {
@@ -26,31 +24,17 @@ export class Game {
     return stuckPots(this.board, this.state);
   }
 
-  get canUndo(): boolean {
-    return this.history.length > 0 && !this.done;
-  }
-
   move(dir: Dir): Step {
     if (this.done) return { state: this.state, moved: false, pushed: -1 };
     const r = step(this.board, this.state, dir);
     if (!r.moved) return r;
-    this.history.push(this.state);
     this.state = r.state;
     this.moves++;
     this.done = solved(this.board, this.state.pots);
     return r;
   }
 
-  undo(): boolean {
-    const prev = this.history.pop();
-    if (!prev || this.done) return false;
-    this.state = prev;
-    this.moves--;
-    return true;
-  }
-
   restart(): void {
-    this.history = [];
     this.state = this.start;
     this.moves = 0;
     this.done = false;

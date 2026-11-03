@@ -26,7 +26,6 @@
   --accent: #ffb703;
   /* 로고 상자색(레몬). 앱 아이콘과 같게 고정, 톤마다 바꾸지 않는다 */
   --mark: #ffb703;
-  --ok: #138a5b;
   --warn: #b25a00;
   --gold: #f5b400;
   --silver: #a8b0c0;
@@ -47,7 +46,6 @@
   --brand: #9277ff;
   --brand-ink: #14102a;
   --accent: #ffc94d;
-  --ok: #4fd69c;
   --warn: #ffb35c;
   --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 10px 28px rgb(0 0 0 / 0.35);
   color-scheme: dark;

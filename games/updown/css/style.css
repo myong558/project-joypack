@@ -39,24 +39,18 @@
   --steel-100: #cbddfb;
   --brick-50: #feefeb;
   --brick-100: #f9cdc5;
-  --plum-50: #f6edfb;
-  --plum-100: #e4cdf2;
-  --navy-700: #24304f;
   --gray-0: #ffffff;
   --gray-200: #dde3ec;
   --gray-600: #5e6572;
   --gray-900: #1f232b;
   --night-50: #e8eaed;
   --night-400: #9aa0a9;
-  --night-600: #3d414a;
   --night-sage: #192d27;
   --night-sage-line: #264c3b;
   --night-steel: #152139;
   --night-steel-line: #1f3763;
   --night-brick: #2f1d1e;
   --night-brick-line: #562a26;
-  --night-plum: #271c33;
-  --night-plum-line: #45305e;
   --night-gold-line: #5b4d19;
 
   /* 역할 토큰 (라이트, 스킨과 무관) */
@@ -66,8 +60,6 @@
   --line-steel: var(--steel-100);
   --surface-brick: var(--brick-50);
   --line-brick: var(--brick-100);
-  --surface-plum: var(--plum-50);
-  --line-plum: var(--plum-100);
   --line-gold: var(--gold-100);
   --text: var(--gray-900);
   --text-muted: var(--gray-600);
@@ -78,12 +70,9 @@
   --success: var(--green-600);
   --danger: var(--red-600);
   --danger-soft: var(--red-50);
-  --danger-glow: rgb(201 15 0 / 0.22);
   --text-on-danger: var(--gray-0);
   --heart: var(--rose-600);
   --star: var(--gold-600);
-  --star-off: var(--gray-200);
-  --pill-text: var(--navy-700);
   --text-on-selected: var(--gray-0);
   --shadow-brand: rgb(22 31 56 / 0.32);
   --shadow-danger: 0 1px 2px rgb(201 15 0 / 0.2), 0 4px 14px rgb(201 15 0 / 0.28);
@@ -95,7 +84,6 @@
   --chip-bg: var(--surface);
   --chip-line: var(--dialog-line);
   --field-bg: var(--surface);
-  --pill-icon: var(--icon-accent);
   --action: var(--primary);
   --field-focus: var(--focus);
   --text-on-action: var(--text-on-primary);
@@ -121,8 +109,6 @@
   --line-steel: var(--night-steel-line);
   --surface-brick: var(--night-brick);
   --line-brick: var(--night-brick-line);
-  --surface-plum: var(--night-plum);
-  --line-plum: var(--night-plum-line);
   --line-gold: var(--night-gold-line);
   --text: var(--night-50);
   --text-muted: var(--night-400);
@@ -133,12 +119,9 @@
   --success: var(--green-300);
   --danger: var(--red-300);
   --danger-soft: rgb(242 139 130 / 0.16);
-  --danger-glow: rgb(255 128 117 / 0.28);
   --text-on-danger: var(--red-950);
   --heart: var(--rose-300);
   --star: var(--gold-300);
-  --star-off: var(--night-600);
-  --pill-text: var(--night-50);
   --text-on-selected: var(--night-50);
   --shadow-brand: rgb(0 0 0 / 0.5);
   --shadow-box: 0 1px 2px rgb(0 0 0 / 0.35), 0 2px 8px rgb(0 0 0 / 0.25);
@@ -233,7 +216,6 @@ html[data-skin='spring'] {
   --shadow-primary: 0 1px 2px rgb(214 92 168 / 0.2), 0 4px 14px rgb(214 92 168 / 0.3);
   --shadow-action: 0 1px 2px rgb(214 92 168 / 0.25), 0 4px 14px rgb(214 92 168 / 0.3);
   --pill-bg: #fffafb99;
-  --pill-bg-hover: #fffafb;
   --pill-line: rgb(122 33 96 / 0.16);
   --well-bg: rgb(122 33 96 / 0.05);
   --well-line: rgb(122 33 96 / 0.12);
@@ -260,7 +242,6 @@ html[data-theme='dark'][data-skin='spring'] {
   --shadow-primary: 0 1px 2px rgb(241 154 210 / 0.2), 0 4px 14px rgb(241 154 210 / 0.3);
   --shadow-action: 0 1px 2px rgb(241 154 210 / 0.25), 0 4px 14px rgb(241 154 210 / 0.3);
   --pill-bg: rgb(241 154 210 / 0.08);
-  --pill-bg-hover: rgb(241 154 210 / 0.16);
   --pill-line: rgb(241 154 210 / 0.18);
   --well-bg: rgb(241 154 210 / 0.04);
   --well-line: rgb(241 154 210 / 0.1);
@@ -285,7 +266,6 @@ html[data-skin='summer'] {
   --shadow-primary: 0 1px 2px rgb(11 122 92 / 0.2), 0 4px 14px rgb(11 122 92 / 0.3);
   --shadow-action: 0 1px 2px rgb(11 122 92 / 0.25), 0 4px 14px rgb(11 122 92 / 0.3);
   --pill-bg: #f8fffb99;
-  --pill-bg-hover: #f8fffb;
   --pill-line: rgb(10 84 64 / 0.16);
   --well-bg: rgb(10 84 64 / 0.05);
   --well-line: rgb(10 84 64 / 0.12);
@@ -312,7 +292,6 @@ html[data-theme='dark'][data-skin='summer'] {
   --shadow-primary: 0 1px 2px rgb(95 214 168 / 0.2), 0 4px 14px rgb(95 214 168 / 0.3);
   --shadow-action: 0 1px 2px rgb(95 214 168 / 0.25), 0 4px 14px rgb(95 214 168 / 0.3);
   --pill-bg: rgb(95 214 168 / 0.08);
-  --pill-bg-hover: rgb(95 214 168 / 0.16);
   --pill-line: rgb(95 214 168 / 0.18);
   --well-bg: rgb(95 214 168 / 0.04);
   --well-line: rgb(95 214 168 / 0.1);
@@ -337,7 +316,6 @@ html[data-skin='autumn'] {
   --shadow-primary: 0 1px 2px rgb(224 112 31 / 0.2), 0 4px 14px rgb(224 112 31 / 0.3);
   --shadow-action: 0 1px 2px rgb(224 112 31 / 0.25), 0 4px 14px rgb(224 112 31 / 0.3);
   --pill-bg: #fffbf599;
-  --pill-bg-hover: #fffbf5;
   --pill-line: rgb(107 53 23 / 0.16);
   --well-bg: rgb(107 53 23 / 0.05);
   --well-line: rgb(107 53 23 / 0.12);
@@ -364,7 +342,6 @@ html[data-theme='dark'][data-skin='autumn'] {
   --shadow-primary: 0 1px 2px rgb(245 165 96 / 0.2), 0 4px 14px rgb(245 165 96 / 0.3);
   --shadow-action: 0 1px 2px rgb(245 165 96 / 0.25), 0 4px 14px rgb(245 165 96 / 0.3);
   --pill-bg: rgb(245 165 96 / 0.08);
-  --pill-bg-hover: rgb(245 165 96 / 0.16);
   --pill-line: rgb(245 165 96 / 0.18);
   --well-bg: rgb(245 165 96 / 0.04);
   --well-line: rgb(245 165 96 / 0.1);
@@ -389,7 +366,6 @@ html[data-skin='winter'] {
   --shadow-primary: 0 1px 2px rgb(120 104 214 / 0.2), 0 4px 14px rgb(120 104 214 / 0.3);
   --shadow-action: 0 1px 2px rgb(120 104 214 / 0.25), 0 4px 14px rgb(120 104 214 / 0.3);
   --pill-bg: #fbfdff99;
-  --pill-bg-hover: #fbfdff;
   --pill-line: rgb(53 44 114 / 0.16);
   --well-bg: rgb(53 44 114 / 0.05);
   --well-line: rgb(53 44 114 / 0.12);
@@ -416,7 +392,6 @@ html[data-theme='dark'][data-skin='winter'] {
   --shadow-primary: 0 1px 2px rgb(187 175 246 / 0.2), 0 4px 14px rgb(187 175 246 / 0.3);
   --shadow-action: 0 1px 2px rgb(187 175 246 / 0.25), 0 4px 14px rgb(187 175 246 / 0.3);
   --pill-bg: rgb(187 175 246 / 0.08);
-  --pill-bg-hover: rgb(187 175 246 / 0.16);
   --pill-line: rgb(187 175 246 / 0.18);
   --well-bg: rgb(187 175 246 / 0.04);
   --well-line: rgb(187 175 246 / 0.1);
@@ -434,8 +409,6 @@ html[data-theme='dark'][data-skin='winter'] {
     --line-steel: color-mix(in srgb, var(--steel-100) 65%, var(--line));
     --surface-brick: color-mix(in srgb, var(--brick-50) 65%, var(--surface));
     --line-brick: color-mix(in srgb, var(--brick-100) 65%, var(--line));
-    --surface-plum: color-mix(in srgb, var(--plum-50) 65%, var(--surface));
-    --line-plum: color-mix(in srgb, var(--plum-100) 65%, var(--line));
   }
 
   html[data-theme='dark'][data-skin] {
@@ -445,8 +418,6 @@ html[data-theme='dark'][data-skin='winter'] {
     --line-steel: color-mix(in srgb, var(--night-steel-line) 65%, var(--line));
     --surface-brick: color-mix(in srgb, var(--night-brick) 65%, var(--surface));
     --line-brick: color-mix(in srgb, var(--night-brick-line) 65%, var(--line));
-    --surface-plum: color-mix(in srgb, var(--night-plum) 65%, var(--surface));
-    --line-plum: color-mix(in srgb, var(--night-plum-line) 65%, var(--line));
   }
 }
 
@@ -710,11 +681,6 @@ button:focus-visible {
 .difficulty-hard {
   --tone: var(--surface-brick);
   --tone-line: var(--line-brick);
-}
-
-.difficulty-extreme {
-  --tone: var(--surface-plum);
-  --tone-line: var(--line-plum);
 }
 
 .difficulty:hover {
@@ -1527,7 +1493,7 @@ button:focus-visible {
 }
 
 /* ── 결과 화면 ────────────────────────── */
-/* 트로피(정답) 또는 어질어질한 얼굴(실패). 정답이면 반짝이 장식이 붙는다. */
+/* 맞히면 트로피와 반짝이 장식 */
 .result-art {
   position: relative;
   align-self: center;
@@ -1544,34 +1510,16 @@ button:focus-visible {
 .result-art.won .result-icon {
   color: var(--star);
   background: var(--surface);
-  /* 실패 아이콘과 같이 반투명 원: 뒤의 계절 배경(입자)이 비쳐 보인다. */
+  /* 반투명 원: 뒤의 계절 배경(입자)이 비쳐 보인다. */
   background: color-mix(in srgb, var(--surface) 55%, transparent);
   box-shadow: inset 0 0 0 1px var(--line-gold);
   /* 정답: 트로피가 위에서 툭 떨어져 좌우로 흔들리며 자리 잡고, 이후 금빛이 은은하게 숨 쉬듯 번진다. */
   animation: trophy-in 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), trophy-glow 2.4s ease-in-out 0.8s infinite;
 }
 
-/* 실패: 어질어질한 얼굴이 좌우로 비틀거리다 멈춘다. */
-.result-art.lost .result-icon {
-  width: min(224px, 32 * var(--vh)); /* 정답 트로피의 2배 */
-  height: min(224px, 32 * var(--vh));
-  padding: min(28px, 4 * var(--vh));
-  color: var(--icon);
-  background: var(--surface-alt);
-  /* 반투명 원: 뒤의 계절 배경(입자)이 비쳐 보인다. color-mix 를 모르는 브라우저는 위의 불투명 색을 쓴다. */
-  background: color-mix(in srgb, var(--surface-alt) 35%, transparent);
-  animation: wobble 1s ease-in-out;
-}
-
-/* 랭킹 등록 칸이 펼쳐지면 자리가 모자라 다시 하기 버튼이 화면 밖으로 밀리므로 실패 얼굴을 트로피 크기로 줄인다 */
+/* 랭킹 등록 칸이 펼쳐지면 자리가 모자라 다시 하기 버튼이 화면 밖으로 밀리지 않게 사이 간격을 줄인다 */
 #screen-result:has(.result-rank:not([hidden])) {
   gap: calc(var(--space) * 0.6);
-}
-
-#screen-result:has(.result-rank:not([hidden])) .result-art.lost .result-icon {
-  width: min(112px, 12 * var(--vh));
-  height: min(112px, 12 * var(--vh));
-  padding: min(16px, 2 * var(--vh));
 }
 
 /* 이때는 등록 칸이 확인 버튼 자리를 이미 비켜 두므로 버튼 아래 여백도 줄인다 */
@@ -1607,10 +1555,6 @@ button:focus-visible {
 
 h1.won {
   color: var(--success);
-}
-
-h1.lost {
-  color: var(--danger);
 }
 
 .answer {
@@ -2223,11 +2167,10 @@ h1.lost {
 }
 
 /* ── 애니메이션 ───────────────────────── */
-/* 첫 실행 인트로(약 1.1초):
+/* 첫 실행 인트로(약 1초):
    1) 로고·제목이 아래에서 0.7초 동안 올라온다.
    2) 거의 멈출 즈음 로고의 빨강 삼각형은 위로, 파랑 삼각형은 아래로 한 번 튀어 "업·다운"을 보여준다.
-   3) 같은 때(0.45초)부터 상단 버튼이 나타나고, 난이도 카드는 쉬움 → 보통 → 어려움 → 최상위 순서로 0.07초씩 늦게 떠오른다.
-   4) 카드가 자리 잡으면 켜진 별이 하나씩 톡 켜진다.
+   3) 같은 때(0.45초)부터 상단 버튼이 나타나고, 범위 카드 1~50 → 1~100 → 1~200 → 직접 정하기가 0.07초씩 늦게 떠오른다.
    끝나면 app.js 가 .intro 를 지워, 시작 화면으로 돌아올 때는 다시 재생하지 않는다. */
 .intro #screen-start {
   overflow: hidden;
@@ -2296,17 +2239,6 @@ h1.lost {
   }
 }
 
-/* 별 켜짐: 꺼진 색에서 크게 부풀며 켜졌다가 제 크기로 */
-@keyframes star-on {
-  from {
-    color: var(--star-off);
-    transform: scale(0.4);
-  }
-  60% {
-    transform: scale(1.35);
-  }
-}
-
 @keyframes rise {
   from {
     transform: translateY(50vh);
@@ -2357,28 +2289,6 @@ h1.lost {
   }
   50% {
     box-shadow: inset 0 0 0 1px var(--line-gold), 0 0 28px 6px color-mix(in srgb, var(--star) 35%, transparent);
-  }
-}
-
-@keyframes wobble {
-  0%,
-  100% {
-    transform: rotate(0);
-  }
-  15% {
-    transform: rotate(-14deg) scale(1.05);
-  }
-  30% {
-    transform: rotate(11deg);
-  }
-  45% {
-    transform: rotate(-8deg);
-  }
-  60% {
-    transform: rotate(5deg);
-  }
-  75% {
-    transform: rotate(-2deg);
   }
 }
 
@@ -2513,12 +2423,7 @@ h1.lost {
     padding-bottom: 0;
   }
 
-  /* 낮은 화면이라 실패 얼굴(세로에서 화면 높이의 32%)을 줄이고, 랭킹 등록 칸도 촘촘하게 */
-  .result-art.lost .result-icon {
-    width: min(160px, 26 * var(--vh));
-    height: min(160px, 26 * var(--vh));
-  }
-
+  /* 낮은 화면이라 랭킹 등록 칸을 촘촘하게 */
   .result-rank {
     gap: 6px;
     padding: 8px 10px;
@@ -2658,7 +2563,6 @@ h1.lost {
   #range.narrowed,
   .settings[open],
   .result-art.won .result-icon,
-  .result-art.lost .result-icon,
   .result-art.won .sparkle,
   .result-rank.enter {
     animation: none;
