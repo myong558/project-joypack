@@ -590,7 +590,7 @@ body:has(.screen.game) .scene .layer {
   top: var(--dc);
   width: var(--dc);
   height: var(--dc);
-  background: var(--wall-0) center / 100% 100% no-repeat;
+  background: var(--wall-logo-win) center / 100% 100% no-repeat;
   filter: var(--wall-filter);
 }
 .d-win {
