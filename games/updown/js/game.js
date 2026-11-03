@@ -138,7 +138,6 @@
     PRESETS: PRESETS,
     CUSTOM_MIN: CUSTOM_MIN,
     CUSTOM_MAX: CUSTOM_MAX,
-    isPreset: isPreset,
     clampMax: clampMax,
     optimalTries: optimalTries,
     score: score,

@@ -134,5 +134,5 @@
     return String(text).toUpperCase().replace(/[^A-Z]/g, '').slice(0, 5);
   }
 
-  global.UpDownRanking = { LIMIT: LIMIT, top: top, cached: cached, submit: submit, qualifies: qualifies, cleanInitials: cleanInitials };
+  global.UpDownRanking = { top: top, cached: cached, submit: submit, qualifies: qualifies, cleanInitials: cleanInitials };
 })(window);

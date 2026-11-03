@@ -19,7 +19,7 @@ async function finish(p) {
   await p.wait(600);
   for (let i = 0; i < 12 && !(await p.eval(`!document.getElementById('screen-result').hidden`)); i++) {
     await guessMiddle(p);
-    await p.wait(1000); // 맞히면 0.8초 동안 막대 연출을 보여 준 뒤 결과 화면으로 간다
+    await p.wait(1000); // 맞히면 0.38초 뒤 결과 화면으로 간다(하나 남으면 자동으로 맞히는 1.05초 포함해도 넉넉히)
   }
   await p.wait(1500);
 }

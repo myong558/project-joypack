@@ -56,7 +56,7 @@
 | `--heart` | `rose-600` | `rose-300` | 하트 |
 | `--star` / `--star-off` | `gold-600` / `gray-200` | `gold-300` / `night-600` | 켜진 별·트로피·반짝이 / 꺼진 별·빈 하트 |
 | `--line-gold` | `gold-100` | `night-gold-line` | 정답 트로피 원 테두리 |
-| `--success` | `green-600` | `green-300` | 정답!, 최고 기록 갱신 |
+| `--success` | `green-600` | `green-300` | 정답!, 최고 기록, 운이 좋은 결과 문구 |
 | `--danger` / `--danger-soft` / `--danger-glow` | `red-600` / `red-50` / 빨강 22% | `red-300` / 빨강 16% / 밝은 빨강 28% | 실패·지우기 버튼·마지막 기회 테두리 / 확인 팝업 아이콘 원 / 마지막 기회 안쪽 번짐 |
 | `--text-on-danger` | `gray-0` | `red-950` | 지우기 버튼 글자 |
 | `--pill-text` | `navy-700` | `night-50` | 상단 알약 버튼 글자 |

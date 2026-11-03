@@ -996,7 +996,7 @@ button:focus-visible {
   transition: opacity 0.3s ease;
 }
 
-.range-bar-live.ticks::after {
+.range-bar.ticks .range-bar-live::after {
   opacity: 1;
 }
 
@@ -1546,7 +1546,7 @@ button:focus-visible {
   border-radius: 50%;
 }
 
-.result-art.won .result-icon {
+.result-art .result-icon {
   color: var(--star);
   background: var(--surface);
   /* 반투명 원: 뒤의 계절 배경(입자)이 비쳐 보인다. */
@@ -1568,12 +1568,8 @@ button:focus-visible {
 
 .sparkle {
   position: absolute;
-  display: none;
-  color: var(--star);
-}
-
-.result-art.won .sparkle {
   display: block;
+  color: var(--star);
   animation: twinkle 1.6s ease-in-out infinite;
 }
 
@@ -1595,6 +1591,7 @@ button:focus-visible {
 /* 결과 제목 = 운 문구(app.js 의 renderResult). 길어도 두 줄 안에서 고르게 줄바꿈. 운이 좋으면 초록, 정석은 대표색, 아쉬우면 글자색 */
 #result-title {
   max-width: 17em;
+  margin-inline: auto; /* 폭을 제한해도 화면 가운데 */
   font-size: clamp(1.3rem, 6.2vw, 1.75rem);
   font-size: min(clamp(1.3rem, 6.2vw, 1.75rem), 5.4 * var(--vh));
   line-height: 1.3;
@@ -2629,8 +2626,8 @@ button:focus-visible {
   .hint.pop.down,
   #range.narrowed,
   .settings[open],
-  .result-art.won .result-icon,
-  .result-art.won .sparkle,
+  .result-art .result-icon,
+  .result-art .sparkle,
   .result-rank.enter {
     animation: none;
   }

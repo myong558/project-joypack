@@ -380,16 +380,13 @@
   // 새 판·언어 전환(animate 아님)은 움직이지 않고 바로 그린다.
   function renderBar(animate) {
     const bar = $('range-bar');
-    const live = $('range-bar-live');
     const prev = barView;
     barView = barViewFor();
     bar.classList.toggle('instant', !animate);
     const cells = game.high - game.low + 1;
     bar.style.setProperty('--cells', cells);
-    const ticks = cells > 1 && cells <= BAR_TICKS;
-    live.classList.toggle('ticks', ticks);
     // 눈금이 나오면 좌우 여백 없이 꽉 채우고, 점 대신 고른 칸을 칠한다(style.css 의 .range-bar.ticks)
-    bar.classList.toggle('ticks', ticks);
+    bar.classList.toggle('ticks', cells > 1 && cells <= BAR_TICKS);
     // 확대하는 동안은 고르는 자리 점도 막대와 같은 속도로 움직인다. 바로 그린 뒤에는 다시 움직임을 켠다.
     const zoom = animate && (prev.from !== barView.from || prev.to !== barView.to);
     bar.classList.toggle('zoom', zoom);
@@ -520,8 +517,6 @@
 
   // 결과 화면: 트로피 → 운 문구 → 점수(+최고 기록) → 정답 숫자·횟수·시간 한 줄 → 랭킹 등록 → 버튼
   function renderResult() {
-    $('result-art').className = 'result-art won';
-    $('result-icon').firstElementChild.setAttribute('href', '#i-trophy');
     $('result-title').textContent = luckLine(game);
     $('result-title').className = 'luck-' + LUCK_TONE[game.luck.tier];
     $('result-score').textContent = t('result.score', { score: fmt(game.score) });
