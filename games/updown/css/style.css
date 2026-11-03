@@ -1520,8 +1520,8 @@ button:focus-visible {
   border-radius: 12px;
   font-size: clamp(1.125rem, 15cqh, 1.4rem); /* 다이얼 크기에 따라 18px ~ 1.4rem */
   font-weight: 700;
-  /* 아이폰은 확대 금지를 무시해 빠르게 두 번 누르면 두 번째를 "두 번 눌러 확대"로 먹는다. 이 버튼만 막는다 */
-  touch-action: manipulation;
+  /* 손가락이 조금 밀려도 스크롤로 보고 누름을 취소하지 않게(app.js 의 확인 버튼 pointerup 처리) */
+  touch-action: none;
 }
 
 /* 누르는 영역을 보이는 버튼보다 사방 10px 넓힌다. 살짝 빗나가 다이얼(숫자)이 바뀌는 일을 줄인다. */
@@ -1534,12 +1534,6 @@ button:focus-visible {
 .dial-submit:not(:disabled):active {
   transform: translateX(-50%) translateY(2px) scale(0.92);
   box-shadow: none;
-}
-
-/* 눌린 동안 버튼이 줄고(0.92배) 2px 내려가도 누르는 영역은 그대로 둔다. 줄면 가장자리를 누른 손가락이 뗄 때 버튼 밖이 돼
-   클릭이 안 되기 때문. 바깥 크기 = 원래 크기 / 0.92 (10px / 0.92 ≈ 10.9px, 버튼 폭·높이의 4.35%), 위는 2px / 0.92 만큼 더 */
-.dial-submit:not(:disabled):active::before {
-  inset: calc(-13px - 4.35%) calc(-10.9px - 4.35%) calc(-8.7px - 4.35%);
 }
 
 /* ── 결과 화면 ────────────────────────── */

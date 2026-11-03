@@ -1176,7 +1176,7 @@
     }, reducedMotion.matches ? 200 : 380);
   }
 
-  // 확인 뒤 손맛 연출: 숫자가 쾅 박히고, UP/DOWN 이 그 방향으로 튀어 나오고, 화면 위쪽이 그 방향으로 툭 밀렸다 돌아오고,
+  // 확인 뒤 손맛 연출: 숫자가 쾅 박히고, UP/DOWN 이 그 방향으로 튀어 나오고, 화면이 그 방향으로 툭 밀렸다 돌아오고,
   // 좁혀진 범위가 반짝인다. 동작 줄이기 설정이면 움직이지 않는다.
   function guessFeedback(isUp) {
     if (reducedMotion.matches) return;
@@ -1189,13 +1189,10 @@
       ],
       { duration: 340, easing: 'ease-out' },
     );
-    // 밀리는 건 위쪽(상태·힌트·기록)만. 다이얼·확인 버튼까지 밀면 연달아 누르던 손가락 아래에서 버튼이 움직여 클릭을 놓친다.
     const dy = isUp ? -7 : 7;
-    screens.play.querySelectorAll('.status, .hint-box, .history').forEach((el) => {
-      el.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(' + dy + 'px)', offset: 0.35 }, { transform: 'translateY(0)' }], {
-        duration: 260,
-        easing: 'ease-out',
-      });
+    screens.play.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(' + dy + 'px)', offset: 0.35 }, { transform: 'translateY(0)' }], {
+      duration: 260,
+      easing: 'ease-out',
     });
     const range = $('range');
     range.classList.remove('narrowed');
@@ -1358,6 +1355,33 @@
   }
 
   $('guess-form').addEventListener('submit', submitGuess);
+  // 확인 버튼은 클릭을 기다리지 않고 손을 뗄 때 바로 낸다. 화면 전체가 touch-action: pan-x pan-y(joypack.js 의 blockZoom)라
+  // 누르는 동안 손가락이 몇 px 만 밀려도 브라우저가 스크롤로 보고 누름을 취소해(클릭 없음) 가끔 안 눌렸다.
+  // 버튼은 touch-action: none 으로 스크롤 판단에서 빼고, 뗀 곳이 버튼 둘레(SUBMIT_SLOP) 안이면 낸다. 키보드 Enter·Space 는 클릭 그대로.
+  const submitButton = $('guess-form').querySelector('.dial-submit');
+  const SUBMIT_SLOP = 16;
+  let submitPointer = null;
+  let pointerSubmitAt = 0;
+  submitButton.addEventListener('pointerdown', (event) => {
+    if (event.button !== 0) return;
+    submitPointer = event.pointerId;
+    submitButton.setPointerCapture(event.pointerId);
+  });
+  submitButton.addEventListener('pointercancel', () => (submitPointer = null));
+  submitButton.addEventListener('pointerup', (event) => {
+    if (event.pointerId !== submitPointer) return;
+    submitPointer = null;
+    const r = submitButton.getBoundingClientRect();
+    const x = event.clientX;
+    const y = event.clientY;
+    if (x < r.left - SUBMIT_SLOP || x > r.right + SUBMIT_SLOP || y < r.top - SUBMIT_SLOP || y > r.bottom + SUBMIT_SLOP) return;
+    pointerSubmitAt = Date.now();
+    $('guess-form').requestSubmit();
+  });
+  // 방금 손을 떼서 낸 뒤 뒤따라오는 클릭은 두 번 내지 않게 막는다
+  submitButton.addEventListener('click', (event) => {
+    if (Date.now() - pointerSubmitAt < 800) event.preventDefault();
+  });
   // 다이얼: 누른 채 끌어서 고르고, 키보드는 화살표 1, Page Up/Down 10, Home/End 양 끝, Enter 제출.
   const dial = $('dial');
   dial.querySelector('.dial-track').setAttribute('d', dialArc(DIAL_END));
