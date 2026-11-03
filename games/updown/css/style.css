@@ -957,6 +957,12 @@ button:focus-visible {
   border-radius: 999px;
   /* 고르는 점이 움직이는 좌우 여백(app.js 의 barPos). 막대색은 여백까지 채워 점이 늘 막대 안에 있다. 눈금이 나오면 0 */
   --bar-pad: 7px;
+  /* 고르는 점·칠한 칸 색: 막대색·흰 눈금과 다른 금색. 다크는 막대가 밝아 막대 위 글자색(진한 색) */
+  --bar-pick: var(--gold-300);
+}
+
+:root[data-theme='dark'] .range-bar {
+  --bar-pick: var(--text-on-action);
 }
 
 .range-bar.ticks {
@@ -999,7 +1005,7 @@ button:focus-visible {
   width: 8px;
   height: 8px;
   translate: -50% -50%;
-  background: #fff;
+  background: var(--bar-pick);
   border-radius: 50%;
   box-shadow: 0 0 0 1.5px var(--text), 0 1px 3px rgb(0 0 0 / 0.3);
   transition: left 0.18s ease-out;
@@ -1010,14 +1016,14 @@ button:focus-visible {
   transition: left 0.45s cubic-bezier(0.2, 1.2, 0.4, 1);
 }
 
-/* 눈금이 나오면 점 대신 고른 숫자의 칸 하나를 칠한다(칸 폭 = 막대 / --cells, 가운데가 고른 자리) */
+/* 눈금이 나오면 점 대신 고른 숫자의 칸 하나를 칠한다(칸 폭 = 막대 / --cells, 가운데가 고른 자리).
+   위아래 2px·눈금 선 1px 씩 안쪽으로 줄여 막대 바깥 테두리와 눈금 선이 칠한 칸 둘레에 그대로 보인다 */
 .range-bar.ticks .range-bar-pick {
-  top: 0;
-  width: calc(100% / var(--cells, 1));
-  height: 100%;
+  top: 2px;
+  width: calc(100% / var(--cells, 1) - 2px);
+  height: calc(100% - 4px);
   translate: -50% 0;
-  background: rgb(255 255 255 / 0.92);
-  border-radius: 0;
+  border-radius: 2px;
   box-shadow: none;
 }
 
