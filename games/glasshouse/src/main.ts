@@ -268,9 +268,34 @@ function play(level: number | 'daily'): void {
   };
   poke();
 
+  // 드래그 한 번 = 한 칸. 앞 걸음이 움직이는 중에 들어온 드래그는 버리지 않고 2개까지 줄 세워 이어 간다
+  const STEP_GAP = 90;
+  let queued: Dir[] = [];
+  let queueTimer: ReturnType<typeof setTimeout> | null = null;
+  let lastStep = 0;
   const stopWalk = () => {
     if (walking) clearTimeout(walking);
     walking = null;
+    if (queueTimer) clearTimeout(queueTimer);
+    queueTimer = null;
+    queued = [];
+  };
+  const pump = () => {
+    queueTimer = null;
+    const d = queued.shift();
+    if (d === undefined) return;
+    lastStep = performance.now();
+    move(d);
+    if (queued.length) queueTimer = setTimeout(pump, STEP_GAP);
+  };
+  const swipeStep = (d: Dir) => {
+    if (walking) stopWalk();
+    if (queued.length >= 2) return;
+    queued.push(d);
+    if (queueTimer) return;
+    const wait = STEP_GAP - (performance.now() - lastStep);
+    if (wait <= 0) pump();
+    else queueTimer = setTimeout(pump, wait);
   };
 
   const move = (dir: Dir) => {
@@ -412,23 +437,22 @@ function play(level: number | 'daily'): void {
       move(d);
     } else if (e.key === 'r' || e.key === 'R') restart();
   };
-  // 판 위에서 밀기(한 칸 · 손을 떼지 않고 계속 밀면 일정 거리마다 한 칸 더) 또는 칸 누르기(옆 칸이면 한 걸음, 멀면 걸어감)
+  // 판 위에서 드래그(한 번에 한 칸: 20px 를 넘는 순간 가고, 손을 뗄 때까지 더 가지 않음. 칸 크기와 상관없이 같은 거리)
+  // 또는 칸 누르기(옆 칸이면 한 걸음, 멀면 걸어감)
+  const SWIPE_PX = 20;
   let start: { x: number; y: number; id: number; moved: boolean } | null = null;
-  const cellPx = () => view.boardHost.querySelector<HTMLElement>('.board')!.getBoundingClientRect().width / game.board.w;
   const onDown = (e: PointerEvent) => {
     if (paused || game.done) return;
     start = { x: e.clientX, y: e.clientY, id: e.pointerId, moved: false };
     view.boardHost.setPointerCapture(e.pointerId);
   };
   const onMove = (e: PointerEvent) => {
-    if (!start || e.pointerId !== start.id) return;
+    if (!start || start.moved || e.pointerId !== start.id) return;
     const dx = e.clientX - start.x;
     const dy = e.clientY - start.y;
-    const need = Math.max(22, cellPx() * 0.55);
-    if (Math.max(Math.abs(dx), Math.abs(dy)) < need) return;
-    stopWalk();
-    move(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 1 : 3) : dy > 0 ? 2 : 0);
-    start = { ...start, x: e.clientX, y: e.clientY, moved: true };
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < SWIPE_PX) return;
+    start.moved = true;
+    swipeStep(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 1 : 3) : dy > 0 ? 2 : 0);
   };
   const onUp = (e: PointerEvent) => {
     if (!start || e.pointerId !== start.id) return;
