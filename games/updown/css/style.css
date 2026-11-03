@@ -1108,6 +1108,12 @@ button:focus-visible {
   color: var(--success);
 }
 
+/* 남은 숫자가 하나라 자동으로 맞히기 직전 안내(app.js 의 autoLastOne). UP/DOWN 보다 작고 차분하게 */
+.hint.last {
+  font-size: min(1.5rem, 3.6 * var(--vh));
+  color: var(--text-muted);
+}
+
 /* 온도 힌트: 힌트 아래 줄의 알약. 가까울수록 따뜻한 색 */
 .hint-box {
   flex-wrap: wrap;

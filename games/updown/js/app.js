@@ -18,6 +18,7 @@
   let newBest = false;
   let updateReady = false; // 새 버전 서비스 워커가 화면을 넘겨받았다. 홈으로 갈 때 새로 고친다.
   let pick = null; // 다이얼로 고른 숫자. null 이면 다음 렌더링 때 범위 최솟값(왼쪽 끝)에서 시작한다.
+  let autoGame = null; // 남은 숫자가 하나라 자동으로 맞히는 중인 판(autoLastOne). 그동안 확인은 무시한다.
   // 하트·난이도가 있던 예전 버전의 최고 기록·등록 대기·순위표는 점수 방식과 비교할 수 없어 한 번 지운다.
   ['updown.best', 'updown.pending', 'updown.rankings'].forEach((key) => {
     try {
@@ -1115,6 +1116,7 @@
 
   function submitGuess(event) {
     event.preventDefault();
+    if (autoGame === game) return;
     // 다이얼은 좁혀진 범위 안의 숫자만 고르므로 검증에 걸리는 일은 없다(게임이 끝난 뒤 제출 등은 무시).
     if (!UpDown.guess(game, pick).ok) return;
 
@@ -1130,12 +1132,42 @@
     renderPlay(true);
     guessFeedback(isUp);
     $('dial').focus();
+    if (game.low === game.high) autoLastOne();
+  }
+
+  // 남은 숫자가 하나가 되면 고를 것이 없으니 자동으로 맞힌다. UP/DOWN 연출이 끝나면 큰 숫자를 남은 숫자로 바꾸고
+  // "남은 숫자 하나"를 보여 줘 왜 자동으로 넘어가는지 알게 한 뒤, 그 숫자를 낸 것으로 처리한다(시도 1번으로 센다).
+  // 시간은 하나로 좁혀진 순간에 멈춰 기다리는 동안은 기록에 들어가지 않는다. 그사이 홈으로 나가면 멈춘다.
+  const AUTO_SHOW = 450;
+  const AUTO_SUBMIT = 1050;
+  function autoLastOne() {
+    const forGame = game;
+    const at = Date.now();
+    autoGame = game;
+    const alive = () => game === forGame && screen === 'play';
+    setTimeout(() => {
+      if (!alive()) return;
+      $('hint-value').textContent = game.low;
+      const hint = $('hint');
+      hint.textContent = t('play.lastOne');
+      hint.className = 'hint last';
+      if (!reducedMotion.matches) {
+        $('hint-value').animate([{ transform: 'scale(1.3)', opacity: 0.3 }, { transform: 'scale(1)', opacity: 1 }], { duration: 260, easing: 'ease-out' });
+      }
+    }, AUTO_SHOW);
+    setTimeout(() => {
+      if (!alive()) return;
+      autoGame = null;
+      pick = game.low;
+      UpDown.guess(game, pick);
+      winGuess(at);
+    }, AUTO_SUBMIT);
   }
 
   // 맞힌 순간: 시간을 멈추고, 맞힌 숫자와 "정답!"을 잠깐 보여 준 뒤 결과 화면으로 간다(막대는 움직이지 않는다).
   // 그사이 홈으로 나가면 결과 화면은 띄우지 않는다.
-  function winGuess() {
-    game.time = Date.now() - gameStartedAt;
+  function winGuess(at = Date.now()) {
+    game.time = at - gameStartedAt;
     const forGame = game;
     renderPlay(true);
     UpDownFx.play('edge');
