@@ -31,7 +31,6 @@ const ko = {
   'pick.open': '아직 안 핌',
   'level.name': '{n}번째 꽃',
   'pick.cleared': '꽃잎 {p}장',
-  'legend.spot': '햇살 자리',
   'legend.rule': '창 앞 햇살 자리마다 화분을 놓으면 꽃이 펴요',
 
   'hud.pause': '일시정지',
@@ -174,7 +173,6 @@ const en: Record<MessageKey, string> = {
   'pick.open': 'not yet bloomed',
   'level.name': 'Flower {n}',
   'pick.cleared': '{p} petals',
-  'legend.spot': 'Sunny spot',
   'legend.rule': 'Put a pot on every sunny spot by a window to bloom',
 
   'hud.pause': 'Pause',

@@ -715,7 +715,7 @@ export function gameScreen(opts: { level: number | null; flower: FlowerId; par: 
         </div>
       </div>
       <div class="dock">
-        <ul class="legend"><li><span><b><span class="sun-ico">${SUN_ICON}</span>${t('legend.spot')}</b> ${t('legend.rule')}</span></li></ul>
+        <ul class="legend"><li><span class="legend-text"><span class="sun-ico">${SUN_ICON}</span>${t('legend.rule')}</span></li></ul>
       </div>
     </main>`);
   const q = <T extends HTMLElement = HTMLElement>(s: string) => el.querySelector<T>(s)!;

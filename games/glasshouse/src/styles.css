@@ -1697,11 +1697,11 @@ h2 .icon-pic {
   display: flex;
   align-items: center;
 }
-.legend b {
+/* 설명 글은 예전 "햇살 자리" 이름표와 같은 굵기(이름표는 하나뿐이라 뺌, v0.13.2). 좁은 폰에서는 줄바꿈 */
+.legend-text {
   font-weight: 700;
-  white-space: nowrap;
 }
-/* 햇살 아이콘은 "햇살 자리" 바로 앞, 글 줄 안에 함께(판의 햇살 자리 표시와 같은 그림) */
+/* 햇살 아이콘은 설명 글 바로 앞, 글 줄 안에 함께(판의 햇살 자리 표시와 같은 그림) */
 .legend .sun-ico {
   width: 1.25em;
   height: 1.25em;
