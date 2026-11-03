@@ -611,10 +611,44 @@ button:focus-visible {
   box-shadow: 0 6px 16px var(--shadow-brand), 0 1px 3px rgb(0 0 0 / 0.12);
 }
 
+/* 제목 + 게임 설명(조이팩 카드와 같은 문구) */
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+}
+
+#screen-start h1 {
+  font-size: 2.5rem;
+  line-height: 1.2;
+}
+
+.brand-desc {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
 @media (max-height: 600px) {
   .brand {
     flex-direction: row;
     gap: 12px;
+  }
+
+  .brand-text {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  #screen-start h1 {
+    font-size: 2rem;
+  }
+
+  .brand-desc {
+    font-size: 0.875rem;
   }
 
   .logo {
@@ -962,6 +996,25 @@ button:focus-visible {
 
 .range-bar-mark.down {
   background: var(--down);
+}
+
+/* 다이얼로 고르는 중인 자리: 막대 안 작은 흰 점. 다이얼을 돌리면 부드럽게 미끄러진다 */
+.range-bar-pick {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  translate: -50% -50%;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1.5px var(--text), 0 1px 3px rgb(0 0 0 / 0.3);
+  transition: left 0.18s ease-out;
+  pointer-events: none;
+}
+
+.range-bar-pick[hidden] {
+  display: none;
 }
 
 /* 맞히면 정답 한 칸으로 모여 초록으로 터진다 */
@@ -2502,7 +2555,11 @@ h1.lost {
   }
 
   #screen-start h1 {
-    font-size: 2.6rem;
+    font-size: 3.2rem;
+  }
+
+  .brand-desc {
+    font-size: 1.125rem;
   }
 
   /* 로고·제목과 카드를 화면 가운데에 함께 모은다. */
@@ -2571,7 +2628,8 @@ h1.lost {
 @media (prefers-reduced-motion: reduce) {
   button,
   .dial-thumb,
-  .dial-fill {
+  .dial-fill,
+  .range-bar-pick {
     transition: none;
   }
 

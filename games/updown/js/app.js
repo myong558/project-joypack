@@ -380,6 +380,7 @@
       bar.appendChild(mark);
     });
     bar.classList.toggle('won', won && animate);
+    $('range-bar-pick').hidden = game.status !== 'playing';
   }
 
   // 정답 축하 색종이. big 이면(최고 기록 갱신) 양쪽 아래 모서리에서도 쏘아 올려 더 크게 터진다.
@@ -1055,6 +1056,7 @@
     $('dial-thumb').setAttribute('cx', x);
     $('dial-thumb').setAttribute('cy', y);
     $('dial-fill').setAttribute('d', dialArc(angle));
+    $('range-bar-pick').style.left = ((pick - 0.5) / game.max) * 100 + '%';
 
     const dial = $('dial');
     dial.setAttribute('aria-valuemin', game.low);

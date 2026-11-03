@@ -291,7 +291,11 @@
             <path class="logo-down" d="M256 430 389 282H123z" fill="url(#logo-down)" stroke="url(#logo-down)"/>
           </g>
         </svg>
-        <h1 data-i18n="app.title"></h1>
+        <div class="brand-text">
+          <h1 data-i18n="app.title"></h1>
+          <!-- 조이팩 첫 화면 카드와 같은 게임 설명(games.json 의 desc) -->
+          <p class="brand-desc" data-i18n="app.desc"></p>
+        </div>
       </div>
       <div id="difficulty-list" class="difficulty-list"></div>
     </section>
@@ -335,6 +339,8 @@
         <p class="play-level" role="group" data-i18n-aria-label="play.range"><span id="range"></span></p>
         <div id="range-bar" class="range-bar" aria-hidden="true">
           <span id="range-bar-live" class="range-bar-live"></span>
+          <!-- 다이얼로 고르는 중인 숫자 자리(숫자는 아래 상자에 있어 위치만). app.js 의 setPick 이 옮긴다 -->
+          <span id="range-bar-pick" class="range-bar-pick"></span>
         </div>
       </div>
 
