@@ -366,8 +366,10 @@
   const BAR_TICKS = 20;
   let barView = { from: 0.5, to: 1.5 };
 
+  // 좌우 여백(--bar-pad)을 뺀 막대 안쪽 기준 자리
   function barPos(view, value) {
-    return ((value - view.from) / (view.to - view.from)) * 100 + '%';
+    const r = (value - view.from) / (view.to - view.from);
+    return 'calc(var(--bar-pad) + (100% - 2 * var(--bar-pad)) * ' + r + ')';
   }
 
   function barViewFor() {
@@ -383,7 +385,10 @@
     bar.classList.toggle('instant', !animate);
     const cells = game.high - game.low + 1;
     live.style.setProperty('--cells', cells);
-    live.classList.toggle('ticks', cells > 1 && cells <= BAR_TICKS);
+    const ticks = cells > 1 && cells <= BAR_TICKS;
+    live.classList.toggle('ticks', ticks);
+    // 눈금이 나오면 좌우 여백 없이 꽉 채운다(style.css 의 .range-bar.ticks)
+    bar.classList.toggle('ticks', ticks);
     // 확대하는 동안은 고르는 자리 점도 막대와 같은 속도로 움직인다. 바로 그린 뒤에는 다시 움직임을 켠다.
     const zoom = animate && (prev.from !== barView.from || prev.to !== barView.to);
     bar.classList.toggle('zoom', zoom);

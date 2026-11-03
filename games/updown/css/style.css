@@ -955,11 +955,18 @@ button:focus-visible {
   background: var(--surface-alt);
   border: 1px solid var(--line);
   border-radius: 999px;
+  /* 채움 막대 좌우 여백. 양쪽이 늘 같다(app.js 의 barPos 도 이 안쪽 기준). 눈금이 나오면 0 */
+  --bar-pad: 4px;
+}
+
+.range-bar.ticks {
+  --bar-pad: 0px;
 }
 
 .range-bar-live {
   position: absolute;
-  inset: 0;
+  inset-block: 0;
+  inset-inline: var(--bar-pad);
   overflow: hidden;
   background: var(--action);
   border-radius: 999px;
