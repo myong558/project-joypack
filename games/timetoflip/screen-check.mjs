@@ -17,7 +17,7 @@ const MATCH_ONE = `(() => {
 
 const play = async (p) => {
   await p.click('[data-mode="classic"]');
-  await p.wait(2400); // 미리 보기가 끝나 카드가 덮일 때까지
+  await p.wait(5600); // 뒷면 0.6초 + 3, 2, 1 2.4초 + 1판 미리 보기 2초가 끝나 카드가 덮일 때까지
 };
 
 export const screens = [
@@ -27,6 +27,9 @@ export const screens = [
   { name: 'dex', setup: SAVE, go: (p) => p.click('[data-dex]') },
   // 그림 카드를 골라 큰 카드가 액자 안에서 앞면으로 뒤집힌 모습(제목·설명 포함)
   { name: 'dex-card', setup: SAVE, go: async (p) => (await p.click('[data-dex]'), await p.click('.dex-item[data-face="wave"]'), p.wait(600)) },
+  // 판 시작 안내(판 이름 · 큰 안내 한 줄 · 3, 2, 1). 5판은 닮은 카드 경고 한 줄이 더해진 가장 긴 안내(설정 TEST 칸 판 바로가기)
+  { name: 'countdown', setup: SAVE, go: async (p) => (await p.click('[data-mode="classic"]'), p.wait(1000)) },
+  { name: 'countdown-5', setup: SAVE, go: async (p) => (await p.click('.settings-btn'), await p.wait(300), await p.click('[data-from="5"]'), p.wait(1000)) },
   { name: 'play', setup: SAVE, go: async (p) => (await play(p), p.eval(MATCH_ONE), p.wait(300)) },
   { name: 'pause', setup: SAVE, go: async (p) => (await play(p), p.click('.pause-btn')) },
   // 짝 하나를 맞혀 점수를 낸 뒤 시간(40초 + 보너스)이 다 가면 결과 화면. 순위표가 비어 있으면 등록 칸이 함께 나온다(가장 긴 결과)

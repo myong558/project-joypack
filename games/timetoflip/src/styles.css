@@ -675,30 +675,6 @@ h1 .word:nth-child(2) .tc-in {
   opacity: 1;
   transform: none;
 }
-/* 미리 보기 동안 위 가운데 짧은 안내(콤보 자리를 빌려 씀: 미리 보기 동안은 콤보가 없다) */
-.hud-note {
-  grid-area: combo;
-  justify-self: center;
-  min-width: 0;
-  max-width: 100%;
-  margin: 0;
-  font-size: 15px;
-  line-height: 1.05;
-  text-align: center;
-  color: var(--accent-ink);
-  /* 특수 카드 첫 안내는 두 줄(이름 / 효과): 좁은 휴대폰에서도 콤보 자리 안에 들어가게 */
-  white-space: pre-line;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-.hud-note.on {
-  opacity: 1;
-}
-.hud-note.warn {
-  color: var(--danger-ink);
-}
 /* 미리 보기(외우는 시간): 시간 막대가 레몬색으로 줄어들고, 스톱워치 대신 눈 */
 .game.peeking .timer-bar {
   background: linear-gradient(90deg, #f2a300, #ffd84f);
@@ -1344,15 +1320,32 @@ h1 .word:nth-child(2) .tc-in {
   font-size: 30px;
   line-height: 1.2;
 }
+/* 모든 판 같은 안내 한 줄: 2.4초 안에 읽히게 크게. 좁은 화면은 두 줄로 */
 .cd-note {
-  max-width: min(86vw, 22em);
-  margin-top: 6px !important;
-  padding: 0.3em 0.9em;
-  border-radius: 12px;
+  max-width: min(86vw, 12em);
+  margin-top: 8px !important;
+  padding: 0.3em 0.8em;
+  border-radius: 16px;
   background: var(--panel);
   box-shadow: 0 4px 12px rgb(42 36 51 / 0.18);
-  font-size: 16px;
+  font-size: clamp(20px, 6.4vw, 28px);
+  line-height: 1.3;
   text-align: center;
+  text-wrap: balance;
+  word-break: keep-all;
+}
+/* 닮은 카드가 나오는 판(5·8판)만: 큰 안내 밑 짧은 경고 */
+.cd-warn {
+  margin-top: 6px !important;
+  padding: 0.2em 0.8em;
+  border-radius: 99px;
+  background: var(--panel);
+  box-shadow: 0 4px 12px rgb(42 36 51 / 0.18);
+  color: var(--danger-ink);
+  font-size: clamp(16px, 4.6vw, 20px);
+}
+.cd-warn[hidden] {
+  display: none;
 }
 .cd-num {
   min-height: 1.1em;
@@ -2388,6 +2381,14 @@ h1 .word:nth-child(2) .tc-in {
 /* ---------- 가로로 눕힌 휴대폰(높이 560 미만): 두 칸 배치 ---------- */
 
 @media (orientation: landscape) and (max-height: 559px) {
+  /* 낮은 가로 화면: 판 시작 안내가 위로 잘리지 않게 안내는 한 줄로 넓히고 숫자를 줄인다 */
+  .cd-note {
+    max-width: 90%;
+    font-size: 20px;
+  }
+  .cd-num {
+    font-size: 64px;
+  }
   .start,
   .result {
     flex-direction: row;

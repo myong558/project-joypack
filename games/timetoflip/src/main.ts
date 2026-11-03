@@ -2,10 +2,9 @@ import '@joypack/shared/topbar.css';
 import './styles.css';
 import { Sound } from './audio';
 import { Game, type GameEvent, type GameResult } from './game/engine';
-import { FACE_SETS, type FaceId, type ItemId } from './game/faces';
+import { type FaceId, type ItemId } from './game/faces';
 import { dateKey, dateSeed, mulberry32, randomSeed } from './game/rng';
 import { START_MS, WARN_MS } from './game/stages';
-import { setName } from './cards';
 import { preloadFaces } from './ui/art';
 import { setLang, t } from './i18n';
 import { fetchBoard, submitEntry } from './online';
@@ -183,7 +182,6 @@ function play(mode: Mode, from = 1): void {
     }
   };
 
-  const HINTS = { clock: 'hint.clock', peek: 'hint.peek', gold: 'hint.gold' } as const;
   // 특수 카드·황금 카드를 처음 맞히면 도감 "특수 카드" 칸에 남긴다
   const recordItem = (item: ItemId, el: HTMLElement) => {
     if (save.items.includes(item)) return;
@@ -192,8 +190,7 @@ function play(mode: Mode, from = 1): void {
     writeSave(save);
   };
 
-  let readyInfo: { stage: string; note: string } | null = null;
-  let noteClass = 'hud-note';
+  let readyInfo: { stage: string; note: string; warn: string } | null = null;
   const handle = (e: GameEvent) => {
     switch (e.type) {
       case 'deal': {
@@ -201,47 +198,23 @@ function play(mode: Mode, from = 1): void {
         view.el.classList.remove('revealing');
         board.deal(e.cards, e.def);
         sound.play('deal');
-        // 미리 보기 동안 위 가운데 짧은 안내: 닮은 카드가 처음 나오거나(5판) 늘어나는 판(8판)은 경고,
-        // 특수 카드(시계·돋보기)·황금 카드가 이 기기에서 처음 깔리면 그 효과 두 줄(한 번만, 새 묶음 이름보다 먼저),
-        // 새 묶음이 열리는 판은 그 이름, 1판은 "위치를 기억하세요". 남은 외울 시간은 시간 막대가 보여 준다(renderHud)
-        const open = FACE_SETS[e.stage - 1];
+        // 판 시작 안내: 카드가 뒷면으로 깔린 동안 판 가운데에 판 이름 + 큰 안내 한 줄 + 3, 2, 1(renderHud).
+        // 안내는 모든 판에서 같은 문장(2.4초 안에 읽히게). 닮은 카드가 처음 나오거나(5판) 늘어나는 판(8판)만 짧은 경고 한 줄을 더한다.
+        // 특수·황금 카드 효과는 맞힐 때 화면에 바로 보이고 도감에 설명이 있어 따로 안내하지 않는다
         const twinsUp = e.stage === 5 || e.stage === 8;
-        const itemOf = (c: (typeof e.cards)[number]): ItemId | null => c.special ?? (c.gold ? 'gold' : null);
-        const firstItem = twinsUp ? undefined : e.cards.map(itemOf).find((i): i is ItemId => !!i && !save.itemHints.includes(i));
-        if (firstItem) {
-          save.itemHints.push(firstItem);
-          writeSave(save);
-        }
-        const note = twinsUp
-          ? t('banner.twins')
-          : firstItem
-            ? t(HINTS[firstItem])
-            : e.stage > 1 && open
-              ? t('banner.newSet', { set: setName(open.id) })
-              : e.stage === 1
-                ? t('hud.peekHint')
-                : '';
-        // 위 안내 줄은 카드가 열릴 때 켠다(3, 2, 1 동안은 판 가운데 안내와 겹치지 않게)
-        view.hud.note.textContent = note;
-        view.hud.note.className = 'hud-note';
-        noteClass = `hud-note${note ? ' on' : ''}${twinsUp ? ' warn' : ''}`;
-        // 판 시작 안내: 카드가 뒷면으로 깔린 동안 판 가운데에 판 이름 + 짧은 설명 + 3, 2, 1(renderHud).
-        // 1판은 게임 방법, 그 뒤는 이 판의 안내(닮은 카드·특수 카드·새 묶음), 없으면 기본 설명
-        readyInfo = { stage: t('hud.stage', { n: e.stage }), note: e.stage === 1 ? t('ready.first') : note || t('ready.note') };
+        readyInfo = { stage: t('hud.stage', { n: e.stage }), note: t('ready.note'), warn: twinsUp ? t('banner.twins') : '' };
         view.showCountdown(readyInfo, 0);
         break;
       }
       case 'peekStart':
         // 3, 2, 1 이 끝나면 카드가 열려 외우는 시간
         view.showCountdown(null);
-        view.hud.note.className = noteClass;
         board.startPeek();
         sound.play('flip');
         break;
       case 'peekEnd':
         board.endPeek();
         sound.play('flip');
-        view.hud.note.className = 'hud-note';
         break;
       case 'flip':
         sound.play('flip');

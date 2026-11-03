@@ -16,8 +16,6 @@ export interface SaveData {
   dex: FaceId[];
   /** 도감 특수 카드 칸: 한 번이라도 맞힌 특수 카드·황금 카드 */
   items: ItemId[];
-  /** 게임 중 처음 만날 때 한 번만 띄우는 특수 카드 안내를 이미 본 것(기록 지우기와 상관없이 남김) */
-  itemHints: ItemId[];
   /** 지금까지 맞힌 짝 수 */
   pairs: number;
   /** 이 기기의 순위표 사본(클래식·오늘의 챌린지) */
@@ -44,7 +42,6 @@ function defaults(): SaveData {
     theme: 'system',
     skin: 'auto',
     playerName: '',
-    itemHints: [],
   };
 }
 
@@ -66,7 +63,9 @@ export function loadSave(): SaveData {
     const renamed: Record<string, string> = { arch: 'moon', ...RENAMED_FACES };
     data.dex = [...new Set((Array.isArray(data.dex) ? (data.dex as string[]) : []).map((f) => renamed[f] ?? f))] as FaceId[];
     data.dex = data.dex.filter((f) => ALL_FACES.includes(f));
-    for (const k of ['items', 'itemHints'] as const) data[k] = (Array.isArray(data[k]) ? data[k] : []).filter((i) => ITEMS.includes(i));
+    data.items = (Array.isArray(data.items) ? data.items : []).filter((i) => ITEMS.includes(i));
+    // v1.3.3 에서 특수 카드 첫 안내를 없앴다(판 시작 안내는 모든 판 같은 문장). 예전 저장의 itemHints 는 버림
+    delete (data as { itemHints?: unknown }).itemHints;
     // v0.11.0 에서 도감의 황금 ★ 기록을 없앴다(예전 저장의 gold 는 버림)
     delete (data as { gold?: unknown }).gold;
     for (const k of ['best', 'bestStage', 'pairs'] as const) if (!Number.isFinite(data[k])) data[k] = 0;
