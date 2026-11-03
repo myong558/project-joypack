@@ -4,7 +4,7 @@ import { Sound } from './audio';
 import { Game, type GameEvent, type GameResult } from './game/engine';
 import { type FaceId, type ItemId } from './game/faces';
 import { dateKey, dateSeed, mulberry32, randomSeed } from './game/rng';
-import { START_MS, WARN_MS } from './game/stages';
+import { WARN_MS } from './game/stages';
 import { preloadFaces } from './ui/art';
 import { setLang, t } from './i18n';
 import { fetchBoard, submitEntry } from './online';
@@ -42,6 +42,8 @@ function vibrate(pattern: number | number[]): void {
 
 /** 초 단위 글(1.5 → "1.5", 2 → "2") */
 const secs = (ms: number) => String(Math.round(ms / 100) / 10);
+/** 판을 깬 뒤 쉬는 시간(1.1초) 중 남은 시간 막대가 0까지 줄며 점수로 바뀌는 시간. 남은 0.3초는 빈 막대·오른 점수를 보여 준다 */
+const DRAIN_MS = 800;
 
 function cacheBoard(mode: Mode, today: string, entries: RankEntry[]): void {
   if (mode === 'classic') save.rankings.classic = entries;
@@ -170,6 +172,8 @@ function play(mode: Mode, from = 1): void {
     timers.add(id);
   };
   const cardEl = (index: number) => board.cards[index];
+  /** 마지막으로 맞힌 카드. 판을 깨면 그 자리에 "남은 시간 → 점수"를 띄운다 */
+  let lastMatch: HTMLElement | null = null;
   const dexBefore = new Set(save.dex);
 
   // 맞힌 그림은 그 자리에서 도감에 남긴다(판 도중에 나가도 사라지지 않게)
@@ -190,19 +194,28 @@ function play(mode: Mode, from = 1): void {
     writeSave(save);
   };
 
-  let readyInfo: { stage: string; note: string; warn: string } | null = null;
+  let readyInfo: { stage: string; time: string; note: string; warn: string } | null = null;
+  /** 판을 깬 순간 남은 시간·그 시간으로 받은 점수. 쉬는 동안 막대가 줄며 점수가 오르는 연출(renderHud)에 쓴다 */
+  let clearInfo: { left: number; timePoints: number } | null = null;
   const handle = (e: GameEvent) => {
     switch (e.type) {
       case 'deal': {
+        clearInfo = null;
         board.reveal(false);
         view.el.classList.remove('revealing');
         board.deal(e.cards, e.def);
         sound.play('deal');
         // 판 시작 안내: 카드가 뒷면으로 깔린 동안 판 가운데에 판 이름 + 큰 안내 한 줄 + 3, 2, 1(renderHud).
         // 안내는 모든 판에서 같은 문장(2.4초 안에 읽히게). 닮은 카드가 처음 나오거나(5판) 늘어나는 판(8판)만 짧은 경고 한 줄을 더한다.
-        // 특수·황금 카드 효과는 맞힐 때 화면에 바로 보이고 도감에 설명이 있어 따로 안내하지 않는다
+        // 특수·황금 카드 효과는 맞힐 때 화면에 바로 보이고 도감에 설명이 있어 따로 안내하지 않는다.
+        // 판마다 시간이 달라(stages.ts STAGE_TIME) 판 이름 밑에 그 판의 제한 시간을 함께 보인다
         const twinsUp = e.stage === 5 || e.stage === 8;
-        readyInfo = { stage: t('hud.stage', { n: e.stage }), note: t('ready.note'), warn: twinsUp ? t('banner.twins') : '' };
+        readyInfo = {
+          stage: t('hud.stage', { n: e.stage }),
+          time: t('ready.time', { s: secs(e.def.timeMs) }),
+          note: t('ready.note'),
+          warn: twinsUp ? t('banner.twins') : '',
+        };
         view.showCountdown(readyInfo, 0);
         break;
       }
@@ -235,6 +248,7 @@ function play(mode: Mode, from = 1): void {
         vibrate(strong ? [45, 30, 60] : 35);
         board.match(a, b);
         const el = cardEl(b.index);
+        lastMatch = el;
         fx.ring(cardEl(a.index), a.gold ? 'gold' : '');
         fx.ring(el, a.gold ? 'gold' : '');
         fx.burst(el, a.gold ? ['#ffd84d', '#fff3a6', '#ff9f43'] : ['#ffffff', '#ffd166', '#7dd3fc'], strong ? 12 : 8);
@@ -278,9 +292,12 @@ function play(mode: Mode, from = 1): void {
         sound.play('clear');
         if (e.perfect) sound.play('perfect');
         vibrate([60, 50, 60, 50, 220]);
-        fx.banner(e.perfect ? t('banner.perfect', { s: secs(e.gain) }) : t('banner.clear', { n: e.stage }), e.perfect ? 'perfect' : 'clear');
+        fx.banner(e.perfect ? t('banner.perfect') : t('banner.clear', { n: e.stage }), e.perfect ? 'perfect' : 'clear');
         fx.shake('small');
         view.showMessage(`+${e.bonus.toLocaleString()}`, 'bonus');
+        clearInfo = { left: e.left, timePoints: e.timePoints };
+        // 남은 시간은 다음 판으로 넘어가지 않고 점수로 바뀐다: 마지막 짝 자리에 "남은 n초 → +점수"(짝 점수 팝업 뒤에)
+        if (e.timePoints > 0 && lastMatch) fx.popup(lastMatch, t('popup.timeScore', { s: secs(e.left), p: e.timePoints.toLocaleString() }), 'time', 250);
         later(900, () => game.phase !== 'peek' && view.showMessage(null));
         break;
       case 'pause':
@@ -309,13 +326,17 @@ function play(mode: Mode, from = 1): void {
   let lastCount = 0;
   const renderHud = () => {
     const { hud } = view;
+    // 판을 깬 뒤 쉬는 동안: 시간 막대가 0까지 줄어드는 만큼 남은 시간 점수가 위 점수 칸에 올라간다(남은 시간은 다음 판으로 넘어가지 않음)
+    const elapsed = game.clearElapsed;
+    const drain = clearInfo && elapsed >= 0 ? Math.min(1, elapsed / DRAIN_MS) : -1;
+    const score = drain >= 0 ? game.score - Math.round(clearInfo!.timePoints * (1 - drain)) : game.score;
     if (shown.stage !== game.stage) hud.stage.textContent = t('hud.stage', { n: game.stage });
-    if (shown.score !== game.score) hud.score.textContent = game.score.toLocaleString();
+    if (shown.score !== score) hud.score.textContent = score.toLocaleString();
     if (shown.combo !== game.combo) {
       hud.combo.textContent = game.combo >= 2 ? `${t('hud.combo')} ${game.combo}` : '';
       hud.combo.classList.toggle('on', game.combo >= 2);
     }
-    shown = { score: game.score, stage: game.stage, combo: game.combo };
+    shown = { score, stage: game.stage, combo: game.combo };
     // 3, 2, 1: 숫자가 바뀔 때 째깍 소리와 함께 판 가운데에 크게(카드는 아직 뒷면). 시간 막대는 외우는 시간이 꽉 찬 채로 기다린다
     const count = game.countdown;
     if (readyInfo && (game.phase === 'ready' || count)) {
@@ -337,12 +358,14 @@ function play(mode: Mode, from = 1): void {
       hud.time.textContent = String(Math.ceil(game.remaining / 1000));
       return;
     }
-    // 막대는 시작 시간(40초)이 꽉 찬 상태. 그보다 많이 모으면 가득 찬 채로 금빛(.over)이 되고 숫자로 남은 시간을 본다
-    const ratio = Math.max(0, Math.min(1, game.remaining / START_MS));
-    view.el.classList.toggle('over', game.remaining > START_MS);
+    // 막대는 그 판에 준 시간(timeMs)이 꽉 찬 상태. 판 안에서 그보다 많이 모으면 가득 찬 채로 금빛(.over)이 되고 숫자로 남은 시간을 본다
+    const full = game.def.timeMs;
+    const shownLeft = drain >= 0 ? clearInfo!.left * (1 - drain) : game.remaining;
+    const ratio = Math.max(0, Math.min(1, shownLeft / full));
+    view.el.classList.toggle('over', shownLeft > full);
     hud.bar.style.transform = `scaleX(${ratio.toFixed(4)})`;
     hud.mascot.style.setProperty('--at', ratio.toFixed(4));
-    const s = game.remaining / 1000;
+    const s = shownLeft / 1000;
     hud.time.textContent = s < 10 ? s.toFixed(1) : String(Math.ceil(s));
     const danger = game.phase === 'playing' && game.remaining <= WARN_MS;
     view.el.classList.toggle('danger', danger);

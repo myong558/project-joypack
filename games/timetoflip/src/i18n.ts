@@ -71,10 +71,11 @@ const ko = {
   'pause.resume': '계속하기',
   'pause.quit': '홈으로',
 
+  'ready.time': '제한 시간 {s}초',
   'ready.note': '짝이 되는 카드 위치를 기억하세요',
   'banner.twins': '닮은 카드 주의!',
   'banner.clear': '{n}판 클리어!',
-  'banner.perfect': '퍼펙트! +{s}초',
+  'banner.perfect': '퍼펙트!',
   'banner.combo': '{n}콤보 ×{m}',
   'popup.memory': '기억력!',
   'popup.lucky': '럭키!',
@@ -84,6 +85,7 @@ const ko = {
   'popup.new': 'NEW',
   'popup.time': '+{s}초',
   'popup.penalty': '−{s}초',
+  'popup.timeScore': '남은 {s}초 +{p}',
   'countdown.end': '시간 끝!',
 
   'mode.classic': '클래식',
@@ -208,10 +210,11 @@ const en: Record<MessageKey, string> = {
   'pause.resume': 'Resume',
   'pause.quit': 'Home',
 
+  'ready.time': 'Time limit {s}s',
   'ready.note': 'Remember where the matching pairs are',
   'banner.twins': 'Watch for look-alikes!',
   'banner.clear': 'Stage {n} clear!',
-  'banner.perfect': 'Perfect! +{s}s',
+  'banner.perfect': 'Perfect!',
   'banner.combo': '{n} combo ×{m}',
   'popup.memory': 'Memory!',
   'popup.lucky': 'Lucky!',
@@ -221,6 +224,7 @@ const en: Record<MessageKey, string> = {
   'popup.new': 'NEW',
   'popup.time': '+{s}s',
   'popup.penalty': '−{s}s',
+  'popup.timeScore': '{s}s left +{p}',
   'countdown.end': "Time's up!",
 
   'mode.classic': 'Classic',

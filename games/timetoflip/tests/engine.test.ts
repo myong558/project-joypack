@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { Game, buildCards, type GameEvent } from '../src/game/engine';
 import { mulberry32 } from '../src/game/rng';
-import { COUNT_MS, DEAL_MS, MAX_MS, MIN_GAIN_RATE, PEEK_REVEAL, START_MS, comboMultiplier, stageDef } from '../src/game/stages';
+import { COUNT_MS, DEAL_MS, MAX_MS, MIN_GAIN_RATE, PEEK_REVEAL, TIME_POINTS, comboMultiplier, stageDef } from '../src/game/stages';
+
+/** 1판에 주는 시간 */
+const START_MS = stageDef(1).timeMs;
 
 function setup(seed = 1) {
   const game = new Game(mulberry32(seed));
@@ -205,16 +208,51 @@ describe('뒤집기', () => {
     expect(game.remaining).toBe(before - 1000);
   });
 
-  it('판을 다 맞히면 보너스와 시간을 받고 다음 판으로 간다(시간은 최대치까지)', () => {
+  it('판을 다 맞히면 남은 시간이 점수로 바뀌고, 다음 판은 그 판의 시간으로 새로 시작한다', () => {
     const { game, events } = setup();
+    game.tick(game.def.viewMs + 3000); // 미리 보기가 끝나고 3초 흐름
     clearStage(game);
     const clear = events.find((e) => e.type === 'stageClear');
     expect(clear && clear.type === 'stageClear' && clear.perfect).toBe(true);
+    if (clear?.type !== 'stageClear') return;
+    expect(clear.left).toBe(game.remaining);
+    expect(clear.left).toBeLessThanOrEqual(MAX_MS);
+    expect(clear.timePoints).toBe(Math.round((clear.left / 1000) * TIME_POINTS));
+    expect(clear.bonus).toBe(clear.timePoints + 200 + 500);
     expect(game.phase).toBe('clear');
-    expect(game.remaining).toBeLessThanOrEqual(MAX_MS);
     game.tick(1200);
     expect(game.stage).toBe(2);
     expect(game.phase).toBe('ready');
+    expect(game.remaining).toBe(stageDef(2).timeMs);
+  });
+
+  it('판을 깬 뒤 쉬는 동안 지난 시간을 알려 준다(일시정지해도 이어서, 쉬는 중이 아니면 -1)', () => {
+    const { game } = setup();
+    expect(game.clearElapsed).toBe(-1);
+    clearStage(game);
+    expect(game.clearElapsed).toBe(0);
+    game.tick(300);
+    game.pause();
+    expect(game.clearElapsed).toBe(300);
+    game.resume();
+    game.tick(2000);
+    expect(game.phase).toBe('ready');
+    expect(game.clearElapsed).toBe(-1);
+  });
+
+  it('몇 판부터 시작해도 그 판의 시간으로 시작한다(출시 전 확인용 바로 시작 = 실제 판)', () => {
+    for (const from of [2, 5, 9, 20]) {
+      const game = new Game(mulberry32(from));
+      game.start(from);
+      expect(game.stage).toBe(from);
+      expect(game.remaining).toBe(stageDef(from).timeMs);
+    }
+  });
+
+  it('판별 시간: 9판부터 줄어들다가 바닥에서 멈춘다', () => {
+    expect(stageDef(9).timeMs).toBeLessThan(stageDef(8).timeMs);
+    expect(stageDef(40).timeMs).toBe(stageDef(30).timeMs);
+    expect(stageDef(40).timeMs).toBeGreaterThan(0);
   });
 
   it('시간이 다 되면 끝나고 결과를 낸다', () => {

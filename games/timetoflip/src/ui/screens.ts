@@ -658,7 +658,7 @@ export interface GameView {
     mascot: HTMLElement;
   };
   /** 판 시작 안내(판 이름·큰 안내 한 줄·경고(있는 판만)·3, 2, 1). 카드가 뒷면일 때만 판 가운데에 보인다 */
-  showCountdown(info: { stage: string; note: string; warn: string } | null, n?: number): void;
+  showCountdown(info: { stage: string; time: string; note: string; warn: string } | null, n?: number): void;
   showPause(show: boolean): void;
   showMessage(text: string | null, variant?: string): void;
 }
@@ -686,7 +686,7 @@ export function gameScreen(opts: { daily: boolean; onPause: () => void; onResume
         <div class="board-wrap"><div class="board" role="group"></div></div>
         <div class="fx-layer" aria-hidden="true"></div>
         <div class="banners" aria-live="polite"></div>
-        <div class="countdown" hidden><p class="cd-stage"></p><p class="cd-note"></p><p class="cd-warn"></p><b class="cd-num" aria-hidden="true"></b></div>
+        <div class="countdown" hidden><p class="cd-stage"></p><p class="cd-time"></p><p class="cd-note"></p><p class="cd-warn"></p><b class="cd-num" aria-hidden="true"></b></div>
         <div class="message" hidden></div>
         <div class="pause-menu" hidden>
           <h2>${t('pause.title')}</h2>
@@ -724,6 +724,7 @@ export function gameScreen(opts: { daily: boolean; onPause: () => void; onResume
       if (countdown.hidden) {
         countdown.hidden = false;
         q('.cd-stage').textContent = info.stage;
+        q('.cd-time').textContent = info.time;
         q('.cd-note').textContent = info.note;
         q('.cd-warn').textContent = info.warn;
         q('.cd-warn').hidden = !info.warn;

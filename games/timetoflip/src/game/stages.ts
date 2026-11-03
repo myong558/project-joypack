@@ -1,15 +1,14 @@
 /**
  * 시간·판 규칙. 숫자는 tests/balance.test.ts 의 모의 플레이로 맞춘 값이다
  * (보통 실력이면 4~6판, 약 2분에서 끝나도록).
+ * 시간은 판마다 새로 준다(StageDef.timeMs). 판 안에서 번 시간은 그 판에서만 쓰고, 판을 깨고 남은 시간은 점수(TIME_POINTS)로 바뀐다.
+ * 그래서 몇 판부터 시작하든(출시 전 확인용 바로 시작 포함) 그 판은 늘 같은 조건이다
  */
 
-/** 처음 주는 시간 */
-export const START_MS = 40_000;
-/** 시간을 아무리 벌어도 이 이상은 쌓이지 않는다(판이 끝없이 늘어지지 않게) */
+/** 한 판 안에서 시간을 아무리 벌어도 이 이상은 쌓이지 않는다(판이 끝없이 늘어지지 않게) */
 export const MAX_MS = 60_000;
-/** 판을 다 맞히면 더하는 시간. 한 번도 안 틀렸으면(퍼펙트) PERFECT_GAIN 을 더 준다 */
-export const CLEAR_GAIN = 3_000;
-export const PERFECT_GAIN = 2_000;
+/** 판을 깨고 남은 시간 1초마다 주는 점수 */
+export const TIME_POINTS = 20;
 /** 콤보 3 이상으로 맞히면 짝마다 더 주는 시간 */
 export const COMBO_GAIN = 500;
 /** 시계 카드 짝 */
@@ -40,9 +39,11 @@ export interface StageDef {
   viewMs: number;
   /** 판을 놓은 뒤 미리 보기가 끝나기까지 = DEAL_MS(뒷면으로 깔림) + COUNT_MS(3, 2, 1) + viewMs(열려서 외우기) */
   peekMs: number;
+  /** 이 판에 주는 시간. 판이 시작될 때 남은 시간을 이 값으로 맞춘다(앞 판에서 남긴 시간은 넘어오지 않음) */
+  timeMs: number;
   /** 짝 하나를 맞히면 더하는 시간 */
   matchGain: number;
-  /** 얻는 시간(짝·콤보·시계·판 클리어·퍼펙트) 전체에 곱하는 비율. 8판까지 1, 9판부터 판마다 GAIN_RATE_STEP 씩 줄어 MIN_GAIN_RATE 에서 멈춤 */
+  /** 판 안에서 얻는 시간(짝·콤보·시계) 전체에 곱하는 비율. 8판까지 1, 9판부터 판마다 GAIN_RATE_STEP 씩 줄어 MIN_GAIN_RATE 에서 멈춤 */
   gainRate: number;
   /** 색만 다른 닮은 짝 수 */
   twins: number;
@@ -52,7 +53,7 @@ export interface StageDef {
  * 미리 보기(viewMs)는 카드가 늘수록 조금씩 길어지지만 카드 한 장에 주는 시간은 판마다 줄어 점점 어려워진다
  * (1판 12장 2.0초 = 장당 0.17초 → 6판 30장 2.8초 = 장당 0.09초). 높은 판도 2.6초 아래로는 내려가지 않는다
  */
-const TABLE: Omit<StageDef, 'peekMs' | 'gainRate'>[] = [
+const TABLE: Omit<StageDef, 'peekMs' | 'gainRate' | 'timeMs'>[] = [
   { pairs: 6, cols: 3, rows: 4, viewMs: 2000, matchGain: 1500, twins: 0 },
   { pairs: 8, cols: 4, rows: 4, viewMs: 2200, matchGain: 1500, twins: 0 },
   { pairs: 10, cols: 4, rows: 5, viewMs: 2400, matchGain: 1000, twins: 0 },
@@ -62,8 +63,18 @@ const TABLE: Omit<StageDef, 'peekMs' | 'gainRate'>[] = [
 ];
 
 /**
- * 9판부터 얻는 시간 전체를 판마다 10%씩 줄이고 30%(15판)에서 멈춘다. 잘하는 사람도 판 클리어·퍼펙트·콤보·시계로
- * 쓰는 시간보다 많이 받아 끝없이 이어지지 않게(모의 플레이: 고수 평균 133판 → 약 16판). 시계는 늘 같은 속도로 흐른다
+ * 판마다 주는 시간(1~8판). 9판부터는 TIME_STEP 씩 줄어 MIN_TIME(15판)에서 멈춘다.
+ * 실력별 "그 판을 깨는 데 드는 시간(쓴 시간 − 판 안에서 번 시간)" 분포를 모의 플레이로 재서 정했다:
+ * 1~3판은 서툰 사람도 대부분 넘고, 4·5판(닮은 짝)에서 서툰 사람이, 6~8판(5×6)에서 보통 실력이, 9판부터 줄어드는 시간에 잘하는 사람이 멈춘다.
+ * 5판은 4판과 같은 크기에 닮은 짝만 더해져 시간을 1초 덜 준다. 6판은 카드가 30장으로 늘어 다시 넉넉히 준다
+ */
+const STAGE_TIME = [20_000, 22_000, 22_000, 20_000, 19_000, 23_000, 22_000, 22_000];
+const TIME_STEP = 1_500;
+const MIN_TIME = 12_000;
+
+/**
+ * 9판부터 판 안에서 얻는 시간 전체를 판마다 10%씩 줄이고 30%(15판)에서 멈춘다. 잘하는 사람도 짝·콤보·시계로
+ * 쓰는 시간보다 많이 받아 끝없이 이어지지 않게(판별 시간과 함께, 모의 플레이 고수 평균 약 13판·최대 14판). 시계는 늘 같은 속도로 흐른다
  */
 const GAIN_RATE_STEP = 0.1;
 export const MIN_GAIN_RATE = 0.3;
@@ -74,7 +85,8 @@ export function stageDef(n: number): StageDef {
   const base = TABLE[Math.min(n, TABLE.length) - 1];
   const def = n < 8 ? base : { ...base, twins: 4, matchGain: 300, viewMs: 2600 };
   const gainRate = n <= 8 ? 1 : Math.max(MIN_GAIN_RATE, Math.round((1 - GAIN_RATE_STEP * (n - 8)) * 10) / 10);
-  return { ...def, gainRate, peekMs: DEAL_MS + COUNT_MS + def.viewMs };
+  const timeMs = n <= 8 ? STAGE_TIME[n - 1] : Math.max(MIN_TIME, STAGE_TIME[7] - TIME_STEP * (n - 8));
+  return { ...def, gainRate, timeMs, peekMs: DEAL_MS + COUNT_MS + def.viewMs };
 }
 
 /** 특수 카드(시계·엿보기) 짝 수. 1판은 없음, 2~3판은 70% 확률로 1쌍, 4판부터 1쌍 + 40% 확률로 1쌍 더 */

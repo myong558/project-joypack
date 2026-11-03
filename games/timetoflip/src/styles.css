@@ -416,7 +416,7 @@ button {
   /* 진한 몸이 어두운 화면에 묻히지 않게 글자색(어두우면 밝음)으로 얇은 테 */
   filter: drop-shadow(0 0 0.8px color-mix(in srgb, var(--ink) 70%, transparent));
 }
-/* 스톱워치 바늘: 남은 시간(--at, 1=가득)만큼 시계 방향으로 돈다. 40초를 넘게 모으면 금색, 5초 아래면 빨강 */
+/* 스톱워치 바늘: 남은 시간(--at, 1=가득)만큼 시계 방향으로 돈다. 그 판에 준 시간보다 많이 모으면 금색, 5초 아래면 빨강 */
 .mascot .sw-hand {
   fill: var(--accent);
   stroke: var(--accent);
@@ -792,7 +792,7 @@ h1 .word:nth-child(2) .tc-in {
     background-position: 160% 0;
   }
 }
-/* 시작 시간(40초)보다 많이 모았을 때: 가득 찬 막대가 금빛으로 빛난다 */
+/* 그 판에 준 시간(판마다 다름)보다 많이 모았을 때: 가득 찬 막대가 금빛으로 빛난다 */
 .game.over .timer-bar {
   background: linear-gradient(90deg, #f5b301, #ffd84d, #f5b301);
   box-shadow: 0 0 12px rgb(255 200 40 / 0.7);
@@ -1319,6 +1319,17 @@ h1 .word:nth-child(2) .tc-in {
   box-shadow: 0 4px 12px rgb(42 36 51 / 0.18);
   font-size: 30px;
   line-height: 1.2;
+}
+/* 판 이름 밑 제한 시간(판마다 달라 매번 보임): 판 이름에 붙은 작은 꼬리표. 큰 안내보다 눈에 덜 띄게 */
+.cd-time {
+  margin-top: 6px !important;
+  padding: 0.15em 0.8em;
+  border-radius: 99px;
+  background: var(--panel);
+  box-shadow: 0 4px 12px rgb(42 36 51 / 0.18);
+  color: var(--accent-ink);
+  font-size: clamp(16px, 4.6vw, 20px);
+  line-height: 1.3;
 }
 /* 모든 판 같은 안내 한 줄: 2.4초 안에 읽히게 크게. 좁은 화면은 두 줄로 */
 .cd-note {
@@ -2381,7 +2392,14 @@ h1 .word:nth-child(2) .tc-in {
 /* ---------- 가로로 눕힌 휴대폰(높이 560 미만): 두 칸 배치 ---------- */
 
 @media (orientation: landscape) and (max-height: 559px) {
-  /* 낮은 가로 화면: 판 시작 안내가 위로 잘리지 않게 안내는 한 줄로 넓히고 숫자를 줄인다 */
+  /* 낮은 가로 화면: 판 시작 안내가 위로 잘리지 않게 안내는 한 줄로 넓히고 숫자를 줄인다(판 이름·제한 시간 꼬리표도 작게) */
+  .cd-stage {
+    font-size: 24px;
+  }
+  .cd-time {
+    margin-top: 3px !important;
+    font-size: 15px;
+  }
   .cd-note {
     max-width: 90%;
     font-size: 20px;

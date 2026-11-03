@@ -1,7 +1,6 @@
 import { ALL_FACES, FACE_SETS, setsOpen, type FaceId, type SpecialId } from './faces';
 import { shuffle, type Rng } from './rng';
 import {
-  CLEAR_GAIN,
   CLEAR_PAUSE,
   CLOCK_GAIN,
   COUNT_MS,
@@ -17,9 +16,8 @@ import {
   MISTAKE_PENALTY,
   PEEK_REVEAL,
   PERFECT_BONUS,
-  PERFECT_GAIN,
   STAGE_BONUS,
-  START_MS,
+  TIME_POINTS,
   WARN_MS,
   comboMultiplier,
   specialCount,
@@ -80,7 +78,8 @@ export type GameEvent =
   | { type: 'mismatch'; a: Card; b: Card; mistake: boolean; penalty: number; comboLost: number }
   | { type: 'reveal'; ms: number }
   | { type: 'revealEnd' }
-  | { type: 'stageClear'; stage: number; bonus: number; gain: number; perfect: boolean }
+  /** bonus: 판 보너스 + 퍼펙트 + 남은 시간 점수(timePoints). left: 깨는 순간 남은 시간 */
+  | { type: 'stageClear'; stage: number; bonus: number; timePoints: number; left: number; perfect: boolean }
   | { type: 'pause' }
   | { type: 'resume' }
   | { type: 'over'; result: GameResult };
@@ -97,7 +96,8 @@ export class Game {
   def: StageDef = stageDef(1);
   cards: Card[] = [];
   score = 0;
-  remaining = START_MS;
+  /** 이 판에 남은 시간. 판이 시작될 때 그 판의 timeMs 로 다시 맞춘다 */
+  remaining = stageDef(1).timeMs;
   combo = 0;
   maxCombo = 0;
   /** 판 시작 미리 보기·판 사이 쉬는 시간이 얼마나 남았는지 */
@@ -142,6 +142,12 @@ export class Game {
     return this.cards.filter((c) => c.state !== 'gone').length / 2;
   }
 
+  /** 판을 깬 뒤 쉬는 시간이 얼마나 지났는지(그 사이 일시정지해도 이어서). 쉬는 중이 아니면 -1. 화면이 남은 시간 → 점수 연출에 쓴다 */
+  get clearElapsed(): number {
+    if (this.phase !== 'clear' && !(this.phase === 'paused' && this.resumeTo === 'clear')) return -1;
+    return CLEAR_PAUSE - this.phaseLeft;
+  }
+
   /** 시간이 얼마 안 남아 경고 중인지 */
   get danger(): boolean {
     return this.phase === 'playing' && this.remaining <= WARN_MS;
@@ -150,6 +156,7 @@ export class Game {
   private deal(stage: number): void {
     this.stage = stage;
     this.def = stageDef(stage);
+    this.remaining = this.def.timeMs;
     this.first = null;
     this.wrong = null;
     this.stageMistakes = 0;
@@ -295,14 +302,15 @@ export class Game {
 
   private clearStage(): void {
     const perfect = this.stageMistakes === 0;
-    const bonus = this.stage * STAGE_BONUS + (perfect ? PERFECT_BONUS : 0);
-    const gain = Math.round((CLEAR_GAIN + (perfect ? PERFECT_GAIN : 0)) * this.def.gainRate);
+    // 남은 시간은 다음 판으로 넘어가지 않고 점수로 바뀐다(1초마다 TIME_POINTS, 0.1초 단위)
+    const left = this.remaining;
+    const timePoints = Math.round((left / 1000) * TIME_POINTS);
+    const bonus = this.stage * STAGE_BONUS + (perfect ? PERFECT_BONUS : 0) + timePoints;
     if (perfect) this.stats.perfects++;
     this.score += bonus;
-    this.addTime(gain);
     this.phase = 'clear';
     this.phaseLeft = CLEAR_PAUSE;
-    this.emit({ type: 'stageClear', stage: this.stage, bonus, gain, perfect });
+    this.emit({ type: 'stageClear', stage: this.stage, bonus, timePoints, left, perfect });
   }
 
   private addTime(ms: number): void {
