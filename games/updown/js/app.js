@@ -1144,7 +1144,7 @@
     }, reducedMotion.matches ? 200 : 380);
   }
 
-  // 확인 뒤 손맛 연출: 숫자가 쾅 박히고, UP/DOWN 이 그 방향으로 튀어 나오고, 화면이 그 방향으로 툭 밀렸다 돌아오고,
+  // 확인 뒤 손맛 연출: 숫자가 쾅 박히고, UP/DOWN 이 그 방향으로 튀어 나오고, 화면 위쪽이 그 방향으로 툭 밀렸다 돌아오고,
   // 좁혀진 범위가 반짝인다. 동작 줄이기 설정이면 움직이지 않는다.
   function guessFeedback(isUp) {
     if (reducedMotion.matches) return;
@@ -1157,10 +1157,13 @@
       ],
       { duration: 340, easing: 'ease-out' },
     );
+    // 밀리는 건 위쪽(상태·힌트·기록)만. 다이얼·확인 버튼까지 밀면 연달아 누르던 손가락 아래에서 버튼이 움직여 클릭을 놓친다.
     const dy = isUp ? -7 : 7;
-    screens.play.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(' + dy + 'px)', offset: 0.35 }, { transform: 'translateY(0)' }], {
-      duration: 260,
-      easing: 'ease-out',
+    screens.play.querySelectorAll('.status, .hint-box, .history').forEach((el) => {
+      el.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(' + dy + 'px)', offset: 0.35 }, { transform: 'translateY(0)' }], {
+        duration: 260,
+        easing: 'ease-out',
+      });
     });
     const range = $('range');
     range.classList.remove('narrowed');
