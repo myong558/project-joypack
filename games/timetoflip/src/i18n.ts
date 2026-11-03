@@ -77,6 +77,8 @@ const ko = {
   'pause.quit': '메인으로',
 
   'hud.peekHint': '위치를 기억하세요',
+  'ready.note': '카드가 열리면 그림 위치를 외워요',
+  'ready.first': '카드가 열리면 위치를 외우고, 닫히면 같은 그림 두 장을 찾아요',
   'banner.twins': '닮은 카드 주의!',
   'banner.clear': '{n}판 클리어!',
   'banner.perfect': '퍼펙트! +{s}초',
@@ -220,6 +222,8 @@ const en: Record<MessageKey, string> = {
   'pause.quit': 'Main menu',
 
   'hud.peekHint': 'Remember the positions',
+  'ready.note': 'When the cards open, memorize where each picture is',
+  'ready.first': 'Memorize the cards while they are open, then find the matching pairs',
   'banner.twins': 'Watch for look-alikes!',
   'banner.clear': 'Stage {n} clear!',
   'banner.perfect': 'Perfect! +{s}s',

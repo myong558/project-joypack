@@ -4,6 +4,7 @@ import {
   CLEAR_GAIN,
   CLEAR_PAUSE,
   CLOCK_GAIN,
+  COUNT_MS,
   DEAL_MS,
   COMBO_GAIN,
   GOLD_CHANCE,
@@ -41,7 +42,8 @@ export interface Card {
   seen: boolean;
 }
 
-export type Phase = 'idle' | 'peek' | 'playing' | 'clear' | 'paused' | 'over';
+/** 판마다: ready(카드가 뒷면으로 깔리고 3, 2, 1) → peek(카드가 열려 외우기) → playing(다시 닫히고 시작). 앞의 둘은 시간이 멈춤 */
+export type Phase = 'idle' | 'ready' | 'peek' | 'playing' | 'clear' | 'paused' | 'over';
 
 export interface GameResult {
   score: number;
@@ -61,6 +63,7 @@ export interface GameResult {
 
 export type GameEvent =
   | { type: 'deal'; stage: number; def: StageDef; cards: Card[] }
+  | { type: 'peekStart' }
   | { type: 'peekEnd' }
   | { type: 'flip'; card: Card }
   | { type: 'hide'; cards: [Card, Card] }
@@ -152,9 +155,23 @@ export class Game {
     this.stageMistakes = 0;
     this.revealLeft = 0;
     this.cards = buildCards(stage, this.def, this.rng, this.layout);
-    this.phase = 'peek';
-    this.phaseLeft = this.def.peekMs;
+    this.phase = 'ready';
+    this.phaseLeft = DEAL_MS + COUNT_MS;
     this.emit({ type: 'deal', stage, def: this.def, cards: this.cards });
+  }
+
+  /** 3, 2, 1 이 끝나면 카드를 열어 외우는 시간 */
+  private startPeek(): void {
+    this.phase = 'peek';
+    this.phaseLeft = this.def.viewMs;
+    this.emit({ type: 'peekStart' });
+  }
+
+  /** 3, 2, 1 중 지금 보일 숫자(카드가 깔리는 동안·3, 2, 1 이 아니면 0) */
+  get countdown(): number {
+    if (this.phase !== 'ready' && !(this.phase === 'paused' && this.resumeTo === 'ready')) return 0;
+    if (this.phaseLeft > COUNT_MS) return 0;
+    return Math.max(1, Math.ceil(this.phaseLeft / (COUNT_MS / 3)));
   }
 
   private endPeek(): void {
@@ -169,7 +186,16 @@ export class Game {
       this.wrong.left -= dt;
       if (this.wrong.left <= 0) this.hideWrong();
     }
-    if (this.phase === 'peek') {
+    if (this.phase === 'ready') {
+      this.phaseLeft -= dt;
+      if (this.phaseLeft <= 0) {
+        // 남은 몫은 미리 보기에서 이어서 센다(한 번에 큰 dt 가 와도 같은 결과)
+        const over = -this.phaseLeft;
+        this.startPeek();
+        this.phaseLeft -= over;
+        if (this.phaseLeft <= 0) this.endPeek();
+      }
+    } else if (this.phase === 'peek') {
       this.phaseLeft -= dt;
       if (this.phaseLeft <= 0) this.endPeek();
     } else if (this.phase === 'clear') {
@@ -200,12 +226,10 @@ export class Game {
     this.emit({ type: 'hide', cards: [a, b] });
   }
 
-  /** 카드를 누름. 미리 보기 중에 누르면 미리 보기를 건너뛰고 바로 뒤집는다(카드가 깔리는 동안의 누름은 실수로 보고 무시) */
+  /** 카드를 누름. 미리 보기 중에 누르면 미리 보기를 건너뛰고 바로 뒤집는다(카드가 깔리고 3, 2, 1 을 세는 동안의 누름은 무시) */
   flip(index: number): void {
-    if (this.phase === 'peek') {
-      if (this.def.peekMs - this.phaseLeft < DEAL_MS) return;
-      this.endPeek();
-    }
+    if (this.phase === 'ready') return;
+    if (this.phase === 'peek') this.endPeek();
     if (this.phase !== 'playing' || this.revealLeft > 0) return;
     // 틀린 두 장을 보여 주는 중에 다음 카드를 누르면 기다리지 않고 바로 덮는다(손이 빠른 사람이 막히지 않게)
     if (this.wrong) this.hideWrong();

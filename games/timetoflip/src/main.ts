@@ -193,6 +193,8 @@ function play(mode: Mode, from = 1): void {
     writeSave(save);
   };
 
+  let readyInfo: { stage: string; note: string } | null = null;
+  let noteClass = 'hud-note';
   const handle = (e: GameEvent) => {
     switch (e.type) {
       case 'deal': {
@@ -220,10 +222,23 @@ function play(mode: Mode, from = 1): void {
               : e.stage === 1
                 ? t('hud.peekHint')
                 : '';
+        // 위 안내 줄은 카드가 열릴 때 켠다(3, 2, 1 동안은 판 가운데 안내와 겹치지 않게)
         view.hud.note.textContent = note;
-        view.hud.note.className = `hud-note${note ? ' on' : ''}${twinsUp ? ' warn' : ''}`;
+        view.hud.note.className = 'hud-note';
+        noteClass = `hud-note${note ? ' on' : ''}${twinsUp ? ' warn' : ''}`;
+        // 판 시작 안내: 카드가 뒷면으로 깔린 동안 판 가운데에 판 이름 + 짧은 설명 + 3, 2, 1(renderHud).
+        // 1판은 게임 방법, 그 뒤는 이 판의 안내(닮은 카드·특수 카드·새 묶음), 없으면 기본 설명
+        readyInfo = { stage: t('hud.stage', { n: e.stage }), note: e.stage === 1 ? t('ready.first') : note || t('ready.note') };
+        view.showCountdown(readyInfo, 0);
         break;
       }
+      case 'peekStart':
+        // 3, 2, 1 이 끝나면 카드가 열려 외우는 시간
+        view.showCountdown(null);
+        view.hud.note.className = noteClass;
+        board.startPeek();
+        sound.play('flip');
+        break;
       case 'peekEnd':
         board.endPeek();
         sound.play('flip');
@@ -319,6 +334,7 @@ function play(mode: Mode, from = 1): void {
   let lastSecond = -1;
   let warned = false;
   let shown = { score: -1, stage: -1, combo: -1 };
+  let lastCount = 0;
   const renderHud = () => {
     const { hud } = view;
     if (shown.stage !== game.stage) hud.stage.textContent = t('hud.stage', { n: game.stage });
@@ -328,11 +344,19 @@ function play(mode: Mode, from = 1): void {
       hud.combo.classList.toggle('on', game.combo >= 2);
     }
     shown = { score: game.score, stage: game.stage, combo: game.combo };
-    // 미리 보기 동안 시간 막대는 "외우는 시간": 카드가 다 깔린 뒤 미리 보기 시간만큼 노랗게 줄어들고 눈 아이콘·남은 초를 보인다
-    const peeking = game.phase === 'peek';
+    // 3, 2, 1: 숫자가 바뀔 때 째깍 소리와 함께 판 가운데에 크게(카드는 아직 뒷면). 시간 막대는 외우는 시간이 꽉 찬 채로 기다린다
+    const count = game.countdown;
+    if (readyInfo && (game.phase === 'ready' || count)) {
+      if (count && count !== lastCount) sound.play('tick');
+      lastCount = count;
+      view.showCountdown(readyInfo, count);
+    }
+    // 미리 보기 동안 시간 막대는 "외우는 시간": 카드가 열린 뒤 미리 보기 시간만큼 노랗게 줄어들고 눈 아이콘·남은 초를 보인다
+    const ready = game.phase === 'ready' || (game.phase === 'paused' && game.countdown > 0);
+    const peeking = game.phase === 'peek' || ready;
     view.el.classList.toggle('peeking', peeking);
     if (peeking) {
-      const left = Math.max(0, Math.min(game.phaseLeft, game.def.viewMs));
+      const left = ready ? game.def.viewMs : Math.max(0, Math.min(game.phaseLeft, game.def.viewMs));
       const pr = left / game.def.viewMs;
       view.el.classList.remove('over');
       hud.bar.style.transform = `scaleX(${pr.toFixed(4)})`;

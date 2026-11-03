@@ -659,6 +659,8 @@ export interface GameView {
     time: HTMLElement;
     mascot: HTMLElement;
   };
+  /** 판 시작 안내(판 이름·짧은 설명·3, 2, 1). 카드가 뒷면일 때만 판 가운데에 보인다 */
+  showCountdown(info: { stage: string; note: string } | null, n?: number): void;
   showPause(show: boolean): void;
   showMessage(text: string | null, variant?: string): void;
 }
@@ -688,6 +690,7 @@ export function gameScreen(opts: { daily: boolean; onPause: () => void; onResume
         <div class="board-wrap"><div class="board" role="group"></div></div>
         <div class="fx-layer" aria-hidden="true"></div>
         <div class="banners" aria-live="polite"></div>
+        <div class="countdown" hidden><p class="cd-stage"></p><p class="cd-note"></p><b class="cd-num" aria-hidden="true"></b></div>
         <div class="message" hidden></div>
         <div class="pause-menu" hidden>
           <h2>${t('pause.title')}</h2>
@@ -700,6 +703,8 @@ export function gameScreen(opts: { daily: boolean; onPause: () => void; onResume
   const q = (s: string) => el.querySelector<HTMLElement>(s)!;
   const pauseMenu = q('.pause-menu');
   const message = q('.message');
+  const countdown = q('.countdown');
+  let shownNum = -1;
   q('.pause-btn').addEventListener('click', opts.onPause);
   q('[data-act="resume"]').addEventListener('click', opts.onResume);
   q('[data-act="restart"]').addEventListener('click', opts.onRestart);
@@ -718,6 +723,26 @@ export function gameScreen(opts: { daily: boolean; onPause: () => void; onResume
       bar: q('.timer-bar'),
       time: q('.timer-text'),
       mascot: q('.timer .mascot'),
+    },
+    showCountdown(info, n = 0) {
+      if (info === null) {
+        countdown.hidden = true;
+        shownNum = -1;
+        return;
+      }
+      if (countdown.hidden) {
+        countdown.hidden = false;
+        q('.cd-stage').textContent = info.stage;
+        q('.cd-note').textContent = info.note;
+      }
+      if (n === shownNum) return;
+      shownNum = n;
+      const num = q('.cd-num');
+      num.textContent = n ? String(n) : '';
+      // 숫자가 바뀔 때마다 톡 튀어나온다(styles.css .cd-num.pop)
+      num.classList.remove('pop');
+      void num.offsetWidth;
+      if (n) num.classList.add('pop');
     },
     showPause(show) {
       pauseMenu.hidden = !show;

@@ -1,15 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { Game, buildCards, type GameEvent } from '../src/game/engine';
 import { mulberry32 } from '../src/game/rng';
-import { DEAL_MS, MAX_MS, MIN_GAIN_RATE, PEEK_REVEAL, START_MS, comboMultiplier, stageDef } from '../src/game/stages';
+import { COUNT_MS, DEAL_MS, MAX_MS, MIN_GAIN_RATE, PEEK_REVEAL, START_MS, comboMultiplier, stageDef } from '../src/game/stages';
 
 function setup(seed = 1) {
   const game = new Game(mulberry32(seed));
   const events: GameEvent[] = [];
   game.on((e) => events.push(e));
   game.start();
-  // 카드가 다 깔릴 때까지(그 전의 누름은 무시된다)
-  game.tick(DEAL_MS);
+  // 카드가 뒷면으로 다 깔리고 3, 2, 1 이 끝날 때까지(그 전의 누름은 무시된다) → 카드가 열린 미리 보기
+  game.tick(DEAL_MS + COUNT_MS);
   return { game, events };
 }
 
@@ -81,13 +81,41 @@ describe('뒤집기', () => {
     expect(game.cards[0].state).toBe('up');
   });
 
-  it('카드가 깔리는 동안의 누름은 무시하고 미리 보기를 이어 간다', () => {
+  it('판마다 뒷면으로 깔림 → 3, 2, 1 → 카드가 열려 미리 보기 → 닫히고 시작, 그동안 누름은 무시', () => {
+    const game = new Game(mulberry32(1));
+    const events: GameEvent[] = [];
+    game.on((e) => events.push(e));
+    game.start();
+    expect(game.phase).toBe('ready');
+    expect(game.countdown).toBe(0);
+    game.tick(DEAL_MS + 1);
+    expect(game.countdown).toBe(3);
+    game.tick(COUNT_MS / 3);
+    expect(game.countdown).toBe(2);
+    game.flip(0);
+    expect(game.phase).toBe('ready');
+    expect(game.cards[0].state).toBe('down');
+    game.tick(COUNT_MS / 3);
+    expect(game.countdown).toBe(1);
+    expect(events.some((e) => e.type === 'peekStart')).toBe(false);
+    game.tick(COUNT_MS / 3);
+    expect(game.phase).toBe('peek');
+    expect(events.some((e) => e.type === 'peekStart')).toBe(true);
+    expect(game.remaining).toBe(START_MS);
+    game.tick(game.def.viewMs);
+    expect(game.phase).toBe('playing');
+  });
+
+  it('3, 2, 1 중 일시정지하면 숫자가 멈췄다가 이어진다', () => {
     const game = new Game(mulberry32(1));
     game.start();
-    game.tick(DEAL_MS - 100);
-    game.flip(0);
-    expect(game.phase).toBe('peek');
-    expect(game.cards[0].state).toBe('down');
+    game.tick(DEAL_MS + COUNT_MS / 3 + 1);
+    expect(game.countdown).toBe(2);
+    game.pause();
+    game.tick(5000);
+    expect(game.countdown).toBe(2);
+    game.resume();
+    expect(game.phase).toBe('ready');
   });
 
   it('미리 보기는 판이 올라도 짧아지지 않고(높은 판 2.6초 이상), 카드 한 장에 주는 시간은 줄어든다', () => {
@@ -96,7 +124,7 @@ describe('뒤집기', () => {
       const def = stageDef(n);
       expect(def.viewMs).toBeGreaterThanOrEqual(2000);
       if (n >= 6) expect(def.viewMs).toBeGreaterThanOrEqual(2600);
-      expect(def.peekMs).toBe(DEAL_MS + def.viewMs);
+      expect(def.peekMs).toBe(DEAL_MS + COUNT_MS + def.viewMs);
     }
     // 닮은 카드가 처음 나오는 5판만 조금 더 주고, 큰 흐름은 1판 → 4판 → 6판 → 8판으로 줄어든다
     expect(perCard(4)).toBeLessThan(perCard(1));
@@ -186,7 +214,7 @@ describe('뒤집기', () => {
     expect(game.remaining).toBeLessThanOrEqual(MAX_MS);
     game.tick(1200);
     expect(game.stage).toBe(2);
-    expect(game.phase).toBe('peek');
+    expect(game.phase).toBe('ready');
   });
 
   it('시간이 다 되면 끝나고 결과를 낸다', () => {

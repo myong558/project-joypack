@@ -56,8 +56,14 @@ export class Board {
     cards.forEach((c) => this.label(c));
     this.el.classList.remove('dealt');
     void this.el.offsetWidth;
-    this.el.classList.add('dealt', 'peek');
+    // 뒷면으로 깔고, 3, 2, 1 이 끝나면 startPeek 로 연다
+    this.el.classList.add('dealt');
     this.layout();
+  }
+
+  /** 카드를 모두 열어 외우는 시간 */
+  startPeek(): void {
+    this.el.classList.add('peek');
   }
 
   endPeek(): void {

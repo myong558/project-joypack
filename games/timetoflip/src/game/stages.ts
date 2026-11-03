@@ -23,6 +23,8 @@ export const HIDE_DELAY = 650;
 export const PEEK_REVEAL = 1_300;
 /** 카드가 날아와 깔리는 시간(ui/board.ts 가 카드 수와 관계없이 이 안에 다 깔리게 간격을 맞춤). 미리 보기는 이 뒤부터 센다 */
 export const DEAL_MS = 600;
+/** 카드가 뒷면으로 다 깔린 뒤 3, 2, 1 을 세는 시간(한 숫자 COUNT_MS / 3). 그동안 판 안내를 보이고, 끝나면 카드가 열려 미리 보기 */
+export const COUNT_MS = 2_400;
 /** 판을 깬 뒤 다음 판을 놓기까지(시간은 멈춤) */
 export const CLEAR_PAUSE = 1_100;
 /** 마지막 경고(째깍 소리·경고 진동)를 시작하는 남은 시간 */
@@ -36,7 +38,7 @@ export interface StageDef {
   rows: number;
   /** 카드가 다 깔린 뒤 모든 카드를 보여 주는 시간(시간은 멈춤, 누르면 건너뜀) */
   viewMs: number;
-  /** 판을 놓은 뒤 미리 보기가 끝나기까지 = DEAL_MS + viewMs */
+  /** 판을 놓은 뒤 미리 보기가 끝나기까지 = DEAL_MS(뒷면으로 깔림) + COUNT_MS(3, 2, 1) + viewMs(열려서 외우기) */
   peekMs: number;
   /** 짝 하나를 맞히면 더하는 시간 */
   matchGain: number;
@@ -72,7 +74,7 @@ export function stageDef(n: number): StageDef {
   const base = TABLE[Math.min(n, TABLE.length) - 1];
   const def = n < 8 ? base : { ...base, twins: 4, matchGain: 300, viewMs: 2600 };
   const gainRate = n <= 8 ? 1 : Math.max(MIN_GAIN_RATE, Math.round((1 - GAIN_RATE_STEP * (n - 8)) * 10) / 10);
-  return { ...def, gainRate, peekMs: DEAL_MS + def.viewMs };
+  return { ...def, gainRate, peekMs: DEAL_MS + COUNT_MS + def.viewMs };
 }
 
 /** 특수 카드(시계·엿보기) 짝 수. 1판은 없음, 2~3판은 70% 확률로 1쌍, 4판부터 1쌍 + 40% 확률로 1쌍 더 */

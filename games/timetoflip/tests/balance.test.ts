@@ -23,7 +23,7 @@ function simulate(seed: number, memory: number, flipMs: number) {
   const down = (i: number) => game.cards[i].state === 'down';
   for (let guard = 0; guard < 5000 && game.phase !== 'over'; guard++) {
     if (game.phase !== 'playing') {
-      step(game.phase === 'peek' ? game.phaseLeft : 100);
+      step(game.phase === 'peek' || game.phase === 'ready' ? game.phaseLeft : 100);
       continue;
     }
     // 돋보기로 모두 보여 주는 동안은 누름을 받지 않으므로 끝날 때까지 기다린다(사람도 보고 있는 시간)

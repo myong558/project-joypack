@@ -167,6 +167,8 @@ h2,
 .banner,
 .popup,
 .message,
+.cd-stage,
+.cd-num,
 .final b,
 .record,
 .goal,
@@ -1317,6 +1319,62 @@ h1 .word:nth-child(2) .tc-in {
   100% {
     transform: translateY(-10px);
     opacity: 0;
+  }
+}
+/* 판 시작 안내: 카드가 뒷면으로 깔린 동안 판 가운데에 판 이름 · 짧은 설명 · 3, 2, 1(카드가 열리면 사라짐) */
+.countdown {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 2px;
+  pointer-events: none;
+  z-index: 3;
+}
+.countdown[hidden] {
+  display: none;
+}
+.countdown > * {
+  margin: 0;
+}
+.cd-stage {
+  padding: 0 0.7em;
+  border-radius: 99px;
+  background: var(--panel);
+  box-shadow: 0 4px 12px rgb(42 36 51 / 0.18);
+  font-size: 30px;
+  line-height: 1.2;
+}
+.cd-note {
+  max-width: min(86vw, 22em);
+  margin-top: 6px !important;
+  padding: 0.3em 0.9em;
+  border-radius: 12px;
+  background: var(--panel);
+  box-shadow: 0 4px 12px rgb(42 36 51 / 0.18);
+  font-size: 16px;
+  text-align: center;
+}
+.cd-num {
+  min-height: 1.1em;
+  margin-top: 4px;
+  color: var(--accent-ink);
+  font-size: 110px;
+  line-height: 1;
+  font-weight: 400;
+  text-shadow: 0 3px 0 var(--panel), 0 6px 18px rgb(42 36 51 / 0.25);
+}
+.cd-num.pop {
+  animation: cd-pop 0.55s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+@keyframes cd-pop {
+  from {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+  60% {
+    opacity: 1;
   }
 }
 .message {
