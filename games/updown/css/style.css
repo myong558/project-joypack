@@ -984,7 +984,7 @@ button:focus-visible {
 /* 좁혀지는 숫자 막대(app.js 의 renderBar): 처음 범위 전체 중 아직 가능한 칸만 밝게 남는다. */
 .range-bar {
   position: relative;
-  height: 12px;
+  height: 14px;
   overflow: hidden;
   background: var(--surface-alt);
   border: 1px solid var(--line);
@@ -993,13 +993,25 @@ button:focus-visible {
 
 .range-bar-live {
   position: absolute;
-  inset-block: 0;
-  min-width: 6px;
+  inset: 0;
+  overflow: hidden;
   background: var(--action);
   border-radius: 999px;
-  transition:
-    left 0.45s cubic-bezier(0.2, 1.2, 0.4, 1),
-    width 0.45s cubic-bezier(0.2, 1.2, 0.4, 1);
+}
+
+/* 남은 숫자가 적으면 숫자 칸마다 옅은 눈금(app.js 의 BAR_TICKS). 칸 수(--cells)로 폭을 나눠 칸 왼쪽 끝에 선을 긋는다 */
+.range-bar-live::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  /* 2px 선을 칸 경계 가운데에 오게 1px 당긴다 */
+  background: linear-gradient(to right, rgb(255 255 255 / 0.9) 0 2px, transparent 2px) -1px 0 / calc(100% / var(--cells, 1)) 100% repeat-x;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.range-bar-live.ticks::after {
+  opacity: 1;
 }
 
 /* 새 판·언어 전환은 움직이지 않고 바로 그린다(app.js 의 renderBar) */

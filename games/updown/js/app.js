@@ -361,9 +361,9 @@
   }
 
   // 막대가 보여 주는 숫자 구간(barView). 숫자 v 의 칸은 v-0.5 ~ v+0.5 이다.
-  // 판 중에는 남은 범위(low~high)를 막대 폭에 맞게 확대해 범위가 넓어도(1~1000 등) 고르는 자리가 잘 움직여 보이게 하고,
-  // 양옆에 빠진 칸을 조금(BAR_PAD) 남겨 범위가 줄어든 것을 보여 준다. 맞힌 뒤에도 막대는 그대로 둔다.
-  const BAR_PAD = 0.1;
+  // 막대는 남은 범위(low~high)만 꽉 채워 보여 준다. 범위가 넓어도(1~1000 등) 고르는 자리가 잘 움직여 보인다.
+  // 남은 숫자가 BAR_TICKS 개 이하로 줄면 막대 안을 숫자 칸마다 눈금으로 나눈다. 맞힌 뒤에도 막대는 그대로 둔다.
+  const BAR_TICKS = 20;
   let barView = { from: 0.5, to: 1.5 };
 
   function barPos(view, value) {
@@ -371,11 +371,9 @@
   }
 
   function barViewFor() {
-    const pad = Math.max(1, (game.high - game.low + 1) * BAR_PAD);
-    return { from: Math.max(0.5, game.low - 0.5 - pad), to: Math.min(game.max + 0.5, game.high + 0.5 + pad) };
+    return { from: game.low - 0.5, to: game.high + 0.5 };
   }
 
-  // 좁혀지는 숫자 막대: 아직 가능한 칸(low~high)만 밝다. 힌트가 나오면 남은 범위로 천천히 확대한다.
   // 새 판·언어 전환(animate 아님)은 움직이지 않고 바로 그린다.
   function renderBar(animate) {
     const bar = $('range-bar');
@@ -383,8 +381,9 @@
     const prev = barView;
     barView = barViewFor();
     bar.classList.toggle('instant', !animate);
-    live.style.left = barPos(barView, game.low - 0.5);
-    live.style.width = 'calc(' + barPos(barView, game.high + 0.5) + ' - ' + barPos(barView, game.low - 0.5) + ')';
+    const cells = game.high - game.low + 1;
+    live.style.setProperty('--cells', cells);
+    live.classList.toggle('ticks', cells > 1 && cells <= BAR_TICKS);
     // 확대하는 동안은 고르는 자리 점도 막대와 같은 속도로 움직인다. 바로 그린 뒤에는 다시 움직임을 켠다.
     const zoom = animate && (prev.from !== barView.from || prev.to !== barView.to);
     bar.classList.toggle('zoom', zoom);
