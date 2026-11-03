@@ -237,21 +237,46 @@ function snowCap(poly: Pt[], cx: number, cy: number, T: number, r: Rng): Pt[] {
   return clipConvex([...top, ...low.reverse()], poly, cx, cy);
 }
 
-function chamfer(x: number, y: number, w: number, h: number, c: number): Pt[] {
+/** 모서리 깎은 네모. 윗모서리 반지름 R 을 주면 위 두 모서리는 둥글게(로고 간판: 바깥 테두리와 같은 중심으로 틈 폭이 일정하게) */
+function chamfer(
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  c: number,
+  R = 0,
+): Pt[] {
+  if (R <= 0)
+    return [
+      [x + c, y],
+      [x + w - c, y],
+      [x + w, y + c],
+      [x + w, y + h - c],
+      [x + w - c, y + h],
+      [x + c, y + h],
+      [x, y + h - c],
+      [x, y + c],
+    ];
+  const arc = (cx: number, cy: number, a0: number): Pt[] =>
+    Array.from({ length: 9 }, (_, i): Pt => {
+      const a = ((a0 + (i * 90) / 8) * Math.PI) / 180;
+      return [cx + R * Math.cos(a), cy + R * Math.sin(a)];
+    });
   return [
-    [x + c, y],
-    [x + w - c, y],
-    [x + w, y + c],
+    ...arc(x + w - R, y + R, -90),
     [x + w, y + h - c],
     [x + w - c, y + h],
     [x + c, y + h],
     [x, y + h - c],
-    [x, y + c],
+    ...arc(x + R, y + R, 180),
   ];
 }
 
-/** 블록 한 장(높이 40 단위, 폭 W: 벽 칸은 40, 로고 간판은 160) SVG. 같은 seed 면 늘 같은 그림 */
-function blockSvg(o: Look, seed: number, W = 40): string {
+/**
+ * 블록 한 장(높이 40 단위, 폭 W: 벽 칸은 40, 로고 간판은 160) SVG. 같은 seed 면 늘 같은 그림.
+ * topR: 윗모서리 둥글기(단위). 0 이면 벽 칸처럼 살짝 깎음
+ */
+function blockSvg(o: Look, seed: number, W = 40, topR = 0): string {
   const S = 40;
   const sp = 12;
   const r = rng(seed);
@@ -371,14 +396,23 @@ function blockSvg(o: Look, seed: number, W = 40): string {
   const th = 2.6;
   const fw = W - 2 * ins;
   const fh = S - 2 * ins - th;
-  const faceP = chamfer(ins, ins, fw, fh, c);
+  const faceP = chamfer(ins, ins, fw, fh, c, topR);
   const sideP: Pt[] = [
     [ins, ins + fh - c],
     [W - ins, ins + fh - c],
     [W - ins - c * 1.1, ins + fh + th],
     [ins + c * 1.1, ins + fh + th],
   ];
-  const inF = pts(chamfer(ins + 0.6, ins + 0.6, fw - 1.2, fh - 1.2, c - 0.25));
+  const inF = pts(
+    chamfer(
+      ins + 0.6,
+      ins + 0.6,
+      fw - 1.2,
+      fh - 1.2,
+      c - 0.25,
+      topR && topR - 0.6,
+    ),
+  );
   let ledge = "";
   if (o.ledge) {
     const lp = snowCap(faceP, W / 2, ins + fh / 2, o.ledge, r);
@@ -434,7 +468,7 @@ ${
 <radialGradient id='vg' cx='.45' cy='.4' r='.75'><stop offset='.6' stop-color='#000' stop-opacity='0'/><stop offset='1' stop-color='${o.lo}' stop-opacity='.22'/></radialGradient>
 </defs>`;
   const inner = `<rect width='${W}' height='${S}' fill='${o.mortar}' filter='url(#mo)'/><g>${under}</g><g filter='url(#st)'>${faces}</g><g>${over}</g>`;
-  const shadow = `<polygon points='${pts(chamfer(ins + 0.4, ins + 1.6, fw, fh + th, c))}' fill='${o.lo}' opacity='.32' filter='url(#bl)'/>`;
+  const shadow = `<polygon points='${pts(chamfer(ins + 0.4, ins + 1.6, fw, fh + th, c, topR))}' fill='${o.lo}' opacity='.32' filter='url(#bl)'/>`;
   // 두께: 같은 돌무늬를 아래로 이어 그리고 그늘을 덮음(띠처럼 보이지 않게)
   const side = `<g clip-path='url(#sdc)'><g transform='translate(0 ${th})'>${inner}</g><polygon points='${pts(sideP)}' fill='url(#sd)'/></g>`;
   const face = `<g clip-path='url(#blk)'>${inner}${caps ? `<g filter='url(#cap)'>${caps}</g>` : ""}${o.overlay ? `<rect width='${W}' height='${S}' fill='url(#ov)'/>` : ""}</g>`;
@@ -456,7 +490,8 @@ export function applyStoneWall(skin: Skin): void {
       ...Array.from({ length: WALL_VARIANTS }, (_, k) =>
         blockSvg(LOOKS[skin], SEED + k * 101),
       ),
-      blockSvg(LOOKS[skin], 777, 160),
+      // 윗모서리: 로고 둥글기(칸의 0.2 = 8 단위)에서 블록 여백(1)을 뺀 같은 중심 곡선
+      blockSvg(LOOKS[skin], 777, 160, 7),
     ];
     cache.set(skin, urls);
   }

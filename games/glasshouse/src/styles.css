@@ -540,7 +540,8 @@ body:has(.screen.game) .scene .layer {
   position: relative;
   width: calc(var(--dc) * 4);
   height: calc(var(--dc) * 2);
-  border-radius: 12px;
+  /* 칸 크기에 비례(60px 칸에서 12px). 위 간판 돌 블록의 윗모서리가 같은 중심 곡선이라 틈 폭이 모서리까지 일정(ui/stonewall.ts) */
+  border-radius: calc(var(--dc) * 0.2);
   /* 돌바닥 4×2 칸 + 테두리 턱 */
   background:
     linear-gradient(90deg, rgb(0 0 0 / 0.07) 1px, transparent 1px) 0 0 / var(--dc) var(--dc),
