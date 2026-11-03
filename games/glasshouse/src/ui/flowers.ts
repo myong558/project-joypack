@@ -165,10 +165,12 @@ class Plate {
 
 /**
  * 꽃 머리 하나를 한 묶음으로(봉오리 때 살짝 작게). neck 은 꽃 머리 밑으로 이어 그리는 줄기 길이:
- * 줄기 끝이 꽃 머리 가운데보다 아래에서 끝나는 꽃은 핀 꽃잎이 가려 주지만 봉오리일 때 떠 보이므로 머리 밑동까지 잇는다
+ * 줄기 끝이 꽃 머리 가운데보다 아래에서 끝나는 꽃은 핀 꽃잎이 가려 주지만 봉오리일 때 떠 보이므로 머리 밑동까지 잇는다.
+ * hang: 줄기 끝에 꽃이 매달린 꽃(설강화·봉선화). 마무리 동작의 기울기 기준점을 꽃 머리 아래 가운데 대신
+ * 줄기와 만나는 꽃 머리 원점으로(아래 가운데로 돌리면 위쪽 줄기 끝에서 꽃이 떨어져 보임, styles.css .hd[data-pivot])
  */
-const head = (x: number, y: number, inner: Plate, delay = 0, neck = 0) =>
-  `${neck ? new Plate().stem(`M${x} ${y + neck}V${y}`, 1.6) : ''}<g transform="translate(${x} ${y})"><g class="hd" style="--d:${delay}ms">${inner}</g></g>`;
+const head = (x: number, y: number, inner: Plate, delay = 0, neck = 0, hang = false) =>
+  `${neck ? new Plate().stem(`M${x} ${y + neck}V${y}`, 1.6) : ''}<g transform="translate(${x} ${y})"><g class="hd"${hang ? ' data-pivot="stem"' : ''} style="--d:${delay}ms">${inner}</g></g>`;
 
 const DRAW: Record<FlowerId, () => Plate> = {
   tulip: () => {
@@ -309,7 +311,7 @@ const DRAW: Record<FlowerId, () => Plate> = {
     const bloom = (x: number, y: number, delay: number) => {
       const h = new Plate().ring(0, 0, 5, 9, 9, { shape: 'heart', c: '#d9466f', l: '#f6a3bb', start: 0, sy: 0.9, cs: 0.4, delay } as PetalOpts, 60);
       h.raw(`<path d="M2 3Q6 8 3 11" fill="none" stroke="#b8345a" stroke-width="1.1" stroke-linecap="round"/><circle r="1.6" fill="#f7e3ea" stroke="${INK}" stroke-width=".3"/>`);
-      return head(x, y, h);
+      return head(x, y, h, 0, 0, true);
     };
     return p.raw(`<path d="M50 70L41 66M50 58L60 54M50 82L59 80" stroke="${STEM}" stroke-width=".8"/>` + bloom(40, 64, 0) + bloom(61, 52, 200) + bloom(60, 79, 400) + bloom(50, 42, 600));
   },
@@ -413,7 +415,7 @@ const DRAW: Record<FlowerId, () => Plate> = {
       .petal(0, 3, 202, 24, 12, { shape: 'oval', c: '#f7f6f0', l: '#ffffff', closed: 182, cs: 0.6, delay: 120 })
       .petal(0, 3, 180, 13, 10, { shape: 'cup', c: '#eef3e6', l: '#ffffff', closed: 180, cs: 0.6, delay: 200 })
       .raw(`<path d="M-2.4 15Q0 13 2.4 15" stroke="#5f9a4a" stroke-width="1" fill="none"/>`);
-    return p.raw(head(64, 42, h));
+    return p.raw(head(64, 42, h, 0, 0, true));
   },
   adonis: () => {
     const p = new Plate().stem('M50 116C50 100 50 88 50 76', 1.4).foliage(
