@@ -206,7 +206,7 @@ function play(level: number | 'daily'): void {
     onQuit: () => showStart(),
     solve:
       !daily && ALL_OPEN()
-        ? { onToggle: () => solToggle(), onPrev: () => solPrev(), onNext: () => solNext(), onAuto: () => solAutoToggle() }
+        ? { onPrev: () => solPrev(), onNext: () => solNext(), onAuto: () => solAutoToggle() }
         : undefined,
   });
   mount(view.el);
@@ -340,6 +340,7 @@ function play(level: number | 'daily'): void {
     sound.play('restart');
     render(true);
     lastLit = game.lit;
+    solInit();
   };
 
   /** 멀리 있는 칸을 누르면 화분을 밀지 않는 가장 짧은 길로 걸어간다(걸음마다 이동 수에 들어감) */
@@ -487,9 +488,9 @@ function play(level: number | 'daily'): void {
   view.boardHost.addEventListener('pointermove', onMove);
   view.boardHost.addEventListener('pointerup', onUp);
   view.boardHost.addEventListener('pointercancel', () => (start = null));
-  // 출시 전 확인(TEST) 풀이 보기: 가장 적은 이동 풀이를 밀기 하나 단위로 앞뒤로 넘겨 보며 판의 의도를 확인한다.
-  // 처음 상태면 미리 적은 풀이(solutions.ts), 하다 만 상태면 워커가 이어지는 풀이를 찾는다. 풀이를 연 판은 기록·순위에 남기지 않고,
-  // 직접 움직이거나 처음부터 하면 풀이 줄을 닫는다
+  // 출시 전 확인(TEST) 풀이 보기: 판 아래 줄(늘 보임)에서 가장 적은 이동 풀이를 밀기 하나 단위로 앞뒤로 넘겨 보며 판의 의도를 확인한다.
+  // 처음 상태면 미리 적은 풀이(solutions.ts), 하다 만 상태면 ▶ 를 누를 때 워커가 거기서 이어지는 풀이를 찾는다.
+  // ◀·▶·▶▶ 를 한 번이라도 누른 판은 기록·순위에 남기지 않는다. 직접 움직이면 풀이를 버리고 "여기서부터 풀이"로 돌아간다
   interface Seg {
     dirs: Dir[];
     pot: number;
@@ -509,11 +510,16 @@ function play(level: number | 'daily'): void {
     board.place(s, null);
     render(true);
   };
+  /** 풀이 줄 글·단추. 화살표는 풀이를 넘겨 보기 시작한 뒤에만(그 전엔 직접 풀어 보는 데 방해되지 않게) */
   const solShow = () => {
-    if (!sol || !view.sol) return;
+    if (!view.sol) return;
+    if (!sol) {
+      board.hint(null);
+      return view.sol.set(t('sol.ready'), false, !game.done);
+    }
     const { segs, at } = sol;
     view.sol.set(t('sol.step', { n: at, total: segs.length }), at > 0 && !game.done, at < segs.length && !game.done);
-    board.hint(at < segs.length ? segs[at].pot : null, segs[at]?.dir);
+    board.hint(assisted && at < segs.length ? segs[at].pot : null, segs[at]?.dir);
   };
   const solStart = (path: Dir[]) => {
     const segs: Seg[] = [];
@@ -533,18 +539,41 @@ function play(level: number | 'daily'): void {
     sol = { segs, at: 0 };
     solShow();
   };
+  /** 처음 상태(판 시작·처음부터)면 미리 적은 풀이를 걸어 둔다 */
+  const solInit = () => {
+    if (!view.sol || game.moves !== 0) return;
+    solStart([...SOLUTIONS[level as number]].map((c) => 'URDL'.indexOf(c) as Dir));
+  };
   const solAutoOff = () => {
     solAuto = false;
     view.sol?.playing(false);
   };
+  /** 직접 움직였을 때: 걸어 둔 풀이를 버린다 */
   const solEnd = () => {
     if (!sol && !solFinding) return;
     stopWalk();
     solAutoOff();
     sol = null;
     solFinding = false;
-    board.hint(null);
-    view.sol?.show(false);
+    solShow();
+  };
+  /** 풀이가 없으면(하다 만 상태) 워커로 찾은 뒤 then */
+  const ensureSol = (then: () => void) => {
+    if (sol) return then();
+    if (solFinding) return;
+    if (game.stuck.length) return view.sol?.set(t('sol.none'), false, false);
+    view.sol?.set(t('sol.finding'), false, false);
+    solFinding = true;
+    const asked = game.state;
+    worker ??= new Worker(new URL('./game/solve.worker.ts', import.meta.url), { type: 'module' });
+    worker.onmessage = (e: MessageEvent<Dir[] | null>) => {
+      if (!solFinding || game.state !== asked) return;
+      solFinding = false;
+      if (!e.data) return view.sol?.set(t('sol.none'), false, false);
+      solStart(e.data);
+      then();
+    };
+    worker.postMessage({ rows: def.rows, state: game.state });
   };
   /** 밀기 하나(걸어가서 한 번 밂)를 걸음마다 보여 준다. 중간에 멈췄던 밀기는 그 밀기 처음 자리부터 */
   const playSeg = (then?: () => void) => {
@@ -566,13 +595,15 @@ function play(level: number | 'daily'): void {
     stepNext();
   };
   const solNext = () => {
-    if (!sol || walking || paused) return;
-    playSeg();
+    if (walking || paused || game.done) return;
+    assisted = true;
+    ensureSol(() => playSeg());
   };
   const solPrev = () => {
-    if (!sol || paused) return;
+    if (!sol || paused || game.done) return;
     stopWalk();
     solAutoOff();
+    assisted = true;
     const cur = sol.segs[sol.at];
     // 밀기 중간이면 그 밀기 처음으로, 아니면 앞 밀기 처음으로
     if (!cur || sameState(game.state, cur.from)) sol.at = Math.max(0, sol.at - 1);
@@ -581,40 +612,24 @@ function play(level: number | 'daily'): void {
     solShow();
   };
   const solAutoToggle = () => {
-    if (!sol || paused) return;
+    if (paused || game.done) return;
     if (solAuto) {
       stopWalk();
       return solAutoOff();
     }
     if (walking) return;
-    solAuto = true;
-    view.sol?.playing(true);
-    const go = () => {
-      if (!solAuto || !sol || sol.at >= sol.segs.length || game.done) return solAutoOff();
-      playSeg(() => (walking = setTimeout(go, 260)));
-    };
-    go();
-  };
-  const solToggle = () => {
-    if (game.done || paused) return;
-    if (sol || solFinding) return solEnd();
-    stopWalk();
     assisted = true;
-    view.sol?.show(true);
-    if (game.moves === 0) return solStart([...SOLUTIONS[level as number]].map((c) => 'URDL'.indexOf(c) as Dir));
-    if (game.stuck.length) return view.sol?.set(t('sol.none'), false, false);
-    view.sol?.set(t('sol.finding'), false, false);
-    solFinding = true;
-    const asked = game.state;
-    worker ??= new Worker(new URL('./game/solve.worker.ts', import.meta.url), { type: 'module' });
-    worker.onmessage = (e: MessageEvent<Dir[] | null>) => {
-      if (!solFinding || game.state !== asked) return;
-      solFinding = false;
-      if (e.data) solStart(e.data);
-      else view.sol?.set(t('sol.none'), false, false);
-    };
-    worker.postMessage({ rows: def.rows, state: game.state });
+    ensureSol(() => {
+      solAuto = true;
+      view.sol?.playing(true);
+      const go = () => {
+        if (!solAuto || !sol || sol.at >= sol.segs.length || game.done) return solAutoOff();
+        playSeg(() => (walking = setTimeout(go, 260)));
+      };
+      go();
+    });
   };
+  solInit();
 
   const onVisibility = () => document.hidden && !game.done && setPaused(true);
   window.addEventListener('keydown', onKey);

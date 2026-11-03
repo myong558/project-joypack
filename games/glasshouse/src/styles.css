@@ -1708,10 +1708,7 @@ h2 .icon-pic {
   margin-right: 2px;
   vertical-align: -0.28em;
 }
-/* 출시 전 확인(TEST) 풀이 보기: 판 아래 설명 자리를 ◀ 밀기 n / 전체 ▶ ▶▶ 줄로 바꿔 쓰고, 오른쪽 단추가 풀이 ↔ 닫기 */
-.dock [hidden] {
-  display: none;
-}
+/* 출시 전 확인(TEST) 풀이 보기: 판 아래 설명 대신 ◀ 밀기 n / 전체 ▶ ▶▶ 줄이 늘 보임 */
 .sol-bar {
   flex: 1;
   min-width: 0;
@@ -1740,21 +1737,6 @@ h2 .icon-pic {
   text-align: center;
   font-size: 14px;
   font-variant-numeric: tabular-nums;
-}
-.sol-btn {
-  flex: none;
-  display: grid;
-  place-items: center;
-  min-width: 52px;
-  height: 44px;
-  padding: 0 12px;
-  border: 1px dashed var(--line);
-  border-radius: 12px;
-  background: var(--panel);
-  color: var(--ink);
-  font: inherit;
-  font-size: 14px;
-  cursor: pointer;
 }
 /* 다음에 밀 화분: 미는 쪽 화살표(화분과 함께 움직임) */
 .pot.sol-next::after {
