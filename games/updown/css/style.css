@@ -976,11 +976,12 @@ button:focus-visible {
     width 0.45s cubic-bezier(0.2, 1.2, 0.4, 1);
 }
 
-.range-bar-live.instant {
+/* 새 판·언어 전환은 움직이지 않고 바로 그린다(app.js 의 renderBar) */
+.range-bar.instant > * {
   transition: none;
 }
 
-/* 추측한 자리 눈금: UP 빨강, DOWN 파랑 */
+/* 추측한 자리 눈금: UP 빨강, DOWN 파랑. 남은 범위로 확대될 때 막대와 함께 미끄러진다 */
 .range-bar-mark {
   position: absolute;
   inset-block: 1px;
@@ -988,6 +989,7 @@ button:focus-visible {
   translate: -50% 0;
   border-radius: 2px;
   opacity: 0.9;
+  transition: left 0.45s cubic-bezier(0.2, 1.2, 0.4, 1);
 }
 
 .range-bar-mark.up {
@@ -1011,6 +1013,10 @@ button:focus-visible {
   box-shadow: 0 0 0 1.5px var(--text), 0 1px 3px rgb(0 0 0 / 0.3);
   transition: left 0.18s ease-out;
   pointer-events: none;
+}
+
+.range-bar.zoom .range-bar-pick {
+  transition: left 0.45s cubic-bezier(0.2, 1.2, 0.4, 1);
 }
 
 .range-bar-pick[hidden] {
@@ -2629,7 +2635,9 @@ h1.lost {
   button,
   .dial-thumb,
   .dial-fill,
-  .range-bar-pick {
+  .range-bar-pick,
+  .range-bar.zoom .range-bar-pick,
+  .range-bar-mark {
     transition: none;
   }
 

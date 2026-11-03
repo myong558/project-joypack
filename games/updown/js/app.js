@@ -360,27 +360,61 @@
     history.classList.toggle('fade-top', history.scrollTop > 0);
   }
 
-  // 좁혀지는 숫자 막대: 1~끝 숫자 전체 중 아직 가능한 칸(low~high)만 밝게 남긴다. 추측한 자리에는 UP(빨강)·DOWN(파랑) 눈금.
-  // 맞히면 정답 한 칸으로 모여 터진다(css 의 .range-bar.won). 새 판·언어 전환(animate 아님)은 움직이지 않고 바로 그린다.
+  // 막대가 보여 주는 숫자 구간(barView). 숫자 v 의 칸은 v-0.5 ~ v+0.5 이다.
+  // 판 중에는 남은 범위(low~high)를 막대 폭에 맞게 확대해 범위가 넓어도(1~1000 등) 고르는 자리가 잘 움직여 보이게 하고,
+  // 양옆에 제외된 칸을 조금(BAR_PAD) 남겨 직전 UP·DOWN 눈금이 가장자리에 보이게 한다. 판이 끝나면 다시 전체 범위.
+  const BAR_PAD = 0.1;
+  let barView = { from: 0.5, to: 1.5 };
+
+  function barPos(view, value) {
+    return ((value - view.from) / (view.to - view.from)) * 100 + '%';
+  }
+
+  function barViewFor() {
+    if (game.status !== 'playing') return { from: 0.5, to: game.max + 0.5 };
+    const pad = Math.max(1, (game.high - game.low + 1) * BAR_PAD);
+    return { from: Math.max(0.5, game.low - 0.5 - pad), to: Math.min(game.max + 0.5, game.high + 0.5 + pad) };
+  }
+
+  // 좁혀지는 숫자 막대: 아직 가능한 칸(low~high)만 밝고, 추측한 자리에는 UP(빨강)·DOWN(파랑) 눈금.
+  // 힌트가 나오면 남은 범위로 부드럽게 확대된다. 맞히면 전체 범위로 돌아가 정답 한 칸으로 모여 터진다(css 의 .range-bar.won).
+  // 새 판·언어 전환(animate 아님)은 움직이지 않고 바로 그린다.
   function renderBar(animate) {
     const bar = $('range-bar');
     const live = $('range-bar-live');
     const won = game.status === 'won';
     const low = won ? game.answer : game.low;
     const high = won ? game.answer : game.high;
-    live.classList.toggle('instant', !animate);
-    live.style.left = ((low - 1) / game.max) * 100 + '%';
-    live.style.width = ((high - low + 1) / game.max) * 100 + '%';
-    bar.querySelectorAll('.range-bar-mark').forEach((el) => el.remove());
-    game.guesses.forEach((g) => {
-      if (g.result === 'CORRECT') return;
-      const mark = document.createElement('span');
+    const prev = barView;
+    barView = barViewFor();
+    bar.classList.toggle('instant', !animate);
+    live.style.left = barPos(barView, low - 0.5);
+    live.style.width = 'calc(' + barPos(barView, high + 0.5) + ' - ' + barPos(barView, low - 0.5) + ')';
+    // 눈금은 지우지 않고 다시 써서 확대할 때 함께 미끄러지게 한다. 새 눈금은 확대 전 자리에서 시작한다.
+    const marks = [...bar.querySelectorAll('.range-bar-mark')];
+    const guesses = game.guesses.filter((g) => g.result !== 'CORRECT');
+    marks.slice(guesses.length).forEach((el) => el.remove());
+    guesses.forEach((g, i) => {
+      let mark = marks[i];
+      if (!mark) {
+        mark = document.createElement('span');
+        mark.style.left = barPos(animate ? prev : barView, g.value);
+        bar.appendChild(mark);
+        void mark.offsetWidth;
+      }
       mark.className = 'range-bar-mark ' + g.result.toLowerCase();
-      mark.style.left = ((g.value - 0.5) / game.max) * 100 + '%';
-      bar.appendChild(mark);
+      mark.style.left = barPos(barView, g.value);
     });
     bar.classList.toggle('won', won && animate);
     $('range-bar-pick').hidden = game.status !== 'playing';
+    // 확대하는 동안은 고르는 자리 점도 막대와 같은 속도로 움직인다. 바로 그린 뒤에는 다시 움직임을 켠다.
+    const zoom = animate && (prev.from !== barView.from || prev.to !== barView.to);
+    bar.classList.toggle('zoom', zoom);
+    if (zoom) setTimeout(() => bar.classList.remove('zoom'), 450);
+    if (!animate) {
+      void bar.offsetWidth;
+      bar.classList.remove('instant');
+    }
   }
 
   // 정답 축하 색종이. big 이면(최고 기록 갱신) 양쪽 아래 모서리에서도 쏘아 올려 더 크게 터진다.
@@ -1056,7 +1090,7 @@
     $('dial-thumb').setAttribute('cx', x);
     $('dial-thumb').setAttribute('cy', y);
     $('dial-fill').setAttribute('d', dialArc(angle));
-    $('range-bar-pick').style.left = ((pick - 0.5) / game.max) * 100 + '%';
+    $('range-bar-pick').style.left = barPos(barView, pick);
 
     const dial = $('dial');
     dial.setAttribute('aria-valuemin', game.low);
