@@ -1010,6 +1010,17 @@ button:focus-visible {
   transition: left 0.45s cubic-bezier(0.2, 1.2, 0.4, 1);
 }
 
+/* 눈금이 나오면 점 대신 고른 숫자의 칸 하나를 칠한다(칸 폭 = 막대 / --cells, 가운데가 고른 자리) */
+.range-bar.ticks .range-bar-pick {
+  top: 0;
+  width: calc(100% / var(--cells, 1));
+  height: 100%;
+  translate: -50% 0;
+  background: rgb(255 255 255 / 0.92);
+  border-radius: 0;
+  box-shadow: none;
+}
+
 /* 아직 가능한 범위(13 ~ 24): 막대 왼쪽의 작은 알약(글자 수가 바뀌어도 막대가 덜 흔들리게 최소 폭). 좁혀지면 #range 가 반짝인다 */
 .play-level {
   flex: none;

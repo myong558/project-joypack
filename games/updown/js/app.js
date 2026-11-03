@@ -384,10 +384,10 @@
     barView = barViewFor();
     bar.classList.toggle('instant', !animate);
     const cells = game.high - game.low + 1;
-    live.style.setProperty('--cells', cells);
+    bar.style.setProperty('--cells', cells);
     const ticks = cells > 1 && cells <= BAR_TICKS;
     live.classList.toggle('ticks', ticks);
-    // 눈금이 나오면 좌우 여백 없이 꽉 채운다(style.css 의 .range-bar.ticks)
+    // 눈금이 나오면 좌우 여백 없이 꽉 채우고, 점 대신 고른 칸을 칠한다(style.css 의 .range-bar.ticks)
     bar.classList.toggle('ticks', ticks);
     // 확대하는 동안은 고르는 자리 점도 막대와 같은 속도로 움직인다. 바로 그린 뒤에는 다시 움직임을 켠다.
     const zoom = animate && (prev.from !== barView.from || prev.to !== barView.to);
