@@ -713,8 +713,7 @@ export function gameScreen(opts: { level: number | null; par: number; onPause: (
         <div class="pause-menu" hidden>
           <h2>${t('pause.title')}</h2>
           <button class="btn primary" data-act="resume">${t('pause.resume')}</button>
-          <button class="btn" data-act="restart">${t('pause.restart')}</button>
-          <button class="btn ghost" data-act="quit">${t('pause.quit')}</button>
+          <button class="btn" data-act="quit">${t('pause.quit')}</button>
         </div>
       </div>
       <div class="dock">

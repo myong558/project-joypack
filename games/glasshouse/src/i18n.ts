@@ -48,8 +48,7 @@ const ko = {
 
   'pause.title': '일시정지',
   'pause.resume': '계속하기',
-  'pause.restart': '처음부터',
-  'pause.quit': '처음 화면으로',
+  'pause.quit': '홈으로',
 
   'result.bloomed': '{flower} 피었어요',
   'result.moves': '이동',
@@ -192,8 +191,7 @@ const en: Record<MessageKey, string> = {
 
   'pause.title': 'Paused',
   'pause.resume': 'Resume',
-  'pause.restart': 'Restart',
-  'pause.quit': 'Main screen',
+  'pause.quit': 'Home',
 
   'result.bloomed': 'The {flower} is in bloom',
   'result.moves': 'Moves',
