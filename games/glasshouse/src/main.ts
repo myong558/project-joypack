@@ -5,7 +5,8 @@ import { FLOWER } from './flora';
 import { Game, levelScore, petals } from './game/engine';
 import { dailyLevel, dateKey, dayIndex } from './game/daily';
 import { LEVELS, TIPS, dailySpecies, speciesFor } from './game/levels';
-import type { Dir } from './game/rules';
+import { step, type Dir, type State } from './game/rules';
+import { SOLUTIONS } from './game/solutions';
 import { setLang, t } from './i18n';
 import { fetchBoard, fetchDaily, submitDaily, submitEntry } from './online';
 import { BOARD, dailyAhead, placeOf, placeOfDaily, type DailyEntry, type RankEntry } from './ranking';
@@ -199,9 +200,14 @@ function play(level: number | 'daily'): void {
     onResume: () => setPaused(false),
     onRestart: () => {
       setPaused(false);
+      solEnd();
       restart();
     },
     onQuit: () => showStart(),
+    solve:
+      !daily && ALL_OPEN()
+        ? { onToggle: () => solToggle(), onPrev: () => solPrev(), onNext: () => solNext(), onAuto: () => solAutoToggle() }
+        : undefined,
   });
   mount(view.el);
   const board = new BoardView(view.boardHost, game.board, species, game.state);
@@ -289,6 +295,7 @@ function play(level: number | 'daily'): void {
     if (queued.length) queueTimer = setTimeout(pump, STEP_GAP);
   };
   const swipeStep = (d: Dir) => {
+    solEnd();
     if (walking) stopWalk();
     if (queued.length >= 2) return;
     queued.push(d);
@@ -357,6 +364,7 @@ function play(level: number | 'daily'): void {
       runAt = null;
     } else if (!on && runAt === null) runAt = performance.now();
     stopWalk();
+    solAutoOff();
     view.showPause(on);
     if (!on) view.boardHost.focus({ preventScroll: true });
   };
@@ -389,8 +397,8 @@ function play(level: number | 'daily'): void {
     const moves = game.moves;
     const score = levelScore(def.par, moves);
     const prev = save.levels[lv];
-    const firstBloom = !prev && !test;
-    const better = !test && (!prev || moves < prev.moves);
+    const firstBloom = !prev && !test && !assisted;
+    const better = !test && !assisted && (!prev || moves < prev.moves);
     if (better) save.levels[lv] = { moves, score, petals: petals(def.par, moves) };
     writeSave(save);
     const result: ClearResult = {
@@ -404,7 +412,7 @@ function play(level: number | 'daily'): void {
       garden: gardenScore(save),
       flowers: flowerCount(save),
     };
-    showResult(result, test);
+    showResult(result, test || assisted);
   };
 
   const finishDaily = () => {
@@ -433,9 +441,13 @@ function play(level: number | 'daily'): void {
     const d = DIRS[e.key];
     if (d !== undefined) {
       e.preventDefault();
+      solEnd();
       stopWalk();
       move(d);
-    } else if (e.key === 'r' || e.key === 'R') restart();
+    } else if (e.key === 'r' || e.key === 'R') {
+      solEnd();
+      restart();
+    }
   };
   // 판 위에서 드래그(한 번에 한 칸: 20px 를 넘는 순간 가고, 손을 뗄 때까지 더 가지 않음. 칸 크기와 상관없이 같은 거리)
   // 또는 칸 누르기(옆 칸이면 한 걸음, 멀면 걸어감)
@@ -461,6 +473,7 @@ function play(level: number | 'daily'): void {
     if (!tapped || paused || game.done) return;
     const cell = board.cellAt(e.clientX, e.clientY);
     if (cell < 0) return;
+    solEnd();
     const w = game.board.w;
     const p = game.state.player;
     const dx = (cell % w) - (p % w);
@@ -474,11 +487,141 @@ function play(level: number | 'daily'): void {
   view.boardHost.addEventListener('pointermove', onMove);
   view.boardHost.addEventListener('pointerup', onUp);
   view.boardHost.addEventListener('pointercancel', () => (start = null));
+  // 출시 전 확인(TEST) 풀이 보기: 가장 적은 이동 풀이를 밀기 하나 단위로 앞뒤로 넘겨 보며 판의 의도를 확인한다.
+  // 처음 상태면 미리 적은 풀이(solutions.ts), 하다 만 상태면 워커가 이어지는 풀이를 찾는다. 풀이를 연 판은 기록·순위에 남기지 않고,
+  // 직접 움직이거나 처음부터 하면 풀이 줄을 닫는다
+  interface Seg {
+    dirs: Dir[];
+    pot: number;
+    dir: Dir;
+    from: State;
+    moves: number;
+  }
+  let assisted = false;
+  let sol: { segs: Seg[]; at: number } | null = null;
+  let solFinding = false;
+  let solAuto = false;
+  let worker: Worker | null = null;
+  const sameState = (a: State, b: State) => a.player === b.player && a.pots.every((p, i) => p === b.pots[i]);
+  const jump = (s: State, moves: number) => {
+    game.state = s;
+    game.moves = moves;
+    board.place(s, null);
+    render(true);
+  };
+  const solShow = () => {
+    if (!sol || !view.sol) return;
+    const { segs, at } = sol;
+    view.sol.set(t('sol.step', { n: at, total: segs.length }), at > 0 && !game.done, at < segs.length && !game.done);
+    board.hint(at < segs.length ? segs[at].pot : null, segs[at]?.dir);
+  };
+  const solStart = (path: Dir[]) => {
+    const segs: Seg[] = [];
+    let s = game.state;
+    let m = game.moves;
+    let seg: Seg = { dirs: [], pot: -1, dir: 0, from: s, moves: m };
+    for (const d of path) {
+      const r = step(game.board, s, d);
+      seg.dirs.push(d);
+      s = r.state;
+      m++;
+      if (r.pushed >= 0) {
+        segs.push({ ...seg, pot: r.pushed, dir: d });
+        seg = { dirs: [], pot: -1, dir: 0, from: s, moves: m };
+      }
+    }
+    sol = { segs, at: 0 };
+    solShow();
+  };
+  const solAutoOff = () => {
+    solAuto = false;
+    view.sol?.playing(false);
+  };
+  const solEnd = () => {
+    if (!sol && !solFinding) return;
+    stopWalk();
+    solAutoOff();
+    sol = null;
+    solFinding = false;
+    board.hint(null);
+    view.sol?.show(false);
+  };
+  /** 밀기 하나(걸어가서 한 번 밂)를 걸음마다 보여 준다. 중간에 멈췄던 밀기는 그 밀기 처음 자리부터 */
+  const playSeg = (then?: () => void) => {
+    if (!sol || sol.at >= sol.segs.length || game.done) return;
+    const seg = sol.segs[sol.at];
+    if (!sameState(game.state, seg.from)) jump(seg.from, seg.moves);
+    const dirs = [...seg.dirs];
+    const stepNext = () => {
+      const d = dirs.shift();
+      if (d === undefined) {
+        walking = null;
+        sol!.at++;
+        solShow();
+        return then?.();
+      }
+      move(d);
+      walking = setTimeout(stepNext, 85);
+    };
+    stepNext();
+  };
+  const solNext = () => {
+    if (!sol || walking || paused) return;
+    playSeg();
+  };
+  const solPrev = () => {
+    if (!sol || paused) return;
+    stopWalk();
+    solAutoOff();
+    const cur = sol.segs[sol.at];
+    // 밀기 중간이면 그 밀기 처음으로, 아니면 앞 밀기 처음으로
+    if (!cur || sameState(game.state, cur.from)) sol.at = Math.max(0, sol.at - 1);
+    const seg = sol.segs[sol.at];
+    jump(seg.from, seg.moves);
+    solShow();
+  };
+  const solAutoToggle = () => {
+    if (!sol || paused) return;
+    if (solAuto) {
+      stopWalk();
+      return solAutoOff();
+    }
+    if (walking) return;
+    solAuto = true;
+    view.sol?.playing(true);
+    const go = () => {
+      if (!solAuto || !sol || sol.at >= sol.segs.length || game.done) return solAutoOff();
+      playSeg(() => (walking = setTimeout(go, 260)));
+    };
+    go();
+  };
+  const solToggle = () => {
+    if (game.done || paused) return;
+    if (sol || solFinding) return solEnd();
+    stopWalk();
+    assisted = true;
+    view.sol?.show(true);
+    if (game.moves === 0) return solStart([...SOLUTIONS[level as number]].map((c) => 'URDL'.indexOf(c) as Dir));
+    if (game.stuck.length) return view.sol?.set(t('sol.none'), false, false);
+    view.sol?.set(t('sol.finding'), false, false);
+    solFinding = true;
+    const asked = game.state;
+    worker ??= new Worker(new URL('./game/solve.worker.ts', import.meta.url), { type: 'module' });
+    worker.onmessage = (e: MessageEvent<Dir[] | null>) => {
+      if (!solFinding || game.state !== asked) return;
+      solFinding = false;
+      if (e.data) solStart(e.data);
+      else view.sol?.set(t('sol.none'), false, false);
+    };
+    worker.postMessage({ rows: def.rows, state: game.state });
+  };
+
   const onVisibility = () => document.hidden && !game.done && setPaused(true);
   window.addEventListener('keydown', onKey);
   document.addEventListener('visibilitychange', onVisibility);
   teardown = () => {
     stopWalk();
+    worker?.terminate();
     clearTimeout(idleTimer);
     ro.disconnect();
     timers.forEach(clearTimeout);

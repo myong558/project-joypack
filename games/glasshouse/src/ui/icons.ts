@@ -16,6 +16,7 @@ export const ICONS = {
   arrow: svg('<path d="M5 12h14M13 6l6 6-6 6"/>'),
   left: svg('<path d="M15 5l-7 7 7 7"/>'),
   right: svg('<path d="M9 5l7 7-7 7"/>'),
+  play: svg('<path d="M5 5l7 7-7 7M12 5l7 7-7 7"/>'),
   lock: svg('<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>'),
   calendar: svg('<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/><circle cx="12" cy="15" r="1.6" fill="currentColor"/>'),
   /** 도감: 펼친 식물 도감(왼쪽 쪽에 눌러 말린 튤립, 오른쪽 쪽에 글 줄, 가운데 빨간 책갈피 끈). 선 아이콘이 아니라 색이 든 작은 그림 */

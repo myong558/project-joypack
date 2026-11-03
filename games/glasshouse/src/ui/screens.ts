@@ -688,10 +688,32 @@ export interface GameView {
   moves: HTMLElement;
   note: HTMLElement;
   showPause(show: boolean): void;
+  /** 출시 전 확인(TEST) 풀이 보기 줄. 풀이 단추가 없는 화면(출시 화면·오늘의 정원)이면 null */
+  sol: SolBar | null;
+}
+
+/** 판 아래 설명 자리를 바꿔 쓰는 풀이 조작 줄: ◀ 밀기 n / 전체 ▶ ▶▶, 오른쪽 단추는 풀이 ↔ 닫기 */
+export interface SolBar {
+  /** 줄을 열고 닫는다(닫으면 판 아래 설명이 돌아옴) */
+  show(on: boolean): void;
+  /** 가운데 글과 앞·다음 단추 쓸 수 있는지 */
+  set(label: string, canPrev: boolean, canNext: boolean): void;
+  /** 끝까지 보기 재생 중 표시 */
+  playing(on: boolean): void;
 }
 
 /** level 이 null 이면 오늘의 정원(판 번호 자리에 걸린 시간) */
-export function gameScreen(opts: { level: number | null; flower: FlowerId; par: number; onPause: () => void; onResume: () => void; onRestart: () => void; onQuit: () => void }): GameView {
+export function gameScreen(opts: {
+  level: number | null;
+  flower: FlowerId;
+  par: number;
+  onPause: () => void;
+  onResume: () => void;
+  onRestart: () => void;
+  onQuit: () => void;
+  /** 출시 전 확인(TEST)일 때만: 풀이 보기 단추 */
+  solve?: { onToggle: () => void; onPrev: () => void; onNext: () => void; onAuto: () => void };
+}): GameView {
   const el = html(`
     <main class="screen game">
       <div class="hud">
@@ -716,6 +738,17 @@ export function gameScreen(opts: { level: number | null; flower: FlowerId; par: 
       </div>
       <div class="dock">
         <ul class="legend"><li><span class="legend-text"><span class="sun-ico">${SUN_ICON}</span>${t('legend.rule')}</span></li></ul>
+        ${
+          opts.solve
+            ? `<div class="sol-bar" hidden>
+          <button type="button" class="hud-btn" data-sol="prev" aria-label="${t('sol.prev')}" title="${t('sol.prev')}">${ICONS.left}</button>
+          <p class="sol-label" aria-live="polite"></p>
+          <button type="button" class="hud-btn" data-sol="next" aria-label="${t('sol.next')}" title="${t('sol.next')}">${ICONS.right}</button>
+          <button type="button" class="hud-btn" data-sol="auto" aria-label="${t('sol.auto')}" title="${t('sol.auto')}">${ICONS.play}</button>
+        </div>
+        <button type="button" class="sol-btn" data-sol="toggle" aria-pressed="false">${t('sol.open')}</button>`
+            : ''
+        }
       </div>
     </main>`);
   const q = <T extends HTMLElement = HTMLElement>(s: string) => el.querySelector<T>(s)!;
@@ -724,7 +757,39 @@ export function gameScreen(opts: { level: number | null; flower: FlowerId; par: 
   q('[data-act="resume"]').addEventListener('click', opts.onResume);
   el.querySelectorAll('[data-act="restart"]').forEach((b) => b.addEventListener('click', opts.onRestart));
   q('[data-act="quit"]').addEventListener('click', opts.onQuit);
+  let sol: SolBar | null = null;
+  if (opts.solve) {
+    const s = opts.solve;
+    const bar = q('.sol-bar');
+    const toggle = q<HTMLButtonElement>('[data-sol="toggle"]');
+    const prev = q<HTMLButtonElement>('[data-sol="prev"]');
+    const next = q<HTMLButtonElement>('[data-sol="next"]');
+    const auto = q<HTMLButtonElement>('[data-sol="auto"]');
+    toggle.addEventListener('click', s.onToggle);
+    prev.addEventListener('click', s.onPrev);
+    next.addEventListener('click', s.onNext);
+    auto.addEventListener('click', s.onAuto);
+    sol = {
+      show(on) {
+        bar.hidden = !on;
+        q('.legend').hidden = on;
+        toggle.setAttribute('aria-pressed', String(on));
+        toggle.innerHTML = on ? ICONS.close : t('sol.open');
+        toggle.setAttribute('aria-label', on ? t('sol.close') : t('sol.open'));
+      },
+      set(label, canPrev, canNext) {
+        q('.sol-label').textContent = label;
+        prev.disabled = !canPrev;
+        next.disabled = !canNext;
+        auto.disabled = !canNext;
+      },
+      playing(on) {
+        auto.innerHTML = on ? ICONS.pause : ICONS.play;
+      },
+    };
+  }
   return {
+    sol,
     el,
     stage: q('.stage'),
     boardHost: q('.board-host'),

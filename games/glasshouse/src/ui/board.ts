@@ -183,6 +183,12 @@ export class BoardView {
     this.gardener.classList.add('bump');
   }
 
+  /** 출시 전 확인(TEST) 풀이 보기: 다음에 밀 화분에 미는 쪽 화살표. pot 이 null 이면 지움 */
+  hint(pot: number | null, dir: Dir = 0): void {
+    this.pots.forEach((p, i) => p.el.classList.toggle('sol-next', i === pot));
+    if (pot !== null) this.pots[pot].el.style.setProperty('--hint', `${dir * 90}deg`);
+  }
+
   /** 화분마다 햇살 자리에 있는지(있으면 꽃대가 서고 바닥이 빛남) */
   mood(lit: boolean[], stuck: number[]): void {
     lit.forEach((ok, i) => {

@@ -1,13 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { FLOWER, FLOWERS } from '../src/flora';
 import { LEVELS, speciesFor } from '../src/game/levels';
-import { lit, parse } from '../src/game/rules';
+import { lit, parse, solved, step } from '../src/game/rules';
+import { SOLUTIONS } from '../src/game/solutions';
 import { explore, solve } from '../src/game/solver';
 
 /** 판마다: 풀리고, 기준 이동 수가 맞고, 처음엔 햇살 자리에 화분이 없고, 뒤로 갈수록 화분이 많다 */
 describe('정원 24개', () => {
   it('판 수와 꽃이 맞물린다', () => {
     expect(LEVELS).toHaveLength(24);
+    expect(SOLUTIONS).toHaveLength(24);
     expect(LEVELS.map((l) => l.flower)).toEqual(FLOWERS.map((f) => f.id));
   });
 
@@ -30,6 +32,11 @@ describe('정원 24개', () => {
       expect(speciesFor(i, start.pots.length)).toEqual(start.pots.map(() => lv.flower));
       // 칸 100개까지(상태 번호 규칙: 칸 번호 0~99)
       expect(board.w * board.h).toBeLessThanOrEqual(100);
+      // TEST 풀이 보기의 미리 적은 풀이: 기준 이동 수 그대로 그 판을 깸(판을 바꾸면 pnpm --filter glasshouse solutions)
+      expect(SOLUTIONS[i]).toHaveLength(lv.par);
+      let s = start;
+      for (const c of SOLUTIONS[i]) s = step(board, s, 'URDL'.indexOf(c) as 0 | 1 | 2 | 3).state;
+      expect(solved(board, s.pots)).toBe(true);
     });
   });
 });

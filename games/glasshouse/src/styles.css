@@ -1708,6 +1708,69 @@ h2 .icon-pic {
   margin-right: 2px;
   vertical-align: -0.28em;
 }
+/* 출시 전 확인(TEST) 풀이 보기: 판 아래 설명 자리를 ◀ 밀기 n / 전체 ▶ ▶▶ 줄로 바꿔 쓰고, 오른쪽 단추가 풀이 ↔ 닫기 */
+.dock [hidden] {
+  display: none;
+}
+.sol-bar {
+  flex: 1;
+  min-width: 0;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border-radius: 14px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+}
+.sol-bar .hud-btn {
+  width: 40px;
+  height: 40px;
+  flex: none;
+}
+.sol-bar .hud-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.sol-label {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  text-align: center;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.sol-btn {
+  flex: none;
+  display: grid;
+  place-items: center;
+  min-width: 52px;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+/* 다음에 밀 화분: 미는 쪽 화살표(화분과 함께 움직임) */
+.pot.sol-next::after {
+  content: '';
+  position: absolute;
+  left: 27%;
+  top: 27%;
+  width: 46%;
+  height: 46%;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 15l7-7 7 7' fill='none' stroke='%23fff' stroke-width='4.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M5 15l7-7 7 7' fill='none' stroke='%23c4524a' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  transform: rotate(var(--hint, 0deg)) translateY(-104%);
+  filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.4));
+  pointer-events: none;
+  z-index: 5;
+}
 /* 가장 작은 폰(폭 360px 아래): 위 막대 간격을 줄임 */
 @media (max-width: 359px) {
   .hud {
