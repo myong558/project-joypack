@@ -58,6 +58,10 @@
   --stone-2: #d4cbb8;
   /* 판 벽 돌 블록 밝기(다크에서 낮춤) */
   --wall-filter: none;
+  /* 로고: 테두리 돌색 · 간판에 새긴 글자색 · 새김 그림자(스킨마다 아래 [data-skin] 에서 바뀜) */
+  --logo-frame: #9a978f;
+  --sign-ink: #4a4640;
+  --sign-cut: 0 1.5px 0 rgb(255 255 255 / 0.6), 0 -1px 0 rgb(0 0 0 / 0.4), 0 0 7px rgb(255 255 255 / 0.7), 0 0 14px rgb(255 255 255 / 0.45);
   --danger: #c2393c;
   --danger-ink: #b0302f;
   --jp-top-accent: var(--leaf);
@@ -79,6 +83,10 @@
   --ai-d: #f0998f;
   --sun-l: #ffe39a;
   --sun-d: #ffd27a;
+  /* 로고: 테두리 돌색 · 간판에 새긴 글자색 · 새김 그림자 */
+  --logo-frame: #9a978f;
+  --sign-ink: #4a4640;
+  --sign-cut: 0 1.5px 0 rgb(255 255 255 / 0.6), 0 -1px 0 rgb(0 0 0 / 0.4), 0 0 7px rgb(255 255 255 / 0.7), 0 0 14px rgb(255 255 255 / 0.45);
 }
 /* 비: 잿빛 하늘·유리를 타고 흐르는 빗방울·흐린 빛 */
 :root[data-skin='rain'] {
@@ -95,6 +103,10 @@
   --ai-d: #9cc4f0;
   --sun-l: #f1f0dc;
   --sun-d: #d9e2d0;
+  /* 로고: 테두리 돌색 · 간판에 새긴 글자색 · 새김 그림자 */
+  --logo-frame: #5c564d;
+  --sign-ink: #f3ebde;
+  --sign-cut: 0 -1px 0 rgb(0 0 0 / 0.65), 0 1.5px 0 rgb(255 255 255 / 0.18), 0 0 7px rgb(20 14 10 / 0.75), 0 0 14px rgb(20 14 10 / 0.45);
 }
 /* 노을: 보랏빛 위·주홍빛 아래, 낮게 걸린 해와 길게 눕는 햇살 */
 :root[data-skin='dusk'] {
@@ -111,6 +123,10 @@
   --ai-d: #f2a77c;
   --sun-l: #ffbe7a;
   --sun-d: #ffa860;
+  /* 로고: 테두리 돌색 · 간판에 새긴 글자색 · 새김 그림자 */
+  --logo-frame: #a3867a;
+  --sign-ink: #5a382e;
+  --sign-cut: 0 1.5px 0 rgb(255 255 255 / 0.6), 0 -1px 0 rgb(0 0 0 / 0.4), 0 0 7px rgb(255 255 255 / 0.7), 0 0 14px rgb(255 255 255 / 0.45);
 }
 /* 눈: 차가운 푸른 하늘·유리 밖에 내리는 눈·창 모서리 성에 */
 :root[data-skin='snow'] {
@@ -127,6 +143,10 @@
   --ai-d: #f08d97;
   --sun-l: #fff4cf;
   --sun-d: #ffe7a8;
+  /* 로고: 테두리 돌색 · 간판에 새긴 글자색 · 새김 그림자 */
+  --logo-frame: #a3adb7;
+  --sign-ink: #3d4856;
+  --sign-cut: 0 1.5px 0 rgb(255 255 255 / 0.6), 0 -1px 0 rgb(0 0 0 / 0.4), 0 0 7px rgb(255 255 255 / 0.7), 0 0 14px rgb(255 255 255 / 0.45);
 }
 
 /* 다크: 밤의 온실(밝기만 바꾼다) */
@@ -526,30 +546,35 @@ body:has(.screen.game) .scene .layer {
     linear-gradient(90deg, rgb(0 0 0 / 0.07) 1px, transparent 1px) 0 0 / var(--dc) var(--dc),
     linear-gradient(rgb(0 0 0 / 0.07) 1px, transparent 1px) 0 0 / var(--dc) var(--dc),
     var(--stone);
-  box-shadow: 0 0 0 5px #7a5a40, 0 0 0 6px rgb(0 0 0 / 0.25), 0 10px 24px rgb(0 0 0 / 0.18);
+  box-shadow: 0 0 0 5px var(--logo-frame), 0 0 0 6px rgb(0 0 0 / 0.22), 0 10px 24px rgb(0 0 0 / 0.16);
 }
-/* 위 줄 나무 간판: 네 칸을 한 장으로 덮고(칸 선 없음) 게임 이름을 크림색으로. 한국어는 크게, 영어는 길어서 조금 작게 */
+/* 위 줄 간판: 네 칸을 덮는 막돌 블록 한 장(판 벽과 같은 돌, 스킨마다 바뀜, ui/stonewall.ts 의 --wall-sign)에 게임 이름을 새김.
+ * 돌 그림은 ::before 에 깔아 다크에서 돌만 어둡게 하고 글자는 그대로. 한국어는 크게, 영어는 길어서 조금 작게 */
 .d-sign {
   position: absolute;
   inset: 0 0 auto;
   height: var(--dc);
   display: grid;
   place-items: center;
-  border-radius: 12px 12px 0 0;
-  background:
-    repeating-linear-gradient(180deg, rgb(0 0 0 / 0.05) 0 2px, transparent 2px 9px),
-    linear-gradient(180deg, #9a7350, #7d5a3c);
-  box-shadow: inset 0 -3px 0 rgb(0 0 0 / 0.22), inset 0 2px 0 rgb(255 255 255 / 0.15);
+}
+.d-sign::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--wall-sign) center / 100% 100% no-repeat;
+  filter: var(--wall-filter);
 }
 .d-sign b {
+  position: relative;
   font-family: 'Jua', sans-serif;
   font-weight: 700;
   font-size: calc(var(--dc) * 0.56);
   line-height: 1;
   letter-spacing: 0.08em;
   white-space: nowrap;
-  color: #fbefd4;
-  text-shadow: 0 1px 0 rgb(0 0 0 / 0.35);
+  color: var(--sign-ink);
+  /* 새긴 글자: 아래쪽 빛·위쪽 그늘로 파인 느낌, 뒤에 은은한 번짐을 깔아 막돌 무늬 위에서도 읽힘 */
+  text-shadow: var(--sign-cut);
 }
 :root[lang='en'] .d-sign b {
   font-size: calc(var(--dc) * 0.43);
