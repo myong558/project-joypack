@@ -950,14 +950,20 @@ button:focus-visible {
 /* 좁혀지는 숫자 막대(app.js 의 renderBar): 처음 범위 전체 중 아직 가능한 칸만 밝게 남는다. */
 .range-bar {
   position: relative;
-  height: 14px;
+  height: 15px;
   overflow: hidden;
-  background: var(--surface-alt);
-  border: 1px solid var(--line);
+  /* 채움(.range-bar-live)이 늘 막대를 꽉 채우므로 바탕도 같은 색. 다르면 둥근 끝 경계에 바탕이 가늘게 비친다 */
+  background: var(--action);
+  border: 1.5px solid var(--bar-outline);
   border-radius: 999px;
+  isolation: isolate; /* 눈금(z-index 2)·고른 자리(1) 쌓임을 막대 안에서만 */
+  /* 테두리: 막대색에 글자색을 섞어 막대와 같은 계열로 또렷하게(밝은 화면은 더 어둡게, 다크는 더 밝게).
+     눈금: 그 테두리 색을 바탕색 쪽으로 옅게(밝은 화면은 밝게, 다크는 어둡게) */
+  --bar-outline: color-mix(in srgb, var(--action) 30%, var(--text));
+  --bar-tick: color-mix(in srgb, var(--bar-outline) 45%, var(--surface));
   /* 고르는 점이 움직이는 좌우 여백(app.js 의 barPos). 막대색은 여백까지 채워 점이 늘 막대 안에 있다. 눈금이 나오면 0 */
   --bar-pad: 7px;
-  /* 고르는 점·칠한 칸 색: 막대색·흰 눈금과 다른 금색. 다크는 막대가 밝아 막대 위 글자색(진한 색) */
+  /* 고르는 점·칠한 칸 색: 막대색·눈금과 다른 금색. 다크는 막대가 밝아 막대 위 글자색(진한 색) */
   --bar-pick: var(--gold-300);
 }
 
@@ -974,18 +980,18 @@ button:focus-visible {
   inset: 0;
   overflow: hidden;
   background: var(--action);
-  border-radius: 999px;
 }
 
-/* 남은 숫자가 적으면 숫자 칸마다 옅은 눈금(app.js 의 BAR_TICKS). 칸 수(--cells)로 폭을 나눠 칸 왼쪽 끝에 선을 긋는다 */
+/* 남은 숫자가 적으면 숫자 칸마다 눈금(app.js 의 BAR_TICKS). 칸 수(--cells)로 폭을 나눠 칸 왼쪽 끝에 위아래 테두리까지 선을 긋는다 */
 .range-bar-live::after {
   content: '';
   position: absolute;
   inset: 0;
-  /* 2px 선을 칸 경계 가운데에 오게 1px 당긴다 */
-  background: linear-gradient(to right, rgb(255 255 255 / 0.9) 0 2px, transparent 2px) -1px 0 / calc(100% / var(--cells, 1)) 100% repeat-x;
-  /* 막대 양 끝 경계에도 선이 반쪽(1px)씩 그려져 맨 앞·맨 뒤 칠한 칸 바깥 여백을 덮으므로 양 끝을 잘라 낸다(폭이 소수점이라 2px) */
+  /* 1.5px 선을 칸 경계 가운데에 오게 0.75px 당긴다 */
+  background: linear-gradient(to right, var(--bar-tick) 0 1.5px, transparent 1.5px) -0.75px 0 / calc(100% / var(--cells, 1)) 100% repeat-x;
+  /* 막대 양 끝 경계에도 선이 반쪽씩 그려져 테두리 안쪽에 덧그려지므로 양 끝을 잘라 낸다(폭이 소수점이라 2px) */
   clip-path: inset(0 2px);
+  z-index: 2; /* 칠한 칸(.range-bar-pick) 위에 그려 칸 경계가 늘 보이게 */
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -1018,28 +1024,15 @@ button:focus-visible {
   transition: left 0.45s cubic-bezier(0.2, 1.2, 0.4, 1);
 }
 
-/* 눈금이 나오면 점 대신 고른 숫자의 칸 하나를 칠한다(칸 폭 = 막대 / --cells, 가운데가 고른 자리).
-   위아래 2px·눈금 선 1px 씩 안쪽으로 줄여 막대 바깥 테두리와 눈금 선이 칠한 칸 둘레에 그대로 보인다 */
+/* 눈금이 나오면 점 대신 고른 숫자의 칸 하나를 위아래 끝까지 칠한다(칸 폭 = 막대 / --cells, 가운데가 고른 자리).
+   눈금은 그 위에 그려지고, 맨 앞·맨 뒤 칸은 막대(overflow: hidden)의 둥근 끝에 맞춰 잘린다 */
 .range-bar.ticks .range-bar-pick {
-  top: 2px;
-  width: calc(100% / var(--cells, 1) - 2px);
-  height: calc(100% - 4px);
+  top: 0;
+  width: calc(100% / var(--cells, 1));
+  height: 100%;
   translate: -50% 0;
-  border-radius: 2px;
+  border-radius: 0;
   box-shadow: none;
-}
-
-/* 맨 앞·맨 뒤 칸은 바깥쪽을 1px 더 비우고(투명 테두리) 둥근 끝을 맞춰, 막대 왼쪽·오른쪽 끝 테두리도 둘레에 보이게 한다 */
-.range-bar.ticks .range-bar-pick.first {
-  border-left: 1px solid transparent;
-  border-radius: 999px 2px 2px 999px;
-  background-clip: padding-box;
-}
-
-.range-bar.ticks .range-bar-pick.last {
-  border-right: 1px solid transparent;
-  border-radius: 2px 999px 999px 2px;
-  background-clip: padding-box;
 }
 
 /* 아직 가능한 범위(13 ~ 24): 막대 왼쪽의 작은 알약(글자 수가 바뀌어도 막대가 덜 흔들리게 최소 폭). 좁혀지면 #range 가 반짝인다 */
