@@ -56,6 +56,8 @@
   --paper-ink: #3a2e20;
   --stone: #ddd5c4;
   --stone-2: #d4cbb8;
+  /* 판 벽 돌 블록 밝기(다크에서 낮춤) */
+  --wall-filter: none;
   --danger: #c2393c;
   --danger-ink: #b0302f;
   --jp-top-accent: var(--leaf);
@@ -148,6 +150,7 @@
   --paper-edge: #cdbb92;
   --stone: #5d5a50;
   --stone-2: #555247;
+  --wall-filter: brightness(0.74) saturate(0.9);
   --danger-ink: #ff8a86;
   color-scheme: dark;
 }
@@ -172,6 +175,7 @@
     --paper-edge: #cdbb92;
     --stone: #5d5a50;
     --stone-2: #555247;
+  --wall-filter: brightness(0.74) saturate(0.9);
     --danger-ink: #ff8a86;
     color-scheme: dark;
   }
@@ -560,22 +564,17 @@ body:has(.screen.game) .scene .layer {
   top: var(--dc);
   width: var(--dc);
   height: var(--dc);
-  border-bottom-right-radius: 12px;
-  background:
-    linear-gradient(180deg, rgb(255 255 255 / 0.18), transparent 30%, rgb(0 0 0 / 0.15)),
-    linear-gradient(90deg, rgb(0 0 0 / 0.12) 1px, transparent 1px) 0 0 / 50% 50%,
-    linear-gradient(rgb(0 0 0 / 0.12) 1px, transparent 1px) 0 0 / 100% 50%,
-    #8a6448;
-  box-shadow: inset 0 2px 0 color-mix(in srgb, var(--leaf) 55%, #8a6448);
+  background: var(--wall-0) center / 100% 100% no-repeat;
+  filter: var(--wall-filter);
 }
 .d-win {
   position: absolute;
   inset: 18%;
-  border: 2px solid #5a4030;
+  border: 2px solid #4e4a44;
   border-radius: 3px;
   background:
-    linear-gradient(#5a4030, #5a4030) 50% 0 / 2px 100% no-repeat,
-    linear-gradient(#5a4030, #5a4030) 0 50% / 100% 2px no-repeat,
+    linear-gradient(#4e4a44, #4e4a44) 50% 0 / 2px 100% no-repeat,
+    linear-gradient(#4e4a44, #4e4a44) 0 50% / 100% 2px no-repeat,
     linear-gradient(135deg, #fffbe8, var(--sun));
   /* 게임 판 창과 같은 햇빛 번짐. 로고는 칸이 커서 게임(0.35칸·85%)보다 조금 약하게(창 칸 안이라 떠 보이지 않음, v0.7.13 너무 약하던 0.2칸·55% 에서 올림) */
   box-shadow: 0 0 calc(var(--dc) * 0.28) calc(var(--dc) * 0.05) color-mix(in srgb, var(--sun) 72%, transparent), inset 0 0 6px rgb(255 240 190 / 0.8);
@@ -1770,17 +1769,28 @@ h2 .icon-pic {
 .tile.floor.alt {
   background: var(--stone-2);
 }
-/* 벽: 낮은 벽돌 화단 턱(위 빛, 아래 그림자, 위쪽에 이끼) */
+/* 벽: 바닥 위에 올린 정사각형 돌 블록(그림은 ui/stonewall.ts 가 스킨마다 만들어 --wall-0 ~ 5 에 넣음).
+ * 아래에 바닥 칸이 깔려 블록 사이 틈으로 보이고, 이웃 블록은 무늬 번호(w0 ~ w5)를 달리한다. 다크는 밝기만 낮춤 */
 .tile.wall,
 .tile.window {
   z-index: 2;
-  border-radius: 3px;
-  background:
-    linear-gradient(180deg, rgb(255 255 255 / 0.18), transparent 30%, rgb(0 0 0 / 0.15)),
-    linear-gradient(90deg, rgb(0 0 0 / 0.12) 1px, transparent 1px) 0 0 / 50% 50%,
-    linear-gradient(rgb(0 0 0 / 0.12) 1px, transparent 1px) 0 0 / 100% 50%,
-    #8a6448;
-  box-shadow: 0 3px 0 rgb(40 26 16 / 0.45), inset 0 2px 0 color-mix(in srgb, var(--leaf) 55%, #8a6448);
+  background: var(--wall-0) center / 100% 100% no-repeat;
+  filter: var(--wall-filter);
+}
+.tile.w1 {
+  background-image: var(--wall-1);
+}
+.tile.w2 {
+  background-image: var(--wall-2);
+}
+.tile.w3 {
+  background-image: var(--wall-3);
+}
+.tile.w4 {
+  background-image: var(--wall-4);
+}
+.tile.w5 {
+  background-image: var(--wall-5);
 }
 /* 창: 벽에 끼운 유리판에서 햇살이 쏟아짐(빛이 들어오는 쪽이 밝게) */
 .tile.window::before {
@@ -1789,7 +1799,7 @@ h2 .icon-pic {
   inset: 18%;
   border-radius: 3px;
   background: linear-gradient(135deg, #fffbe8, var(--sun));
-  border: 2px solid #5a4030;
+  border: 2px solid #4e4a44;
   box-shadow: 0 0 calc(var(--cell) * 0.35) calc(var(--cell) * 0.08) color-mix(in srgb, var(--sun) 85%, transparent);
   animation: shimmer 3.4s ease-in-out infinite alternate;
 }
@@ -1798,8 +1808,8 @@ h2 .icon-pic {
   position: absolute;
   inset: 18%;
   background:
-    linear-gradient(#5a4030, #5a4030) 50% 0 / 2px 100% no-repeat,
-    linear-gradient(#5a4030, #5a4030) 0 50% / 100% 2px no-repeat;
+    linear-gradient(#4e4a44, #4e4a44) 50% 0 / 2px 100% no-repeat,
+    linear-gradient(#4e4a44, #4e4a44) 0 50% / 100% 2px no-repeat;
 }
 /* 햇살 자리: 창 바로 앞 한 칸. 창 쪽에서 들어온 빛 띠가 칸 끝으로 갈수록 옅어지고, 바닥에는 동그랗게 고인 빛과 빛 테두리 */
 .beam-layer {

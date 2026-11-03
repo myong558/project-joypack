@@ -1,6 +1,7 @@
 import type { FlowerId } from '../flora';
 import { Tile, type Board, type Dir, type State } from '../game/rules';
 import { flowerSvg } from './flowers';
+import { wallVariant } from './stonewall';
 
 /**
  * 온실 판 그리기. 바닥·벽·창과 창 앞 햇살 자리는 한 번 깔고, 화분·정원사는 움직일 때마다 옮긴다.
@@ -89,7 +90,9 @@ export class BoardView {
       const x = i % w;
       const y = Math.floor(i / w);
       const pos = `style="--x:${x};--y:${y}"`;
-      if (windows.has(i)) floor += `<i class="tile window d${windows.get(i)}" ${pos}></i>`;
+      const ground = `<i class="tile floor${(x + y) % 2 ? ' alt' : ''}" ${pos}></i>`;
+      // 벽·창은 바닥 위에 올린 돌 블록: 아래에 바닥을 깔고, 블록 무늬(w0~w5)는 이웃끼리 다르게
+      if (windows.has(i)) floor += `${ground}<i class="tile window w${wallVariant(x, y)} d${windows.get(i)}" ${pos}></i>`;
       else if (t === Tile.Wall) {
         // 판 밖(빈칸)은 그리지 않고, 벽은 바닥과 닿은 곳만 그린다
         const touches = [-1, 1, -w, w, -w - 1, -w + 1, w - 1, w + 1].some((o) => {
@@ -97,8 +100,8 @@ export class BoardView {
           const jx = j % w;
           return j >= 0 && j < w * h && Math.abs(jx - x) <= 1 && tiles[j] !== Tile.Wall;
         });
-        if (touches) floor += `<i class="tile wall" ${pos}></i>`;
-      } else floor += `<i class="tile floor${(x + y) % 2 ? ' alt' : ''}" ${pos}></i>`;
+        if (touches) floor += `${ground}<i class="tile wall w${wallVariant(x, y)}" ${pos}></i>`;
+      } else floor += ground;
     }
     // 햇살 자리: 창에서 들어온 빛이 바로 앞 한 칸 바닥에 고인다(빛 띠는 창 쪽에서 들어오는 방향)
     const sun = board.windows

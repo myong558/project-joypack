@@ -1,8 +1,10 @@
+import { applyStoneWall } from './ui/stonewall';
+
 export type Theme = 'system' | 'light' | 'dark';
 export const THEMES: Theme[] = ['system', 'light', 'dark'];
 
 /**
- * 스킨 묶음: 온실 유리 너머의 날씨 톤. 하늘·햇살 색, 바깥 날씨(구름·비·노을·눈), 단추 강조색이 바뀐다(styles.css [data-skin], ui/scene.ts).
+ * 스킨 묶음: 온실 유리 너머의 날씨 톤. 하늘·햇살 색, 바깥 날씨(구름·비·노을·눈), 단추 강조색, 판 벽 돌 블록(맑음 규암·비에 젖은 돌·노을빛 돌·눈 내린 돌)이 바뀐다(styles.css [data-skin], ui/scene.ts, ui/stonewall.ts).
  * 판 규칙·꽃과는 상관없다(온실 안이라 꽃은 날씨·계절과 상관없이 핀다)
  */
 export const SKINS = ['clear', 'rain', 'dusk', 'snow'] as const;
@@ -30,4 +32,5 @@ export function applyTheme(theme: Theme): void {
 
 export function applySkin(skin: Skin): void {
   document.documentElement.dataset.skin = skin;
+  applyStoneWall(skin);
 }
