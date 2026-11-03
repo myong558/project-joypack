@@ -28,6 +28,7 @@
   let particles = [];
   let width = 0;
   let height = 0;
+  let ratio = 1; // 캔버스 픽셀 배수(devicePixelRatio)
   let frameId = 0;
   let last = 0;
   let scale = 1; // PC 화면 확대 배수. 입자 크기·속도·개수를 화면 확대에 맞춘다.
@@ -106,6 +107,9 @@
   }
 
   function render() {
+    // 배수를 늘 다시 건다. 안드로이드는 다른 앱을 쓰고 돌아오면 캔버스를 버렸다 되살리며 배수를 1로 되돌려,
+    // 그대로 그리면 왼쪽 위 일부에만 그려지고 나머지에 입자 자국이 남는다.
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     ctx.clearRect(0, 0, width, height);
     ctx.globalAlpha = document.documentElement.dataset.theme === 'dark' ? 0.5 : 0.6;
     particles.forEach(drawParticle);
@@ -144,7 +148,7 @@
 
   // 확대 배수가 바뀌었으면 true 를 돌려준다(입자를 새 크기로 다시 만들어야 함).
   function resize() {
-    const ratio = window.devicePixelRatio || 1;
+    ratio = window.devicePixelRatio || 1;
     const before = scale;
     scale = screenScale();
     width = window.innerWidth;
@@ -178,6 +182,9 @@
         else if (!frameId) render();
       });
       document.addEventListener('visibilitychange', play);
+      canvas.addEventListener('contextrestored', () => {
+        if (!frameId) render();
+      });
       reducedMotion.addEventListener('change', play);
     }
     reset();

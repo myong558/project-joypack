@@ -436,6 +436,7 @@
     function frame(now) {
       const step = Math.min((now - last) / 16.7, 3); // 60fps 기준 한 프레임 = 1
       last = now;
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0); // 캔버스가 되살아나 배수가 풀려도 다시 건다(skins.js 의 render 와 같음)
       ctx.clearRect(0, 0, width, height);
       let alive = 0;
       pieces.forEach((p) => {
@@ -1108,11 +1109,12 @@
     // 다이얼은 좁혀진 범위 안의 숫자만 고르므로 검증에 걸리는 일은 없다(게임이 끝난 뒤 제출 등은 무시).
     if (!UpDown.guess(game, pick).ok) return;
 
-    pick = null;
+    // 맞히면 고른 숫자를 그대로 둬 막대의 점이 정답 자리에 멈춰 있게 한다.
     if (game.status !== 'playing') {
       winGuess();
       return;
     }
+    pick = null;
     const last = game.guesses[game.guesses.length - 1];
     const isUp = last.result === 'UP';
     UpDownFx.play(isUp ? 'up' : 'down');
@@ -1121,7 +1123,7 @@
     $('dial').focus();
   }
 
-  // 맞힌 순간: 시간을 멈추고, 막대가 정답 한 칸으로 모여 터지는 걸 잠깐 보여 준 뒤 결과 화면으로 간다.
+  // 맞힌 순간: 시간을 멈추고, 맞힌 숫자와 "정답!"을 잠깐 보여 준 뒤 결과 화면으로 간다(막대는 움직이지 않는다).
   // 그사이 홈으로 나가면 결과 화면은 띄우지 않는다.
   function winGuess() {
     game.time = Date.now() - gameStartedAt;
@@ -1130,7 +1132,7 @@
     UpDownFx.play('edge');
     setTimeout(() => {
       if (game === forGame && screen === 'play') finishGame();
-    }, reducedMotion.matches ? 250 : 800);
+    }, reducedMotion.matches ? 200 : 380);
   }
 
   // 확인 뒤 손맛 연출: 숫자가 쾅 박히고, UP/DOWN 이 그 방향으로 튀어 나오고, 화면이 그 방향으로 툭 밀렸다 돌아오고,
