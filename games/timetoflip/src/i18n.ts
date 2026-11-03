@@ -29,7 +29,7 @@ const ko = {
   'dex.items': '특수 카드',
   'dex.itemKind': '특수 카드',
   'dex.itemLocked': '{n}판부터 나와요. 짝을 맞히면 어떤 효과인지 열려요.',
-  'item.clock': '짝을 맞히면 남은 시간이 5초 늘어나요. 시간이 모자랄 때 먼저 찾아 두세요.',
+  'item.clock': '짝을 맞히면 남은 시간이 6초 늘어나요. 시간이 모자랄 때 먼저 찾아 두세요.',
   'item.peek': '짝을 맞히면 남은 카드를 잠깐 모두 보여 줘요. 카드가 많이 남았을 때 더 좋아요.',
   'item.gold': '보통 카드 한 쌍이 가끔 금 액자와 별을 달고 나와요. 그 짝을 맞히면 점수가 2배예요.',
 
@@ -168,7 +168,7 @@ const en: Record<MessageKey, string> = {
   'dex.items': 'Special cards',
   'dex.itemKind': 'Special card',
   'dex.itemLocked': 'Appears from stage {n}. Match it to find out what it does.',
-  'item.clock': 'Match it to add 5 seconds. Find it first when time runs low.',
+  'item.clock': 'Match it to add 6 seconds. Find it first when time runs low.',
   'item.peek': 'Match it to see all remaining cards for a moment. Best when many are left.',
   'item.gold': 'Sometimes a pair comes in a gold frame with a star. Match it for double points.',
 

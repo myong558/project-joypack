@@ -12,14 +12,14 @@ export const TIME_POINTS = 20;
 /** 콤보 3 이상으로 맞히면 짝마다 더 주는 시간 */
 export const COMBO_GAIN = 500;
 /** 시계 카드 짝 */
-export const CLOCK_GAIN = 5_000;
+export const CLOCK_GAIN = 6_000;
 /** 기억 실수(짝이 어디 있는지 이미 봤는데 다른 카드를 뒤집음)에 깎는 시간. 1판은 익히는 판이라 깎지 않는다 */
 export const MISTAKE_PENALTY = 1_000;
 export const MISTAKE_FROM_STAGE = 2;
 /** 틀린 두 장을 보여 주는 시간. 그사이 다른 카드를 누르면 바로 덮고 넘어간다 */
 export const HIDE_DELAY = 650;
 /** 엿보기 카드: 남은 카드를 모두 보여 주는 시간 */
-export const PEEK_REVEAL = 1_300;
+export const PEEK_REVEAL = 2_000;
 /** 카드가 날아와 깔리는 시간(ui/board.ts 가 카드 수와 관계없이 이 안에 다 깔리게 간격을 맞춤). 미리 보기는 이 뒤부터 센다 */
 export const DEAL_MS = 600;
 /** 카드가 뒷면으로 다 깔린 뒤 3, 2, 1 을 세는 시간(한 숫자 COUNT_MS / 3). 그동안 판 안내를 보이고, 끝나면 카드가 열려 미리 보기 */
