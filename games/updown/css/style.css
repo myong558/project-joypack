@@ -984,6 +984,8 @@ button:focus-visible {
   inset: 0;
   /* 2px 선을 칸 경계 가운데에 오게 1px 당긴다 */
   background: linear-gradient(to right, rgb(255 255 255 / 0.9) 0 2px, transparent 2px) -1px 0 / calc(100% / var(--cells, 1)) 100% repeat-x;
+  /* 막대 양 끝 경계에도 선이 반쪽(1px)씩 그려져 맨 앞·맨 뒤 칠한 칸 바깥 여백을 덮으므로 양 끝을 잘라 낸다(폭이 소수점이라 2px) */
+  clip-path: inset(0 2px);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
