@@ -53,8 +53,8 @@ const ICON = {
   sparkle: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5c.6 4.2 2.3 6 6.5 6.5-4.2.6-5.9 2.3-6.5 6.5-.6-4.2-2.3-5.9-6.5-6.5 4.2-.5 5.9-2.3 6.5-6.5z"/><path d="M18.5 15.5c.3 1.8 1 2.6 2.5 3-1.5.3-2.2 1.1-2.5 3-.3-1.9-1-2.7-2.5-3 1.5-.4 2.2-1.2 2.5-3z"/></svg>',
 };
 
-// 조이필드 로고(public/logo.svg 와 같은 그림): 레몬 상자에 게임기 부품으로 만든 웃는 얼굴.
-// 첫 화면에서는 부품(십자 버튼 → 동그란 버튼 → 입 → 볼)이 하나씩 튀어 들어오도록 그림자와 함께 나눠 그린다.
+// 조이필드 로고(public/logo.svg 와 같은 그림): 레몬 상자에 게임기 부품으로 만든 웃는 얼굴 + 두 눈 사이 위로 기운 새싹.
+// 첫 화면에서는 부품(십자 버튼 → 동그란 버튼 → 입 → 볼)이 하나씩 튀어 들어오고 마지막에 새싹이 밑동부터 쏙 돋도록 그림자와 함께 나눠 그린다.
 // 앱 아이콘과 같은 색으로 고정한다(오늘의 톤을 따르지 않음).
 const HERO_LOGO = `
   <svg class="hero-logo" viewBox="0 0 512 512" aria-hidden="true">
@@ -62,6 +62,7 @@ const HERO_LOGO = `
     <g class="logo-tile" style="--i:0"><g transform="translate(0 16)"><rect x="120" y="198" width="116" height="40" rx="14" fill="#d98f00"/><rect x="158" y="160" width="40" height="116" rx="14" fill="#d98f00"/></g><rect x="120" y="198" width="116" height="40" rx="14" fill="#3d2a00"/><rect x="158" y="160" width="40" height="116" rx="14" fill="#3d2a00"/></g>
     <g class="logo-tile" style="--i:1"><g transform="translate(0 16)"><circle cx="336" cy="218" r="44" fill="#d98f00"/></g><circle cx="336" cy="218" r="44" fill="#3d2a00"/></g>
     <g class="logo-tile" style="--i:2"><g transform="translate(0 16)"><path d="M152 318 Q256 428 360 318" fill="none" stroke="#d98f00" stroke-width="40" stroke-linecap="round"/></g><path d="M152 318 Q256 428 360 318" fill="none" stroke="#3d2a00" stroke-width="40" stroke-linecap="round"/></g>
+    <g class="logo-tile logo-sprout" style="--i:4"><g transform="translate(0 12)"><path d="M256 152 Q272 123 258 104" stroke="#d98f00" stroke-width="14" fill="none" stroke-linecap="round"/><g transform="rotate(10 258 106)"><path transform="translate(258 106) scale(-0.84 0.84) rotate(14)" d="M0 0C18-46 64-60 96-44 76-6 34 10 0 0Z" fill="#d98f00"/><path transform="translate(258 106) scale(0.98) rotate(8)" d="M0 0C18-46 64-60 96-44 76-6 34 10 0 0Z" fill="#d98f00"/></g></g><path d="M256 152 Q272 123 258 104" stroke="#4e9e34" stroke-width="14" fill="none" stroke-linecap="round"/><g transform="rotate(10 258 106)"><path transform="translate(258 106) scale(-0.84 0.84) rotate(14)" d="M0 0C18-46 64-60 96-44 76-6 34 10 0 0Z" fill="#6cc24a"/><path transform="translate(258 106) scale(0.98) rotate(8)" d="M0 0C18-46 64-60 96-44 76-6 34 10 0 0Z" fill="#9ee07a"/></g></g>
     <g class="logo-tile" style="--i:3"><circle cx="122" cy="300" r="26" fill="#ff7a3d" opacity="0.9"/><circle cx="390" cy="300" r="26" fill="#ff7a3d" opacity="0.9"/></g>
   </svg>`;
 
@@ -71,6 +72,7 @@ function smallLogo(size: number): string {
   return `
     <svg class="mini-logo" viewBox="0 0 512 512" width="${size}" height="${size}" aria-hidden="true">
       <rect width="512" height="512" rx="120" fill="#ffb703"/>
+      <g transform="translate(0 12)"><path d="M256 152 Q272 123 258 104" stroke="#d98f00" stroke-width="14" fill="none" stroke-linecap="round"/><g transform="rotate(10 258 106)"><path transform="translate(258 106) scale(-0.84 0.84) rotate(14)" d="M0 0C18-46 64-60 96-44 76-6 34 10 0 0Z" fill="#d98f00"/><path transform="translate(258 106) scale(0.98) rotate(8)" d="M0 0C18-46 64-60 96-44 76-6 34 10 0 0Z" fill="#d98f00"/></g></g><path d="M256 152 Q272 123 258 104" stroke="#4e9e34" stroke-width="14" fill="none" stroke-linecap="round"/><g transform="rotate(10 258 106)"><path transform="translate(258 106) scale(-0.84 0.84) rotate(14)" d="M0 0C18-46 64-60 96-44 76-6 34 10 0 0Z" fill="#6cc24a"/><path transform="translate(258 106) scale(0.98) rotate(8)" d="M0 0C18-46 64-60 96-44 76-6 34 10 0 0Z" fill="#9ee07a"/></g>
       <g transform="translate(0 16)"><rect x="120" y="198" width="116" height="40" rx="14" fill="#d98f00"/><rect x="158" y="160" width="40" height="116" rx="14" fill="#d98f00"/><circle cx="336" cy="218" r="44" fill="#d98f00"/><path d="M152 318 Q256 428 360 318" fill="none" stroke="#d98f00" stroke-width="40" stroke-linecap="round"/></g>
       <circle cx="122" cy="300" r="26" fill="#ff7a3d" opacity="0.9"/><circle cx="390" cy="300" r="26" fill="#ff7a3d" opacity="0.9"/><rect x="120" y="198" width="116" height="40" rx="14" fill="#3d2a00"/><rect x="158" y="160" width="40" height="116" rx="14" fill="#3d2a00"/><circle cx="336" cy="218" r="44" fill="#3d2a00"/><path d="M152 318 Q256 428 360 318" fill="none" stroke="#3d2a00" stroke-width="40" stroke-linecap="round"/>
     </svg>`;

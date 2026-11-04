@@ -19,16 +19,16 @@ const fullBleed = (scale) =>
   Buffer.from(
     logo
       .toString()
-      .replace('<rect width="512" height="512" rx="120" fill="#ffb703"/>', '<rect width="512" height="512" fill="#ffb703"/><g transform="translate(256 248) scale(' + scale + ') translate(-256 -270)">')
+      .replace('<rect width="512" height="512" rx="120" fill="#ffb703"/>', '<rect width="512" height="512" fill="#ffb703"/><g transform="translate(256 256) scale(' + scale + ') translate(-256 -240)">')
       .replace('</svg>', '</g></svg>'),
   );
 // 안드로이드 Chrome 바로가기는 마스커블을 적응형 아이콘(108dp 중 가운데 72dp, 약 66%만 보임)으로 넣어 1.5배 확대돼 보인다.
-// 0.6배는 잘린 뒤 원래 로고와 같은 크기였지만 홈 화면에서 얼굴이 작아 보여(2026-11-04) 0.85배로 키움: 가운데 66% 원 안에 볼까지 들어가는 가장 큰 크기.
+// 0.6배는 잘린 뒤 원래 로고와 같은 크기였지만 홈 화면에서 얼굴이 작아 보여(2026-11-04) 0.85배로 키움. 새싹을 더한 뒤(허브 v1.38.0) 그림이 위로 커져 얼굴·새싹 전체 가운데(y 240)를 아이콘 가운데에 맞추고 0.82배: 가운데 66% 원 안에 볼·잎 끝까지 들어가는 가장 큰 크기.
 // 일반 아이콘(pwa-*)은 0.95배(잘리지 않고 그대로 보일 때 로고와 거의 같은 크기), 아이폰은 둥근 사각 그대로 보이므로 1.1배
 const fullIcon = (scale, size, file) => sharp(fullBleed(scale), { density: 384 }).resize(size, size).png().toFile(file);
 await fullIcon(0.95, 192, 'public/pwa-192x192.png');
 await fullIcon(0.95, 512, 'public/pwa-512x512.png');
-await fullIcon(0.85, 512, 'public/maskable-icon-512x512.png');
+await fullIcon(0.82, 512, 'public/maskable-icon-512x512.png');
 await fullIcon(1.1, 180, 'public/apple-touch-icon-180x180.png');
 
 // 링크 미리보기 1200×630(카카오톡·메신저·SNS). 화면과 같은 Jua 글꼴로 그리려고 Chrome 으로 HTML 을 찍는다

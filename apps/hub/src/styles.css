@@ -550,7 +550,7 @@ a.card:active {
 }
 
 /*
- * 그림판 무늬: 게임을 추가한 순서대로 아래 여섯 가지를 돌려 쓴다(main.ts patternOf → data-pat).
+ * 그림판 무늬: games.json 순서대로 아래 열 가지를 돌려 써서 게임마다 다르다(games.ts patternOf → data-pat, PATTERNS 와 개수 같게).
  * 무늬 한 칸(--pat-x, --pat-y)만큼 옮기면 처음과 똑같아져 끊김 없이 계속 흐른다
  */
 .card-art::before {
@@ -617,6 +617,51 @@ a.card:active {
     0 0;
   background-size: 20px 20px;
   animation-duration: 8s;
+}
+
+/* 6 물결(비늘): 오른쪽으로 */
+.card-art[data-pat='6']::before {
+  --pat-x: 20px;
+  --pat-y: 0px;
+  background-image: radial-gradient(circle at 50% 100%, transparent 6px, var(--ink) 6.6px 8.4px, transparent 9px);
+  background-size: 20px 12px;
+  animation-duration: 9s;
+}
+
+/* 7 마름모 그물: 오른쪽 위로 */
+.card-art[data-pat='7']::before {
+  --ink: rgb(255 255 255 / 0.22);
+  --pat-x: 20px;
+  --pat-y: -20px;
+  background-image:
+    linear-gradient(45deg, transparent 46%, var(--ink) 46% 54%, transparent 54%),
+    linear-gradient(-45deg, transparent 46%, var(--ink) 46% 54%, transparent 54%);
+  background-size: 20px 20px;
+  animation-duration: 13s;
+}
+
+/* 8 가로 띠: 아래로 */
+.card-art[data-pat='8']::before {
+  --ink: rgb(255 255 255 / 0.13);
+  --pat-x: 0px;
+  --pat-y: 20px;
+  background-image: linear-gradient(var(--ink) 50%, transparent 50%);
+  background-size: 20px 20px;
+  animation-duration: 7s;
+}
+
+/* 9 큰 점·작은 점 엇갈림: 왼쪽 위로 */
+.card-art[data-pat='9']::before {
+  --ink: rgb(255 255 255 / 0.3);
+  --pat-x: -28px;
+  --pat-y: -28px;
+  background-image:
+    radial-gradient(var(--ink) 3px, transparent 3.6px), radial-gradient(rgb(255 255 255 / 0.2) 1.6px, transparent 2.2px);
+  background-position:
+    0 0,
+    14px 14px;
+  background-size: 28px 28px;
+  animation-duration: 16s;
 }
 
 .card-art::after {
@@ -2038,6 +2083,15 @@ a.primary-btn {
   animation: tile-drop 520ms cubic-bezier(0.3, 1.7, 0.5, 1) calc(260ms + var(--i) * 110ms) both;
 }
 
+/* 새싹은 떨어지지 않고 밑동(아래 가운데)부터 쏙 돋는다(부품 넷이 다 들어온 뒤) */
+.logo-sprout {
+  transform-origin: 50% 100%;
+}
+
+.intro .logo-sprout {
+  animation: sprout-grow 560ms cubic-bezier(0.3, 1.8, 0.5, 1) calc(260ms + var(--i) * 110ms) both;
+}
+
 .intro .burst i {
   animation: burst 720ms cubic-bezier(0.2, 0.7, 0.3, 1) calc(760ms + var(--d) * 60ms) both;
 }
@@ -2114,6 +2168,13 @@ a.primary-btn {
   from {
     opacity: 0;
     transform: translateY(-80%) scale(0.2);
+  }
+}
+
+@keyframes sprout-grow {
+  from {
+    opacity: 0;
+    transform: scale(0.1, 0);
   }
 }
 

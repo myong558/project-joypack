@@ -65,11 +65,15 @@ export function byNewest(games: GameMeta[], now = Date.now()): GameMeta[] {
 }
 
 /** 허브 카드 그림판 무늬 가짓수(styles.css .card-art[data-pat]) */
-const PATTERNS = 6;
+export const PATTERNS = 10;
 
-/** 그림판 무늬 번호: 추가한 순서(오래된 게임부터 0)대로 돌려 쓴다. 새 게임이 생겨도 기존 게임 무늬는 그대로 */
-export function patternOf(game: GameMeta): number {
-  return byAdded(GAMES).reverse().indexOf(game) % PATTERNS;
+/**
+ * 그림판 무늬 번호: games.json 에 적힌 순서(맨 위 0)대로 하나씩 돌려 써서 게임마다 다르다(PATTERNS 개까지 겹치지 않음).
+ * added 날짜로 정하면 정식 공개(pnpm release 가 added 를 공개일로 바꿈) 때 순서가 바뀌어 다른 게임 무늬까지 바뀌므로,
+ * 새 게임을 맨 아래에 더하기만 하는 games.json 순서를 쓴다. 그래서 공개·새 게임 추가에도 기존 게임 무늬는 그대로
+ */
+export function patternOf(game: GameMeta, games: GameMeta[] = GAMES): number {
+  return Math.max(0, games.indexOf(game)) % PATTERNS;
 }
 
 /** NEW 표시: 공개한 게임마다 공개한 날(added)부터 NEW_DAYS 동안. 새 게임이 나와도 앞서 나온 게임의 NEW 는 그대로(같은 날 여러 게임을 내도 모두 NEW) */
