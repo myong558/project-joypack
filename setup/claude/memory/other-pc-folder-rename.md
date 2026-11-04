@@ -12,7 +12,7 @@ metadata:
 
 **Why:** VS Code 위 가운데 제목은 GitHub 이름이 아니라 내 PC 폴더 이름이라, 폴더를 바꿔야 바뀐다. Claude 메모리는 폴더 경로마다 따로라 폴더를 바꾸면 새 경로에 다시 깔아야 한다. VS Code 가 열려 있으면 폴더가 잠겨 이름을 못 바꾼다.
 
-**How to apply:** 다른 PC에서 그 요청을 받거나 폴더·원격 주소가 옛 이름이면 묻지 않고 진행한다.
+**How to apply:** 다른 PC에서 그 요청을 받거나 폴더·원격 주소가 옛 이름이면 묻지 않고 진행한다. 사용자가 다른 PC에서 잊지 않게 알려 달라고 했으므로(2026-11-04), 옛 이름 PC에서는 세션 첫 답변에서 먼저 이 일을 꺼낸다(도메인 일 [[studio-domain-pocketgamelab]] 보다 먼저).
 1. 고친 파일이 없는지 보고 `git pull`(옛 원격 주소도 GitHub 가 넘겨 줌)
 2. `pnpm setup:rename` — 원격 주소 → 폴더 이름 → `pnpm install` → `pnpm setup:claude`. Windows 에서는 따로 PowerShell 창이 떠서 VS Code 를 모두 닫을 때까지 기다렸다가 이름을 바꾸고 설치한 뒤 VS Code 를 다시 연다(이 PC에서 잠금 풀릴 때까지 기다리는 동작 시험함).
 3. 사용자에게 "VS Code 를 모두 닫으면 이어서 됨, 다시 열리면 Claude Code 새 세션"과 "홈 화면에 옛 주소로 설치한 앱은 새 주소에서 다시 설치(같은 사이트라 기기 설정·기록은 이어짐)"를 알린다.

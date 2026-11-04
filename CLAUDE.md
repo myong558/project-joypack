@@ -61,6 +61,7 @@
 
 게임 스튜디오 이름을 **Pocket Game Lab** 으로 정하고 `pocketgamelab.com`·`.kr`·`.co.kr` 을 아이티이지에서 사기로 했다(WHOIS·KIPRIS 확인 끝). 사용자가 구매 뒤 다른 PC에서 이어 가겠다고 했으므로, **이 일이 끝나기 전에는 세션 첫 답변에서 먼저 아래 다음 일정을 알린다.** 자세한 내용은 메모리 `studio-domain-pocketgamelab`.
 
+0. **이름 바뀐 것 반영 먼저:** 그 PC의 폴더 이름이나 `git remote -v` 가 아직 옛 이름(`project-joypack`)이면, 도메인 일보다 먼저 아래 "저장소 이름 바꾸기 후속"(`pnpm setup:rename`)을 알리고 진행한다. 끝나고 새 세션에서 1번부터 잇는다.
 1. 구매 확인(세 주소, 등록인 본인 이름, 자동 연장).
 2. Cloudflare(무료)에 세 주소 추가 → 아이티이지에서 네임서버 변경 → `.kr`·`.co.kr` 을 `https://pocketgamelab.com` 으로 301 연결.
 3. 조이필드 주소 이전 계획(지금 GitHub Pages `/project-joyfield/`): 새 경로 구조, 호스팅, Vite base, PWA 범위·서비스 워커, Firebase 허용 도메인, 공유 링크, 옛 주소 안내를 먼저 계획해 사용자와 정한 뒤 진행. 홈 화면 설치 앱은 새 주소에서 다시 설치.
@@ -75,5 +76,5 @@
 - 설치: `pnpm setup:claude` → `~/.claude/`에 복사하고 `settings.json`의 `hooks.SessionStart`(matcher `compact`)에 그 PC 경로로 훅을, 비어 있으면 `language: korean`을 넣는다. 메모리는 그 PC의 이 저장소 메모리 폴더에 깔고 `MEMORY.md`는 없는 줄만 더한다(다른 설정은 그대로, 내용이 다른 기존 파일은 `.bak`으로 남김). 적용은 세션을 다시 시작한 뒤부터.
 - 개인 설정을 고쳤거나 **메모리를 새로 쓰거나 고쳤으면** 같은 작업의 커밋에서 `pnpm setup:claude --save`로 저장소 원본에 반영한다(두 PC가 어긋나지 않게).
 - 새 PC 준비(Node 24.12+, pnpm 12.8.1, git 작성자, GitHub 로그인, Chrome/Edge)는 [README 7장](README.md) "새 PC에서 처음 받을 때"를 따른다.
-- **저장소 이름 바꾸기 후속(2026-11-04, 옛 이름 `project-joypack`·조이팩):** 저장소·사이트 주소가 `project-joyfield` 로 바뀌었다. 이 PC의 폴더 이름이나 `git remote -v` 가 아직 새 이름이 아니거나, 사용자가 "이름(제목) 바뀐 것 반영해줘"라고 하면 묻지 않고 진행한다: 고친 파일이 없는지 보고 `git pull` → **`pnpm setup:rename`**(원격 주소 → 폴더 이름 → `pnpm install` → `pnpm setup:claude`). Windows 에서는 VS Code 가 폴더를 잡고 있어 스크립트가 따로 PowerShell 창을 띄우므로, 사용자에게 "VS Code 를 모두 닫으면 그 창이 이름을 바꾸고 설치한 뒤 VS Code 를 다시 연다, 열리면 Claude Code 새 세션"이라고 알리고 끝낸다. 홈 화면에 옛 주소로 설치한 앱은 새 주소에서 다시 설치하라고 덧붙인다(메모리 `other-pc-folder-rename`).
+- **저장소 이름 바꾸기 후속(2026-11-04, 옛 이름 `project-joypack`·조이팩):** 저장소·사이트 주소가 `project-joyfield` 로 바뀌었다. 아직 반영 안 된 PC에서는 **세션 첫 답변에서 먼저 이 일을 알린다.** 이 PC의 폴더 이름이나 `git remote -v` 가 아직 새 이름이 아니거나, 사용자가 "이름(제목) 바뀐 것 반영해줘"라고 하면 묻지 않고 진행한다: 고친 파일이 없는지 보고 `git pull` → **`pnpm setup:rename`**(원격 주소 → 폴더 이름 → `pnpm install` → `pnpm setup:claude`). Windows 에서는 VS Code 가 폴더를 잡고 있어 스크립트가 따로 PowerShell 창을 띄우므로, 사용자에게 "VS Code 를 모두 닫으면 그 창이 이름을 바꾸고 설치한 뒤 VS Code 를 다시 연다, 열리면 Claude Code 새 세션"이라고 알리고 끝낸다. 홈 화면에 옛 주소로 설치한 앱은 새 주소에서 다시 설치하라고 덧붙인다(메모리 `other-pc-folder-rename`).
 - **세션 첫 답변 전에 확인한다:** 이 대화에 전역 지침(`~/.claude/CLAUDE.md`의 "진행 시간·토큰" 규칙)이 안 보이거나 `~/.claude/hooks/korean-after-compact.js`가 없으면, 개인 설정이 안 깔린 PC다. 답변 맨 앞에 "`pnpm setup:claude` 실행 후 세션 재시작"을 알리고, 사용자가 원하면 대신 실행한다.
