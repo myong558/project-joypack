@@ -5,3 +5,4 @@
 - [온실 정원 판 점검](glasshouse-level-review.md) — 사용자가 풀이 보기로 판 확인 후 구조·순서 수정 전달 예정, 판 바꾸면 solutions 다시 생성
 - [마켓 등록 때 랭킹 초기화](ranking-reset-at-store-launch.md) — 플레이 스토어 최초 공개 직전에 모든 랭킹 초기화를 사용자에게 먼저 요청(콘솔에서 지울 목록 정리)
 - [다른 PC 폴더 이름 바꾸기](other-pc-folder-rename.md) — 저장소를 project-joypack → project-joyfield 로 바꿈(2026-11-04), 다른 PC에서 "이름 바뀐 것 반영해줘" 하면 git pull 뒤 pnpm setup:rename
+- [스튜디오 도메인 Pocket Game Lab](studio-domain-pocketgamelab.md) — pocketgamelab.com/.kr/.co.kr 아이티이지 구매 예정, 조이필드·새 게임을 그 아래로 옮길 계획
