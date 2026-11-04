@@ -15,12 +15,26 @@ const GAME_PREFIX = 'joyfield-game-';
 const NETWORK_TIMEOUT = 3000;
 const SCOPE = self.registration.scope; // 끝이 / 인 사이트 루트 주소
 
+// 넘어간(redirect) 응답은 페이지 이동에 주면 브라우저가 거절한다(ERR_FAILED). Cloudflare Pages 는 index.html 을 폴더 주소로
+// 308 보내므로(…/index.html → …/) 그대로 캐시하면 두 번째 실행부터 화면이 안 열린다 → 담기 전·꺼낼 때 새 응답으로 감싼다
+async function unredirect(res) {
+  if (!res || !res.redirected) return res;
+  return new Response(await res.blob(), { status: res.status, statusText: res.statusText, headers: res.headers });
+}
+
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches
-      .open(HUB_CACHE)
-      .then((cache) => cache.addAll(HUB_FILES.map((path) => new Request(SCOPE + path, { cache: 'reload' }))))
-      .then(() => self.skipWaiting()),
+    (async () => {
+      const cache = await caches.open(HUB_CACHE);
+      await Promise.all(
+        HUB_FILES.map(async (path) => {
+          const res = await fetch(new Request(SCOPE + path, { cache: 'reload' }));
+          if (!res.ok) throw new Error(path);
+          await cache.put(SCOPE + path, await unredirect(res));
+        }),
+      );
+      await self.skipWaiting();
+    })(),
   );
 });
 
@@ -65,7 +79,7 @@ async function syncGame(id) {
       changed.map(async (f) => {
         const res = await fetch(SCOPE + f.path, { cache: 'no-cache' });
         if (!res.ok) throw new Error(f.path);
-        await cache.put(SCOPE + f.path, res);
+        await cache.put(SCOPE + f.path, await unredirect(res));
       }),
     );
   } catch (e) {
@@ -93,14 +107,15 @@ self.addEventListener('fetch', (event) => {
 async function match(cacheName, req) {
   const cache = await caches.open(cacheName);
   const url = req.url.split(/[?#]/)[0];
-  return (await cache.match(url)) || (url.endsWith('/') ? cache.match(url + 'index.html') : undefined);
+  // 이 수정 전에 담긴 넘어간 응답(게임 캐시는 허브 버전이 바뀌어도 남음)도 꺼낼 때 감싼다
+  return unredirect((await cache.match(url)) || (url.endsWith('/') ? await cache.match(url + 'index.html') : undefined));
 }
 
 // fresh: 브라우저 HTTP 캐시(GitHub Pages 는 약 10분)를 건너뛰고 서버에 바뀌었는지 물어본다(안 바뀌었으면 304 로 가볍게 끝남)
 async function fetchAndPut(cacheName, req, fresh) {
   let res = await fetch(fresh ? new Request(req.url, { cache: 'no-cache', credentials: 'same-origin' }) : req);
   // 주소를 새로 만들어 받았으므로, 넘어간(redirect) 응답을 페이지 이동에 그대로 주면 브라우저가 거절한다 → 새 응답으로 감싼다
-  if (fresh && res.redirected) res = new Response(await res.blob(), { status: res.status, statusText: res.statusText, headers: res.headers });
+  if (fresh) res = await unredirect(res);
   if (res.ok && res.type === 'basic') {
     const cache = await caches.open(cacheName);
     await cache.put(req.url.split(/[?#]/)[0], res.clone());
