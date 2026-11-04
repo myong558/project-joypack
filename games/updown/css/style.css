@@ -2155,30 +2155,43 @@ button:focus-visible {
   padding-bottom: calc(1.5em + 8px);
 }
 
-.confirm {
-  width: min(340px, calc(100% - var(--gutter) * 2));
+/* 내 기록 지우기 확인 상자(설정 창 안): 칩을 누르면 칩 줄 전체가 흐려져 막히고 바로 아래에 열린다. 팝업 없음 */
+.reset-row.locked {
+  opacity: 0.45;
+  filter: saturate(0.4);
+  pointer-events: none;
+  transition: opacity 0.2s, filter 0.2s;
 }
 
-.confirm .settings-body {
-  align-items: center;
-  text-align: center;
+/* 줄 전체를 흐리게 했으니 칩마다 따로 흐리지 않는다(두 번 흐려져 글자가 안 보이지 않게) */
+.reset-row.locked .chip:disabled {
+  opacity: 1;
 }
 
-.confirm-icon {
+.reset-confirm {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 12px;
+  border: 2px solid color-mix(in srgb, var(--danger) 45%, transparent);
+  border-radius: 14px;
   background: var(--danger-soft);
-  color: var(--danger);
-  font-size: 28px;
+  word-break: keep-all;
+  animation: reset-confirm-open 220ms ease-out;
 }
 
-.confirm-message {
+.reset-confirm-message {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+@keyframes reset-confirm-open {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
 }
 
 .confirm-actions {

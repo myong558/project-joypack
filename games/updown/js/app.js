@@ -1299,12 +1299,17 @@
     changeLang(langs[(langs.indexOf(UpDownI18n.getLang()) + 1) % langs.length]);
   }
 
+  let pendingReset = null;
+
   // 설정 메뉴: 기록 리셋, 컬러 모드, 스킨, 언어
   function renderSettings() {
+    // 확인 상자가 열려 있는 동안은 칩 줄 전체를 막고 흐리게(.reset-row.locked)
     document.querySelectorAll('[data-reset]').forEach((button) => {
       const key = button.dataset.reset;
-      button.disabled = key === 'all' ? Object.keys(best).length === 0 : !best[key];
+      button.disabled = pendingReset !== null || (key === 'all' ? Object.keys(best).length === 0 : !best[key]);
     });
+    $('reset-row').classList.toggle('locked', pendingReset !== null);
+    $('reset-confirm').hidden = pendingReset === null;
     // 기록이 하나도 없으면 공유할 것이 없다
     document.querySelectorAll('[data-theme-option]').forEach((button) => {
       button.setAttribute('aria-pressed', String(button.dataset.themeOption === themePreference));
@@ -1388,25 +1393,35 @@
     startGame(max, true);
   }
 
-  // 되돌릴 수 없는 동작 전에 띄우는 확인 팝업. "지우기"를 누르면 true, 취소·Esc·바깥 클릭은 false 로 끝난다.
-  function confirmDialog(message) {
-    const dialog = $('confirm');
-    $('confirm-message').textContent = message;
-    dialog.returnValue = '';
-    dialog.showModal();
-    return new Promise((resolve) => {
-      dialog.addEventListener('close', () => resolve(dialog.returnValue === 'ok'), { once: true });
-    });
+  // 내 기록 지우기: 칩을 누르면 팝업 대신 설정 창 안에서 칩 줄 전체를 흐리게 막고(모양이 달라 숨기지 않음),
+  // 바로 아래 상자에 설명·취소·지우기를 연다(다른 게임의 "내 기록 지우기"와 같은 흐름).
+  // pendingReset = 지우려고 고른 범위('all' 또는 끝 숫자), 상자가 닫혀 있으면 null
+  function resetMessage(key) {
+    return key === 'all' ? t('settings.confirmAll') : t('settings.confirmOne', { level: t('board.level', { max: key }) });
   }
 
-  async function resetRecord(key) {
-    const level = key === 'all' ? '' : t('board.level', { max: key });
-    const message = key === 'all' ? t('settings.confirmAll') : t('settings.confirmOne', { level: level });
-    if (!(await confirmDialog(message))) return;
-    if (key === 'all') best = {};
-    else delete best[key];
-    saveBest();
+  function askReset(key) {
+    pendingReset = key;
+    $('reset-confirm-message').textContent = resetMessage(key);
     renderSettings();
+    $('reset-cancel').focus();
+  }
+
+  function closeReset() {
+    const key = pendingReset;
+    pendingReset = null;
+    renderSettings();
+    // 고른 칩으로 초점을 돌려 둔다(지워서 꺼진 칩이면 그대로 둠)
+    const chip = document.querySelector('[data-reset="' + key + '"]');
+    if (chip && !chip.disabled) chip.focus();
+  }
+
+  function resetRecord() {
+    if (pendingReset === null) return;
+    if (pendingReset === 'all') best = {};
+    else delete best[pendingReset];
+    saveBest();
+    closeReset();
     renderScreen(); // 시작 화면의 범위별 최고 기록 표시도 바로 갱신한다.
   }
 
@@ -1493,12 +1508,19 @@
     });
   });
   // 대화상자 바깥(배경)을 누르면 닫는다. 내용은 .settings-body 안에 있어 배경 클릭만 대화상자 자체에 닿는다.
-  ['settings', 'confirm', 'ranking', 'custom', 'thermo'].forEach((id) => {
+  ['settings', 'ranking', 'custom', 'thermo'].forEach((id) => {
     $(id).addEventListener('click', (event) => {
       if (event.target === $(id)) $(id).close();
     });
   });
-  $('confirm-cancel').addEventListener('click', () => $('confirm').close('cancel'));
+  $('reset-cancel').addEventListener('click', closeReset);
+  $('reset-ok').addEventListener('click', resetRecord);
+  // 설정 창을 닫으면 열어 둔 확인 상자도 닫는다(다시 열면 칩 줄부터)
+  $('settings').addEventListener('close', () => {
+    if (pendingReset === null) return;
+    pendingReset = null;
+    renderSettings();
+  });
   $('thermo-open').addEventListener('click', openThermo);
   $('thermo-close').addEventListener('click', () => $('thermo').close());
   $('thermo-cancel').addEventListener('click', () => $('thermo').close());
@@ -1507,7 +1529,6 @@
   $('thermo').addEventListener('close', () => {
     if (screen === 'play') $('dial').focus();
   });
-  $('confirm-ok').addEventListener('click', () => $('confirm').close('ok'));
   UpDown.PRESETS.forEach((key) => {
     const button = document.createElement('button');
     button.type = 'button';
@@ -1525,7 +1546,7 @@
   $('custom-plus10').addEventListener('click', () => stepCustom(10));
   $('custom-max').addEventListener('blur', () => stepCustom(0));
   document.querySelectorAll('[data-reset]').forEach((button) => {
-    button.addEventListener('click', () => resetRecord(button.dataset.reset));
+    button.addEventListener('click', () => askReset(button.dataset.reset));
   });
   document.querySelectorAll('[data-theme-option]').forEach((button) => {
     button.addEventListener('click', () => {

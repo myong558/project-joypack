@@ -180,11 +180,6 @@
         <path d="M5 9.5V20h5v-6h4v6h5V9.5"/>
       </g>
     </symbol>
-    <symbol id="i-trash" viewBox="0 0 24 24">
-      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>
-      </g>
-    </symbol>
     <symbol id="i-thermo" viewBox="0 0 24 24">
       <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M10 13.5V5a2 2 0 0 1 4 0v8.5a4 4 0 1 1-4 0z"/>
@@ -464,6 +459,14 @@
         <div id="reset-row" class="chip-row reset-row">
           <button type="button" class="chip" data-reset="all" data-i18n="settings.resetAll"></button>
         </div>
+        <!-- 칩을 누르면 칩 줄 전체를 흐리게 막고(모양이 달라 숨기지 않음) 아래에 확인 상자를 연다. 다른 게임의 "내 기록 지우기"와 같은 방식(팝업 없음) -->
+        <div id="reset-confirm" class="reset-confirm" hidden>
+          <p id="reset-confirm-message" class="reset-confirm-message"></p>
+          <div class="confirm-actions">
+            <button id="reset-cancel" type="button" class="secondary" data-i18n="confirm.cancel"></button>
+            <button id="reset-ok" type="button" class="danger-button" data-i18n="confirm.delete"></button>
+          </div>
+        </div>
       </section>
 
       <!-- 지금 쓰는 버전(package.json version, 조이필드 빌드가 넣음). 새 버전이 반영됐는지 확인할 때 본다. -->
@@ -543,19 +546,6 @@
       <div class="confirm-actions">
         <button id="thermo-cancel" type="button" class="secondary"></button>
         <button id="thermo-use" type="button" class="primary"></button>
-      </div>
-    </div>
-  </dialog>
-
-  <dialog id="confirm" class="settings confirm" aria-describedby="confirm-message">
-    <div class="settings-body">
-      <span class="confirm-icon" aria-hidden="true">
-        <svg class="icon"><use href="#i-trash"></use></svg>
-      </span>
-      <p id="confirm-message" class="confirm-message"></p>
-      <div class="confirm-actions">
-        <button id="confirm-cancel" type="button" class="secondary" data-i18n="confirm.cancel"></button>
-        <button id="confirm-ok" type="button" class="danger-button" data-i18n="confirm.delete"></button>
       </div>
     </div>
   </dialog>
