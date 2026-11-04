@@ -69,7 +69,17 @@ class Plate {
   stem(d: string, width = 1.4): this {
     // 도감: 왼쪽에 빛 받은 밝은 줄을 더해 줄기가 둥글게 보이게
     const shine = detail === 'dex' ? `<path d="${d}" fill="none" stroke="${LEAF_L}" stroke-width="${n(width * 0.35)}" stroke-opacity=".7" stroke-linecap="round" transform="translate(${n(-width * 0.25)} 0)"/>` : '';
-    this.parts.push(`<path d="${d}" fill="none" stroke="${STEM}" stroke-width="${width}" stroke-linecap="round"/>${shine}<path d="${d}" fill="none" stroke="${INK}" stroke-width=".35" stroke-opacity=".5" transform="translate(.5 0)"/>`);
+    // 도감: 밑동 쪽을 두 번 조금씩 더 굵게 덧그려 줄기가 위로 갈수록 가늘어지게(줄기 길은 모두 밑동에서 시작, 굵기 차이가 계단처럼 안 보이게 두 단)
+    const base =
+      detail === 'dex' && width >= 1.2
+        ? [
+            [1.12, 55],
+            [1.24, 25],
+          ]
+            .map(([k, len]) => `<path d="${d}" fill="none" stroke="${STEM}" stroke-width="${n(width * k)}" pathLength="100" stroke-dasharray="${len} 100"/>`)
+            .join('')
+        : '';
+    this.parts.push(`${base}<path d="${d}" fill="none" stroke="${STEM}" stroke-width="${width}" stroke-linecap="round"/>${shine}<path d="${d}" fill="none" stroke="${INK}" stroke-width=".35" stroke-opacity=".5" transform="translate(.5 0)"/>`);
     return this;
   }
 
@@ -89,6 +99,26 @@ class Plate {
         [0.3, 0.5, 0.7].map((t) => `<path d="M${n(k * t * 0.9)} ${n(-L * t)}l${n(w * 0.7)} ${n(-L * 0.12)}M${n(k * t * 0.9)} ${n(-L * t)}l${n(-w * 0.7)} ${n(-L * 0.12)}" stroke="${INK}" stroke-width=".22" stroke-opacity=".35"/>`).join('') +
         '</g>',
     );
+    return this;
+  }
+
+  /** 깃꼴로 잘게 갈라진 잎(코스모스·복수초): (x,y)에서 ang 쪽으로 뻗은 잎줄기에 가는 갈래가 양쪽으로, 갈래마다 잔갈래 하나 */
+  feather(x: number, y: number, ang: number, L: number, spread = 0.34): this {
+    if (detail === 'game') return this;
+    const bend = L * 0.08;
+    let s = `<path d="M0 0Q${n(bend * 2)} ${n(-L * 0.5)} 0 ${n(-L)}" stroke-width=".8"/>`;
+    for (let i = 1; i <= 6; i++) {
+      const t = i / 7;
+      const px = 4 * (1 - t) * t * bend;
+      const py = -L * t;
+      const len = L * spread * (1 - t * 0.5);
+      for (const k of [-1, 1]) {
+        const mx = px + k * len * 0.5;
+        const my = py - len * 0.2;
+        s += `<path d="M${n(px)} ${n(py)}Q${n(px + k * len * 0.55)} ${n(py - len * 0.08)} ${n(px + k * len)} ${n(py - len * 0.5)}M${n(mx)} ${n(my)}l${n(k * len * 0.22)} ${n(-len * 0.42)}" stroke-width=".5"/>`;
+      }
+    }
+    this.parts.push(`<g transform="translate(${n(x)} ${n(y)}) rotate(${ang})" fill="none" stroke="${LEAF}" stroke-linecap="round">${s}</g>`);
     return this;
   }
 
@@ -295,13 +325,19 @@ const DRAW: Record<FlowerId, () => Plate> = {
   },
   iris: () => {
     const p = new Plate().stem('M50 116V58', 1.5).leaf(48, 116, -10, 66, 6, 0.08).leaf(52, 116, 9, 60, 6, -0.08).leaf(50, 116, -24, 46, 5, 0.2);
+    // 아래로 늘어진 꽃잎(바깥 꽃덮이) 셋과 위로 선 꽃잎(안 꽃덮이) 셋. 노란 수염은 늘어진 꽃잎 가운데를 따라(꽃술처럼 봉오리 때는 숨음)
+    const beard = (a: number) => {
+      const [sx, sy] = [Math.sin((a * Math.PI) / 180), -Math.cos((a * Math.PI) / 180)];
+      return `<path d="M${n(sx * 4)} ${n(sy * 4)}L${n(sx * 10.5)} ${n(sy * 10.5)}" stroke="#f0c94a" stroke-width="1.5" stroke-dasharray=".7 .45" stroke-linecap="round"/>`;
+    };
     const h = new Plate()
-      .petal(0, 0, -70, 26, 20, { shape: 'round', c: '#6a4fa3', l: '#b9a3e2', closed: -8, cs: 0.4 })
-      .petal(0, 0, 70, 26, 20, { shape: 'round', c: '#6a4fa3', l: '#b9a3e2', closed: 8, cs: 0.4, delay: 120 })
-      .petal(0, 0, 180, 22, 19, { shape: 'round', c: '#5d4596', l: '#ae97da', closed: 170, cs: 0.4, delay: 240 })
-      .petal(0, -2, -12, 14, 8, { shape: 'point', c: '#7d64b6', l: '#cbb9ee', delay: 360 })
-      .petal(0, -2, 12, 14, 8, { shape: 'point', c: '#7d64b6', l: '#cbb9ee', delay: 400 })
-      .raw(`<path d="M-3 4L-10 14M3 4L10 14" stroke="#f0c94a" stroke-width="1.2" stroke-linecap="round"/>`);
+      .petal(0, 0, -112, 25, 20, { shape: 'round', c: '#6a4fa3', l: '#b9a3e2', closed: -8, cs: 0.4 })
+      .petal(0, 0, 112, 25, 20, { shape: 'round', c: '#6a4fa3', l: '#b9a3e2', closed: 8, cs: 0.4, delay: 120 })
+      .petal(0, 0, 180, 23, 19, { shape: 'round', c: '#5d4596', l: '#ae97da', closed: 170, cs: 0.4, delay: 240 })
+      .raw(`<g class="dc">${[-112, 112, 180].map(beard).join('')}</g>`)
+      .petal(0, -2, -34, 18, 12, { shape: 'round', c: '#7d64b6', l: '#cbb9ee', closed: -4, delay: 320 })
+      .petal(0, -2, 34, 18, 12, { shape: 'round', c: '#7d64b6', l: '#cbb9ee', closed: 4, delay: 360 })
+      .petal(0, -2, 0, 20, 11, { shape: 'round', c: '#8a71c2', l: '#d4c4f2', closed: 0, delay: 400 });
     return p.raw(head(50, 56, h));
   },
   balsam: () => {
@@ -310,7 +346,7 @@ const DRAW: Record<FlowerId, () => Plate> = {
     for (const [y, a] of [[104, -48], [96, 46], [86, -44], [76, 42], [64, -38], [52, 34]] as const) p.leaf(50, y, a, 24, 7, a < 0 ? 0.15 : -0.15);
     const bloom = (x: number, y: number, delay: number) => {
       const h = new Plate().ring(0, 0, 5, 9, 9, { shape: 'heart', c: '#d9466f', l: '#f6a3bb', start: 0, sy: 0.9, cs: 0.4, delay } as PetalOpts, 60);
-      h.raw(`<path d="M2 3Q6 8 3 11" fill="none" stroke="#b8345a" stroke-width="1.1" stroke-linecap="round"/><circle r="1.6" fill="#f7e3ea" stroke="${INK}" stroke-width=".3"/>`);
+      h.raw(`<path d="M1.5 3Q5 6.5 3.6 9.6Q5.4 6.2 2.6 2.8Z" fill="#c13d63" stroke="#b8345a" stroke-width=".35" stroke-linejoin="round"/><circle r="1.6" fill="#f7e3ea" stroke="${INK}" stroke-width=".3"/>`);
       return head(x, y, h, 0, 0, true);
     };
     return p.raw(`<path d="M50 70L41 66M50 58L60 54M50 82L59 80" stroke="${STEM}" stroke-width=".8"/>` + bloom(40, 64, 0) + bloom(61, 52, 200) + bloom(60, 79, 400) + bloom(50, 42, 600));
@@ -321,9 +357,8 @@ const DRAW: Record<FlowerId, () => Plate> = {
     return p.raw(head(52, 48, h, 0, 20));
   },
   cosmos: () => {
-    const p = new Plate().stem('M50 116C47 96 46 78 52 58', 0.9).foliage(
-      `<path d="M48 100L38 92M38 92L33 94M38 92L36 86M49 88L60 80M60 80L65 82M60 80L60 74M47 106L58 100" stroke="${LEAF}" stroke-width=".8" fill="none" stroke-linecap="round"/>`,
-    );
+    // 실처럼 가늘게 갈라진 깃꼴 잎이 줄기 위 점(같은 베지어의 t=.15·.3·.5)에서 어긋나게
+    const p = new Plate().stem('M50 116C47 96 46 78 52 58', 0.9).feather(48.8, 107.1, 60, 20).feather(48, 98.4, -58, 22).feather(47.6, 87, 52, 17);
     const h = new Plate().calyx(0, 0, 6, 13, 7).ring(0, 0, 8, 22, 15, { shape: 'notch', c: '#de7fa8', l: '#f7c6db', start: 10 } as PetalOpts, 50).disc(0, 0, 4.5, '#e9b730', '#fbe38a', 14);
     return p.raw(head(52, 52, h, 0, 6));
   },
@@ -380,8 +415,17 @@ const DRAW: Record<FlowerId, () => Plate> = {
     return p.raw(head(50, 56, h, 0, 16));
   },
   cyclamen: () => {
-    const p = new Plate().stem('M48 112C46 80 44 62 40 48', 0.9).stem('M52 112C56 84 62 66 64 56', 0.9);
-    for (const [x, a] of [[38, -40], [50, -5], [62, 35]] as const) p.foliage(`<g transform="translate(${x} 112) rotate(${a})"><path d="M0 0C12 -4 14 -18 0 -16C-14 -18 -12 -4 0 0Z" fill="#4f7a43" fill-opacity=".85" stroke="${INK}" stroke-width=".45"/><path d="M0 -3C7 -6 8 -13 0 -12C-8 -13 -7 -6 0 -3Z" fill="#b9cf9a" fill-opacity=".55"/></g>`);
+    // 잎: 덩이줄기(50,114)에서 나온 잎자루 끝에 하트 잎(잎자루가 붙는 오목한 곳이 아래), 은빛 무늬 띠. 꽃대는 잎 앞으로
+    const p = new Plate();
+    const heart = 'M0 0C-4 3 -13 1 -13 -7C-13 -15 -6 -20 0 -24C6 -20 13 -15 13 -7C13 1 4 3 0 0Z';
+    for (const [x, y, a, k] of [[38, 106, -58, 0.8], [61, 105, 56, 0.85], [49, 102, -6, 0.75]] as const)
+      p.foliage(
+        `<path d="M50 114Q${n((50 + x) / 2)} ${y + 6} ${x} ${y}" fill="none" stroke="#7a5a48" stroke-width=".9" stroke-linecap="round"/>` +
+          `<g transform="translate(${x} ${y}) rotate(${a}) scale(${k})"><path d="${heart}" fill="#46703f" fill-opacity=".9" stroke="${INK}" stroke-width=".5"/>` +
+          `<path d="${heart}" fill="none" stroke="#c9d9b4" stroke-width="2.2" stroke-opacity=".55" transform="translate(0 -6) scale(.55)"/>` +
+          `<path d="${heart}" fill="${INK}" fill-opacity=".14" transform="scale(.5 1)"/><path d="M0 0V-21" stroke="${INK}" stroke-width=".35" stroke-opacity=".5"/></g>`,
+      );
+    p.stem('M50 114C46 80 44 62 40 48', 0.9).stem('M50 114C56 84 62 66 64 56', 0.9);
     const flower = (x: number, y: number, tilt: number, delay: number) => {
       const h = new Plate();
       [-30, -12, 6, 22].forEach((a, i) => h.petal(0, 0, a + tilt, 20, 7, { shape: 'oval', c: '#d2466e', l: '#f4a2b8', closed: 170, cs: 0.4, delay: delay + i * 80 }));
@@ -399,8 +443,10 @@ const DRAW: Record<FlowerId, () => Plate> = {
     return p.raw(head(50, 58, h, 0, 16));
   },
   hellebore: () => {
-    const p = new Plate().stem('M50 116C50 96 52 82 56 70', 1.2);
-    for (const a of [-50, -25, 0, 25, 50]) p.leaf(44, 116, a - 10, 26, 8, 0.15, '#4b6b3e', '#93b07c');
+    // 잎을 먼저 그려 줄기가 앞에, 잎 밑동은 줄기 밑동과 같은 자리
+    const p = new Plate();
+    for (const a of [-56, -30, -6, 28, 54]) p.leaf(50, 116, a, 26, 8, a < 0 ? 0.15 : -0.15, '#4b6b3e', '#93b07c');
+    p.stem('M50 116C50 96 52 82 56 70', 1.2);
     const h = new Plate()
       .ring(0, 0, 5, 20, 20, { shape: 'round', c: '#f1ede0', l: '#ffffff', start: 0, sy: 0.85 } as PetalOpts, 80)
       .disc(0, 0, 4, '#b6c977', '#e2ecb0', 0, 0.85);
@@ -418,9 +464,8 @@ const DRAW: Record<FlowerId, () => Plate> = {
     return p.raw(head(64, 42, h, 0, 0, true));
   },
   adonis: () => {
-    const p = new Plate().stem('M50 116C50 100 50 88 50 76', 1.4).foliage(
-      `<path d="M50 104L38 96M38 96L34 97M38 96L37 91M50 98L62 90M62 90L66 92M62 90L62 85M50 110L40 106M50 110L60 105" stroke="${LEAF}" stroke-width=".9" fill="none" stroke-linecap="round"/>`,
-    );
+    // 당근 잎처럼 잘게 갈라진 깃꼴 잎이 줄기에 어긋나게(위로 갈수록 짧게)
+    const p = new Plate().stem('M50 116C50 100 50 88 50 76', 1.4).feather(50, 111, -64, 18, 0.4).feather(50, 105, 62, 19, 0.4).feather(50, 97, -56, 16, 0.4).feather(50, 90, 52, 13, 0.4);
     const h = new Plate()
       .calyx(0, 0, 6, 14, 7, 0.6)
       .ring(0, 0, 9, 21, 10, { shape: 'oval', c: '#e2b81f', l: '#fff0a0', start: -80, sy: 0.6, cs: 0.4 } as PetalOpts, 50)
