@@ -2319,7 +2319,8 @@ h2 .icon-pic {
     transform-box: view-box;
     transform-origin: 0 0;
   }
-  /* 잎(도감 그림에만 있음, flowers.ts leaf·feather·시클라멘 잎의 .lf): 줄기에 붙은 곳을 기준으로 꽃보다 조금 늦게·작게(2° → 1° → 0.3°) 따라 흔들림 */
+  /* 잎(도감 그림에만 있음, flowers.ts leaf·feather·시클라멘 잎의 .lf): 줄기에 붙은 곳을 기준으로 꽃보다 조금 늦게·작게(2° → 1° → 0.3°) 따라 흔들림.
+   * 왼쪽으로 뻗은 잎은 시계 반대 방향부터, 오른쪽 잎(--lk:-1)은 좌우 반전으로 시계 방향부터(양쪽 잎 끝이 함께 들렸다 내려앉음) */
   .fl.flourish .lf {
     animation: lf-sway 0.7s 0.06s both;
   }
@@ -2355,15 +2356,15 @@ h2 .icon-pic {
     animation-timing-function: cubic-bezier(0.33, 0, 0.25, 1);
   }
   26% {
-    transform: rotate(-2deg);
+    transform: rotate(calc(var(--lk, 1) * -2deg));
     animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
   }
   54% {
-    transform: rotate(1deg);
+    transform: rotate(calc(var(--lk, 1) * 1deg));
     animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
   }
   78% {
-    transform: rotate(-0.3deg);
+    transform: rotate(calc(var(--lk, 1) * -0.3deg));
     animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
   }
   100% {
