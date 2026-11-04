@@ -994,7 +994,7 @@ a.card:active .card-play {
   animation: none;
 }
 
-/* 설정 → 정보: 버전 글자(7번 누르면 미리보기 비밀번호 창). 연타해도 글자가 선택되지 않게 */
+/* 설정 맨 아래: 버전 글자(7번 누르면 미리보기 비밀번호 창). 연타해도 글자가 선택되지 않게 */
 .ver-tap {
   -webkit-user-select: none;
   user-select: none;
@@ -1888,9 +1888,25 @@ a.primary-btn {
   text-align: left;
 }
 
-.about p {
-  margin: 0;
-  font-size: 14px;
+/* 설정 창 맨 아래 버전·저작권: 조이필드와 모든 게임이 같은 글꼴(Jua, Jua 에 없는 ©는 시스템 글꼴)·크기·간격(색만 앱마다) */
+.app-version,
+.app-copyright {
+  font-family: 'Jua', system-ui, sans-serif;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0;
+  text-align: center;
+  color: var(--muted);
+}
+.app-version {
+  margin: 20px 0 0;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.app-copyright {
+  margin: 4px 0 0;
+  font-size: 11px;
+  opacity: 0.8;
 }
 
 /* 넓은 화면(PC·태블릿 가로): 왼쪽 간판, 오른쪽 카드. main.ts 의 fitScreen 이 --z 배로 키워

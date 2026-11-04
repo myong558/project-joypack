@@ -5,7 +5,7 @@
 // - 넣을 글자는 scripts/font-text.mjs 규칙으로 모은다: 기본 세트(ASCII·한글 자음모음·자주 쓰는 기호) + 앱의 index.html·src/·js/·css/
 //   + 공통 모듈(packages/shared) + games.json.
 // - 몇 글자에만 쓰는 글꼴은 세 번째 칸에 글자를 적으면 그 글자(+ ASCII)만 넣는다.
-//   예) jua=src/fonts/jua-topbar-subset.woff2=한국어 → 공용 위 메뉴(Jua)의 언어 단추 "한국어 / English" 용
+//   예) jua=src/fonts/jua-topbar-subset.woff2=한국어 → 공용 위 메뉴(Jua)의 언어 단추 "한국어 / English"·설정 맨 아래 "버전" 용(기준서 1.4)
 // - 기호 채움: 세 번째 칸이 +<본문 글꼴 id> 이면 본문 글꼴에 없는 ASCII·기본 기호만 담는다(글자 수가 정해져 있어 문구와 무관).
 //   예) gothic-a1-bold=src/fonts/gothic-a1-bold-symbols.woff2=+jua → Jua 에 없는 … → © ① ★ 등 약 86자, 약 8 KB.
 //   CSS 에서 본문 글꼴과 **같은 font-family 이름·같은 굵기 설명**으로, 출력되는 unicode-range 를 붙여 하나 더 선언한다(기준서 1.10).

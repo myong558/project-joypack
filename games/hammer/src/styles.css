@@ -2521,20 +2521,32 @@ button.dex-item:focus-visible {
 }
 
 /* 설정 맨 아래 버전 표시: 업데이트가 적용됐는지 확인용 */
+/* 설정 창 맨 아래 버전·저작권: 조이필드와 모든 게임이 같은 글꼴(Jua, Jua 에 없는 ©는 시스템 글꼴)·크기·간격(색만 앱마다) */
+.app-version,
 .app-copyright {
-  margin: 0.3em 0 0;
-  font-size: max(12px, 0.5em);
-  color: var(--muted);
+  font-family: 'Jua', system-ui, sans-serif;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0;
   text-align: center;
+  color: var(--muted);
+}
+.app-version {
+  margin: 20px 0 0;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.app-copyright {
+  margin: 4px 0 0;
+  font-size: 11px;
   opacity: 0.8;
 }
-
-.app-version {
-  margin: 0.6em 0 0;
-  font-size: max(16px, 0.65em);
-  color: var(--muted);
-  text-align: center;
-  font-variant-numeric: tabular-nums;
+/* 설정 창은 칸 사이 간격(gap 0.7em)이 있어, 그만큼 빼서 다른 앱과 같은 20px·4px 로 */
+.settings > .app-version {
+  margin-top: calc(20px - 0.7em);
+}
+.settings > .app-copyright {
+  margin-top: calc(4px - 0.7em);
 }
 
 /* 영어 이름(Snowy Peak 등)이 다섯 칸에 다 들어가지 않으면 칸을 늘리지 않고 다음 줄로 넘긴다 */

@@ -1303,12 +1303,12 @@
 
   // 설정 메뉴: 기록 리셋, 컬러 모드, 스킨, 언어
   function renderSettings() {
-    // 확인 상자가 열려 있는 동안은 칩 줄 전체를 막고 흐리게(.reset-row.locked)
+    // 범위 칩은 탭처럼: 고른 칩만 눌린 표시(빨간 테두리), 상자가 열려 있어도 다른 칩을 눌러 바꿀 수 있다
     document.querySelectorAll('[data-reset]').forEach((button) => {
       const key = button.dataset.reset;
-      button.disabled = pendingReset !== null || (key === 'all' ? Object.keys(best).length === 0 : !best[key]);
+      button.disabled = key === 'all' ? Object.keys(best).length === 0 : !best[key];
+      button.setAttribute('aria-pressed', String(key === pendingReset));
     });
-    $('reset-row').classList.toggle('locked', pendingReset !== null);
     $('reset-confirm').hidden = pendingReset === null;
     // 기록이 하나도 없으면 공유할 것이 없다
     document.querySelectorAll('[data-theme-option]').forEach((button) => {
@@ -1393,18 +1393,18 @@
     startGame(max, true);
   }
 
-  // 내 기록 지우기: 칩을 누르면 팝업 대신 설정 창 안에서 칩 줄 전체를 흐리게 막고(모양이 달라 숨기지 않음),
-  // 바로 아래 상자에 설명·취소·지우기를 연다(다른 게임의 "내 기록 지우기"와 같은 흐름).
+  // 내 기록 지우기: 칩을 누르면 팝업 대신 설정 창 안 바로 아래 상자에 설명·취소·지우기를 연다(다른 게임과 같은 흐름).
+  // 칩은 탭처럼 다른 칩을 누르면 고른 범위가 바뀌고(문구에 범위를 적어 무엇을 지우는지 늘 보임), 같은 칩을 다시 누르면 닫힌다.
   // pendingReset = 지우려고 고른 범위('all' 또는 끝 숫자), 상자가 닫혀 있으면 null
   function resetMessage(key) {
     return key === 'all' ? t('settings.confirmAll') : t('settings.confirmOne', { level: t('board.level', { max: key }) });
   }
 
   function askReset(key) {
+    if (pendingReset === key) return closeReset();
     pendingReset = key;
     $('reset-confirm-message').textContent = resetMessage(key);
     renderSettings();
-    $('reset-cancel').focus();
   }
 
   function closeReset() {

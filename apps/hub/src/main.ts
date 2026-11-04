@@ -822,11 +822,8 @@ async function openSettings(): Promise<void> {
         .join('')}</ul>
       <p class="hint">${t('data.hint')}</p>
     </details>
-    <section class="set-group about">
-      <h3>${t('settings.about')}</h3>
-      <p><span class="ver-tap" data-ver-tap>${t('app.title')} v${__APP_VERSION__}</span></p>
-      <p class="hint copyright">${esc(Joyfield.COPYRIGHT)}</p>
-    </section>`;
+    <p class="app-version"><span class="ver-tap" data-ver-tap>${t('app.title')} v${__APP_VERSION__}</span></p>
+    <p class="app-copyright">${esc(Joyfield.COPYRIGHT)}</p>`;
   const dialog = openDialog('settings', body, t('settings.title'));
   renderInstall(dialog.querySelector<HTMLElement>('[data-install-section]')!);
   dialog.querySelector('[data-share]')!.addEventListener('click', async () => {

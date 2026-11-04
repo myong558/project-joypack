@@ -114,7 +114,6 @@ const ko = {
   'share.button': '조이필드 공유하기',
   'share.copied': '링크를 복사했어요. 메신저에 붙여 넣어 보내 주세요.',
   'share.text': '미니 게임 모음 조이필드! 업다운, 두더지잡기 같이 하자 🎮',
-  'settings.about': '정보',
   'close': '닫기',
 };
 
@@ -230,7 +229,6 @@ const en: Record<keyof typeof ko, string> = {
   'share.button': 'Share Joyfield',
   'share.copied': 'Link copied. Paste it into a chat to send.',
   'share.text': "Joyfield mini games! Let's play Up Down and Peekaboo Moles 🎮",
-  'settings.about': 'About',
   close: 'Close',
 };
 

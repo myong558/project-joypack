@@ -507,7 +507,7 @@
     if (open) setTimeout(() => location.reload(), Math.min(open - Date.now() + 500, 2 ** 31 - 1));
   }
 
-  // 개발자 모드(조이필드 설정 → 정보의 버전을 7번 눌러 비밀번호로 켬, 허브 preview.ts 와 같은 키 joyfield.preview).
+  // 개발자 모드(조이필드 설정 맨 아래 버전을 7번 눌러 비밀번호로 켬, 허브 preview.ts 와 같은 키 joyfield.preview).
   // 켠 기기에서만 게임의 출시 전 확인 기능(판별 바로 시작·도감 전부 열기 등)을 보인다
   function devMode() {
     try {
@@ -662,7 +662,7 @@
   blockZoom();
   gatePreview();
 
-  // 저작권 표기: 조이필드 설정 → 정보, 각 게임 설정 맨 아래 버전 밑에 그대로 쓴다(기준서 1.4). 바꿀 때는 여기 한 곳만
+  // 저작권 표기: 조이필드·각 게임 설정 맨 아래 버전 밑에(모양은 기준서 1.4 6번) 그대로 쓴다(기준서 1.4). 바꿀 때는 여기 한 곳만
   var COPYRIGHT = '© 2026 Myong Bum Soo. All rights reserved.';
 
   global.Joyfield = {

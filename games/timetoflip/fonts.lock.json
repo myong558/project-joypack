@@ -15,9 +15,9 @@
     },
     "src/fonts/jua-topbar-subset.woff2": {
       "font": "jua",
-      "only": "한국어",
-      "sha256": "800aaf7677dd1d33b6bc6981c090bec8bf63ea4b4265cb16e6069120a54cb764",
-      "chars": " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~국어한",
+      "only": "한국어버전",
+      "sha256": "749017a4aff59f7086b4480d5243a366a3e3ea4a645763b177300dbc194d4ca1",
+      "chars": " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~국버어전한",
       "absent": "`"
     }
   }
