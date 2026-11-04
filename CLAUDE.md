@@ -57,21 +57,22 @@
 - **15개쯤부터 · 설정 "게임 데이터"를 새 창으로:** 지금은 설정 안 접힘 구역(펼치면 게임 전부, 허브 v1.34.2)이다. 길어지면 설정에 "게임 데이터 ›" 한 줄만 두고 누르면 게임 데이터 전용 창(팝업)이 열리게 바꾼다(필요하면 "오프라인 저장 모두 비우기"도). 설정 안에 안쪽 스크롤을 두는 방식은 이중 스크롤이라 쓰지 않는다(2026-10-25 사용자 결정).
 - 맨 위로 가기 떠 있는 버튼은 권하지 않는다(위 메뉴가 이미 고정이고, 오른쪽 카드의 플레이 버튼을 가림). 필요하면 "조이필드 제목 누르면 맨 위로" 같은 숨은 방식으로 한다.
 
-## 스튜디오 도메인·주소 이전 다음 일정 (2026-11-04)
+## 스튜디오 도메인·주소 이전 다음 일정 (2026-11-05, 다른 PC에서 이어 감)
 
 게임 스튜디오 **Pocket Game Lab**, 도메인 `pocketgamelab.com`·`.kr`·`.co.kr`(아이티이지, 만기 2027-11-04, **자동 연장 없음**). **이 일이 끝나기 전에는 세션 첫 답변에서 먼저 남은 일정을 알린다.** 자세한 내용은 메모리 `studio-domain-pocketgamelab`.
 
-- 끝난 것(2026-11-04): 구매, Cloudflare 에 세 주소(네임서버 변경), `.kr`·`.co.kr` → `https://pocketgamelab.com` 301(Redirect Rules, http·https·www 확인), 개발 DB `joyfield-dev`, 주소 이전 결정(`pocketgamelab.com/joyfield/`, Cloudflare Pages, 개발 사이트 `dev.pocketgamelab.com`, 옛 주소는 안내만)과 코드(README 8장).
-1. **사람:** Cloudflare Pages 프로젝트 `pocketgamelab`(직접 업로드) 만들기 → API 토큰(Pages 편집) → GitHub 저장소 비밀값 `CLOUDFLARE_API_TOKEN`·`CLOUDFLARE_ACCOUNT_ID` → 사용자 도메인 `pocketgamelab.com`(운영)·`dev.pocketgamelab.com`(`dev` 브랜치) 연결 → Google Cloud API 키 웹사이트 제한 확인.
-2. 커밋·푸시로 `main` 배포 + `dev` 브랜치 만들어 배포 → 두 주소에서 허브·게임·랭킹(운영/개발 DB)·설치 앱 확인.
-3. 확인 뒤 GitHub Actions 에서 `Old address notice`(moved.yml) 한 번 실행 → 옛 주소가 새 주소로 넘어가는지 확인.
-4. 아이티이지 도메인 잠금 3개, 연장·달력 알림(만기 2027-11-04). 나중에 최상위 `/` 에 스튜디오 소개·개인정보처리방침.
+- 끝난 것: 구매, Cloudflare 에 세 주소, `.kr`·`.co.kr` → `.com` 301, 개발 DB `joyfield-dev`, Cloudflare Pages 프로젝트 `pocketgamelab`·사용자 도메인(`dev` CNAME → `dev.pocketgamelab.pages.dev`)·GitHub 비밀값·API 키 제한 없음 확인, **운영 `https://pocketgamelab.com/joyfield/`·개발 `https://dev.pocketgamelab.com/joyfield/` 배포·확인 완료**(`main`·`dev` 푸시하면 자동 배포, README 8장).
+1. **옛 주소 안내(남음):** 2026-11-05 GitHub Actions "Old address notice (GitHub Pages)" 첫 실행(#1)이 GitHub 쪽에서 queued 로 멈추고 취소도 안 됐다(새로 돌린 #2 도 같은 대기열이라 막힘). `moved.yml` 대기열을 빼서 올렸으니(0352ea5) **Actions → Old address notice → Run workflow** 를 다시 누른다(멈춘 #1·#2 는 GitHub 이 24시간 안에 정리). 끝나면 `https://myong558.github.io/project-joyfield/games/hammer/?from=share` 가 같은 경로의 새 주소로 넘어가는지 확인. 또 멈추면 Pages 설정(Settings → Pages → Source: GitHub Actions)과 GitHub 상태를 본다.
+2. **사람:** 아이티이지 도메인 잠금 3개(한 줄씩), 기간연장·달력 알림(만기 2027-11-04). 휴대폰에 옛 주소로 설치한 앱은 새 주소에서 다시 설치.
+3. 나중에: 최상위 `/` 에 스튜디오 소개·개인정보처리방침(지금은 302 로 `/joyfield/`), 필요하면 `www` → `.com` 이동 규칙.
 
 끝나면 이 절을 지우고 메모리를 고친다.
 
 ## 다른 PC에서 작업할 때
 
 이 문서·기준서·README는 저장소에 있어 `git pull`만 하면 된다. Claude Code 개인 설정(`~/.claude/`)도 원본을 [setup/claude/](setup/claude/)에 두었다.
+
+- **"다른 PC에서 하던 거 이어해줘"**(비슷한 말 포함)라고 하면 묻지 않고: 고친 파일이 없는지 보고 `git pull` → `pnpm setup:claude`(메모리·설정을 이 PC에 깔기, 이미 같으면 그대로) → 이 문서의 "다음 일정" 절들(지금은 "스튜디오 도메인·주소 이전 다음 일정")과 메모리 `studio-domain-pocketgamelab` 을 읽고, **끝나지 않은 첫 항목부터** 무엇을 할지 짧게 알린 뒤 진행한다. 사람이 해야 하는 일(콘솔·결제·Actions 버튼)은 화면 순서대로 안내하고, 끝났는지 직접 확인할 수 있는 것(주소 응답 등)은 확인한다. 메모리는 세션을 다시 시작해야 자동으로 읽히므로, 그 세션에서는 `setup/claude/memory/` 파일을 직접 읽는다. 이전 PC 마지막 상태는 `git log` 최근 커밋으로도 확인한다.
 
 - 원본: `setup/claude/CLAUDE.md`(전역 지침: 한국어 답변, 답변 뒤 별도 메시지로 진행 시간·토큰 한 줄), `setup/claude/hooks/korean-after-compact.js`(압축 직후 한국어 규칙을 다시 넣는 훅), `setup/claude/memory/*.md`(이 저장소 작업 메모리. Claude 메모리는 PC마다 따로라 여기로 옮긴다)
 - 설치: `pnpm setup:claude` → `~/.claude/`에 복사하고 `settings.json`의 `hooks.SessionStart`(matcher `compact`)에 그 PC 경로로 훅을, 비어 있으면 `language: korean`을 넣는다. 메모리는 그 PC의 이 저장소 메모리 폴더에 깔고 `MEMORY.md`는 없는 줄만 더한다(다른 설정은 그대로, 내용이 다른 기존 파일은 `.bak`으로 남김). 적용은 세션을 다시 시작한 뒤부터.
