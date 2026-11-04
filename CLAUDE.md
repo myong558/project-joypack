@@ -48,6 +48,10 @@
 - 화면 배치(CSS 배치·글자 크기·화면 맞춤 코드)를 바꿨으면 `pnpm check:screens <hub | 게임 id> quick`(대표 4크기, 약 2분)으로 점검한다. 15크기 전체(`all`)는 새 게임 첫 배치와 정식 공개 직전에만 돌린다. 점검은 백그라운드로 돌리고 기다리는 동안 다른 일을 한다. 언제 어디까지 돌릴지는 기준서 7.1 "언제 돌리나"를 따르고, 묻지 않고 진행한다. 색·문구·규칙만 바꿨으면 돌리지 않는다.
 - Firestore 규칙(`firestore.rules`)을 바꾸면 콘솔 게시는 사람이 해야 하므로 답변에 알린다. **운영(`joyfield-41b5a`)·개발(`joyfield-dev`) 두 프로젝트 모두** 게시해야 한다(README 4.4). 로컬(`pnpm dev`·`preview`)과 개발 사이트(`dev.pocketgamelab.com`)의 랭킹은 개발 DB 에 쌓인다.
 
+## 도메인 만기 알림 (2026-11-05 사용자 요청)
+
+오늘 날짜가 **2027-10-28 이후**이고 연장했다는 기록이 없으면, **세션 첫 답변에서 먼저** 알린다: "`pocketgamelab.com`·`.kr`·`.co.kr` 만기 2027-11-04(아이티이지, 자동 연장 없음, 연장 가능 ~2027-12-04). 만기 지나면 조이필드 운영·개발 사이트가 모두 멈춘다." 연장했다고 하면 이 절의 날짜를 새 만기 1주 전으로 고친다. 이 절은 주소 이전 일정이 끝나도 지우지 않는다.
+
 ## 게임이 늘면 먼저 다시 추천할 것 (2026-10-22 미룸)
 
 허브 첫 화면이 긴 목록이 될 때를 대비한 개선안. 1번(스크롤 때 위 메뉴 뒤 흐린 띠, 허브 v1.13.0)만 했고 아래는 사용자가 "게임이 많아지면 다시 추천해 달라"고 미뤘다. `games.json`의 live 게임 수가 기준에 가까워지거나, 새 게임을 추가하는 세션에서 먼저 꺼내 제안한다.
@@ -61,10 +65,9 @@
 
 게임 스튜디오 **Pocket Game Lab**, 도메인 `pocketgamelab.com`·`.kr`·`.co.kr`(아이티이지, 만기 2027-11-04, **자동 연장 없음**). **이 일이 끝나기 전에는 세션 첫 답변에서 먼저 남은 일정을 알린다.** 자세한 내용은 메모리 `studio-domain-pocketgamelab`.
 
-- 끝난 것: 구매, Cloudflare 에 세 주소, `.kr`·`.co.kr` → `.com` 301, 개발 DB `joyfield-dev`, Cloudflare Pages 프로젝트 `pocketgamelab`·사용자 도메인(`dev` CNAME → `dev.pocketgamelab.pages.dev`)·GitHub 비밀값·API 키 제한 없음 확인, **운영 `https://pocketgamelab.com/joyfield/`·개발 `https://dev.pocketgamelab.com/joyfield/` 배포·확인 완료**(`main`·`dev` 푸시하면 자동 배포, README 8장).
-1. **옛 주소 안내(남음):** 2026-11-05 GitHub Actions "Old address notice (GitHub Pages)" 첫 실행(#1)이 GitHub 쪽에서 queued 로 멈추고 취소도 안 됐다(새로 돌린 #2 도 같은 대기열이라 막힘). `moved.yml` 대기열을 빼서 올렸으니(0352ea5) **Actions → Old address notice → Run workflow** 를 다시 누른다(멈춘 #1·#2 는 GitHub 이 24시간 안에 정리). 끝나면 `https://myong558.github.io/project-joyfield/games/hammer/?from=share` 가 같은 경로의 새 주소로 넘어가는지 확인. 또 멈추면 Pages 설정(Settings → Pages → Source: GitHub Actions)과 GitHub 상태를 본다.
-2. **사람:** 아이티이지 도메인 잠금 3개(한 줄씩), 기간연장·달력 알림(만기 2027-11-04). 휴대폰에 옛 주소로 설치한 앱은 새 주소에서 다시 설치.
-3. 나중에: 최상위 `/` 에 스튜디오 소개·개인정보처리방침(지금은 302 로 `/joyfield/`), 필요하면 `www` → `.com` 이동 규칙.
+- 끝난 것: 구매, Cloudflare 에 세 주소, `.kr`·`.co.kr` → `.com` 301, 개발 DB `joyfield-dev`, Cloudflare Pages 프로젝트 `pocketgamelab`·사용자 도메인(`dev` CNAME → `dev.pocketgamelab.pages.dev`)·GitHub 비밀값·API 키 제한 없음 확인, **운영 `https://pocketgamelab.com/joyfield/`·개발 `https://dev.pocketgamelab.com/joyfield/` 배포·확인 완료**(`main`·`dev` 푸시하면 자동 배포, README 8장), **옛 주소 안내**(`myong558.github.io/project-joyfield/…` → 같은 경로의 새 주소, 2026-11-05 확인), **아이티이지 도메인 잠금 세 주소 모두**(2026-11-05, 등록정보 숨김도 켜짐).
+1. **사람:** 휴대폰에 옛 주소로 설치한 앱은 새 주소에서 다시 설치(운영 `https://pocketgamelab.com/joyfield/`, 개발 `https://dev.pocketgamelab.com/joyfield/`). 달력 알림은 사용자가 설정함(2026-11-05).
+2. 나중에: 최상위 `/` 에 스튜디오 소개·개인정보처리방침(지금은 302 로 `/joyfield/`), 필요하면 `www` → `.com` 이동 규칙.
 
 끝나면 이 절을 지우고 메모리를 고친다.
 

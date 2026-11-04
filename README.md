@@ -430,7 +430,7 @@ pnpm --filter hub icons  # 로고(apps/hub/public/logo.svg)를 바꾼 뒤 앱 �
   | 브랜치 | 주소 | 랭킹 DB |
   | --- | --- | --- |
   | `main` | `https://pocketgamelab.com/joyfield/` | 운영 `joyfield-41b5a` |
-  | `dev` | `https://dev.pocketgamelab.com/joyfield/` (검색 차단) | 개발 `joyfield-dev` |
+  | `dev` | `https://dev.pocketgamelab.com/joyfield/` (검색 차단, 홈 화면 앱 이름 "조이필드 개발": 빌드 때 `JOYFIELD_SITE=dev`) | 개발 `joyfield-dev` |
   | (내 PC) | `pnpm dev`·`pnpm preview` → `http://localhost:4170/joyfield/` | 개발 `joyfield-dev` |
 - 흐름: 내 PC → `dev` 에 올려 개발 사이트에서 확인 → `main` 에 올려 운영(새 게임은 숨김 미리보기로 마지막 확인 → 정식 공개).
 - `pnpm site`(`scripts/site.mjs`)가 `dist/` 를 `site/joyfield/` 로 넣고 `_redirects`(첫 화면 `/` → `/joyfield/` 302, 스튜디오 소개를 만들 때까지)·`_headers`(`sw.js` no-cache, 개발 주소 noindex)·`robots.txt` 를 만듭니다. 도메인 최상위는 스튜디오(Pocket Game Lab) 자리라 나중에 소개·개인정보처리방침·스토어 앱 연결(`/.well-known/assetlinks.json`)을 둡니다.

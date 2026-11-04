@@ -115,6 +115,24 @@ cpSync(join(ROOT, 'sounds/index.html'), join(DIST, 'sounds/index.html'));
 cpSync(join(ROOT, 'sounds/catalog.json'), join(DIST, 'sounds/catalog.json'));
 cpSync(join(ROOT, 'packages/shared/sfx.js'), join(DIST, 'sounds/sfx.js'));
 
+// 3-2. 개발 사이트(dev 브랜치 배포, JOYFIELD_SITE=dev)는 홈 화면 앱 이름을 "조이필드 개발"로 바꿔 운영 앱과 구분한다.
+//      파일 목록·서비스 워커 해시보다 먼저 바꿔야 오프라인 캐시가 어긋나지 않는다
+if (process.env.JOYFIELD_SITE === 'dev') {
+  const DEV_NAME = '조이필드 개발';
+  const manifestPath = join(DIST, 'manifest.webmanifest');
+  const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+  writeFileSync(manifestPath, JSON.stringify({ ...manifest, name: DEV_NAME, short_name: DEV_NAME }, null, 2) + '\n');
+  let pages = 0;
+  for (const file of walk(DIST).filter((f) => f.endsWith('.html'))) {
+    const html = readFileSync(file, 'utf8');
+    const next = html.replace(/(<meta\s+name="apple-mobile-web-app-title"\s+content=")[^"]*(")/i, `$1${DEV_NAME}$2`);
+    if (next === html) continue;
+    writeFileSync(file, next);
+    pages++;
+  }
+  console.log(`개발 사이트: 앱 이름 "${DEV_NAME}" (manifest, iOS 제목 ${pages}쪽)`);
+}
+
 // 4. 게임별 파일 목록
 const sizeGroups = [];
 for (const game of games) {
