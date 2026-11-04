@@ -2300,7 +2300,7 @@ h2 .icon-pic {
 .board.cleared .pot .plant {
   transform: scale(1.06);
 }
-/* 꽃이 다 핀 뒤 마무리 동작(판·도감 큰 카드·결과 카드 모두 같음, 0.7초, 크기는 그대로·줄기와 잎은 가만히):
+/* 꽃이 다 핀 뒤 마무리 동작(판·도감 큰 카드·결과 카드 모두 같음, 0.7초, 크기는 그대로·줄기는 가만히, 잎은 줄기에 붙은 곳을 기준으로 살짝):
  * 꽃잎은 활짝 핀 그대로 두고(오므렸다 펴지 않음), 꽃 머리(.hd)가 줄기와 만나는 곳(위로 핀 꽃은 꽃 머리 아래 가운데, 매달린 꽃은 줄기 끝)을 기준으로
  * 살랑 튕긴 꽃처럼 시계 반대 방향 4.5° → 반대로 2° → 0.6° 로 부드럽게 잦아들며 멈춤.
  * 꼭짓점마다 사인 곡선처럼 느려졌다 빨라지게(구간마다 ease-in-out), 처음 움직임은 부드럽게 출발해 빠르게 기울고 끝에서 감속(꺾이듯 딱딱하게 오가지 않게).
@@ -2318,6 +2318,10 @@ h2 .icon-pic {
   .fl.flourish .hd[data-pivot] {
     transform-box: view-box;
     transform-origin: 0 0;
+  }
+  /* 잎(도감 그림에만 있음, flowers.ts leaf·feather·시클라멘 잎의 .lf): 줄기에 붙은 곳을 기준으로 꽃보다 조금 늦게·작게(2° → 1° → 0.3°) 따라 흔들림 */
+  .fl.flourish .lf {
+    animation: lf-sway 0.7s 0.06s both;
   }
   .board.done .pot .fl.spray .pt,
   .fl.spray.flourish .pt {
@@ -2339,6 +2343,27 @@ h2 .icon-pic {
   }
   77% {
     transform: rotate(-0.6deg);
+    animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+@keyframes lf-sway {
+  0% {
+    transform: rotate(0deg);
+    animation-timing-function: cubic-bezier(0.33, 0, 0.25, 1);
+  }
+  26% {
+    transform: rotate(-2deg);
+    animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
+  }
+  54% {
+    transform: rotate(1deg);
+    animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
+  }
+  78% {
+    transform: rotate(-0.3deg);
     animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
   }
   100% {

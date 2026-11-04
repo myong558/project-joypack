@@ -83,21 +83,21 @@ class Plate {
     return this;
   }
 
-  /** 잎: (x,y)에서 ang 쪽으로 자라는 잎. curl 은 잎이 휘는 정도 */
+  /** 잎: (x,y)에서 ang 쪽으로 자라는 잎. curl 은 잎이 휘는 정도. 안쪽 .lf 묶음은 마무리 동작 때 줄기에 붙은 곳(x,y)을 기준으로 살짝 흔들림(styles.css) */
   leaf(x: number, y: number, ang: number, L: number, W: number, curl = 0.25, c = LEAF, l = LEAF_L): this {
     if (detail === 'game') return this;
     const w = W / 2;
     const k = curl * L;
     const d = `M0 0C${n(w * 1.4 + k)} ${n(-L * 0.3)} ${n(w + k)} ${n(-L * 0.85)} ${n(k * 1.2)} ${n(-L)}C${n(-w * 0.6 + k)} ${n(-L * 0.8)} ${n(-w * 1.3)} ${n(-L * 0.35)} 0 0Z`;
     this.parts.push(
-      `<g transform="translate(${n(x)} ${n(y)}) rotate(${ang})"><path d="${d}" fill="${c}" fill-opacity=".82" stroke="${INK}" stroke-width=".45" stroke-opacity=".7"/>` +
+      `<g transform="translate(${n(x)} ${n(y)}) rotate(${ang})"><g class="lf"><path d="${d}" fill="${c}" fill-opacity=".82" stroke="${INK}" stroke-width=".45" stroke-opacity=".7"/>` +
         `<path d="${d}" fill="${l}" fill-opacity=".45" transform="translate(${n(-w * 0.25)} ${n(-L * 0.12)}) scale(.6 .75)"/>` +
         // 가운데 잎맥 한쪽은 그늘(잎이 살짝 접혀 빛을 한쪽만 받음)
         `<path d="M0 0C${n(w * 1.4 + k)} ${n(-L * 0.3)} ${n(w + k)} ${n(-L * 0.85)} ${n(k * 1.2)} ${n(-L)}Q${n(k * 0.5)} ${n(-L * 0.55)} 0 0Z" fill="${INK}" fill-opacity=".16"/>` +
         `<path d="M0 0Q${n(k * 0.5)} ${n(-L * 0.55)} ${n(k * 1.15)} ${n(-L * 0.96)}" fill="none" stroke="${INK}" stroke-width=".35" stroke-opacity=".55"/>` +
         // 곁맥: 가운데 잎맥에서 비스듬히 갈라지는 가는 선 셋씩
         [0.3, 0.5, 0.7].map((t) => `<path d="M${n(k * t * 0.9)} ${n(-L * t)}l${n(w * 0.7)} ${n(-L * 0.12)}M${n(k * t * 0.9)} ${n(-L * t)}l${n(-w * 0.7)} ${n(-L * 0.12)}" stroke="${INK}" stroke-width=".22" stroke-opacity=".35"/>`).join('') +
-        '</g>',
+        '</g></g>',
     );
     return this;
   }
@@ -118,7 +118,7 @@ class Plate {
         s += `<path d="M${n(px)} ${n(py)}Q${n(px + k * len * 0.55)} ${n(py - len * 0.08)} ${n(px + k * len)} ${n(py - len * 0.5)}M${n(mx)} ${n(my)}l${n(k * len * 0.22)} ${n(-len * 0.42)}" stroke-width=".5"/>`;
       }
     }
-    this.parts.push(`<g transform="translate(${n(x)} ${n(y)}) rotate(${ang})" fill="none" stroke="${LEAF}" stroke-linecap="round">${s}</g>`);
+    this.parts.push(`<g transform="translate(${n(x)} ${n(y)}) rotate(${ang})" fill="none" stroke="${LEAF}" stroke-linecap="round"><g class="lf">${s}</g></g>`);
     return this;
   }
 
@@ -421,9 +421,9 @@ const DRAW: Record<FlowerId, () => Plate> = {
     for (const [x, y, a, k] of [[38, 106, -58, 0.8], [61, 105, 56, 0.85], [49, 102, -6, 0.75]] as const)
       p.foliage(
         `<path d="M50 114Q${n((50 + x) / 2)} ${y + 6} ${x} ${y}" fill="none" stroke="#7a5a48" stroke-width=".9" stroke-linecap="round"/>` +
-          `<g transform="translate(${x} ${y}) rotate(${a}) scale(${k})"><path d="${heart}" fill="#46703f" fill-opacity=".9" stroke="${INK}" stroke-width=".5"/>` +
+          `<g transform="translate(${x} ${y}) rotate(${a}) scale(${k})"><g class="lf"><path d="${heart}" fill="#46703f" fill-opacity=".9" stroke="${INK}" stroke-width=".5"/>` +
           `<path d="${heart}" fill="none" stroke="#c9d9b4" stroke-width="2.2" stroke-opacity=".55" transform="translate(0 -6) scale(.55)"/>` +
-          `<path d="${heart}" fill="${INK}" fill-opacity=".14" transform="scale(.5 1)"/><path d="M0 0V-21" stroke="${INK}" stroke-width=".35" stroke-opacity=".5"/></g>`,
+          `<path d="${heart}" fill="${INK}" fill-opacity=".14" transform="scale(.5 1)"/><path d="M0 0V-21" stroke="${INK}" stroke-width=".35" stroke-opacity=".5"/></g></g>`,
       );
     p.stem('M50 114C46 80 44 62 40 48', 0.9).stem('M50 114C56 84 62 66 64 56', 0.9);
     const flower = (x: number, y: number, tilt: number, delay: number) => {
