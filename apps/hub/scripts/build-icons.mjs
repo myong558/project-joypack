@@ -23,12 +23,13 @@ const fullBleed = (scale) =>
       .replace('</svg>', '</g></svg>'),
   );
 // 안드로이드 Chrome 바로가기는 마스커블을 적응형 아이콘(108dp 중 가운데 72dp, 약 66%만 보임)으로 넣어 1.5배 확대돼 보인다.
-// 그래서 마스커블은 얼굴을 0.6배로 줄여, 잘린 뒤 보이는 크기가 원래 로고와 같게 한다
+// 0.6배는 잘린 뒤 원래 로고와 같은 크기였지만 홈 화면에서 얼굴이 작아 보여(2026-11-04) 0.85배로 키움: 가운데 66% 원 안에 볼까지 들어가는 가장 큰 크기.
+// 일반 아이콘(pwa-*)은 0.95배(잘리지 않고 그대로 보일 때 로고와 거의 같은 크기), 아이폰은 둥근 사각 그대로 보이므로 1.1배
 const fullIcon = (scale, size, file) => sharp(fullBleed(scale), { density: 384 }).resize(size, size).png().toFile(file);
-await fullIcon(0.8, 192, 'public/pwa-192x192.png');
-await fullIcon(0.8, 512, 'public/pwa-512x512.png');
-await fullIcon(0.6, 512, 'public/maskable-icon-512x512.png');
-await fullIcon(0.92, 180, 'public/apple-touch-icon-180x180.png');
+await fullIcon(0.95, 192, 'public/pwa-192x192.png');
+await fullIcon(0.95, 512, 'public/pwa-512x512.png');
+await fullIcon(0.85, 512, 'public/maskable-icon-512x512.png');
+await fullIcon(1.1, 180, 'public/apple-touch-icon-180x180.png');
 
 // 링크 미리보기 1200×630(카카오톡·메신저·SNS). 화면과 같은 Jua 글꼴로 그리려고 Chrome 으로 HTML 을 찍는다
 // (sharp 는 웹 글꼴 woff2 를 못 읽어 기본 글꼴로 딱딱하게 나온다). Chrome 위치가 다르면 CHROME 환경 변수로 알려 준다.
