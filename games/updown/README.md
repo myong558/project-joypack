@@ -62,7 +62,7 @@
 
 ## 랭킹 서버 (Firebase Firestore)
 
-GitHub Pages 는 파일만 내주는 서버라 기록을 받을 수 없어서, 랭킹만 Firebase Firestore(무료 Spark 플랜)에 저장합니다. 여러 게임이 Firebase 프로젝트 하나(`joyfield-41b5a`)를 같이 쓰고, 이 게임은 범위마다 `games/updown/scores-50`, `scores-100`, `scores-200` 컬렉션에 기록 1건 = 문서 1개(`initials`, `score`, `tries`, `time`, `createdAt`)로 씁니다. 게임은 SDK 없이 Firestore REST API 를 `fetch` 로 부릅니다(`js/ranking.js` 의 `FIREBASE`). 웹 앱 설정 값(apiKey)은 원래 공개되는 값이고, 저장소는 보안 규칙이 지킵니다.
+GitHub Pages 는 파일만 내주는 서버라 기록을 받을 수 없어서, 랭킹만 Firebase Firestore(무료 Spark 플랜)에 저장합니다. 여러 게임이 Firebase 프로젝트 하나(`joyfield-41b5a`)를 같이 쓰고, 이 게임은 범위마다 `games/updown/scores-50`, `scores-100`, `scores-200` 컬렉션에 기록 1건 = 문서 1개(`initials`, `score`, `tries`, `time`, `createdAt`)로 씁니다. 게임은 SDK 없이 Firestore REST API 를 `fetch` 로 부릅니다(`js/ranking.js` 가 공통 설정 `Joyfield.FIREBASE` 를 씀 — 내 PC 에서는 개발 DB `joyfield-dev`, 배포 사이트는 운영 DB, README 4.4). 웹 앱 설정 값(apiKey)은 원래 공개되는 값이고, 저장소는 보안 규칙이 지킵니다.
 
 1. **보안 규칙**: 루트 `firestore.rules` 의 업다운 블록을 Firebase 콘솔 → Firestore Database → 규칙 에 붙여 넣고 게시합니다. 누구나 읽기·등록만 할 수 있고 고치기·지우기는 막습니다. 점수는 시도 횟수·걸린 시간으로 낸 점수를 넘지 못하게 검사합니다.
 2. **색인**: 범위마다 컬렉션을 나눠 `score` 내림차순 하나로만 정렬하므로 복합 색인이 필요 없습니다(자동 단일 필드 색인). 같은 점수는 받아 온 뒤 먼저 등록한 순으로 다시 늘어놓습니다.

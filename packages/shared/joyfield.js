@@ -153,8 +153,8 @@
 
   // ── 공유 ──
   // 공유 링크에는 ?from=share 를 붙인다. 받은 사람이 열면 설치 안내(게임: 아래 띠, 허브: 첫 화면 카드)를 보여 준다.
-  // 개발 서버에서 공유해도 친구가 열 수 있도록 배포 주소로 고정한다.
-  const SITE = 'https://myong558.github.io/project-joyfield/';
+  // 개발 서버·개발 사이트에서 공유해도 친구가 열 수 있도록 운영 주소로 고정한다(2026-11, github.io → pocketgamelab.com 이전).
+  const SITE = 'https://pocketgamelab.com/joyfield/';
   const INVITE_KEY = 'joyfield.invite';
 
   function shareUrl(gameId) {
@@ -665,9 +665,61 @@
   // 저작권 표기: 조이필드·각 게임 설정 맨 아래 버전 밑에(모양은 기준서 1.4 6번) 그대로 쓴다(기준서 1.4). 바꿀 때는 여기 한 곳만
   var COPYRIGHT = '© 2026 Myong Bum Soo. All rights reserved.';
 
+  // 랭킹 Firebase 웹 설정(README 4.4). 원래 웹페이지에 드러나는 공개 값이고, 저장소를 지키는 건 보안 규칙(firestore.rules)이다.
+  // 개발용 DB(joyfield-dev): 내 PC·같은 와이파이에서 연 주소(localhost, 127.0.0.1, 192.168.x 등 사설 주소, pnpm dev·preview)와
+  //   개발 사이트(dev.pocketgamelab.com, Cloudflare Pages 의 브랜치·미리보기 주소 <이름>.<프로젝트>.pages.dev)
+  // 운영 DB(joyfield-41b5a): 그 밖의 주소(운영 사이트 pocketgamelab.com). 그래서 개발 중 테스트 점수가 실제 랭킹에 섞이지 않는다.
+  // 로컬에서 운영 DB 를 봐야 하면 localStorage 'joyfield.db' 를 'prod' 로(반대로 'dev' 면 배포 사이트에서도 개발 DB)
+  // 규칙은 두 프로젝트에 똑같이 게시한다. 바꿀 때는 여기 한 곳만
+  var FIREBASE_PROD = {
+    apiKey: 'AIzaSyDX5BIFO5ViBSMkSKaHNJVHDHZdrzWRRRg',
+    authDomain: 'joyfield-41b5a.firebaseapp.com',
+    projectId: 'joyfield-41b5a',
+    storageBucket: 'joyfield-41b5a.firebasestorage.app',
+    messagingSenderId: '433473215665',
+    appId: '1:433473215665:web:af7584b216d602902c9690',
+  };
+  var FIREBASE_DEV = {
+    apiKey: 'AIzaSyDCn1yMgLde3dwNDJ9_SO3NXEYY57E9JUo',
+    authDomain: 'joyfield-dev.firebaseapp.com',
+    projectId: 'joyfield-dev',
+    storageBucket: 'joyfield-dev.firebasestorage.app',
+    messagingSenderId: '689947095413',
+    appId: '1:689947095413:web:085d86651f60a1cd56e33c',
+  };
+  function isLocalHost(host) {
+    host = String(host || '').toLowerCase().replace(/^\[|\]$/g, '');
+    if (host === 'localhost' || host.endsWith('.localhost') || host.endsWith('.local') || host === '::1') return true;
+    const m = host.match(/^(\d+)\.(\d+)\.\d+\.\d+$/);
+    if (!m) return false;
+    const a = +m[1];
+    const b = +m[2];
+    return a === 127 || a === 10 || (a === 192 && b === 168) || (a === 172 && b >= 16 && b <= 31);
+  }
+  // 개발 DB 를 쓸 주소: 내 PC·사설 주소 + 개발 사이트
+  function isDevHost(host) {
+    host = String(host || '').toLowerCase();
+    if (isLocalHost(host)) return true;
+    if (host === 'dev.pocketgamelab.com') return true;
+    // <프로젝트>.pages.dev 는 운영(main) 배포와 같고, 그 앞에 하나 더 붙은 주소(dev.·미리보기 해시)는 개발 배포다
+    return host.endsWith('.pages.dev') && host.split('.').length >= 4;
+  }
+  function firebaseEnv() {
+    const forced = read('joyfield.db');
+    if (forced === 'dev' || forced === 'prod') return forced;
+    const host = typeof location !== 'undefined' ? location.hostname : '';
+    return isDevHost(host) ? 'dev' : 'prod';
+  }
+  var FIREBASE_ENV = firebaseEnv();
+  var FIREBASE = FIREBASE_ENV === 'dev' ? FIREBASE_DEV : FIREBASE_PROD;
+
   global.Joyfield = {
     KEYS: KEYS,
     COPYRIGHT: COPYRIGHT,
+    FIREBASE: FIREBASE,
+    FIREBASE_ENV: FIREBASE_ENV,
+    isLocalHost: isLocalHost,
+    isDevHost: isDevHost,
     isPreview: isPreview,
     devMode: devMode,
     releaseView: releaseView,

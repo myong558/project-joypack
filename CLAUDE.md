@@ -44,9 +44,9 @@
 - 버전은 손으로 고치지 않고 **`pnpm bump <게임 id | hub> <patch | minor>`** 로 올린다(파일의 지금 값 + 1 이라 여러 세션이 번갈아 고쳐도 번호가 꼬이지 않음). 고치기 전에 `git pull`.
 - 게임·허브를 고치면 버전을 올린다: 게임은 `games/<id>/package.json`, 허브는 루트 `package.json` (기능 추가 minor, 수정 patch). 게임은 미리보기 동안 0.x.x, **정식 공개하면 1.0.0**(`pnpm release` 가 올림).
 - 답변 끝에 **확인 버전**(바뀐 대상 → 새 버전, 확인 위치: 게임 설정 창 맨 아래 / 조이필드 설정 창 맨 아래)을 적는다.
-- 확인: `pnpm test`, `pnpm build`, `pnpm preview`(http://localhost:4170/project-joyfield/)로 실제 화면.
+- 확인: `pnpm test`, `pnpm build`, `pnpm preview`(http://localhost:4170/joyfield/)로 실제 화면. 배포는 `main` → 운영 `pocketgamelab.com/joyfield/`, `dev` → 개발 `dev.pocketgamelab.com/joyfield/`(README 8장).
 - 화면 배치(CSS 배치·글자 크기·화면 맞춤 코드)를 바꿨으면 `pnpm check:screens <hub | 게임 id> quick`(대표 4크기, 약 2분)으로 점검한다. 15크기 전체(`all`)는 새 게임 첫 배치와 정식 공개 직전에만 돌린다. 점검은 백그라운드로 돌리고 기다리는 동안 다른 일을 한다. 언제 어디까지 돌릴지는 기준서 7.1 "언제 돌리나"를 따르고, 묻지 않고 진행한다. 색·문구·규칙만 바꿨으면 돌리지 않는다.
-- Firestore 규칙(`firestore.rules`)을 바꾸면 콘솔 게시는 사람이 해야 하므로 답변에 알린다.
+- Firestore 규칙(`firestore.rules`)을 바꾸면 콘솔 게시는 사람이 해야 하므로 답변에 알린다. **운영(`joyfield-41b5a`)·개발(`joyfield-dev`) 두 프로젝트 모두** 게시해야 한다(README 4.4). 로컬(`pnpm dev`·`preview`)과 개발 사이트(`dev.pocketgamelab.com`)의 랭킹은 개발 DB 에 쌓인다.
 
 ## 게임이 늘면 먼저 다시 추천할 것 (2026-10-22 미룸)
 
@@ -57,14 +57,15 @@
 - **15개쯤부터 · 설정 "게임 데이터"를 새 창으로:** 지금은 설정 안 접힘 구역(펼치면 게임 전부, 허브 v1.34.2)이다. 길어지면 설정에 "게임 데이터 ›" 한 줄만 두고 누르면 게임 데이터 전용 창(팝업)이 열리게 바꾼다(필요하면 "오프라인 저장 모두 비우기"도). 설정 안에 안쪽 스크롤을 두는 방식은 이중 스크롤이라 쓰지 않는다(2026-10-25 사용자 결정).
 - 맨 위로 가기 떠 있는 버튼은 권하지 않는다(위 메뉴가 이미 고정이고, 오른쪽 카드의 플레이 버튼을 가림). 필요하면 "조이필드 제목 누르면 맨 위로" 같은 숨은 방식으로 한다.
 
-## 스튜디오 도메인 다음 일정 (2026-11-04, 다른 PC에서 이어 감)
+## 스튜디오 도메인·주소 이전 다음 일정 (2026-11-04)
 
-게임 스튜디오 이름을 **Pocket Game Lab** 으로 정하고 `pocketgamelab.com`·`.kr`·`.co.kr` 을 아이티이지에서 사기로 했다(WHOIS·KIPRIS 확인 끝). 사용자가 구매 뒤 다른 PC에서 이어 가겠다고 했으므로, **이 일이 끝나기 전에는 세션 첫 답변에서 먼저 아래 다음 일정을 알린다.** 자세한 내용은 메모리 `studio-domain-pocketgamelab`.
+게임 스튜디오 **Pocket Game Lab**, 도메인 `pocketgamelab.com`·`.kr`·`.co.kr`(아이티이지, 만기 2027-11-04, **자동 연장 없음**). **이 일이 끝나기 전에는 세션 첫 답변에서 먼저 남은 일정을 알린다.** 자세한 내용은 메모리 `studio-domain-pocketgamelab`.
 
-0. **이름 바뀐 것 반영 먼저:** 그 PC의 폴더 이름이나 `git remote -v` 가 아직 옛 이름(`project-joypack`)이면, 도메인 일보다 먼저 아래 "저장소 이름 바꾸기 후속"(`pnpm setup:rename`)을 알리고 진행한다. 끝나고 새 세션에서 1번부터 잇는다.
-1. 구매 확인(세 주소, 등록인 본인 이름, 자동 연장).
-2. Cloudflare(무료)에 세 주소 추가 → 아이티이지에서 네임서버 변경 → `.kr`·`.co.kr` 을 `https://pocketgamelab.com` 으로 301 연결.
-3. 조이필드 주소 이전 계획(지금 GitHub Pages `/project-joyfield/`): 새 경로 구조, 호스팅, Vite base, PWA 범위·서비스 워커, Firebase 허용 도메인, 공유 링크, 옛 주소 안내를 먼저 계획해 사용자와 정한 뒤 진행. 홈 화면 설치 앱은 새 주소에서 다시 설치.
+- 끝난 것(2026-11-04): 구매, Cloudflare 에 세 주소(네임서버 변경), `.kr`·`.co.kr` → `https://pocketgamelab.com` 301(Redirect Rules, http·https·www 확인), 개발 DB `joyfield-dev`, 주소 이전 결정(`pocketgamelab.com/joyfield/`, Cloudflare Pages, 개발 사이트 `dev.pocketgamelab.com`, 옛 주소는 안내만)과 코드(README 8장).
+1. **사람:** Cloudflare Pages 프로젝트 `pocketgamelab`(직접 업로드) 만들기 → API 토큰(Pages 편집) → GitHub 저장소 비밀값 `CLOUDFLARE_API_TOKEN`·`CLOUDFLARE_ACCOUNT_ID` → 사용자 도메인 `pocketgamelab.com`(운영)·`dev.pocketgamelab.com`(`dev` 브랜치) 연결 → Google Cloud API 키 웹사이트 제한 확인.
+2. 커밋·푸시로 `main` 배포 + `dev` 브랜치 만들어 배포 → 두 주소에서 허브·게임·랭킹(운영/개발 DB)·설치 앱 확인.
+3. 확인 뒤 GitHub Actions 에서 `Old address notice`(moved.yml) 한 번 실행 → 옛 주소가 새 주소로 넘어가는지 확인.
+4. 아이티이지 도메인 잠금 3개, 연장·달력 알림(만기 2027-11-04). 나중에 최상위 `/` 에 스튜디오 소개·개인정보처리방침.
 
 끝나면 이 절을 지우고 메모리를 고친다.
 

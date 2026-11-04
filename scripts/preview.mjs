@@ -1,12 +1,12 @@
-// dist/ 를 실제 배포와 같은 하위 경로(/project-joyfield/)로 띄운다. 서비스 워커는 localhost 에서 동작한다.
-// 먼저 pnpm build. 사용: pnpm preview  →  http://localhost:4170/project-joyfield/
+// dist/ 를 실제 배포와 같은 하위 경로(/joyfield/, 운영은 https://pocketgamelab.com/joyfield/)로 띄운다. 서비스 워커는 localhost 에서 동작한다.
+// 먼저 pnpm build. 사용: pnpm preview  →  http://localhost:4170/joyfield/
 import { createReadStream, existsSync, statSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { extname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const DIST = fileURLToPath(new URL('../dist/', import.meta.url));
-const BASE = '/project-joyfield/';
+const BASE = '/joyfield/';
 const PORT = Number(process.env.PORT) || 4170;
 const TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -35,7 +35,7 @@ createServer((req, res) => {
   let file = normalize(join(DIST, url.slice(BASE.length)));
   if (!file.startsWith(normalize(DIST))) return res.writeHead(403).end();
   if (existsSync(file) && statSync(file).isDirectory()) {
-    // GitHub Pages 처럼 폴더 주소는 끝에 / 를 붙여 넘긴다
+    // Cloudflare Pages 처럼 폴더 주소는 끝에 / 를 붙여 넘긴다
     if (!url.endsWith('/')) return res.writeHead(301, { Location: url + '/' }).end();
     file = join(file, 'index.html');
   }

@@ -1,6 +1,7 @@
+import '@joyfield/shared';
 /**
  * 전체 랭킹 화면용 읽기 전용 순위 조회(Firestore REST, SDK 없이 fetch).
- * 게임들과 같은 Firebase 프로젝트(joyfield-41b5a)를 읽기만 한다. 등록은 각 게임이 한다.
+ * 게임들과 같은 Firebase 프로젝트(운영 joyfield-41b5a · 내 PC 에서는 개발 joyfield-dev)를 읽기만 한다. 등록은 각 게임이 한다.
  *
  * 서버 부담을 줄이려고
  * - 랭킹 창을 열 때, 보고 있는 순위표만 읽는다(허브를 여는 것만으로는 읽지 않음)
@@ -8,10 +9,8 @@
  * - 불러온 순위는 기기에 남겨 두고 5분 안에 다시 열면 서버를 부르지 않는다
  * - 오프라인이거나 실패하면 마지막으로 불러온 순위를 보여 준다
  */
-const FIREBASE = {
-  apiKey: 'AIzaSyDX5BIFO5ViBSMkSKaHNJVHDHZdrzWRRRg',
-  projectId: 'joyfield-41b5a',
-};
+// 개발(내 PC)·운영(배포 사이트) DB 는 공통 모듈이 주소를 보고 고른다(packages/shared/joyfield.js 의 FIREBASE)
+const FIREBASE = Joyfield.FIREBASE;
 const API = `https://firestore.googleapis.com/v1/projects/${FIREBASE.projectId}/databases/(default)/documents`;
 /** 랭킹 창에서 게임마다 처음 보이는 줄 수. 게임이 늘어도 창이 길어지지 않게 1위만 */
 export const TOP = 1;

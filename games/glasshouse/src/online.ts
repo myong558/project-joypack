@@ -1,3 +1,4 @@
+import '@joyfield/shared';
 import { BOARD, dailyBoard, insertDaily, insertEntry, sanitizeDaily, sanitizeEntries, type DailyEntry, type RankEntry } from './ranking';
 
 /**
@@ -7,14 +8,8 @@ import { BOARD, dailyBoard, insertDaily, insertEntry, sanitizeDaily, sanitizeEnt
  *   오늘의 정원:  daily-YYYY-MM-DD     { entries: [{ name, moves, time, date }, ...] } (날짜마다 새 문서라 매일 새로 시작한다)
  * 웹 설정값은 공개되는 값이며, 쓰기 제한은 Firestore 규칙이 맡는다
  */
-const firebaseConfig = {
-  apiKey: 'AIzaSyDX5BIFO5ViBSMkSKaHNJVHDHZdrzWRRRg',
-  authDomain: 'joyfield-41b5a.firebaseapp.com',
-  projectId: 'joyfield-41b5a',
-  storageBucket: 'joyfield-41b5a.firebasestorage.app',
-  messagingSenderId: '433473215665',
-  appId: '1:433473215665:web:af7584b216d602902c9690',
-};
+// 개발(내 PC)·운영(배포 사이트) DB 는 공통 모듈이 주소를 보고 고른다(packages/shared/joyfield.js 의 FIREBASE)
+const firebaseConfig = Joyfield.FIREBASE;
 
 /** 응답이 이보다 늦으면 오프라인으로 보고 기기에 남은 순위를 보여 준다 */
 const TIMEOUT_MS = 8000;

@@ -93,7 +93,7 @@ await new Promise((r) => setTimeout(r, 800));
 const page = await launch();
 // 모든 앱은 동작 줄이기면 첫 진입 연출을 건너뛴다(기준서 1.3). 그래서 화면마다 연출이 끝나기를 기다리지 않아도 된다
 if (!motion) await page.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
-const url = `http://localhost:${PORT}/project-joyfield/${base}`;
+const url = `http://localhost:${PORT}/joyfield/${base}`;
 let problems = 0;
 
 // 새로 연 페이지: 설치 안내는 닫고 한국어로(설정은 화면 정의의 setup 으로 더 넣는다)

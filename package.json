@@ -1,7 +1,7 @@
 {
   "name": "joyfield",
   "private": true,
-  "version": "1.38.1",
+  "version": "1.39.0",
   "author": "Myong Bum Soo",
   "license": "UNLICENSED",
   "description": "조이필드: 미니 게임 모음 웹앱",
@@ -16,6 +16,8 @@
     "test": "pnpm -r --if-present test",
     "build": "node scripts/build.mjs",
     "preview": "node scripts/preview.mjs",
+    "site": "node scripts/site.mjs",
+    "moved": "node scripts/moved-site.mjs",
     "check:screens": "node scripts/screen-check/run.mjs",
     "release": "node scripts/release.mjs",
     "setup:claude": "node scripts/setup-claude.mjs",

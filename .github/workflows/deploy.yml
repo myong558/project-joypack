@@ -1,21 +1,24 @@
-name: Deploy to GitHub Pages
+name: Deploy to Cloudflare Pages
 
+# main → 운영 https://pocketgamelab.com/joyfield/  (개발 DB 아님, 운영 DB joyfield-41b5a)
+# dev  → 개발 https://dev.pocketgamelab.com/joyfield/ (개발 DB joyfield-dev, 검색 차단)
+# DB 는 빌드가 아니라 주소를 보고 공통 모듈이 고른다(Joyfield.FIREBASE, README 4.4·4.5)
+# 필요한 저장소 비밀값: CLOUDFLARE_API_TOKEN(Pages 편집 권한), CLOUDFLARE_ACCOUNT_ID
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
+  deployments: write
 
 concurrency:
-  group: pages
+  group: pages-${{ github.ref_name }}
   cancel-in-progress: true
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,17 +30,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
       - run: pnpm build
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - run: pnpm site
+      - uses: cloudflare/wrangler-action@v3
         with:
-          path: dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=pocketgamelab --branch=${{ github.ref_name }} --commit-dirty=true

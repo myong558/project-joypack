@@ -6,13 +6,14 @@
 
 > **진행 상황 (2026-10-21)**: 0~3단계 구현 완료(6장). 업다운·두더지잡기가 `games/` 아래로 옮겨졌고, 허브·공통 설정·전체 랭킹·사이트 서비스 워커가 동작합니다. 남은 일은 GitHub Pages 설정·첫 배포, Firestore 규칙 대조, 4단계(기존 사이트 이사 마무리)입니다.
 >
-> | 주소 | |
+> | 주소 (2026-11 `github.io` → `pocketgamelab.com` 이전, 8장) | |
 > | --- | --- |
-> | 조이필드 | `https://myong558.github.io/project-joyfield/` |
-> | 업다운 | `https://myong558.github.io/project-joyfield/games/updown/` |
-> | 두더지잡기 | `https://myong558.github.io/project-joyfield/games/hammer/` |
-> | 타임 투 플립 | `https://myong558.github.io/project-joyfield/games/timetoflip/` (2026-10-26 12:00 정식 공개 예약) |
-> | 온실정원 | `https://myong558.github.io/project-joyfield/games/glasshouse/` (미리보기: 개발자 모드에서만) |
+> | 조이필드 | `https://pocketgamelab.com/joyfield/` (개발 사이트 `https://dev.pocketgamelab.com/joyfield/`) |
+> | 업다운 | `https://pocketgamelab.com/joyfield/games/updown/` |
+> | 두더지잡기 | `https://pocketgamelab.com/joyfield/games/hammer/` |
+> | 타임 투 플립 | `https://pocketgamelab.com/joyfield/games/timetoflip/` |
+> | 온실정원 | `https://pocketgamelab.com/joyfield/games/glasshouse/` (미리보기: 개발자 모드에서만) |
+> | 옛 주소 | `https://myong558.github.io/project-joyfield/` → 같은 경로의 새 주소로 넘김 |
 
 ---
 
@@ -98,7 +99,7 @@ project-joyfield/
 배포 결과(`dist/`)와 주소:
 
 ```
-dist/                       → https://myong558.github.io/project-joyfield/
+dist/                       → https://pocketgamelab.com/joyfield/ (배포 묶음 site/joyfield/, 8장)
 ├── index.html              조이필드 허브
 ├── sw.js                   서비스 워커 (사이트 전체에 하나)
 ├── manifest.webmanifest    조이필드 앱 하나
@@ -172,7 +173,9 @@ dist/                       → https://myong558.github.io/project-joyfield/
 
 ### 4.4 랭킹 (Firebase)
 
-- Firebase 프로젝트 `joyfield-41b5a` 하나를 모든 게임이 같이 쓰고, 게임 ID 는 **그대로**입니다.
+- Firebase 프로젝트 `joyfield-41b5a`(운영) 하나를 모든 게임이 같이 쓰고, 게임 ID 는 **그대로**입니다.
+- **개발용 DB `joyfield-dev`**(2026-11-04, 무료 Spark): 내 PC·같은 와이파이 주소(`localhost`, `127.0.0.1`, `192.168.x` 등 사설 주소 — `pnpm dev`·`pnpm preview`)와 개발 사이트(`dev.pocketgamelab.com`, Pages 브랜치·미리보기 주소)에서 열면 개발 DB, 운영 사이트(`pocketgamelab.com`)에서 열면 운영 DB 에 씁니다. 개발 중 테스트 점수가 실제 랭킹에 섞이지 않습니다. 설정은 `packages/shared/joyfield.js` 의 `FIREBASE` 한 곳(허브·모든 게임이 `Joyfield.FIREBASE` 를 씀). 로컬에서 운영 DB 를 봐야 하면 개발자 도구에서 `localStorage.setItem('joyfield.db', 'prod')`(되돌리기 `removeItem`).
+- **규칙은 두 프로젝트에 똑같이 게시**합니다(`firestore.rules` 를 운영·개발 콘솔 각각에 붙여 넣기). 한쪽만 게시하면 그쪽만 새 규칙으로 동작합니다.
 - 각 게임의 랭킹 코드는 처음에는 손대지 않습니다(업다운 REST, 두더지잡기 SDK). 두 방식 모두 잘 돌고 있고, 억지로 합치면 위험만 커집니다.
 - 보안 규칙은 지금 콘솔에만 있으므로 **`firestore.rules` 파일 하나로 모아 저장소에서 관리**합니다. 게임을 추가할 때 이 파일에 블록을 더하고 콘솔에 붙여 넣습니다(Firebase CLI `firebase deploy --only firestore:rules` 로 바꿀 수도 있음).
 - 허브에 **전체 랭킹** 화면: 게임별 1위를 한 화면에 보여 주고 "TOP 10 보기"로 그 자리에서 10위까지 펼칩니다(허브 v1.17.1부터, 이전엔 TOP 3)(순위표는 칩으로 고름: 업다운 범위 1~50·1~100·1~200, 두더지잡기 클래식·오늘의 챌린지).
@@ -180,7 +183,7 @@ dist/                       → https://myong558.github.io/project-joyfield/
   - 불러온 순위는 기기(`joyfield.rankingCache`)에 남겨 두고 5분 안에 다시 열면 서버를 부르지 않습니다. 오프라인·실패 때는 마지막 순위를 보여 줍니다.
   - 허브는 SDK 없이 REST 로 읽기만 합니다(등록은 각 게임). 업다운 조회는 게임과 같은 정렬(범위별 컬렉션의 점수 내림차순)이라 복합 색인이 필요 없습니다.
 - 무료 한도(하루 읽기 5만·쓰기 2만)는 모든 게임이 나눠 씁니다. 게임이 늘면 한도 사용량을 콘솔에서 주기적으로 확인합니다.
-- API 키에 HTTP 리퍼러 제한을 걸어 두었다면 `myong558.github.io/project-joyfield/*` 를 추가합니다(같은 도메인이라 `myong558.github.io/*` 로 걸려 있다면 그대로 됨).
+- API 키에 HTTP 리퍼러 제한을 걸어 두었다면 `pocketgamelab.com/*`·`dev.pocketgamelab.com/*` 를 추가합니다(Google Cloud 콘솔 → API 및 서비스 → 사용자 인증 정보). 로그인(Firebase Auth)을 쓰지 않아 Firebase 의 허용 도메인 설정은 필요 없습니다.
 
 ### 4.5 게임 목록 메타 (`games.json`)
 
@@ -408,7 +411,7 @@ pnpm dev                 # 허브 개발 서버 http://localhost:5170/ (업다�
 pnpm --filter hammer dev # 두더지잡기만 개발 http://localhost:5173/
 pnpm test                # 모든 게임 테스트
 pnpm build               # 허브 + 모든 게임 → dist/ (pnpm build hammer: 허브와 그 게임만 다시 빌드)
-pnpm preview             # dist/ 를 http://localhost:4170/project-joyfield/ 로 띄워 확인(서비스 워커 포함)
+pnpm preview             # dist/ 를 http://localhost:4170/joyfield/ 로 띄워 확인(서비스 워커 포함, 개발 DB)
 pnpm check:screens hammer quick # 대표 4크기로 모든 화면을 찍어 잘림 점검(빠름). 14크기 전체는 quick 대신 all(기준서 7.1, 먼저 build)
 pnpm font                # 허브·업다운 웹폰트 서브셋 다시 만들기(화면 문구를 바꾼 뒤)
 pnpm release hammer      # 개발자 모드 게임 정식 공개. --at "2026-11-01 10:00" 공개 예약, --cancel 예약 취소(기준서 7.4)
@@ -423,7 +426,15 @@ pnpm --filter hub icons  # 로고(apps/hub/public/logo.svg)를 바꾼 뒤 앱 �
 
 ## 8. 배포
 
-- `main` 에 푸시하면 GitHub Actions 가 테스트 → 빌드 → Pages 배포를 합니다.
+- **호스팅: Cloudflare Pages**(2026-11 GitHub Pages 에서 옮김, 프로젝트 이름 `pocketgamelab`). GitHub Actions(`.github/workflows/deploy.yml`)가 테스트 → `pnpm build` → `pnpm site` → `wrangler pages deploy` 를 합니다. 저장소 비밀값 `CLOUDFLARE_API_TOKEN`·`CLOUDFLARE_ACCOUNT_ID` 가 필요합니다.
+  | 브랜치 | 주소 | 랭킹 DB |
+  | --- | --- | --- |
+  | `main` | `https://pocketgamelab.com/joyfield/` | 운영 `joyfield-41b5a` |
+  | `dev` | `https://dev.pocketgamelab.com/joyfield/` (검색 차단) | 개발 `joyfield-dev` |
+  | (내 PC) | `pnpm dev`·`pnpm preview` → `http://localhost:4170/joyfield/` | 개발 `joyfield-dev` |
+- 흐름: 내 PC → `dev` 에 올려 개발 사이트에서 확인 → `main` 에 올려 운영(새 게임은 숨김 미리보기로 마지막 확인 → 정식 공개).
+- `pnpm site`(`scripts/site.mjs`)가 `dist/` 를 `site/joyfield/` 로 넣고 `_redirects`(첫 화면 `/` → `/joyfield/` 302, 스튜디오 소개를 만들 때까지)·`_headers`(`sw.js` no-cache, 개발 주소 noindex)·`robots.txt` 를 만듭니다. 도메인 최상위는 스튜디오(Pocket Game Lab) 자리라 나중에 소개·개인정보처리방침·스토어 앱 연결(`/.well-known/assetlinks.json`)을 둡니다.
+- **옛 주소** `https://myong558.github.io/project-joyfield/`: `.github/workflows/moved.yml`(손으로 한 번 실행)이 GitHub Pages 에 `pnpm moved`(`scripts/moved-site.mjs`) 묶음을 올립니다. 어떤 경로든 같은 경로의 새 주소로 넘기고(설치 앱으로 열면 "새 주소에서 다시 설치" 안내), 옛 서비스 워커는 캐시를 비우고 스스로 해제합니다. 주소(출처)가 달라 기기에 저장된 설정·기록은 따라가지 않습니다(2026-11-04 결정: 안내만).
 - 서비스 워커와 게임별 `files.json` 은 빌드할 때마다 새로 만들어지므로 수동으로 캐시 버전을 올릴 필요가 없습니다.
 - 게임별 버전은 각 게임 `package.json` 의 `version` 을 쓰고, 그 게임 설정 화면 맨 아래에 `vX.Y.Z` 로 표시합니다. 조이필드 전체 버전은 루트 `package.json` 이고 조이필드 설정 창 맨 아래와 첫 화면 맨 아래에 보입니다(게임별 버전은 나열하지 않음).
 
@@ -490,7 +501,7 @@ pnpm --filter hub icons  # 로고(apps/hub/public/logo.svg)를 바꾼 뒤 앱 �
 6. `games.json` 에 항목 추가(처음엔 `status: "soon"`, 완성되면 `"live"`). 허브 카드에 최고 기록·전체 랭킹을 보이려면 `apps/hub/src/records.ts`, `rankings.ts` 에 읽는 방법을 추가하고, 게임 이름이 바뀌었으면 `pnpm font`.
 7. 시작 화면 왼쪽 위에 조이필드 게임 목록 버튼(`../../`)을 둡니다.
 8. 한국어·영어 문구, 라이트·다크, 동작 줄이기 설정, 휴대폰 세로·PC 화면 확인.
-9. 링크 미리보기 이미지(1200×630) 준비. 게임 `index.html` 의 og:url·og:image 는 `https://myong558.github.io/project-joyfield/games/<id>/` 기준.
+9. 링크 미리보기 이미지(1200×630) 준비. 게임 `index.html` 의 og:url·og:image 는 `https://pocketgamelab.com/joyfield/games/<id>/` 기준.
 
 ---
 

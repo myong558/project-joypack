@@ -6,12 +6,29 @@ export type TopIcon = 'apps' | 'globe' | 'trophy' | 'gear' | 'home';
 /** 랭킹 기록을 남긴 입력: m 모바일(터치·펜), p PC(마우스) */
 export type Device = 'm' | 'p';
 
+export interface FirebaseWebConfig {
+  apiKey: string;
+  authDomain: string;
+  projectId: string;
+  storageBucket: string;
+  messagingSenderId: string;
+  appId: string;
+}
+
 export type ShareOutcome = 'shared' | 'cancelled' | 'saved' | 'copied' | 'failed';
 
 export interface JoyfieldApi {
   KEYS: Record<SharedSetting, string>;
   /** 저작권 표기 한 줄. 설정 맨 아래 버전 밑에 그대로 보인다 */
   COPYRIGHT: string;
+  /** 랭킹 Firebase 웹 설정. 내 PC·사설 주소·개발 사이트(dev.pocketgamelab.com)면 개발 DB(joyfield-dev), 운영 사이트면 운영 DB(joyfield-41b5a). localStorage 'joyfield.db' = 'dev' | 'prod' 로 바꿀 수 있음 */
+  FIREBASE: FirebaseWebConfig;
+  /** 지금 쓰는 랭킹 DB: 'dev' 개발 · 'prod' 운영 */
+  FIREBASE_ENV: 'dev' | 'prod';
+  /** 내 PC·같은 와이파이 주소인지(localhost, 127.x, 10.x, 172.16~31.x, 192.168.x, *.local) */
+  isLocalHost(host: string): boolean;
+  /** 개발 DB 를 쓸 주소인지: 내 PC·사설 주소, dev.pocketgamelab.com, Cloudflare Pages 브랜치·미리보기 주소(<이름>.<프로젝트>.pages.dev) */
+  isDevHost(host: string): boolean;
   /** 숨김 미리보기(games.json status "preview")로 배포된 게임인지. 랭킹은 미리보기 동안에도 등록된다 */
   isPreview(): boolean;
   /** 이 기기에서 조이필드 개발자 모드(숨김 미리보기 보기)를 켰는지. 게임의 출시 전 확인 기능을 이때만 보인다 */

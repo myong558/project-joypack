@@ -8,11 +8,9 @@
 (function (global) {
   'use strict';
 
-  // 웹 앱 공개 설정 값. 원래 웹페이지에 드러나는 값이고, 저장소를 지키는 건 보안 규칙이다.
-  const FIREBASE = {
-    apiKey: 'AIzaSyDX5BIFO5ViBSMkSKaHNJVHDHZdrzWRRRg',
-    projectId: 'joyfield-41b5a',
-  };
+  // 웹 앱 공개 설정 값(원래 웹페이지에 드러나는 값이고, 저장소를 지키는 건 보안 규칙이다).
+  // 개발(내 PC)·운영(배포 사이트) DB 는 공통 모듈이 주소를 보고 고른다(shared/joyfield.js 의 FIREBASE)
+  const FIREBASE = global.Joyfield.FIREBASE;
   const GAME_ID = 'updown';
   const LIMIT = 10;
   const DOCS = 'projects/' + FIREBASE.projectId + '/databases/(default)/documents';
