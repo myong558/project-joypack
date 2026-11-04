@@ -4,3 +4,4 @@
 - [온실 정원 조작 개편](glasshouse-push-controls.md) — 드래그 한 번에 한 칸(밀기 포함), 희미한 화분 UI 폐기, 무르기 금지(v0.13.0)
 - [온실 정원 판 점검](glasshouse-level-review.md) — 사용자가 풀이 보기로 판 확인 후 구조·순서 수정 전달 예정, 판 바꾸면 solutions 다시 생성
 - [마켓 등록 때 랭킹 초기화](ranking-reset-at-store-launch.md) — 플레이 스토어 최초 공개 직전에 모든 랭킹 초기화를 사용자에게 먼저 요청(콘솔에서 지울 목록 정리)
+- [다른 PC 폴더 이름 바꾸기](other-pc-folder-rename.md) — 저장소를 project-joyfield 로 바꿈(2026-11-04), 다른 PC는 폴더·원격 주소·pnpm install·setup:claude 안내 대기
