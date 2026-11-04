@@ -31,8 +31,9 @@ jobs:
       - run: pnpm test
       - run: pnpm build
       - run: pnpm site
-      - uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy site --project-name=pocketgamelab --branch=${{ github.ref_name }} --commit-dirty=true
+      # wrangler-action 은 저장소 루트(pnpm 작업 공간)에 wrangler 를 설치하려다 실패해서 pnpm dlx 로 따로 받아 쓴다
+      - name: Deploy (wrangler pages deploy)
+        run: pnpm dlx wrangler@4 pages deploy site --project-name=pocketgamelab --branch=${{ github.ref_name }} --commit-dirty=true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
