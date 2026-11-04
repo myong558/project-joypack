@@ -910,14 +910,16 @@ h2 .icon-pic {
 }
 .modal h3 {
   margin: 0 0 8px;
-  font-size: 16px;
+  font-size: 17px;
 }
 .modal section + section {
   margin-top: 16px;
 }
+/* 설명 글: 고운돋움은 굵기가 하나뿐이라 가늘어 보여 굵게(브라우저가 두껍게 그림) 키우고, 제목(17px)과 차이는 남긴다 */
 .note {
   margin: 6px 0 0;
-  font-size: 13px;
+  font-size: 14.5px;
+  font-weight: 700;
   color: var(--muted);
   line-height: 1.5;
 }
@@ -992,7 +994,8 @@ h2 .icon-pic {
 }
 .confirm {
   margin-top: 12px;
-  padding: 12px;
+  /* 아래는 버튼 그림자(3px)만큼 더해 눈에 보이는 위·아래 여백을 같게 */
+  padding: 12px 12px 15px;
   border: 2px solid color-mix(in srgb, var(--danger) 45%, transparent);
   border-radius: 14px;
   background: color-mix(in srgb, var(--danger) 9%, var(--panel, #fff));
@@ -1004,8 +1007,11 @@ h2 .icon-pic {
     transform: translateY(-6px);
   }
 }
+/* 상자 안 위·아래 여백을 같게(문단 기본 위 여백 없이 padding 만), 버튼과는 10px */
 .confirm p {
-  font-size: 14px;
+  margin: 0 0 10px;
+  font-size: 14.5px;
+  font-weight: 700;
   line-height: 1.5;
 }
 .app-version,
