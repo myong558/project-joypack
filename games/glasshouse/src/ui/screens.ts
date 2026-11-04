@@ -292,7 +292,7 @@ export function openDex(host: HTMLElement, save: SaveData, start: number | null,
     const apply = () => {
       // 꽃은 바싹 움츠린 봉오리로 펼쳐 놓고, 카드가 다 뒤집힌 뒤 꽃잎이 차례로 벌어지며 핀다(styles.css .dex .fl.closed)
       front.innerHTML = isOpen ? `<div class="plate">${flowerSvg(f.id, false, 'dex')}</div>` : '';
-      if (isOpen) bloomThenFlourish(front.querySelector('.fl'), reducedMotion.matches ? 0 : 480, 2600);
+      if (isOpen) bloomThenFlourish(front.querySelector('.fl'), reducedMotion.matches ? 0 : 480, 2100);
       if (!isOpen) {
         title.textContent = '???';
         by.textContent = t('dex.locked');
@@ -867,7 +867,7 @@ export function resultScreen(opts: {
   el.classList.add('locked');
   setTimeout(() => el.classList.remove('locked'), 600);
   // 결과 카드의 꽃도 한 번 더 천천히 피고 마무리 동작
-  requestAnimationFrame(() => bloomThenFlourish(q('.bloom-card .fl'), 120, 2200));
+  requestAnimationFrame(() => bloomThenFlourish(q('.bloom-card .fl'), 120, 1800));
   countUp(q('.level-score'), r.score);
 
   // 정원 점수가 10위 안에 들면 결과 화면에서 바로 이름을 받는다. 그냥 넘어가도 등록 대기로 남는다
@@ -983,7 +983,7 @@ export function dailyResultScreen(opts: { result: DailyResult; onRetry: () => vo
   const q = (s: string) => el.querySelector<HTMLElement>(s)!;
   el.classList.add('locked');
   setTimeout(() => el.classList.remove('locked'), 600);
-  requestAnimationFrame(() => bloomThenFlourish(q('.bloom-card .fl'), 120, 2200));
+  requestAnimationFrame(() => bloomThenFlourish(q('.bloom-card .fl'), 120, 1800));
 
   let entryForm: HTMLElement | null = null;
   const showEntry = (place: number) => {

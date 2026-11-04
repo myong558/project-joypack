@@ -386,10 +386,10 @@ function play(level: number | 'daily'): void {
       board.bloom();
       later(260, () => board.pots.forEach((p) => fx.petals(p.el, accentOf(f.id))));
     });
-    // 모든 화분 꽃이 함께 다 피면(시작 260 + board.bloom 200 + 판 위 꽃잎이 벌어지는 데 약 1.3초, styles.css .pot .fl) 마무리 동작(0.9초, 톡 튕긴 듯 떨리다 멈춤),
+    // 모든 화분 꽃이 함께 다 피면(시작 260 + board.bloom 200 + 판 위 꽃잎이 거의 다 벌어지는 1초, styles.css .pot .fl: 끝이 느린 곡선이라 남은 움직임은 눈에 안 띔) 마무리 동작(0.7초),
     // 멈춘 뒤 0.5초 더 핀 꽃을 보여 주고 결과 화면
-    later(260 + 200 + 1300, () => board.flourish());
-    later(260 + 200 + 1300 + 900 + 500, () => finish());
+    later(260 + 200 + 1000, () => board.flourish());
+    later(260 + 200 + 1000 + 700 + 500, () => finish());
   };
 
   const finish = () => {
