@@ -172,7 +172,7 @@ importers:
 
   apps/hub:
     dependencies:
-      '@joypack/shared':
+      '@joyfield/shared':
         specifier: workspace:*
         version: link:../../packages/shared
     devDependencies:
@@ -188,7 +188,7 @@ importers:
 
   games/glasshouse:
     dependencies:
-      '@joypack/shared':
+      '@joyfield/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       firebase:
@@ -210,7 +210,7 @@ importers:
 
   games/hammer:
     dependencies:
-      '@joypack/shared':
+      '@joyfield/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       firebase:
@@ -232,7 +232,7 @@ importers:
 
   games/timetoflip:
     dependencies:
-      '@joypack/shared':
+      '@joyfield/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       firebase:

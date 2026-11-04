@@ -7,7 +7,7 @@
 import { getJson } from './get.mjs';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 const dir = process.argv[2];
-const UA = { headers: { 'User-Agent': 'joypack-art-picker/1.0' } };
+const UA = { headers: { 'User-Agent': 'joyfield-art-picker/1.0' } };
 const LD = { headers: { Accept: 'application/ld+json' } };
 
 async function met(id) {
@@ -53,7 +53,7 @@ for (const arg of process.argv.slice(3)) {
   const file = `${dir}/${name}.jpg`;
   if (!existsSync(file)) {
     await new Promise((r) => setTimeout(r, 400));
-    const res = await fetch(info.image, src === 'aic' ? { headers: { 'User-Agent': 'joypack-art-picker/1.0', 'AIC-User-Agent': 'joypack-art-picker' } } : UA);
+    const res = await fetch(info.image, src === 'aic' ? { headers: { 'User-Agent': 'joyfield-art-picker/1.0', 'AIC-User-Agent': 'joyfield-art-picker' } } : UA);
     writeFileSync(file, Buffer.from(await res.arrayBuffer()));
   }
   console.log(arg, 'ok', String(info.title).slice(0, 40));

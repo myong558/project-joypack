@@ -5,7 +5,7 @@ import { solve } from './src/game/solver.ts';
 export const base = 'games/glasshouse/';
 
 // 미리보기 동안은 개발자 모드여야 열리고, 출시 화면 보기로 확인 도구를 숨긴다. 판 기록은 정원 1~6을 깬 상태(도감·정원 고르기에 열린·잠긴 칸이 섞이고, 오늘의 정원이 열림)
-const SAVE = `localStorage.setItem('joypack.preview', 'on'); localStorage.setItem('joypack.releaseView', 'on'); localStorage.setItem('glasshouse:v1', JSON.stringify({ levels: Array.from({ length: 24 }, (_, i) => (i < 6 ? { moves: 20, score: 900, petals: 2 } : null)) }))`;
+const SAVE = `localStorage.setItem('joyfield.preview', 'on'); localStorage.setItem('joyfield.releaseView', 'on'); localStorage.setItem('glasshouse:v1', JSON.stringify({ levels: Array.from({ length: 24 }, (_, i) => (i < 6 ? { moves: 20, score: 900, petals: 2 } : null)) }))`;
 
 // 정원 7(정원 1~6 다음 판, 이어 가꾸기로 열림). src/game/levels.ts 와 같은 판
 const LEVEL = ['########', '#.#.#..#', '#.o@o..#', '>......#', '#...#..#', '#....#.#', '######^#'];

@@ -1,6 +1,6 @@
 /**
  * 전체 랭킹 화면용 읽기 전용 순위 조회(Firestore REST, SDK 없이 fetch).
- * 게임들과 같은 Firebase 프로젝트(joypack-c6bd2)를 읽기만 한다. 등록은 각 게임이 한다.
+ * 게임들과 같은 Firebase 프로젝트(joyfield-41b5a)를 읽기만 한다. 등록은 각 게임이 한다.
  *
  * 서버 부담을 줄이려고
  * - 랭킹 창을 열 때, 보고 있는 순위표만 읽는다(허브를 여는 것만으로는 읽지 않음)
@@ -9,8 +9,8 @@
  * - 오프라인이거나 실패하면 마지막으로 불러온 순위를 보여 준다
  */
 const FIREBASE = {
-  apiKey: 'AIzaSyChpbX7wDj2GQF7O4QqR-5g7QYpCVkx_9s',
-  projectId: 'joypack-c6bd2',
+  apiKey: 'AIzaSyDX5BIFO5ViBSMkSKaHNJVHDHZdrzWRRRg',
+  projectId: 'joyfield-41b5a',
 };
 const API = `https://firestore.googleapis.com/v1/projects/${FIREBASE.projectId}/databases/(default)/documents`;
 /** 랭킹 창에서 게임마다 처음 보이는 줄 수. 게임이 늘어도 창이 길어지지 않게 1위만 */
@@ -19,7 +19,7 @@ export const TOP = 1;
 export const FULL = 10;
 const FRESH_MS = 5 * 60 * 1000;
 const TIMEOUT_MS = 8000;
-const CACHE_KEY = 'joypack.rankingCache';
+const CACHE_KEY = 'joyfield.rankingCache';
 
 /** thermo: 업다운에서 온도계를 쓴 기록(🌡️ 표시, 순위에는 영향 없음). dev: 플레이한 입력 m 모바일·p PC(이름 옆 아이콘, 예전 기록에는 없음) */
 export type Row = ({ name: string; tries: number; time: number } | { name: string; score: number; thermo?: boolean }) & { dev?: string };

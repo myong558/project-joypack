@@ -2,7 +2,7 @@
 export async function getJson(url) {
   for (let i = 0; i < 6; i++) {
     await new Promise((r) => setTimeout(r, 1200 + i * 3000));
-    const res = await fetch(url, { headers: { 'User-Agent': 'joypack-art-picker/1.0', 'AIC-User-Agent': 'joypack-art-picker' } });
+    const res = await fetch(url, { headers: { 'User-Agent': 'joyfield-art-picker/1.0', 'AIC-User-Agent': 'joyfield-art-picker' } });
     const text = await res.text();
     if (text.startsWith('{')) return JSON.parse(text);
   }

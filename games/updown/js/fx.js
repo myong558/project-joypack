@@ -7,16 +7,16 @@
   const VIBRATE_KEY = 'updown.vibrate';
   const canVibrate = typeof navigator.vibrate === 'function';
 
-  // 기본은 둘 다 켬. 저장된 값이 'off' 일 때만 끈다. 조이팩 공통 설정을 먼저 본다.
+  // 기본은 둘 다 켬. 저장된 값이 'off' 일 때만 끈다. 조이필드 공통 설정을 먼저 본다.
   function load(kind, key) {
-    return Joypack.get(kind, key) !== 'off';
+    return Joyfield.get(kind, key) !== 'off';
   }
 
   const enabled = { sound: load('sound', SOUND_KEY), vibrate: canVibrate && load('vibrate', VIBRATE_KEY) };
 
   function set(kind, on) {
     enabled[kind] = on;
-    Joypack.set(kind, on ? 'on' : 'off', kind === 'sound' ? SOUND_KEY : VIBRATE_KEY);
+    Joyfield.set(kind, on ? 'on' : 'off', kind === 'sound' ? SOUND_KEY : VIBRATE_KEY);
   }
 
   // 브라우저는 사용자가 화면을 누른 뒤에만 소리를 낼 수 있게 한다. 첫 누름 때 오디오를 만들고 깨운다.

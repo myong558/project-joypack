@@ -1,5 +1,5 @@
 {
-  "about": "조이팩 글꼴 목록(기준서 1.10). **상업적 사용이 가능한 무료 글꼴만** 넣는다: licenseType 은 허용 목록(지금은 OFL-1.1)만, free·commercial 은 true, rfn(예약 글꼴 이름)은 false 여야 한다. scripts/check-fonts.mjs 가 빌드 때마다 이 목록과 배포본의 모든 글꼴 파일을 검사하고, 어긋나면 빌드가 실패한다. 원본 파일은 저장소에 넣지 않고 서브셋을 만들 때 받아 node_modules/.cache/fonts 에 둔다. 새 게임에 맞는 것이 없으면 억지로 고르지 말고, 상업 무료 글꼴을 추천·검증해 여기에 더한다.",
+  "about": "조이필드 글꼴 목록(기준서 1.10). **상업적 사용이 가능한 무료 글꼴만** 넣는다: licenseType 은 허용 목록(지금은 OFL-1.1)만, free·commercial 은 true, rfn(예약 글꼴 이름)은 false 여야 한다. scripts/check-fonts.mjs 가 빌드 때마다 이 목록과 배포본의 모든 글꼴 파일을 검사하고, 어긋나면 빌드가 실패한다. 원본 파일은 저장소에 넣지 않고 서브셋을 만들 때 받아 node_modules/.cache/fonts 에 둔다. 새 게임에 맞는 것이 없으면 억지로 고르지 말고, 상업 무료 글꼴을 추천·검증해 여기에 더한다.",
   "allowedLicenses": {
     "OFL-1.1": "SIL Open Font License 1.1: 무료, 상업적 사용·웹 임베딩·서브셋(예약 이름이 없을 때) 허용, 글꼴 단독 판매만 금지"
   },

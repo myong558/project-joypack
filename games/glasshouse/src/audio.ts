@@ -1,7 +1,7 @@
-import { playRecipe, type RecipeNote } from '@joypack/shared/sfx.js';
+import { playRecipe, type RecipeNote } from '@joyfield/shared/sfx.js';
 
 /**
- * 효과음(파일 없이 Web Audio 합성). 소리는 조이팩 효과음 목록(sounds/catalog.json)에서 골라 온실 결에 맞게 낮췄다:
+ * 효과음(파일 없이 Web Audio 합성). 소리는 조이필드 효과음 목록(sounds/catalog.json)에서 골라 온실 결에 맞게 낮췄다:
  * 테라코타 화분이 돌바닥을 긁는 낮은 스르륵, 햇살 자리에 놓으면 맑은 종소리, 꽃이 피면 높은 마림바가 흩어짐
  */
 type Note = RecipeNote;

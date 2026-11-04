@@ -1,6 +1,6 @@
 ---
 name: two-pc-setup
-description: 사용자는 조이팩을 두 PC에서 번갈아 작업함 — 새 PC에서 막혔던 준비 항목과 메모리가 PC마다 따로라는 점
+description: 사용자는 조이필드를 두 PC에서 번갈아 작업함 — 새 PC에서 막혔던 준비 항목과 메모리가 PC마다 따로라는 점
 metadata:
   node_type: memory
   type: project
@@ -8,7 +8,7 @@ metadata:
   modified: 2026-10-23T15:11:04.042Z
 ---
 
-사용자는 조이팩을 두 PC에서 번갈아 작업한다(2026-10-23 다른 PC → 이 PC로 이어받음). Claude 메모리(`~/.claude/projects/.../memory`)는 PC마다 따로라, 2026-10-25부터 저장소 `setup/claude/memory` 에 원본을 두고 `pnpm setup:claude` 로 깐다. 메모리를 쓰거나 고친 작업은 커밋 전에 `pnpm setup:claude --save` 로 원본에 반영한다.
+사용자는 조이필드를 두 PC에서 번갈아 작업한다(2026-10-23 다른 PC → 이 PC로 이어받음). Claude 메모리(`~/.claude/projects/.../memory`)는 PC마다 따로라, 2026-10-25부터 저장소 `setup/claude/memory` 에 원본을 두고 `pnpm setup:claude` 로 깐다. 메모리를 쓰거나 고친 작업은 커밋 전에 `pnpm setup:claude --save` 로 원본에 반영한다.
 
 이 PC(D:\workspace)에서 처음 막힌 것:
 - Node 20.11 → test·build 실패, 설치 때 rolldown 바이너리가 빠짐. winget `OpenJS.NodeJS.LTS`(24)로 올리고 `pnpm install --force`.

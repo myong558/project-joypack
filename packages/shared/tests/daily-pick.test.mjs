@@ -1,14 +1,14 @@
-// 자동 스킨 공통 규칙 Joypack.dailyPick(기준서 1.4) 검사: node --test
+// 자동 스킨 공통 규칙 Joyfield.dailyPick(기준서 1.4) 검사: node --test
 //   1. 같은 날은 같은 값, 이틀 연속 같은 값 없음, 묶음마다 고르게
-//   2. 허브·업다운 index.html 첫 화면 스크립트의 복사본이 joypack.js 와 글자 그대로 같음(공백만 무시)
+//   2. 허브·업다운 index.html 첫 화면 스크립트의 복사본이 joyfield.js 와 글자 그대로 같음(공백만 무시)
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = fileURLToPath(new URL('../../../', import.meta.url));
-await import('../joypack.js');
-const { dailyPick } = globalThis.Joypack;
+await import('../joyfield.js');
+const { dailyPick } = globalThis.Joyfield;
 
 const day = (n) => new Date(2026, 0, 1 + n);
 
@@ -39,7 +39,7 @@ test('허브·업다운 첫 화면 스크립트의 복사본이 공통 모듈과
     assert.ok(m, `${file} 에 dailyPick 복사본이 없음`);
     return m[0].replace(/\s+/g, ' ');
   };
-  const source = block('packages/shared/joypack.js');
-  assert.equal(block('apps/hub/index.html'), source, '허브 index.html 을 joypack.js 의 dailyPick 과 같게 고치세요');
-  assert.equal(block('games/updown/index.html'), source, '업다운 index.html 을 joypack.js 의 dailyPick 과 같게 고치세요');
+  const source = block('packages/shared/joyfield.js');
+  assert.equal(block('apps/hub/index.html'), source, '허브 index.html 을 joyfield.js 의 dailyPick 과 같게 고치세요');
+  assert.equal(block('games/updown/index.html'), source, '업다운 index.html 을 joyfield.js 의 dailyPick 과 같게 고치세요');
 });

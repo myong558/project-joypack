@@ -1,20 +1,36 @@
-// 조이팩 공통 모듈. 허브와 모든 게임이 같은 파일을 쓴다.
-// - 빌드 없는 게임(업다운)은 <script src="../../shared/joypack.js"> 로, 빌드하는 게임·허브는 import '@joypack/shared' 로 불러온다.
-// - 어느 쪽이든 window.Joypack 하나를 만든다(두 번 불러와도 처음 것을 쓴다).
+// 조이필드 공통 모듈. 허브와 모든 게임이 같은 파일을 쓴다.
+// - 빌드 없는 게임(업다운)은 <script src="../../shared/joyfield.js"> 로, 빌드하는 게임·허브는 import '@joyfield/shared' 로 불러온다.
+// - 어느 쪽이든 window.Joyfield 하나를 만든다(두 번 불러와도 처음 것을 쓴다).
 (function (global) {
   'use strict';
-  if (global.Joypack) return;
+  if (global.Joyfield) return;
 
   // 허브 설정에서 고르면 모든 게임이 따르는 공통 설정. 값 형식은 README 4.2
   const KEYS = {
-    theme: 'joypack.theme', // system | light | dark
-    lang: 'joypack.lang', // ko | en
-    sound: 'joypack.sound', // on | off
-    vibrate: 'joypack.vibrate', // on | off
-    initials: 'joypack.initials', // A–Z 1~5자
+    theme: 'joyfield.theme', // system | light | dark
+    lang: 'joyfield.lang', // ko | en
+    sound: 'joyfield.sound', // on | off
+    vibrate: 'joyfield.vibrate', // on | off
+    initials: 'joyfield.initials', // A–Z 1~5자
   };
 
-  const GAME_CACHE_PREFIX = 'joypack-game-';
+  const GAME_CACHE_PREFIX = 'joyfield-game-';
+
+  // 이름을 바꾸기 전(2026-11-04)에 쓰던 저장 키 접두어. 기기에 남은 설정·기록을 새 키(joyfield.)로 한 번 옮기고 지운다.
+  // 새 키가 이미 있으면 새 값을 둔다. 옛 키가 남은 기기가 없어질 때쯤(2027년 이후) 이 묶음을 지운다.
+  const OLD_KEY_PREFIX = 'joypack.';
+  try {
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (!key || !key.startsWith(OLD_KEY_PREFIX)) continue;
+      const next = 'joyfield.' + key.slice(OLD_KEY_PREFIX.length);
+      if (localStorage.getItem(next) === null) localStorage.setItem(next, localStorage.getItem(key));
+      localStorage.removeItem(key);
+    }
+  } catch (e) {
+    // 저장소를 못 쓰면 옮기지 않는다(시크릿 창 등)
+  }
+
 
   function read(key) {
     try {
@@ -108,7 +124,7 @@
   }
 
   /**
-   * 조이팩 서비스 워커를 등록한다. 서비스 워커는 사이트에 하나(root/sw.js)이고, 게임 페이지에서 등록해도 같은 것을 쓴다.
+   * 조이필드 서비스 워커를 등록한다. 서비스 워커는 사이트에 하나(root/sw.js)이고, 게임 페이지에서 등록해도 같은 것을 쓴다.
    * game 을 주면 그 게임 파일 전체를 캐시하라고(이미 있으면 바뀐 파일만 다시 받으라고) 서비스 워커에 알린다.
    * root: 이 페이지에서 사이트 루트까지의 상대 경로(허브 './', 게임 '../../')
    */
@@ -138,8 +154,8 @@
   // ── 공유 ──
   // 공유 링크에는 ?from=share 를 붙인다. 받은 사람이 열면 설치 안내(게임: 아래 띠, 허브: 첫 화면 카드)를 보여 준다.
   // 개발 서버에서 공유해도 친구가 열 수 있도록 배포 주소로 고정한다.
-  const SITE = 'https://myong558.github.io/project-joypack/';
-  const INVITE_KEY = 'joypack.invite';
+  const SITE = 'https://myong558.github.io/project-joyfield/';
+  const INVITE_KEY = 'joyfield.invite';
 
   function shareUrl(gameId) {
     return SITE + (gameId ? 'games/' + gameId + '/' : '') + '?from=share';
@@ -188,14 +204,14 @@
   }
 
   // 결과 화면의 "기록 공유하기"(모든 게임 같은 방식).
-  // 결과 캡처 이미지 한 장 + 조이팩 설치 주소 한 줄을 기기 공유 창으로 한 번에 보낸다. 결과 글은 이미지에 다 있으므로 따로 보내지 않는다.
+  // 결과 캡처 이미지 한 장 + 조이필드 설치 주소 한 줄을 기기 공유 창으로 한 번에 보낸다. 결과 글은 이미지에 다 있으므로 따로 보내지 않는다.
   // 받는 앱이 이미지와 같이 온 글을 버려도(카카오톡 등) 붙여 넣을 수 있게, 공유 창을 열기 전에 주소 줄을 클립보드에도 넣어 둔다.
   // 공유 창이 없으면(주로 PC) 이미지를 내려받고 주소 줄을 복사한다.
   // 결과: 'shared' | 'cancelled' | 'saved'(이미지 저장 + 주소 복사) | 'copied'(주소만 복사) | 'failed'
   function shareResult(options) {
     const text = options.installText + ' ' + shareUrl();
     const image = options.image;
-    const name = 'joypack-' + options.gameId + '-result.png';
+    const name = 'joyfield-' + options.gameId + '-result.png';
     const file = image && typeof File !== 'undefined' ? new File([image], name, { type: 'image/png' }) : null;
     const nav = global.navigator;
     return copyText(text).then((copied) => {
@@ -216,7 +232,7 @@
     });
   }
 
-  // 게임 화면 아래 "조이팩 앱으로 설치하기" 띠. 공유 링크로 게임에 바로 들어온 사람에게만, 앱으로 실행 중이 아닐 때만 보인다.
+  // 게임 화면 아래 "조이필드 앱으로 설치하기" 띠. 공유 링크로 게임에 바로 들어온 사람에게만, 앱으로 실행 중이 아닐 때만 보인다.
   // 누르면 허브로 가서 설치 안내 카드를 본다. 게임을 시작하려고 화면 다른 곳을 누르면 판을 가리지 않게 사라진다.
   function inviteBar(options) {
     const root = (options && options.root) || '../../';
@@ -224,24 +240,24 @@
     try {
       closed = sessionStorage.getItem(INVITE_KEY + 'BarClosed') === '1';
     } catch (e) {}
-    if (!readInvite() || closed || isStandalone() || document.querySelector('.joypack-invite')) return;
+    if (!readInvite() || closed || isStandalone() || document.querySelector('.joyfield-invite')) return;
     const ko = (get('lang') || deviceLang()) === 'ko';
     const style = document.createElement('style');
     style.textContent =
-      '.joypack-invite{position:fixed;left:50%;bottom:max(14px,env(safe-area-inset-bottom));z-index:2147483000;display:flex;align-items:center;gap:4px;' +
+      '.joyfield-invite{position:fixed;left:50%;bottom:max(14px,env(safe-area-inset-bottom));z-index:2147483000;display:flex;align-items:center;gap:4px;' +
       'max-width:calc(100% - 24px);padding:6px 6px 6px 8px;border-radius:999px;background:#ffb703;color:#3d2a00;font:15px/1.2 system-ui,sans-serif;' +
-      'box-shadow:0 8px 24px rgb(120 70 0/.35);transform:translateX(-50%);animation:joypack-invite-in .4s cubic-bezier(.2,.9,.3,1.2) both}' +
-      '.joypack-invite a{display:flex;align-items:center;gap:8px;padding:4px 8px;color:inherit;text-decoration:none;white-space:nowrap}' +
-      '.joypack-invite img{width:26px;height:26px}' +
-      '.joypack-invite button{width:30px;height:30px;border:0;border-radius:50%;background:rgb(61 42 0/.12);color:#3d2a00;font:18px/1 system-ui;cursor:pointer}' +
-      '@keyframes joypack-invite-in{from{opacity:0;transform:translate(-50%,20px)}}' +
-      '@media (prefers-reduced-motion:reduce){.joypack-invite{animation:none}}';
+      'box-shadow:0 8px 24px rgb(120 70 0/.35);transform:translateX(-50%);animation:joyfield-invite-in .4s cubic-bezier(.2,.9,.3,1.2) both}' +
+      '.joyfield-invite a{display:flex;align-items:center;gap:8px;padding:4px 8px;color:inherit;text-decoration:none;white-space:nowrap}' +
+      '.joyfield-invite img{width:26px;height:26px}' +
+      '.joyfield-invite button{width:30px;height:30px;border:0;border-radius:50%;background:rgb(61 42 0/.12);color:#3d2a00;font:18px/1 system-ui;cursor:pointer}' +
+      '@keyframes joyfield-invite-in{from{opacity:0;transform:translate(-50%,20px)}}' +
+      '@media (prefers-reduced-motion:reduce){.joyfield-invite{animation:none}}';
     const bar = document.createElement('div');
-    bar.className = 'joypack-invite';
+    bar.className = 'joyfield-invite';
     bar.setAttribute('role', 'region');
-    bar.setAttribute('aria-label', ko ? '조이팩 앱 설치' : 'Install Joypack');
+    bar.setAttribute('aria-label', ko ? '조이필드 앱 설치' : 'Install Joyfield');
     bar.innerHTML =
-      '<a href="' + root + '"><img src="' + root + 'logo.svg" alt="">' + (ko ? '조이팩 앱으로 설치하기' : 'Install the Joypack app') + '</a>' +
+      '<a href="' + root + '"><img src="' + root + 'logo.svg" alt="">' + (ko ? '조이필드 앱으로 설치하기' : 'Install the Joyfield app') + '</a>' +
       '<button type="button" aria-label="' + (ko ? '닫기' : 'Close') + '">×</button>';
     const close = () => {
       // 한 번 닫으면 이번 방문 동안 다른 게임에서도 다시 띄우지 않는다(허브 첫 화면 카드는 그대로)
@@ -281,7 +297,7 @@
   // ── 오래 안 한 게임 자동 정리(기준서 1.11) ──
   // 게임이 계속 늘어나므로, 게임을 마지막으로 연 날을 적어 두고 IDLE_DAYS 동안 열지 않은 게임의 파일 캐시를 허브가 지운다.
   // 다음에 열면(인터넷 연결 시) 다시 받는다. 최고 기록·설정은 그대로
-  const PLAYED_KEY = 'joypack.played'; // { 게임 id: 마지막으로 연 시각(ms) }
+  const PLAYED_KEY = 'joyfield.played'; // { 게임 id: 마지막으로 연 시각(ms) }
   const IDLE_DAYS = 60;
 
   function readPlayed() {
@@ -319,7 +335,7 @@
   }
 
   // 공통 상단 메뉴 아이콘(topbar.css 의 .jp-top-btn 안에 넣는다). 24 격자 선 그림 + 안쪽 옅은 채움(.jp-fill).
-  // 조이팩 첫 화면과 모든 게임이 같은 그림을 쓴다
+  // 조이필드 첫 화면과 모든 게임이 같은 그림을 쓴다
   const GEAR =
     'M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.4.3a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.5a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.4.3a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.4-.3a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.5a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.4-.3a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2z';
   const TOP_ICONS = {
@@ -329,7 +345,7 @@
     gear: '<path class="jp-fill" d="' + GEAR + '"/><path d="' + GEAR + '"/><circle cx="12" cy="12" r="3"/>',
     home: '<path class="jp-fill" d="M4 10.5 12 4l8 6.5V20H4z"/><path d="M3 11 12 3.5 21 11M5.5 9.5V20h13V9.5M10 20v-5.5h4V20"/>',
   };
-  // 아래 가림 막기: 안드로이드 설치 앱에서 조이팩 → 게임으로 넘어오면, 화면을 내비게이션 바 뒤까지 쓰면서도
+  // 아래 가림 막기: 안드로이드 설치 앱에서 조이필드 → 게임으로 넘어오면, 화면을 내비게이션 바 뒤까지 쓰면서도
   // 바 높이(env(safe-area-inset-bottom))를 0으로 알려 줘 맨 아래 내용이 바에 가리는 일이 있었다(앱을 내렸다 올리면 정상).
   // 그때만 "화면 전체 높이 - 시스템이 쓰는 높이"(최대 72px)를 --jp-bottom-guard 로 넣는다. 바 높이가 제대로 오면 0.
   // 게임 css 는 아래 여백을 max(env(safe-area-inset-bottom), var(--jp-bottom-guard, 0px)) 로 둔다
@@ -354,7 +370,7 @@
     [300, 1000, 2500].forEach((ms) => setTimeout(update, ms));
   }
 
-  // 보이는 화면 높이 따라가기: 설치 앱에서 조이팩 → 게임으로 넘어오면 css 의 화면 높이(100dvh·100%)가 실제 보이는 높이보다
+  // 보이는 화면 높이 따라가기: 설치 앱에서 조이필드 → 게임으로 넘어오면 css 의 화면 높이(100dvh·100%)가 실제 보이는 높이보다
   // 크게 잡혀 맨 아래가 화면 밖으로 나가는 일이 있었다(앱을 내렸다 올리면 정상). 페이지 높이·보이는 영역 높이 중 작은 값을
   // --jp-vh(px)로 넣고, 처음 몇 초 동안과 화면이 바뀔 때마다 다시 잰다. 게임 css 는 height: var(--jp-vh, 100dvh) 로 쓴다.
   // 원인 확인용으로 처음 잰 값과 지금 값을 viewportReport() 로 돌려준다(설정 창 맨 아래에 잠깐 표시)
@@ -405,7 +421,7 @@
   }
 
   // 기본 언어: 저장한 선택이 없으면 기기(휴대폰·PC)의 설정 언어를 따른다. 한국어면 'ko', 그 밖의 언어는 모두 'en'.
-  // 조이팩과 모든 게임이 같은 규칙을 쓴다
+  // 조이필드와 모든 게임이 같은 규칙을 쓴다
   function deviceLang() {
     const nav = global.navigator || {};
     const first = (nav.languages && nav.languages[0]) || nav.language || '';
@@ -477,7 +493,7 @@
       (open ? (ko ? when + ' 공개' : 'Opens ' + when) : ko ? '준비 중인 게임이에요' : 'This game is not open yet') +
       '</p>' +
       '<a href="../../" style="margin-top:8px;padding:12px 22px;border-radius:999px;background:#ffd84d;color:#2a1d00;font-weight:700;text-decoration:none">' +
-      (ko ? '조이팩으로' : 'Back to Joypack') +
+      (ko ? '조이필드로' : 'Back to Joyfield') +
       '</a>';
     const stopKeys = (e) => e.stopImmediatePropagation();
     window.addEventListener('keydown', stopKeys, true);
@@ -491,11 +507,11 @@
     if (open) setTimeout(() => location.reload(), Math.min(open - Date.now() + 500, 2 ** 31 - 1));
   }
 
-  // 개발자 모드(조이팩 설정 → 정보의 버전을 7번 눌러 비밀번호로 켬, 허브 preview.ts 와 같은 키 joypack.preview).
+  // 개발자 모드(조이필드 설정 → 정보의 버전을 7번 눌러 비밀번호로 켬, 허브 preview.ts 와 같은 키 joyfield.preview).
   // 켠 기기에서만 게임의 출시 전 확인 기능(판별 바로 시작·도감 전부 열기 등)을 보인다
   function devMode() {
     try {
-      const value = localStorage.getItem('joypack.preview');
+      const value = localStorage.getItem('joyfield.preview');
       return value === 'on' || value === '1';
     } catch (e) {
       return false;
@@ -504,7 +520,7 @@
 
   // 출시 모드 보기: 개발자 모드를 켠 기기에서 출시 전 확인 기능(판별 바로 시작·도감 전부 열기 등)을 잠시 숨기고
   // 실제 출시 화면 그대로 확인할 때 켠다. 끄고 켜는 단추는 개발자 모드인 동안 늘 보인다
-  const RELEASE_VIEW_KEY = 'joypack.releaseView';
+  const RELEASE_VIEW_KEY = 'joyfield.releaseView';
   function releaseView() {
     return read(RELEASE_VIEW_KEY) === 'on';
   }
@@ -529,7 +545,7 @@
     return devMode() && !releaseView();
   }
 
-  // ── 날마다 바뀌는 자동 스킨(조이팩 오늘의 톤·모든 게임 스킨 "자동", 기준서 1.4) ──
+  // ── 날마다 바뀌는 자동 스킨(조이필드 오늘의 톤·모든 게임 스킨 "자동", 기준서 1.4) ──
   // 날짜로 정해지는 무작위 번호(0 ~ count-1): 같은 날은 어느 기기에서나 같고, 이틀 연속 같은 번호는 나오지 않는다.
   // count 일씩 묶어 그 묶음 안에서 count 개를 섞은 순서대로 쓴다(앞 묶음 마지막 날과 겹치면 첫 두 날을 바꿈) → 고르게 돌아감.
   // salt(게임 id)마다 섞는 순서가 달라 같은 날 게임끼리 같은 순서가 되지 않는다. 기기 날짜(자정) 기준
@@ -569,11 +585,11 @@
   }
   /* dailyPick: end */
 
-  // ── 랭킹 탭 공통 기준(조이팩 전체 랭킹·모든 게임 랭킹 창, 기준서 1.6) ──
+  // ── 랭킹 탭 공통 기준(조이필드 전체 랭킹·모든 게임 랭킹 창, 기준서 1.6) ──
   // 랭킹 창을 열 때 처음 고를 탭: ① 등록 대기 기록이 있는 탭(여럿이면 최근 탭, 아니면 첫 번째) → ② 최근 탭(방금 한 판 또는 마지막으로 본 탭 중 나중)
-  // → ③ 기본 탭. 한 기기 안에서 조이팩과 모든 게임이 같은 값을 읽고 써서, 어디서 열어도 이어진다.
-  // joypack.rankBoard = { [게임 ID]: { last: 탭 ID, pending: [{ board, day? }] } }. day(YYYY-MM-DD, 기기 날짜)가 있으면 그날만 유효(오늘의 챌린지 등)
-  const RANK_KEY = 'joypack.rankBoard';
+  // → ③ 기본 탭. 한 기기 안에서 조이필드와 모든 게임이 같은 값을 읽고 써서, 어디서 열어도 이어진다.
+  // joyfield.rankBoard = { [게임 ID]: { last: 탭 ID, pending: [{ board, day? }] } }. day(YYYY-MM-DD, 기기 날짜)가 있으면 그날만 유효(오늘의 챌린지 등)
+  const RANK_KEY = 'joyfield.rankBoard';
 
   function localDay(d) {
     d = d || new Date();
@@ -646,10 +662,10 @@
   blockZoom();
   gatePreview();
 
-  // 저작권 표기: 조이팩 설정 → 정보, 각 게임 설정 맨 아래 버전 밑에 그대로 쓴다(기준서 1.4). 바꿀 때는 여기 한 곳만
+  // 저작권 표기: 조이필드 설정 → 정보, 각 게임 설정 맨 아래 버전 밑에 그대로 쓴다(기준서 1.4). 바꿀 때는 여기 한 곳만
   var COPYRIGHT = '© 2026 Myong Bum Soo. All rights reserved.';
 
-  global.Joypack = {
+  global.Joyfield = {
     KEYS: KEYS,
     COPYRIGHT: COPYRIGHT,
     isPreview: isPreview,

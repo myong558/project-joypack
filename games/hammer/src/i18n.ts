@@ -32,7 +32,7 @@ const ko = {
   'dex.exploded': '지금까지 {n}번 터뜨렸어요',
 
   'lang.label': '언어 선택',
-  'nav.hub': '조이팩 게임 목록',
+  'nav.hub': '조이필드 게임 목록',
   'settings.title': '설정',
   'test.dexAll': '개발자 모드: 도감 모두 열림(저장 기록은 그대로)',
   'test.releaseView': '출시 화면',
@@ -124,10 +124,10 @@ const ko = {
   'goal.missing': '{name}를 아직 못 잡았어요',
   'goal.gap': '신기록까지 {n}점!',
 
-  'share.install': '조이팩에서 같이 해요 👉',
-  'toast.shared': '보냈어요! 조이팩 링크는 복사도 해 두었어요',
-  'toast.saved': '결과 이미지를 저장하고 조이팩 링크를 복사했어요',
-  'toast.copied': '조이팩 링크를 복사했어요',
+  'share.install': '조이필드에서 같이 해요 👉',
+  'toast.shared': '보냈어요! 조이필드 링크는 복사도 해 두었어요',
+  'toast.saved': '결과 이미지를 저장하고 조이필드 링크를 복사했어요',
+  'toast.copied': '조이필드 링크를 복사했어요',
 
   'mission.golden3': '황금 두더지 3마리 잡기',
   'mission.noBomb': '폭탄 안 치고 20마리 잡기',
@@ -185,7 +185,7 @@ const en: Record<MessageKey, string> = {
   'dex.exploded': '{n} set off so far',
 
   'lang.label': 'Choose language',
-  'nav.hub': 'Joypack games',
+  'nav.hub': 'Joyfield games',
   'settings.title': 'Settings',
   'test.dexAll': 'Developer mode: all moles shown in the guide (saved records unchanged)',
   'test.releaseView': 'Release view',
@@ -278,10 +278,10 @@ const en: Record<MessageKey, string> = {
   'goal.missing': "You haven't caught the {name} yet",
   'goal.gap': '{n} points to a new record!',
 
-  'share.install': 'Play on Joypack 👉',
-  'toast.shared': 'Sent! The Joypack link is copied too',
-  'toast.saved': 'Result image saved and Joypack link copied',
-  'toast.copied': 'Joypack link copied',
+  'share.install': 'Play on Joyfield 👉',
+  'toast.shared': 'Sent! The Joyfield link is copied too',
+  'toast.saved': 'Result image saved and Joyfield link copied',
+  'toast.copied': 'Joyfield link copied',
 
   'mission.golden3': 'Catch 3 golden moles',
   'mission.noBomb': 'Catch 20 without hitting a bomb',
@@ -321,9 +321,9 @@ export function getLang(): Lang {
   return current;
 }
 
-/** 저장한 선택이 없을 때: 기기 설정 언어(한국어면 ko, 그 밖은 모두 en). 조이팩·모든 게임 공통 규칙(Joypack.deviceLang) */
+/** 저장한 선택이 없을 때: 기기 설정 언어(한국어면 ko, 그 밖은 모두 en). 조이필드·모든 게임 공통 규칙(Joyfield.deviceLang) */
 export function detectLang(): Lang {
-  return Joypack.deviceLang();
+  return Joyfield.deviceLang();
 }
 
 export function t(key: MessageKey, params: Record<string, string | number> = {}): string {

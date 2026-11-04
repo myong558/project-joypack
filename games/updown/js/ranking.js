@@ -10,8 +10,8 @@
 
   // 웹 앱 공개 설정 값. 원래 웹페이지에 드러나는 값이고, 저장소를 지키는 건 보안 규칙이다.
   const FIREBASE = {
-    apiKey: 'AIzaSyChpbX7wDj2GQF7O4QqR-5g7QYpCVkx_9s',
-    projectId: 'joypack-c6bd2',
+    apiKey: 'AIzaSyDX5BIFO5ViBSMkSKaHNJVHDHZdrzWRRRg',
+    projectId: 'joyfield-41b5a',
   };
   const GAME_ID = 'updown';
   const LIMIT = 10;
@@ -115,7 +115,7 @@
               time: { integerValue: String(entry.time) },
               thermo: { booleanValue: !!entry.thermo },
               // 플레이한 입력: m 모바일(터치)·p PC(마우스)(기준서 1.6)
-              dev: { stringValue: Joypack.playDevice() },
+              dev: { stringValue: Joyfield.playDevice() },
             },
           },
           updateTransforms: [{ fieldPath: 'createdAt', setToServerValue: 'REQUEST_TIME' }],

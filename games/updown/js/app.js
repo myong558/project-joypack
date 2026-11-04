@@ -1,4 +1,4 @@
-// 화면 이벤트 처리, 렌더링, 최고 기록 저장, 서비스 워커 등록(조이팩 공통 서비스 워커).
+// 화면 이벤트 처리, 렌더링, 최고 기록 저장, 서비스 워커 등록(조이필드 공통 서비스 워커).
 // 언어를 바꾸면 현재 화면을 상태에서 다시 그리므로, 화면 문구는 모두 render* 함수에서 채운다.
 (function () {
   'use strict';
@@ -58,7 +58,7 @@
     Object.keys(screens).forEach((key) => {
       screens[key].hidden = key !== name;
     });
-    // 왼쪽 위: 시작 화면은 조이팩 게임 목록·언어 전환, 게임 화면은 홈. 오른쪽 위 설정 버튼은 항상 보인다.
+    // 왼쪽 위: 시작 화면은 조이필드 게임 목록·언어 전환, 게임 화면은 홈. 오른쪽 위 설정 버튼은 항상 보인다.
     $('hub-link').hidden = name !== 'start';
     $('lang-toggle').hidden = name !== 'start';
     $('home').hidden = name !== 'play';
@@ -96,7 +96,7 @@
   let themePreference = loadThemePreference();
 
   function loadThemePreference() {
-    const saved = Joypack.get('theme', THEME_KEY);
+    const saved = Joyfield.get('theme', THEME_KEY);
     if (saved === 'system' || saved === 'light' || saved === 'dark') return saved;
     return 'system';
   }
@@ -117,7 +117,7 @@
 
   function setTheme(preference) {
     themePreference = preference;
-    Joypack.set('theme', preference, THEME_KEY);
+    Joyfield.set('theme', preference, THEME_KEY);
     applyTheme();
   }
 
@@ -691,7 +691,7 @@
 
     return new Promise((resolve, reject) => {
       canvas.toBlob((blob) => {
-        if (blob) resolve(new File([blob], 'joypack-updown-result.png', { type: 'image/png' }));
+        if (blob) resolve(new File([blob], 'joyfield-updown-result.png', { type: 'image/png' }));
         else reject(new Error('toBlob'));
       }, 'image/png');
     });
@@ -716,7 +716,7 @@
     toastTimer = setTimeout(() => toast.classList.remove('show'), duration || 2600);
   }
 
-  // [기록 공유하기]: 결과 카드 이미지 + 조이팩 설치 주소를 한 번에 보낸다(모든 게임 같은 방식, Joypack.shareResult).
+  // [기록 공유하기]: 결과 카드 이미지 + 조이필드 설치 주소를 한 번에 보낸다(모든 게임 같은 방식, Joyfield.shareResult).
   // 결과는 이미지에 다 있으므로 결과 글은 따로 보내지 않는다.
   async function shareResult() {
     const button = $('share');
@@ -726,7 +726,7 @@
       try {
         image = await prepareShareCard();
       } catch (e) {}
-      const outcome = await Joypack.shareResult({ gameId: 'updown', image: image, title: t('app.title'), installText: t('share.install') });
+      const outcome = await Joyfield.shareResult({ gameId: 'updown', image: image, title: t('app.title'), installText: t('share.install') });
       if (outcome !== 'cancelled') showToast(t('share.' + outcome), 3200);
     } finally {
       button.disabled = false;
@@ -745,7 +745,7 @@
   let pending = loadPending(); // { [끝 숫자]: { score, tries, time, thermo } } 등록 대기 기록
   let resultEntry = null; // 이번 판 기록 { board, score, tries, time, thermo, expected, online }. TOP 10 에 들 때만 생긴다(checkRanking).
   let gameStartedAt = 0; // 걸린 시간(점수에 들어감) 재기: 판 시작 시각
-  let rankingTab = 100; // 랭킹 창에서 보고 있는 범위. 열 때마다 Joypack.rankTab 으로 다시 고른다
+  let rankingTab = 100; // 랭킹 창에서 보고 있는 범위. 열 때마다 Joyfield.rankTab 으로 다시 고른다
   let rankingMine = null; // 방금 등록한 기록 ID (목록에서 강조)
   let rankingRequest = 0;
   let rankingDone = null; // 이번 판을 등록한 결과 { rank }. 결과 화면 등록 칸이 "N위로 등록했어요"로 바뀐다.
@@ -807,20 +807,20 @@
   }
 
   // 랭킹 버튼은 아이콘만 둔다. 등록할 기록이 남았으면 대표색으로 채우고(공통 .is-on) 이름도 "등록하기"로 읽힌다.
-  // 등록 대기가 바뀔 때마다 여기를 거치므로, 랭킹 탭 공통 기준(Joypack.rankTab)에 쓸 대기 범위 목록도 여기서 알린다(조이팩 전체 랭킹과 같이 씀)
+  // 등록 대기가 바뀔 때마다 여기를 거치므로, 랭킹 탭 공통 기준(Joyfield.rankTab)에 쓸 대기 범위 목록도 여기서 알린다(조이필드 전체 랭킹과 같이 씀)
   function renderRankingButton() {
     const button = $('ranking-open');
     const waiting = hasPending();
-    Joypack.setRankPending('updown', UpDown.PRESETS.filter((key) => !!pendingFor(key)));
+    Joyfield.setRankPending('updown', UpDown.PRESETS.filter((key) => !!pendingFor(key)));
     const label = t(waiting ? 'ranking.register' : 'ranking.open');
     button.classList.toggle('is-on', waiting);
     button.setAttribute('aria-label', label);
     button.title = label;
   }
 
-  // 처음 탭은 조이팩 공통 기준: 등록 대기 → 최근 범위(방금 한 판·마지막으로 본 탭) → 1~100. 조이팩 전체 랭킹과 같은 값을 쓴다
+  // 처음 탭은 조이필드 공통 기준: 등록 대기 → 최근 범위(방금 한 판·마지막으로 본 탭) → 1~100. 조이필드 전체 랭킹과 같은 값을 쓴다
   function openRanking() {
-    rankingTab = Number(Joypack.rankTab('updown', UpDown.PRESETS, 100));
+    rankingTab = Number(Joyfield.rankTab('updown', UpDown.PRESETS, 100));
     $('ranking-status').textContent = '';
     renderRanking();
     $('ranking').showModal();
@@ -840,7 +840,7 @@
         time: duration(entry.time),
       });
       if (!$('ranking-initials').value) {
-        $('ranking-initials').value = Joypack.get('initials', INITIALS_KEY) || '';
+        $('ranking-initials').value = Joyfield.get('initials', INITIALS_KEY) || '';
       }
     }
     const tabs = $('ranking-tabs');
@@ -855,7 +855,7 @@
       button.classList.toggle('has-pending', !!pendingFor(key));
       button.addEventListener('click', () => {
         rankingTab = key;
-        Joypack.setRankBoard('updown', key);
+        Joyfield.setRankBoard('updown', key);
         renderRanking();
         loadRanking();
       });
@@ -909,7 +909,7 @@
       const name = document.createElement('span');
       name.className = 'ranking-name';
       name.textContent = row.initials;
-      name.insertAdjacentHTML('beforeend', Joypack.deviceIcon(row.dev));
+      name.insertAdjacentHTML('beforeend', Joyfield.deviceIcon(row.dev));
       const score = document.createElement('span');
       score.className = 'ranking-tries';
       score.textContent = t('ranking.score', { score: fmt(row.score) });
@@ -979,7 +979,7 @@
       time: entry.time,
       thermo: !!entry.thermo,
     });
-    Joypack.set('initials', initials, INITIALS_KEY);
+    Joyfield.set('initials', initials, INITIALS_KEY);
     rankingTab = entry.board;
     if (sameRecord(pending[entry.board], entry)) {
       delete pending[entry.board];
@@ -1013,7 +1013,7 @@
         : t('ranking.cardPromptOffline');
       const input = $('result-rank-initials');
       if (!input.value) {
-        input.value = Joypack.get('initials', INITIALS_KEY) || '';
+        input.value = Joyfield.get('initials', INITIALS_KEY) || '';
       }
     }
     if (animate) {
@@ -1033,8 +1033,8 @@
       input.focus();
       return;
     }
-    // 금지어(욕설 등)는 올리지 않는다(조이팩 공통 Joypack.isAllowedName, 기준서 10.3)
-    if (!Joypack.isAllowedName(initials)) {
+    // 금지어(욕설 등)는 올리지 않는다(조이필드 공통 Joyfield.isAllowedName, 기준서 10.3)
+    if (!Joyfield.isAllowedName(initials)) {
       showToast(t('ranking.badName'));
       input.focus();
       return;
@@ -1059,7 +1059,7 @@
     input.value = initials;
     const entry = pendingFor(rankingTab);
     if (!initials || !entry) return;
-    if (!Joypack.isAllowedName(initials)) {
+    if (!Joyfield.isAllowedName(initials)) {
       $('ranking-status').textContent = t('ranking.badName');
       input.focus();
       return;
@@ -1260,7 +1260,7 @@
     game.score = UpDown.score(game.max, tries, game.time, game.thermo ? game.thermo.cost : 0);
     game.luck = pickLuck(luckTier(game)); // 한 판에 한 번만 고른다(언어를 바꿔도 같은 문구의 번역)
     // 최고 점수는 랭킹 범위만 남긴다(연습 판은 남기지 않음). 랭킹 범위 판은 랭킹 창의 최근 탭으로도 남긴다
-    if (game.ranked) Joypack.setRankBoard('updown', game.max);
+    if (game.ranked) Joyfield.setRankBoard('updown', game.max);
     newBest = game.ranked && (!best[game.max] || game.score > best[game.max]);
     if (newBest) {
       best[game.max] = game.score;
@@ -1344,12 +1344,12 @@
     showVersion();
   }
 
-  // 설정 맨 아래 버전. 조이팩 빌드(scripts/build.mjs)가 __APP_VERSION__ 자리에 package.json 의 version 을 넣는다.
+  // 설정 맨 아래 버전. 조이필드 빌드(scripts/build.mjs)가 __APP_VERSION__ 자리에 package.json 의 version 을 넣는다.
   // 빌드하지 않은 원본 파일을 바로 열었으면(자리 표시가 그대로) 숨긴다.
   const APP_VERSION = '__APP_VERSION__';
   function showVersion() {
-    // 저작권 표기는 조이팩 공통 모듈 한 곳에서(빌드 전 원본에서도 보임)
-    if (window.Joypack) $('app-copyright').textContent = Joypack.COPYRIGHT;
+    // 저작권 표기는 조이필드 공통 모듈 한 곳에서(빌드 전 원본에서도 보임)
+    if (window.Joyfield) $('app-copyright').textContent = Joyfield.COPYRIGHT;
     if (APP_VERSION.indexOf('__') === 0) return;
     $('app-version').textContent = t('settings.version', { version: 'v' + APP_VERSION });
     $('app-version').hidden = false;
@@ -1411,7 +1411,7 @@
   }
 
   $('guess-form').addEventListener('submit', submitGuess);
-  // 확인 버튼은 클릭을 기다리지 않고 손을 뗄 때 바로 낸다. 화면 전체가 touch-action: pan-x pan-y(joypack.js 의 blockZoom)라
+  // 확인 버튼은 클릭을 기다리지 않고 손을 뗄 때 바로 낸다. 화면 전체가 touch-action: pan-x pan-y(joyfield.js 의 blockZoom)라
   // 누르는 동안 손가락이 몇 px 만 밀려도 브라우저가 스크롤로 보고 누름을 취소해(클릭 없음) 가끔 안 눌렸다.
   // 버튼은 touch-action: none 으로 스크롤 판단에서 빼고, 뗀 곳이 버튼 둘레(SUBMIT_SLOP) 안이면 낸다. 키보드 Enter·Space 는 클릭 그대로.
   const submitButton = $('guess-form').querySelector('.dial-submit');
@@ -1476,8 +1476,8 @@
   $('ranking-open').addEventListener('click', openRanking);
   $('ranking-close').addEventListener('click', () => $('ranking').close());
   $('ranking-form').addEventListener('submit', submitRanking);
-  // 영문 대문자 5자까지(붙여 넣기 포함), 휴대폰은 영문 자판으로(조이팩 공통 Joypack.initialsInput)
-  ['ranking-initials', 'result-rank-initials'].forEach((id) => Joypack.initialsInput($(id)));
+  // 영문 대문자 5자까지(붙여 넣기 포함), 휴대폰은 영문 자판으로(조이필드 공통 Joyfield.initialsInput)
+  ['ranking-initials', 'result-rank-initials'].forEach((id) => Joyfield.initialsInput($(id)));
   $('result-rank').addEventListener('submit', submitResultRank);
   $('result-rank-view').addEventListener('click', openRanking);
   $('settings-close').addEventListener('click', () => $('settings').close());
@@ -1543,8 +1543,8 @@
   // iOS Safari 는 touchstart 리스너가 있어야 버튼에 :active(눌림 효과)를 적용한다.
   document.addEventListener('touchstart', () => {}, { passive: true });
 
-  // 위 메뉴 아이콘: 조이팩 공통 그림을 넣는다(shared/joypack.js)
-  document.querySelectorAll('[data-top-icon]').forEach((el) => el.insertAdjacentHTML('afterbegin', Joypack.topIcon(el.dataset.topIcon)));
+  // 위 메뉴 아이콘: 조이필드 공통 그림을 넣는다(shared/joyfield.js)
+  document.querySelectorAll('[data-top-icon]').forEach((el) => el.insertAdjacentHTML('afterbegin', Joyfield.topIcon(el.dataset.topIcon)));
   renderStaticTexts();
   renderRankingButton();
   goToStart();
@@ -1554,7 +1554,7 @@
   // 인트로(css 의 .intro, 마지막 '직접 정하기'가 약 1.01초에 끝남)가 끝난 뒤 클래스를 지운다. 여러 요소가 시차를 두고 움직여서 animationend 대신 타이머를 쓴다.
   setTimeout(endIntro, 1100);
 
-  // 서비스 워커는 조이팩 사이트에 하나(../../sw.js)다. HTTPS 와 localhost 에서만 등록되고, file:// 로 열면 게임만 동작한다.
+  // 서비스 워커는 조이필드 사이트에 하나(../../sw.js)다. HTTPS 와 localhost 에서만 등록되고, file:// 로 열면 게임만 동작한다.
   // 등록하면서 이 게임 파일 전체를 캐시하라고 알린다(처음 열 때 캐시, 이후에는 바뀐 파일만).
   // 새 서비스 워커가 화면을 넘겨받으면(controllerchange) 한 번 새로 고쳐 바로 새 버전을 보여 준다.
   // 게임 중이면 판을 날리지 않도록 홈으로 갈 때까지 미룬다. 처음 설치(원래 담당 워커가 없음)는 새로 고치지 않는다.
@@ -1566,9 +1566,9 @@
       if (screen === 'start') location.reload();
     });
     window.addEventListener('load', () => {
-      Joypack.registerSW({ root: '../../', game: 'updown' });
-      // 공유 링크로 바로 들어온 사람에게 조이팩 앱 설치 안내 띠
-      Joypack.inviteBar({ root: '../../' });
+      Joyfield.registerSW({ root: '../../', game: 'updown' });
+      // 공유 링크로 바로 들어온 사람에게 조이필드 앱 설치 안내 띠
+      Joyfield.inviteBar({ root: '../../' });
     });
   }
 })();

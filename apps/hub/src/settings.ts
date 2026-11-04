@@ -1,4 +1,4 @@
-import '@joypack/shared';
+import '@joyfield/shared';
 import { LANGS, detectLang, setLang, type Lang } from './i18n';
 
 export type Theme = 'system' | 'light' | 'dark';
@@ -44,31 +44,31 @@ export function migrateLegacy(): void {
     lang: (v) => LANGS.includes(v as Lang),
     sound: (v) => v === 'on' || v === 'off',
     vibrate: (v) => v === 'on' || v === 'off',
-    initials: (v) => Joypack.cleanInitials(v).length > 0,
+    initials: (v) => Joyfield.cleanInitials(v).length > 0,
   };
   for (const name of Object.keys(candidates) as (keyof Settings)[]) {
-    if (Joypack.get(name) !== null) continue;
+    if (Joyfield.get(name) !== null) continue;
     const found = candidates[name].find((v) => typeof v === 'string' && valid[name](v));
-    if (found) Joypack.set(name, name === 'initials' ? Joypack.cleanInitials(found) : found);
+    if (found) Joyfield.set(name, name === 'initials' ? Joyfield.cleanInitials(found) : found);
   }
 }
 
 export function loadSettings(): Settings {
-  const theme = Joypack.get('theme') as Theme | null;
-  const lang = Joypack.get('lang') as Lang | null;
+  const theme = Joyfield.get('theme') as Theme | null;
+  const lang = Joyfield.get('lang') as Lang | null;
   return {
     theme: theme && THEMES.includes(theme) ? theme : 'system',
     lang: lang && LANGS.includes(lang) ? lang : detectLang(),
-    sound: Joypack.get('sound') !== 'off',
-    vibrate: Joypack.get('vibrate') !== 'off',
-    initials: Joypack.cleanInitials(Joypack.get('initials') ?? ''),
+    sound: Joyfield.get('sound') !== 'off',
+    vibrate: Joyfield.get('vibrate') !== 'off',
+    initials: Joyfield.cleanInitials(Joyfield.get('initials') ?? ''),
   };
 }
 
 export function saveSetting<K extends keyof Settings>(settings: Settings, name: K, value: Settings[K]): void {
   settings[name] = value;
   const stored = typeof value === 'boolean' ? (value ? 'on' : 'off') : String(value);
-  Joypack.set(name, stored);
+  Joyfield.set(name, stored);
 }
 
 const darkQuery = matchMedia('(prefers-color-scheme: dark)');

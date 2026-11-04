@@ -2,8 +2,8 @@
 
 > 게임 이름: 한국어 **두더지잡기** · 영어 **Peekaboo Moles**. 게임 ID·주소·저장 키는 `hammer`.
 
-> **조이팩으로 통합됨 (2026-10-21)**: 이 게임은 이제 조이팩 저장소의 `games/` 아래에서 관리하고 `https://myong558.github.io/project-joypack/games/hammer/` 로 배포합니다.
-> 앱 설치·오프라인(서비스 워커·manifest)·배포는 조이팩이 맡고, 컬러 모드·언어·효과음·진동·랭킹 이름은 조이팩 공통 설정(`joypack.*`)을 먼저 따릅니다.
+> **조이필드로 통합됨 (2026-10-21)**: 이 게임은 이제 조이필드 저장소의 `games/` 아래에서 관리하고 `https://myong558.github.io/project-joyfield/games/hammer/` 로 배포합니다.
+> 앱 설치·오프라인(서비스 워커·manifest)·배포는 조이필드가 맡고, 컬러 모드·언어·효과음·진동·랭킹 이름은 조이필드 공통 설정(`joyfield.*`)을 먼저 따릅니다.
 > 아래의 배포·서비스 워커·주소 설명은 통합 전 기준입니다. 현재 방식은 저장소 루트 README 를 보세요.
 
 브라우저에서 바로 즐기는 두더지 잡기 게임(영어 이름 "Peekaboo Moles")입니다.
@@ -119,7 +119,7 @@ Project Hammer 🔨 10/19
 
 ### 랭킹 (온라인, Firebase Firestore)
 
-- **저장소**: Firebase `joypack` 프로젝트의 Firestore를 다른 게임과 같이 쓰며, 두더지잡기는 `games/hammer/rankings/` 아래에만 둔다. 순위표 하나가 문서 하나다(`classic`, `daily-YYYY-MM-DD`). 등록은 트랜잭션으로 해서 동시에 올려도 규칙이 깨지지 않는다(`src/online.ts`)
+- **저장소**: Firebase `joyfield` 프로젝트의 Firestore를 다른 게임과 같이 쓰며, 두더지잡기는 `games/hammer/rankings/` 아래에만 둔다. 순위표 하나가 문서 하나다(`classic`, `daily-YYYY-MM-DD`). 등록은 트랜잭션으로 해서 동시에 올려도 규칙이 깨지지 않는다(`src/online.ts`)
 - **오프라인**: 마지막으로 불러온 순위를 기기에 남겨 두고 보여 준다. 등록하지 못한 기록은 등록 대기로 남는다
 - **보안 규칙**(`firestore.rules`): `games/hammer/rankings/{board}`만 읽기·쓰기 허용, 문서 이름은 `classic`·`daily-날짜`만, 삭제 금지. 쓰기는 "기존 순위표에 새 기록 1개를 끼운 것"만 받는다 — 새 기록은 1개(이름 금지어 검사, 점수 1~20000, 오늘의 챌린지는 문서 날짜와 같은 날짜), 기존 기록은 지우거나 바꿀 수 없고 꽉 찼을 때만 꼴찌 1개가 빠지며, 목록은 점수 높은 순. 남이 순위표를 지우거나 바꿔치기할 수 없다
 
@@ -148,7 +148,7 @@ Project Hammer 🔨 10/19
 | 언어 | TypeScript | 게임 상태 타입 안정성 |
 | UI | 순수 DOM + CSS | 9~16칸 그리드에 프레임워크·Canvas 불필요 |
 | 애니메이션 | CSS transform/transition, keyframes | 두더지 올라옴/내려감, 타격·기절·화면 흔들림 |
-| 글꼴 | Jua 하나(제목·버튼·숫자·본문·위 메뉴), SIL OFL 1.1 | 둥글고 친근한 게임 느낌, 상업적 사용 가능. 화면 글자만 남긴 서브셋(`pnpm --filter hammer font`, 조이팩 글꼴 목록 `fonts/catalog.json`), 약 117 KB. 지난 글꼴: v0.15.2까지 여기어때 잘난체 2종(서브셋 불가, 약 850 KB), v0.15.3 Bagel Fat One(낡아 보임), v0.15.4 Gothic A1 Black(딱딱함) |
+| 글꼴 | Jua 하나(제목·버튼·숫자·본문·위 메뉴), SIL OFL 1.1 | 둥글고 친근한 게임 느낌, 상업적 사용 가능. 화면 글자만 남긴 서브셋(`pnpm --filter hammer font`, 조이필드 글꼴 목록 `fonts/catalog.json`), 약 117 KB. 지난 글꼴: v0.15.2까지 여기어때 잘난체 2종(서브셋 불가, 약 850 KB), v0.15.3 Bagel Fat One(낡아 보임), v0.15.4 Gothic A1 Black(딱딱함) |
 | 사운드 | Web Audio API | 지연 없는 효과음, 피버 시 음높이 변경 |
 | 저장 | localStorage | 최고 기록·도감·설정 저장 (실패 시 무시) |
 | 테스트 | Vitest | 게임 로직 단위 테스트 |

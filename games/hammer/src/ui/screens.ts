@@ -131,7 +131,7 @@ export interface StartOptions {
 export function startScreen(opts: StartOptions): HTMLElement {
   const { save } = opts;
   // 개발자 모드(출시 화면 보기 꺼짐)면 도감을 모두 열어 보인다. 저장된 기록(save.dex)은 그대로 둔다
-  const dex = new Set<MoleKind>(Joypack.devJump() ? MOLE_ORDER : save.dex);
+  const dex = new Set<MoleKind>(Joyfield.devJump() ? MOLE_ORDER : save.dex);
   const dailyBest = save.daily?.date === opts.today ? save.daily.best : 0;
   const lang = getLang();
   const otherLang = LANGS.find((l) => l !== lang)!;
@@ -140,12 +140,12 @@ export function startScreen(opts: StartOptions): HTMLElement {
     <main class="screen start">
       <nav class="jp-topbar" aria-label="${t('app.title')}">
         <div class="jp-topbar-group">
-          <a class="jp-top-btn hub-btn" href="../../" aria-label="${t('nav.hub')}" title="${t('nav.hub')}">${Joypack.topIcon('apps')}</a>
-          <button class="jp-top-btn jp-top-pill top-lang" data-lang="${otherLang}" aria-label="${t('lang.label')}: ${LANG_LABEL[lang]} → ${LANG_LABEL[otherLang]}">${Joypack.topIcon('globe')}<span lang="${otherLang}">${LANG_LABEL[otherLang]}</span></button>
+          <a class="jp-top-btn hub-btn" href="../../" aria-label="${t('nav.hub')}" title="${t('nav.hub')}">${Joyfield.topIcon('apps')}</a>
+          <button class="jp-top-btn jp-top-pill top-lang" data-lang="${otherLang}" aria-label="${t('lang.label')}: ${LANG_LABEL[lang]} → ${LANG_LABEL[otherLang]}">${Joyfield.topIcon('globe')}<span lang="${otherLang}">${LANG_LABEL[otherLang]}</span></button>
         </div>
         <div class="jp-topbar-group">
-          <button class="jp-top-btn rank-btn" data-ranking aria-label="${t('ranking.open')}">${Joypack.topIcon('trophy')}${pendingIn('classic') || pendingIn('daily') ? `<i class="jp-top-dot" role="img" aria-label="${t('ranking.newBadge')}"></i>` : ''}</button>
-          <button class="jp-top-btn settings-btn" aria-label="${t('settings.open')}">${Joypack.topIcon('gear')}</button>
+          <button class="jp-top-btn rank-btn" data-ranking aria-label="${t('ranking.open')}">${Joyfield.topIcon('trophy')}${pendingIn('classic') || pendingIn('daily') ? `<i class="jp-top-dot" role="img" aria-label="${t('ranking.newBadge')}"></i>` : ''}</button>
+          <button class="jp-top-btn settings-btn" aria-label="${t('settings.open')}">${Joyfield.topIcon('gear')}</button>
         </div>
       </nav>
       <div class="col main-col">
@@ -256,8 +256,8 @@ export function startScreen(opts: StartOptions): HTMLElement {
 
   // 등록 대기 기록이 있는 쪽을 먼저 연다. 대기 기록을 모두 올리면 버튼의 점을 지운다
   el.querySelector('[data-ranking]')!.addEventListener('click', () =>
-    // 처음 탭은 조이팩 공통 기준: 등록 대기 → 최근 모드(방금 한 판·마지막으로 본 탭) → 클래식. 조이팩 전체 랭킹과 같은 값을 쓴다
-    openRanking(el, opts.ranking, Joypack.rankTab('hammer', ['classic', 'daily'], 'classic') as Mode, null, () => {
+    // 처음 탭은 조이필드 공통 기준: 등록 대기 → 최근 모드(방금 한 판·마지막으로 본 탭) → 클래식. 조이필드 전체 랭킹과 같은 값을 쓴다
+    openRanking(el, opts.ranking, Joyfield.rankTab('hammer', ['classic', 'daily'], 'classic') as Mode, null, () => {
       if (!pendingIn('classic') && !pendingIn('daily')) el.querySelector('.jp-top-dot')?.remove();
     }),
   );
@@ -414,8 +414,8 @@ function settingsPanel(opts: StartOptions): HTMLElement {
       <h2>${ICONS.gear} ${t('settings.title')}</h2>
       ${
         // 개발자 모드: 확인 도구(도감 모두 열기)와 출시 화면 단추. 테스트할 때 바로 누르도록 설정 창 맨 위에 둔다(기준서 11.5)
-        Joypack.devMode()
-          ? `<section class="dev-section"><h3>TEST</h3>${Joypack.devJump() ? `<p class="dev-note">${t('test.dexAll')}</p>` : ''}<button type="button" class="dev-toggle" data-release aria-pressed="${Joypack.releaseView()}">${Joypack.releaseView() ? t('test.devView') : t('test.releaseView')}</button></section>`
+        Joyfield.devMode()
+          ? `<section class="dev-section"><h3>TEST</h3>${Joyfield.devJump() ? `<p class="dev-note">${t('test.dexAll')}</p>` : ''}<button type="button" class="dev-toggle" data-release aria-pressed="${Joyfield.releaseView()}">${Joyfield.releaseView() ? t('test.devView') : t('test.releaseView')}</button></section>`
           : ''
       }
       <div class="settings-grid">
@@ -459,7 +459,7 @@ function settingsPanel(opts: StartOptions): HTMLElement {
         </section>
       </div>
       <p class="app-version">${t('settings.version')} v${__APP_VERSION__}</p>
-      <p class="app-copyright">${Joypack.COPYRIGHT}</p>    </div>`);
+      <p class="app-copyright">${Joyfield.COPYRIGHT}</p>    </div>`);
 
   const select = (attr: string, value: string) =>
     el.querySelectorAll<HTMLButtonElement>(`[data-${attr}]`).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset[attr] === value)));
@@ -506,7 +506,7 @@ function settingsPanel(opts: StartOptions): HTMLElement {
   confirm.querySelector('[data-confirm]')!.addEventListener('click', opts.onReset);
   // 개발자 모드: 출시 화면 보기 ↔ 개발 보기(도감 모두 열기를 숨기거나 다시 보임)
   el.querySelector('[data-release]')?.addEventListener('click', () => {
-    Joypack.setReleaseView(!Joypack.releaseView());
+    Joyfield.setReleaseView(!Joyfield.releaseView());
     opts.onRefresh();
   });
   return el;
@@ -555,17 +555,17 @@ function rankEntryForm(opts: {
     </form>`);
   const input = el.querySelector('input')!;
   const submit = el.querySelector<HTMLButtonElement>('[type="submit"]')!;
-  // 영문 대문자 5자까지, 휴대폰은 영문 자판·대문자로 연다(조이팩 공통 Joypack.initialsInput, 한글 조합 중에는 끝난 뒤 거름)
+  // 영문 대문자 5자까지, 휴대폰은 영문 자판·대문자로 연다(조이필드 공통 Joyfield.initialsInput, 한글 조합 중에는 끝난 뒤 거름)
   const hint = el.querySelector<HTMLElement>('.rank-entry-hint')!;
   const hintText = hint.innerHTML;
   let sending = false;
-  // 금지어(욕설 등)는 등록 버튼을 끄고 안내 줄에 알린다(조이팩 공통 Joypack.isAllowedName, 기준서 10.3)
+  // 금지어(욕설 등)는 등록 버튼을 끄고 안내 줄에 알린다(조이필드 공통 Joyfield.isAllowedName, 기준서 10.3)
   const sync = (clean = cleanName(input.value)) => {
-    const blocked = isValidName(clean) && !Joypack.isAllowedName(clean);
+    const blocked = isValidName(clean) && !Joyfield.isAllowedName(clean);
     submit.disabled = !isValidName(clean) || blocked;
     if (!sending) hint.innerHTML = blocked ? `<span class="rank-error">${t('ranking.badName')}</span>` : hintText;
   };
-  Joypack.initialsInput(input, sync);
+  Joyfield.initialsInput(input, sync);
   sync();
   el.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -664,7 +664,7 @@ function openRanking(host: HTMLElement, view: RankingView, start: Mode, mark: nu
     list.innerHTML = Array.from({ length: RANK_SIZE }, (_, i) => {
       const e = entries[i];
       const cls = [i < 3 ? `top top${i + 1}` : '', e ? '' : 'empty', e && i === highlight ? 'me' : ''].filter(Boolean).join(' ');
-      return `<li class="${cls}"><span class="no">${i + 1}</span><span class="name">${e ? e.name + Joypack.deviceIcon(e.dev) : '-----'}</span><span class="score">${e ? e.score.toLocaleString() : '-'}</span>${mode === 'classic' ? `<span class="date">${e ? shortDate(e.date) : ''}</span>` : ''}</li>`;
+      return `<li class="${cls}"><span class="no">${i + 1}</span><span class="name">${e ? e.name + Joyfield.deviceIcon(e.dev) : '-----'}</span><span class="score">${e ? e.score.toLocaleString() : '-'}</span>${mode === 'classic' ? `<span class="date">${e ? shortDate(e.date) : ''}</span>` : ''}</li>`;
     }).join('');
   };
 
@@ -701,7 +701,7 @@ function openRanking(host: HTMLElement, view: RankingView, start: Mode, mark: nu
     b.addEventListener('click', () => {
       if (b.dataset.board === mode) return;
       mode = b.dataset.board as Mode;
-      Joypack.setRankBoard('hammer', mode);
+      Joyfield.setRankBoard('hammer', mode);
       highlight = null;
       if (status[mode] !== 'online') fetchBoard(mode);
       render();
@@ -918,7 +918,7 @@ export function resultScreen(opts: {
   setTimeout(() => el.isConnected && capture(), 1600);
   const toast = q('.toast');
   const shareBtn = q('[data-act="share"]') as HTMLButtonElement;
-  // 결과 캡처 이미지 + 조이팩 설치 주소를 한 번에 보낸다. 결과는 이미지에 다 있으므로 결과 글은 보내지 않는다
+  // 결과 캡처 이미지 + 조이필드 설치 주소를 한 번에 보낸다. 결과는 이미지에 다 있으므로 결과 글은 보내지 않는다
   shareBtn.addEventListener('click', async () => {
     shareBtn.disabled = true;
     toast.textContent = t('toast.preparing');

@@ -941,7 +941,7 @@ h1 .word:nth-child(2) .tc-in {
 .side svg {
   display: block;
 }
-/* 뒷면: 조이팩 로고 얼굴을 새긴 메달(그림은 art.ts CARD_BACK, 카드를 꽉 채움).
+/* 뒷면: 조이필드 로고 얼굴을 새긴 메달(그림은 art.ts CARD_BACK, 카드를 꽉 채움).
  * ::before 는 스킨 강조색 안쪽 테두리, ::after 는 카드마다 시차를 두고 지나가는 빛줄기(심심하지 않게) */
 .back {
   overflow: hidden;

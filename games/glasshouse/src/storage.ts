@@ -1,5 +1,5 @@
-import '@joypack/shared';
-import type { SharedSetting } from '@joypack/shared';
+import '@joyfield/shared';
+import type { SharedSetting } from '@joyfield/shared';
 import { LEVELS } from './game/levels';
 import { LANGS, detectLang, type Lang } from './i18n';
 import { cleanName, sanitizeDaily, sanitizeEntries, sanitizePending, type DailyEntry, type DailyRecord, type PendingRecord, type RankEntry } from './ranking';
@@ -87,18 +87,18 @@ const SHARED: SharedSetting[] = ['theme', 'lang', 'sound', 'vibrate', 'initials'
 /** 이 게임이 마지막으로 읽거나 쓴 공통 설정 값. 저장할 때 이것과 달라진(이 게임에서 바꾼) 값만 공통 키에 쓴다 */
 const synced: Partial<Record<SharedSetting, string | null>> = {};
 
-/** 조이팩 공통 설정(허브·다른 게임에서 고른 값)이 있으면 이 게임 저장 값보다 앞선다. 스킨은 게임마다 달라 공통으로 두지 않는다 */
+/** 조이필드 공통 설정(허브·다른 게임에서 고른 값)이 있으면 이 게임 저장 값보다 앞선다. 스킨은 게임마다 달라 공통으로 두지 않는다 */
 function withShared(data: SaveData): SaveData {
-  for (const name of SHARED) synced[name] = Joypack.get(name);
-  const theme = Joypack.get('theme') as Theme | null;
+  for (const name of SHARED) synced[name] = Joyfield.get(name);
+  const theme = Joyfield.get('theme') as Theme | null;
   if (theme && THEMES.includes(theme)) data.theme = theme;
-  const lang = Joypack.get('lang') as Lang | null;
+  const lang = Joyfield.get('lang') as Lang | null;
   if (lang && LANGS.includes(lang)) data.lang = lang;
-  const sound = Joypack.get('sound');
+  const sound = Joyfield.get('sound');
   if (sound) data.sound = sound !== 'off';
-  const vibrate = Joypack.get('vibrate');
+  const vibrate = Joyfield.get('vibrate');
   if (vibrate) data.vibrate = vibrate !== 'off';
-  const initials = cleanName(Joypack.get('initials') ?? '');
+  const initials = cleanName(Joyfield.get('initials') ?? '');
   if (initials) data.playerName = initials;
   return data;
 }
@@ -109,7 +109,7 @@ export function writeSave(data: SaveData): void {
   } catch {
     // 저장 실패는 무시한다(시크릿 창, 용량 초과 등)
   }
-  // 이 게임에서 바꾼 공통 설정만 조이팩 공통 키에 쓴다(판 끝 저장이 다른 화면에서 바꾼 값을 덮어쓰지 않게)
+  // 이 게임에서 바꾼 공통 설정만 조이필드 공통 키에 쓴다(판 끝 저장이 다른 화면에서 바꾼 값을 덮어쓰지 않게)
   const values: Record<SharedSetting, string> = {
     theme: data.theme,
     lang: data.lang,
@@ -119,7 +119,7 @@ export function writeSave(data: SaveData): void {
   };
   for (const name of SHARED) {
     if (!values[name] || values[name] === synced[name]) continue;
-    Joypack.set(name, values[name]);
+    Joyfield.set(name, values[name]);
     synced[name] = values[name];
   }
 }

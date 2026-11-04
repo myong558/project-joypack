@@ -1,4 +1,4 @@
-// joypack.js 가 만드는 window.Joypack 의 타입. import '@joypack/shared' 를 하면 전역 Joypack 을 쓸 수 있다.
+// joyfield.js 가 만드는 window.Joyfield 의 타입. import '@joyfield/shared' 를 하면 전역 Joyfield 을 쓸 수 있다.
 export type SharedSetting = 'theme' | 'lang' | 'sound' | 'vibrate' | 'initials';
 
 /** 공통 상단 메뉴 아이콘 이름(topbar.css 의 .jp-top-btn 안에 넣는다) */
@@ -8,13 +8,13 @@ export type Device = 'm' | 'p';
 
 export type ShareOutcome = 'shared' | 'cancelled' | 'saved' | 'copied' | 'failed';
 
-export interface JoypackApi {
+export interface JoyfieldApi {
   KEYS: Record<SharedSetting, string>;
   /** 저작권 표기 한 줄. 설정 맨 아래 버전 밑에 그대로 보인다 */
   COPYRIGHT: string;
   /** 숨김 미리보기(games.json status "preview")로 배포된 게임인지. 랭킹은 미리보기 동안에도 등록된다 */
   isPreview(): boolean;
-  /** 이 기기에서 조이팩 개발자 모드(숨김 미리보기 보기)를 켰는지. 게임의 출시 전 확인 기능을 이때만 보인다 */
+  /** 이 기기에서 조이필드 개발자 모드(숨김 미리보기 보기)를 켰는지. 게임의 출시 전 확인 기능을 이때만 보인다 */
   devMode(): boolean;
   /** 개발자 모드에서 "출시 모드 보기"를 켰는지(출시 전 확인 기능을 숨기고 실제 출시 화면으로 봄) */
   releaseView(): boolean;
@@ -56,16 +56,16 @@ export interface JoypackApi {
   cleanupIdleGames(ids: string[]): Promise<string[]>;
   /** 이 날 수 동안 열지 않은 게임은 저장본을 자동으로 비운다 */
   IDLE_DAYS: number;
-  /** 공유할 배포 주소(+ ?from=share). gameId 를 주면 그 게임 주소, 없으면 조이팩 첫 화면 */
+  /** 공유할 배포 주소(+ ?from=share). gameId 를 주면 그 게임 주소, 없으면 조이필드 첫 화면 */
   shareUrl(gameId?: string): string;
   /**
-   * 결과 화면 "기록 공유하기": 결과 캡처 이미지 + "<installText> <조이팩 주소>" 한 줄을 공유 창으로 한 번에 보낸다.
+   * 결과 화면 "기록 공유하기": 결과 캡처 이미지 + "<installText> <조이필드 주소>" 한 줄을 공유 창으로 한 번에 보낸다.
    * 주소 줄은 공유 전에 클립보드에도 넣는다. 공유 창이 없으면 이미지를 내려받고 주소를 복사한다
    */
   shareResult(options: { gameId: string; image: Blob | null; title: string; installText: string }): Promise<ShareOutcome>;
   /** 공유 링크로 들어왔는지(이번 방문 동안 기억). 주소의 ?from=share 는 지운다 */
   readInvite(): boolean;
-  /** 공유 링크로 게임에 바로 들어온 사람에게 "조이팩 앱으로 설치하기" 띠를 보여 준다 */
+  /** 공유 링크로 게임에 바로 들어온 사람에게 "조이필드 앱으로 설치하기" 띠를 보여 준다 */
   inviteBar(options?: { root?: string }): void;
   /** 랭킹 탭 공통 기준: 판을 끝냈을 때·랭킹 창에서 탭을 골랐을 때 그 탭을 최근 탭으로 남긴다 */
   setRankBoard(gameId: string, board: string | number): void;
@@ -76,8 +76,8 @@ export interface JoypackApi {
 }
 
 declare global {
-  const Joypack: JoypackApi;
+  const Joyfield: JoyfieldApi;
   interface Window {
-    Joypack: JoypackApi;
+    Joyfield: JoyfieldApi;
   }
 }

@@ -22,7 +22,7 @@ export interface GameMeta {
    * soon: 배포하지 않고 "다음 게임" 띠에 이름만
    */
   status: 'live' | 'preview' | 'soon';
-  /** 조이팩에 추가한 날(YYYY-MM-DD). 허브 카드는 이 날짜가 늦은 게임부터 보인다 */
+  /** 조이필드에 추가한 날(YYYY-MM-DD). 허브 카드는 이 날짜가 늦은 게임부터 보인다 */
   added: string;
   /**
    * 공개 예약 시각(ISO, 예: 2026-11-01T10:00:00+09:00). status "preview" 와 함께 쓴다.

@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- 조이팩 로고: 레몬 상자에 게임기 부품으로 만든 웃는 얼굴(왼눈 십자 버튼, 오른눈 동그란 버튼). 부품 아래 그림자로 툭 튀어나온 장난감 버튼처럼 -->
+  <!-- 조이필드 로고: 레몬 상자에 게임기 부품으로 만든 웃는 얼굴(왼눈 십자 버튼, 오른눈 동그란 버튼). 부품 아래 그림자로 툭 튀어나온 장난감 버튼처럼 -->
   <rect width="512" height="512" rx="120" fill="#ffb703"/>
   <g transform="translate(0 16)"><rect x="120" y="198" width="116" height="40" rx="14" fill="#d98f00"/><rect x="158" y="160" width="40" height="116" rx="14" fill="#d98f00"/><circle cx="336" cy="218" r="44" fill="#d98f00"/><path d="M152 318 Q256 428 360 318" fill="none" stroke="#d98f00" stroke-width="40" stroke-linecap="round"/></g>
   <circle cx="122" cy="300" r="26" fill="#ff7a3d" opacity="0.9"/><circle cx="390" cy="300" r="26" fill="#ff7a3d" opacity="0.9"/>

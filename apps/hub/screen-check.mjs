@@ -7,7 +7,7 @@ export const screens = [
   {
     name: 'install',
     async go(p) {
-      await p.eval("localStorage.removeItem('joypack.installDismissed'); true");
+      await p.eval("localStorage.removeItem('joyfield.installDismissed'); true");
       await p.reload();
       await p.wait(2500);
     },

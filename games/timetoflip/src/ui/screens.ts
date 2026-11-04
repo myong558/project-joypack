@@ -132,9 +132,9 @@ function heroDemo(): string {
 }
 
 /**
- * 판 바로가기(Joypack.devJump: 개발자 모드이고 "출시 화면" 보기가 꺼져 있을 때, 정식 공개 뒤에도 보임): 설정 창 맨 위 TEST 칸의 "N판부터 바로 시작" 단추(클래식, 기록·랭킹에 안 남음)
+ * 판 바로가기(Joyfield.devJump: 개발자 모드이고 "출시 화면" 보기가 꺼져 있을 때, 정식 공개 뒤에도 보임): 설정 창 맨 위 TEST 칸의 "N판부터 바로 시작" 단추(클래식, 기록·랭킹에 안 남음)
  */
-const STAGE_JUMP = () => Joypack.devJump();
+const STAGE_JUMP = () => Joyfield.devJump();
 
 export function startScreen(opts: StartOptions): HTMLElement {
   const { save } = opts;
@@ -146,12 +146,12 @@ export function startScreen(opts: StartOptions): HTMLElement {
     <main class="screen start">
       <nav class="jp-topbar" aria-label="${t('app.title')}">
         <div class="jp-topbar-group">
-          <a class="jp-top-btn hub-btn" href="../../" aria-label="${t('nav.hub')}" title="${t('nav.hub')}">${Joypack.topIcon('apps')}</a>
-          <button class="jp-top-btn jp-top-pill top-lang" data-lang="${otherLang}" aria-label="${t('lang.label')}: ${LANG_LABEL[lang]} → ${LANG_LABEL[otherLang]}">${Joypack.topIcon('globe')}<span lang="${otherLang}">${LANG_LABEL[otherLang]}</span></button>
+          <a class="jp-top-btn hub-btn" href="../../" aria-label="${t('nav.hub')}" title="${t('nav.hub')}">${Joyfield.topIcon('apps')}</a>
+          <button class="jp-top-btn jp-top-pill top-lang" data-lang="${otherLang}" aria-label="${t('lang.label')}: ${LANG_LABEL[lang]} → ${LANG_LABEL[otherLang]}">${Joyfield.topIcon('globe')}<span lang="${otherLang}">${LANG_LABEL[otherLang]}</span></button>
         </div>
         <div class="jp-topbar-group">
-          <button class="jp-top-btn rank-btn" data-ranking aria-label="${t('ranking.open')}">${Joypack.topIcon('trophy')}${pendingIn('classic') || pendingIn('daily') ? `<i class="jp-top-dot" role="img" aria-label="${t('ranking.newBadge')}"></i>` : ''}</button>
-          <button class="jp-top-btn settings-btn" aria-label="${t('settings.open')}">${Joypack.topIcon('gear')}</button>
+          <button class="jp-top-btn rank-btn" data-ranking aria-label="${t('ranking.open')}">${Joyfield.topIcon('trophy')}${pendingIn('classic') || pendingIn('daily') ? `<i class="jp-top-dot" role="img" aria-label="${t('ranking.newBadge')}"></i>` : ''}</button>
+          <button class="jp-top-btn settings-btn" aria-label="${t('settings.open')}">${Joyfield.topIcon('gear')}</button>
         </div>
       </nav>
       <div class="col main-col">
@@ -191,8 +191,8 @@ export function startScreen(opts: StartOptions): HTMLElement {
   el.querySelector('.top-lang')!.addEventListener('click', () => opts.onLang(otherLang));
   el.querySelector('[data-dex]')!.addEventListener('click', () => openDex(el, save));
   el.querySelector('[data-ranking]')!.addEventListener('click', () =>
-    // 처음 탭은 조이팩 공통 기준: 등록 대기 → 최근 모드(방금 한 판·마지막으로 본 탭) → 클래식
-    openRanking(el, opts.ranking, Joypack.rankTab('timetoflip', ['classic', 'daily'], 'classic') as Mode, null, () => {
+    // 처음 탭은 조이필드 공통 기준: 등록 대기 → 최근 모드(방금 한 판·마지막으로 본 탭) → 클래식
+    openRanking(el, opts.ranking, Joyfield.rankTab('timetoflip', ['classic', 'daily'], 'classic') as Mode, null, () => {
       if (!pendingIn('classic') && !pendingIn('daily')) el.querySelector('.jp-top-dot')?.remove();
     }),
   );
@@ -212,7 +212,7 @@ export function startScreen(opts: StartOptions): HTMLElement {
 /**
  * 출시 전 확인용: 개발자 모드 + 미리보기 배포일 때만(정식 공개하면 사라짐) 도감 48장을 모두 연 것처럼 보여 준다(저장된 기록은 그대로)
  */
-const DEX_ALL_OPEN = () => Joypack.devTools();
+const DEX_ALL_OPEN = () => Joyfield.devTools();
 
 function openDex(host: HTMLElement, save: SaveData): void {
   const found = new Set<FaceId>(DEX_ALL_OPEN() ? ALL_FACES : save.dex);
@@ -335,8 +335,8 @@ function settingsPanel(opts: StartOptions): HTMLElement {
       <h2>${ICONS.gear} ${t('settings.title')}</h2>
       ${
         // 개발자 모드: 판 바로가기(정식 공개 뒤에도)·출시 화면 단추. 테스트할 때 바로 누르도록 설정 창 맨 위에 둔다
-        Joypack.devMode()
-          ? `<section class="dev-section"><h3>TEST</h3>${STAGE_JUMP() ? `<p class="note">${t('test.jump')}</p><div class="stage-jump" role="group" aria-label="${t('test.jump')}">${[2, 3, 4, 5, 6, 7, 8].map((n) => `<button type="button" data-from="${n}">${n}</button>`).join('')}</div>` : ''}<button type="button" class="dev-toggle" data-release aria-pressed="${Joypack.releaseView()}">${Joypack.releaseView() ? t('test.devView') : t('test.releaseView')}</button></section>`
+        Joyfield.devMode()
+          ? `<section class="dev-section"><h3>TEST</h3>${STAGE_JUMP() ? `<p class="note">${t('test.jump')}</p><div class="stage-jump" role="group" aria-label="${t('test.jump')}">${[2, 3, 4, 5, 6, 7, 8].map((n) => `<button type="button" data-from="${n}">${n}</button>`).join('')}</div>` : ''}<button type="button" class="dev-toggle" data-release aria-pressed="${Joyfield.releaseView()}">${Joyfield.releaseView() ? t('test.devView') : t('test.releaseView')}</button></section>`
           : ''
       }
       <section>
@@ -378,7 +378,7 @@ function settingsPanel(opts: StartOptions): HTMLElement {
         </div>
       </section>
       <p class="app-version">${t('settings.version')} v${__APP_VERSION__}</p>
-      <p class="app-copyright">${Joypack.COPYRIGHT}</p>
+      <p class="app-copyright">${Joyfield.COPYRIGHT}</p>
     </div>`);
 
   const select = (attr: string, value: string) =>
@@ -424,7 +424,7 @@ function settingsPanel(opts: StartOptions): HTMLElement {
   confirm.querySelector('[data-confirm]')!.addEventListener('click', opts.onReset);
   // 개발자 모드: 출시 모드 보기 ↔ 개발 기능 보기(판별 바로 시작·도감 전부 열기를 숨기거나 다시 보임)
   el.querySelector('[data-release]')?.addEventListener('click', () => {
-    Joypack.setReleaseView(!Joypack.releaseView());
+    Joyfield.setReleaseView(!Joyfield.releaseView());
     opts.onRefresh();
   });
   el.querySelectorAll<HTMLButtonElement>('[data-from]').forEach((b) => b.addEventListener('click', () => opts.onPlay('classic', Number(b.dataset.from))));
@@ -484,14 +484,14 @@ function rankEntryForm(opts: {
   const hint = el.querySelector<HTMLElement>('.rank-entry-hint')!;
   const hintText = hint.innerHTML;
   let sending = false;
-  // 금지어(욕설 등)는 등록 버튼을 끄고 안내 줄에 알린다(조이팩 공통 Joypack.isAllowedName, 기준서 10.3)
+  // 금지어(욕설 등)는 등록 버튼을 끄고 안내 줄에 알린다(조이필드 공통 Joyfield.isAllowedName, 기준서 10.3)
   const sync = (clean = cleanName(input.value)) => {
-    const blocked = isValidName(clean) && !Joypack.isAllowedName(clean);
+    const blocked = isValidName(clean) && !Joyfield.isAllowedName(clean);
     submit.disabled = !isValidName(clean) || blocked;
     if (!sending) hint.innerHTML = blocked ? `<span class="rank-error">${t('ranking.badName')}</span>` : hintText;
   };
-  // 영문 대문자 5자까지, 휴대폰은 영문 자판·대문자로 연다(조이팩 공통 Joypack.initialsInput)
-  Joypack.initialsInput(input, sync);
+  // 영문 대문자 5자까지, 휴대폰은 영문 자판·대문자로 연다(조이필드 공통 Joyfield.initialsInput)
+  Joyfield.initialsInput(input, sync);
   sync();
   el.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -586,7 +586,7 @@ function openRanking(host: HTMLElement, view: RankingView, start: Mode, mark: nu
     list.innerHTML = Array.from({ length: RANK_SIZE }, (_, i) => {
       const e = entries[i];
       const cls = [i < 3 ? `top top${i + 1}` : '', e ? '' : 'empty', e && i === highlight ? 'me' : ''].filter(Boolean).join(' ');
-      return `<li class="${cls}"><span class="no">${i + 1}</span><span class="name">${e ? e.name + Joypack.deviceIcon(e.dev) : '-----'}</span><span class="stage">${e ? t('ranking.stage', { n: e.stage }) : ''}</span><span class="score">${e ? e.score.toLocaleString() : '-'}</span>${mode === 'classic' ? `<span class="date">${e ? shortDate(e.date) : ''}</span>` : ''}</li>`;
+      return `<li class="${cls}"><span class="no">${i + 1}</span><span class="name">${e ? e.name + Joyfield.deviceIcon(e.dev) : '-----'}</span><span class="stage">${e ? t('ranking.stage', { n: e.stage }) : ''}</span><span class="score">${e ? e.score.toLocaleString() : '-'}</span>${mode === 'classic' ? `<span class="date">${e ? shortDate(e.date) : ''}</span>` : ''}</li>`;
     }).join('');
   };
   const render = () => {
@@ -621,7 +621,7 @@ function openRanking(host: HTMLElement, view: RankingView, start: Mode, mark: nu
     b.addEventListener('click', () => {
       if (b.dataset.board === mode) return;
       mode = b.dataset.board as Mode;
-      Joypack.setRankBoard('timetoflip', mode);
+      Joyfield.setRankBoard('timetoflip', mode);
       highlight = null;
       if (status[mode] !== 'online') fetchBoard(mode);
       render();

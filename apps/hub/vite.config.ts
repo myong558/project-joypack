@@ -8,7 +8,7 @@ import { teaserBackdrop } from '../../scripts/check-icons.mjs';
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const readJson = (path: string) => JSON.parse(readFileSync(join(ROOT, path), 'utf8'));
 
-// 개발 서버가 게임 주소를 이어 줄 게임 목록. 설정 → 정보에는 조이팩 버전(루트 package.json)만 보인다(게임 버전은 각 게임 설정 맨 아래)
+// 개발 서버가 게임 주소를 이어 줄 게임 목록. 설정 → 정보에는 조이필드 버전(루트 package.json)만 보인다(게임 버전은 각 게임 설정 맨 아래)
 const games: { id: string; icon?: string; color?: string }[] = readJson('games.json');
 
 const TYPES: Record<string, string> = {
@@ -30,7 +30,7 @@ const TYPES: Record<string, string> = {
  *   shared/        → packages/shared
  */
 const devGames: Plugin = {
-  name: 'joypack-dev-games',
+  name: 'joyfield-dev-games',
   apply: 'serve',
   configureServer(server) {
     const mounts: [string, string][] = [

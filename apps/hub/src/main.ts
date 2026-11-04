@@ -1,4 +1,6 @@
-import '@joypack/shared/topbar.css';
+// 공통 모듈을 맨 먼저 불러, 이름 바꾸기 전 저장 키를 다른 코드가 읽기 전에 옮긴다
+import '@joyfield/shared';
+import '@joyfield/shared/topbar.css';
 import './styles.css';
 import { GAMES, byNewest, iconUrl, isNew, isPublic, isScheduled, patternOf, type GameMeta } from './games';
 import { LANG_LABEL, LANGS, formatNumber, getLang, t, type MessageKey } from './i18n';
@@ -15,7 +17,7 @@ applySettings(settings);
 watchSystemTheme(() => settings.theme);
 
 // 보이는 화면 높이를 --jp-vh 로(styles.css body·#app). 설치 앱에서 100dvh 가 실제보다 커 스크롤이 생기던 것 방지
-Joypack.trackViewport();
+Joyfield.trackViewport();
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 
@@ -51,7 +53,7 @@ const ICON = {
   sparkle: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5c.6 4.2 2.3 6 6.5 6.5-4.2.6-5.9 2.3-6.5 6.5-.6-4.2-2.3-5.9-6.5-6.5 4.2-.5 5.9-2.3 6.5-6.5z"/><path d="M18.5 15.5c.3 1.8 1 2.6 2.5 3-1.5.3-2.2 1.1-2.5 3-.3-1.9-1-2.7-2.5-3 1.5-.4 2.2-1.2 2.5-3z"/></svg>',
 };
 
-// 조이팩 로고(public/logo.svg 와 같은 그림): 레몬 상자에 게임기 부품으로 만든 웃는 얼굴.
+// 조이필드 로고(public/logo.svg 와 같은 그림): 레몬 상자에 게임기 부품으로 만든 웃는 얼굴.
 // 첫 화면에서는 부품(십자 버튼 → 동그란 버튼 → 입 → 볼)이 하나씩 튀어 들어오도록 그림자와 함께 나눠 그린다.
 // 앱 아이콘과 같은 색으로 고정한다(오늘의 톤을 따르지 않음).
 const HERO_LOGO = `
@@ -63,7 +65,7 @@ const HERO_LOGO = `
     <g class="logo-tile" style="--i:3"><circle cx="122" cy="300" r="26" fill="#ff7a3d" opacity="0.9"/><circle cx="390" cy="300" r="26" fill="#ff7a3d" opacity="0.9"/></g>
   </svg>`;
 
-// 작은 로고(설치 안내·설정의 "조이팩 앱"). 파일(logo.svg)을 따로 불러오지 않고 그려 넣어,
+// 작은 로고(설치 안내·설정의 "조이필드 앱"). 파일(logo.svg)을 따로 불러오지 않고 그려 넣어,
 // 주소·캐시 상태와 관계없이 늘 보인다
 function smallLogo(size: number): string {
   return `
@@ -153,10 +155,10 @@ const lbl = (html: string) => `<span class="lbl${/[가-힣]/.test(html) ? ' ko' 
 
 // ---------- 공유받은 링크로 들어온 사람: 첫 화면 위에 설치 안내 ----------
 
-const DISMISS_KEY = 'joypack.installDismissed';
+const DISMISS_KEY = 'joyfield.installDismissed';
 
 // 게임에서 공유 링크로 들어왔다가 허브로 넘어온 경우도 공통 모듈이 이번 방문 동안 기억해 둔다
-const invited = Joypack.readInvite();
+const invited = Joyfield.readInvite();
 
 /**
  * 첫 화면 설치 안내를 보여 줄지.
@@ -187,7 +189,7 @@ function installGuide(): string {
 }
 
 // ---------- 앱으로 설치하는 방법(기기별 단계 안내) ----------
-// 설정 "조이팩 앱" 칸과 첫 화면 설치 카드가 함께 쓴다. 안드로이드·아이폰 탭(지금 기기 쪽이 먼저), 단계마다 실제 버튼과 비슷한 작은 아이콘.
+// 설정 "조이필드 앱" 칸과 첫 화면 설치 카드가 함께 쓴다. 안드로이드·아이폰 탭(지금 기기 쪽이 먼저), 단계마다 실제 버튼과 비슷한 작은 아이콘.
 // 기기 화면 사진은 OS 버전마다 달라지고 무거워 쓰지 않는다
 const HOW_ICON = {
   // 안드로이드 Chrome 메뉴(세로 점 셋)
@@ -295,7 +297,7 @@ function bindInstallCard(root: HTMLElement): void {
 const cached = new Map<string, boolean>();
 
 async function refreshCached(): Promise<void> {
-  await Promise.all(live.map(async (g) => cached.set(g.id, await Joypack.isGameCached(g.id))));
+  await Promise.all(live.map(async (g) => cached.set(g.id, await Joyfield.isGameCached(g.id))));
 }
 
 function gameCard(game: GameMeta): string {
@@ -409,11 +411,11 @@ function renderHome(force = true): void {
   const markup = `
     <nav class="top jp-topbar" aria-label="${esc(t('app.title'))}">
       <div class="jp-topbar-group">
-        <button class="jp-top-btn jp-top-pill lang-btn" data-lang="${otherLang}" aria-label="${t('settings.lang')}: ${LANG_LABEL[getLang()]} → ${LANG_LABEL[otherLang]}">${Joypack.topIcon('globe')}<span lang="${otherLang}">${LANG_LABEL[otherLang]}</span></button>
+        <button class="jp-top-btn jp-top-pill lang-btn" data-lang="${otherLang}" aria-label="${t('settings.lang')}: ${LANG_LABEL[getLang()]} → ${LANG_LABEL[otherLang]}">${Joyfield.topIcon('globe')}<span lang="${otherLang}">${LANG_LABEL[otherLang]}</span></button>
       </div>
       <div class="jp-topbar-group">
-        <button class="jp-top-btn" data-open="ranking" aria-label="${t('ranking.open')}" title="${t('ranking.open')}">${Joypack.topIcon('trophy')}</button>
-        <button class="jp-top-btn" data-open="settings" aria-label="${t('settings.open')}" title="${t('settings.open')}">${Joypack.topIcon('gear')}</button>
+        <button class="jp-top-btn" data-open="ranking" aria-label="${t('ranking.open')}" title="${t('ranking.open')}">${Joyfield.topIcon('trophy')}</button>
+        <button class="jp-top-btn" data-open="settings" aria-label="${t('settings.open')}" title="${t('settings.open')}">${Joyfield.topIcon('gear')}</button>
       </div>
     </nav>
     <main class="stage">
@@ -433,7 +435,7 @@ function renderHome(force = true): void {
     </main>
     <footer class="foot">
       <span>${smallLogo(14)}${
-        // 개발자 모드(숨김 미리보기)가 켜진 기기는 "조이팩" 자리에 "개발자"(글자 수가 같아 배치는 그대로)
+        // 개발자 모드(숨김 미리보기)가 켜진 기기는 "조이필드" 자리에 "개발자"(글자 수가 같아 배치는 그대로)
         previewOn() ? t('preview.foot') : t('app.title')
       } v${__APP_VERSION__}</span>
     </footer>`;
@@ -511,7 +513,7 @@ void document.fonts?.ready.then(fitScreen);
 // 연출 중에 다시 그리면(오프라인 표시·설치 안내 갱신 등) 요소가 새로 만들어져 연출이 처음부터 다시 돌므로,
 // 그동안의 다시 그리기는 연출이 끝난 뒤 한 번으로 모은다.
 // 끝나는 때: 기본 1.9초, 게임이 많으면 "다음 게임" 띠(1.2초 + 카드 수 × 0.11초에 시작, 0.5초)가 다 올라온 뒤까지
-// 뒤로 가기·게임 위 조이팩 버튼으로 돌아올 때는 짧은 복귀 연출(#app.intro-back, 약 1초): 로고 얼굴 부품 콩콩·반짝이 크게, 카드가 거의 한꺼번에 떠오름
+// 뒤로 가기·게임 위 조이필드 버튼으로 돌아올 때는 짧은 복귀 연출(#app.intro-back, 약 1초): 로고 얼굴 부품 콩콩·반짝이 크게, 카드가 거의 한꺼번에 떠오름
 const REDUCED_MOTION = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const introMs = (back: boolean, cards: number): number =>
   REDUCED_MOTION ? 0 : back ? Math.max(1000, 560 + cards * 40) : Math.max(1900, 1750 + cards * 110);
@@ -534,7 +536,7 @@ function startHome(): void {
 }
 
 /**
- * 미니 게임 위 메뉴의 조이팩 버튼(링크)으로 넘어왔나: 뒤로 가기와 같은 짧은 복귀 연출을 쓴다.
+ * 미니 게임 위 메뉴의 조이필드 버튼(링크)으로 넘어왔나: 뒤로 가기와 같은 짧은 복귀 연출을 쓴다.
  * 같은 사이트의 games/ 아래 페이지에서 새로 들어온 경우만(새로 고침·앞뒤 이동은 제외). 게임마다 따로 고칠 것이 없다
  */
 function cameFromGame(): boolean {
@@ -638,11 +640,11 @@ function openDialog(className: string, body: string, title: string, sub?: string
 // ---------- 전체 랭킹 ----------
 
 /**
- * 게임마다 처음 보일 순위표 탭: 조이팩 공통 기준(Joypack.rankTab) — 등록 대기 → 최근 탭(그 게임에서 방금 한 판·어디서든 마지막으로 본 탭) → games.json 의 default.
+ * 게임마다 처음 보일 순위표 탭: 조이필드 공통 기준(Joyfield.rankTab) — 등록 대기 → 최근 탭(그 게임에서 방금 한 판·어디서든 마지막으로 본 탭) → games.json 의 default.
  * 각 게임 랭킹 창과 같은 값을 읽고 써서, 여기서 고른 탭이 게임 랭킹 창에도 이어진다
  */
 function rankBoardOf(game: GameMeta): string {
-  return Joypack.rankTab(game.id, game.ranking!.boards.map((b) => b.id), game.ranking!.default);
+  return Joyfield.rankTab(game.id, game.ranking!.boards.map((b) => b.id), game.ranking!.default);
 }
 
 /** TOP 10 으로 펼친 게임 */
@@ -658,7 +660,7 @@ function rowsHtml(game: GameMeta, rows: Row[], limit = TOP): string {
           ? t('ranking.score', { score: formatNumber(r.score) }) +
             (r.thermo ? ` <span class="rank-thermo" title="${t('ranking.thermo')}" aria-label="${t('ranking.thermo')}">🌡️</span>` : '')
           : t('ranking.tries', { tries: r.tries, time: (r.time / 1000).toFixed(1) });
-      return `<li class="place-${i + 1}" style="--c:${game.color}"><span class="medal">${i + 1}</span><span class="rank-name">${esc(r.name)}${Joypack.deviceIcon(r.dev)}</span><span class="rank-value">${value}</span></li>`;
+      return `<li class="place-${i + 1}" style="--c:${game.color}"><span class="medal">${i + 1}</span><span class="rank-name">${esc(r.name)}${Joyfield.deviceIcon(r.dev)}</span><span class="rank-value">${value}</span></li>`;
     })
     .join('')}</ol>`;
 }
@@ -700,7 +702,7 @@ function openRanking(): void {
     // 고른 탭은 최근 탭으로 남긴다(게임 랭킹 창에도 이어짐)
     section.querySelectorAll<HTMLButtonElement>('[data-board]').forEach((b) =>
       b.addEventListener('click', () => {
-        Joypack.setRankBoard(game.id, b.dataset.board!);
+        Joyfield.setRankBoard(game.id, b.dataset.board!);
         show(b.dataset.board!);
       }),
     );
@@ -821,12 +823,12 @@ async function openSettings(): Promise<void> {
     <section class="set-group about">
       <h3>${t('settings.about')}</h3>
       <p><span class="ver-tap" data-ver-tap>${t('app.title')} v${__APP_VERSION__}</span></p>
-      <p class="hint copyright">${esc(Joypack.COPYRIGHT)}</p>
+      <p class="hint copyright">${esc(Joyfield.COPYRIGHT)}</p>
     </section>`;
   const dialog = openDialog('settings', body, t('settings.title'));
   renderInstall(dialog.querySelector<HTMLElement>('[data-install-section]')!);
   dialog.querySelector('[data-share]')!.addEventListener('click', async () => {
-    if (!(await shareJoypack())) dialog.querySelector<HTMLElement>('[data-share-done]')!.hidden = false;
+    if (!(await shareJoyfield())) dialog.querySelector<HTMLElement>('[data-share-done]')!.hidden = false;
   });
 
   dialog.querySelectorAll<HTMLElement>('[data-seg]').forEach((group) =>
@@ -854,8 +856,8 @@ async function openSettings(): Promise<void> {
     input.addEventListener('change', () => saveSetting(settings, input.dataset.toggle as 'sound' | 'vibrate', input.checked)),
   );
   const initials = dialog.querySelector<HTMLInputElement>('#initials')!;
-  // 영문 대문자 5자까지, 휴대폰은 영문 자판으로(조이팩 공통). 바뀔 때마다 바로 저장
-  Joypack.initialsInput(initials, (clean) => {
+  // 영문 대문자 5자까지, 휴대폰은 영문 자판으로(조이필드 공통). 바뀔 때마다 바로 저장
+  Joyfield.initialsInput(initials, (clean) => {
     if (clean) saveSetting(settings, 'initials', clean);
   });
   // 기록 지우기·저장 비우기: 실수로 지우지 않게 확인 창을 한 번 더 띄운다
@@ -874,7 +876,7 @@ async function openSettings(): Promise<void> {
     b.addEventListener('click', () => {
       const game = gameOf(b.dataset.clear!);
       openConfirm(t('storage.clear'), t('storage.confirmText', { name: esc(game.name[getLang()]) }), async () => {
-        await Joypack.clearGameCache(game.id);
+        await Joyfield.clearGameCache(game.id);
         cached.set(game.id, false);
         b.disabled = true;
         b.closest('li')!.querySelector('[data-cache-state]')!.textContent = t('storage.none');
@@ -959,15 +961,15 @@ function openPreviewSwitch(settingsDialog: HTMLDialogElement): void {
   });
 }
 
-// ---------- 조이팩 공유 ----------
+// ---------- 조이필드 공유 ----------
 
 /**
  * 기기 공유 창(카카오톡·문자 등)으로 보낸다. 공유 창이 없으면(주로 PC) 링크를 복사한다.
  * 공유 창으로 보냈거나 사용자가 닫았으면 true, 복사로 대신했으면 false(복사했다는 안내를 보여 준다)
  */
-async function shareJoypack(): Promise<boolean> {
-  // 공유할 주소: 조이팩 첫 화면 + 공유 표시(?from=share). 받은 사람이 열면 첫 화면에 설치 안내가 뜬다
-  const data = { title: t('app.title'), text: t('share.text'), url: Joypack.shareUrl() };
+async function shareJoyfield(): Promise<boolean> {
+  // 공유할 주소: 조이필드 첫 화면 + 공유 표시(?from=share). 받은 사람이 열면 첫 화면에 설치 안내가 뜬다
+  const data = { title: t('app.title'), text: t('share.text'), url: Joyfield.shareUrl() };
   if (navigator.share) {
     try {
       await navigator.share(data);
@@ -985,7 +987,7 @@ async function shareJoypack(): Promise<boolean> {
   return false;
 }
 
-// ---------- 앱 설치(설정의 "조이팩 다운로드") ----------
+// ---------- 앱 설치(설정의 "조이필드 다운로드") ----------
 
 function renderInstall(section: HTMLElement, showGuide = false): void {
   const state = installState();
@@ -1022,19 +1024,19 @@ function renderInstall(section: HTMLElement, showGuide = false): void {
 const firstCheck = refreshCached();
 // 0.3초 안에 끝나지 않았으면 끝난 뒤 한 번 더 그린다(아직 그리기 전이면 건너뜀)
 void firstCheck.then(() => app.childElementCount && requestRender());
-// 게임이 계속 늘어나므로 오래(Joypack.IDLE_DAYS) 안 한 게임의 저장본은 비운다(기준서 1.11). 지운 게 있으면 카드·설정 표시를 새로
+// 게임이 계속 늘어나므로 오래(Joyfield.IDLE_DAYS) 안 한 게임의 저장본은 비운다(기준서 1.11). 지운 게 있으면 카드·설정 표시를 새로
 void firstCheck
-  .then(() => Joypack.cleanupIdleGames(GAMES.map((g) => g.id)))
+  .then(() => Joyfield.cleanupIdleGames(GAMES.map((g) => g.id)))
   .then((removed) => (removed.length ? refreshHome() : undefined));
 void Promise.race([firstCheck, new Promise((r) => setTimeout(r, 300))]).then(startHome);
 
-// 조이팩으로 들어오면 늘 시작 화면: 게임으로 떠날 때 열린 창(랭킹·설정·개발자 모드)을 닫아 두고,
+// 조이필드로 들어오면 늘 시작 화면: 게임으로 떠날 때 열린 창(랭킹·설정·개발자 모드)을 닫아 두고,
 // 뒤로 가기로 되살아나면(bfcache) 맨 위로 올려 최고 기록·오프라인 표시를 새로 읽고, 짧은 복귀 연출을 돌린다
 // (되살아난 순위는 옛 값이라 보이지 않게)
 const closeDialogs = () => document.querySelectorAll<HTMLDialogElement>('dialog[open]').forEach((d) => d.close());
 window.addEventListener('pagehide', closeDialogs);
 // 되살아난 옛 화면은 그 자리에서 애니메이션이 이어지다 새로 그릴 때 처음부터 다시 시작돼 끊겨 보였다(캐시 확인을 기다린 뒤 그렸음).
-// 그래서 되살아나자마자 곧바로 복귀 연출로 새로 그리고(조이팩 버튼으로 들어올 때와 같은 모양), 오프라인 저장 확인은 그 뒤에 해서 바뀐 게임이 있을 때만 다시 그린다
+// 그래서 되살아나자마자 곧바로 복귀 연출로 새로 그리고(조이필드 버튼으로 들어올 때와 같은 모양), 오프라인 저장 확인은 그 뒤에 해서 바뀐 게임이 있을 때만 다시 그린다
 const cachedKey = () => live.map((g) => `${g.id}:${cached.get(g.id) ?? false}`).join();
 window.addEventListener('pageshow', (e) => {
   if (!e.persisted) return;
@@ -1051,7 +1053,7 @@ window.addEventListener('online', () => void refreshHome());
 window.addEventListener('offline', () => void refreshHome());
 // 다른 탭(게임)에서 바꾼 설정·기록을 따라간다
 window.addEventListener('storage', (e) => {
-  if (!e.key || e.key.startsWith('joypack.') || e.key.startsWith('updown.') || e.key.startsWith('project-hammer') || e.key.startsWith('timetoflip')) {
+  if (!e.key || e.key.startsWith('joyfield.') || e.key.startsWith('updown.') || e.key.startsWith('project-hammer') || e.key.startsWith('timetoflip')) {
     Object.assign(settings, loadSettings());
     applySettings(settings);
     void refreshHome();
@@ -1070,4 +1072,4 @@ if ('serviceWorker' in navigator) {
     if ((e.data as { type?: string })?.type === 'game-cached') void refreshHome();
   });
 }
-window.addEventListener('load', () => void Joypack.registerSW({ root: './' }));
+window.addEventListener('load', () => void Joyfield.registerSW({ root: './' }));

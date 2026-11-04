@@ -1,7 +1,7 @@
 {
   "name": "timetoflip",
   "private": true,
-  "version": "1.6.0",
+  "version": "1.6.1",
   "author": "Myong Bum Soo",
   "license": "UNLICENSED",
   "type": "module",
@@ -20,7 +20,7 @@
   "dependencies": {
     "firebase": "^13.0.0",
     "html-to-image": "1.11.13",
-    "@joypack/shared": "workspace:*"
+    "@joyfield/shared": "workspace:*"
   },
-  "description": "조이팩 미니 게임: 타임 투 플립"
+  "description": "조이필드 미니 게임: 타임 투 플립"
 }

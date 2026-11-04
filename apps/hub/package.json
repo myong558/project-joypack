@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "author": "Myong Bum Soo",
   "license": "UNLICENSED",
-  "description": "조이팩 첫 화면: 게임 목록, 공통 설정, 전체 랭킹",
+  "description": "조이필드 첫 화면: 게임 목록, 공통 설정, 전체 랭킹",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,7 +13,7 @@
     "font": "node --use-system-ca ../../scripts/font-subset.mjs jua=src/fonts/jua-hub.woff2 gothic-a1-bold=src/fonts/gothic-a1-bold-symbols.woff2=+jua"
   },
   "dependencies": {
-    "@joypack/shared": "workspace:*"
+    "@joyfield/shared": "workspace:*"
   },
   "devDependencies": {
     "sharp": "^0.34.4",

@@ -3,7 +3,7 @@ import { getLang, t } from './i18n';
 
 /**
  * 도감 설명: 묶음 이름과 카드마다 제목·작가·한두 줄 설명(한국어·영어).
- * 도형·팝아트(조이팩이 직접 그린 그림)는 작가 줄은 "그림 조이팩", 설명은 지어낸 우스개,
+ * 도형·팝아트(조이필드가 직접 그린 그림)는 작가 줄은 "그림 조이필드", 설명은 지어낸 우스개,
  * 명화는 실제 작가·연도·짧은 이야기. 명화 그림은 미술관 공개 이미지다(CC0·퍼블릭 도메인·공공누리 1유형, art-src/meta.json).
  * 공공누리 1유형(국립중앙박물관)은 출처 표시가 의무라 작가 줄에 소장처를 쓴다
  */
@@ -23,19 +23,19 @@ const SETS: Record<SetId, { ko: string; en: string }> = {
   ink: { ko: '동양화 · 수묵', en: 'Ink Painting' },
 };
 
-const anon = { ko: '그림 조이팩', en: 'Art by Joypack' };
+const anon = { ko: '그림 조이필드', en: 'Art by Joyfield' };
 const joke = (koTitle: string, ko: string, enTitle: string, en: string): Entry => ({
   ko: { title: koTitle, by: anon.ko, desc: ko },
   en: { title: enTitle, by: anon.en, desc: en },
 });
 const art = (ko: Text, en: Text): Entry => ({ ko, en });
 const pop = (koArtist: string, enArtist: string, year: string) => ({
-  ko: `원작 ${koArtist}(${year}) · 팝아트 편집 조이팩`,
-  en: `After ${enArtist} (${year}) · pop edit by Joypack`,
+  ko: `원작 ${koArtist}(${year}) · 팝아트 편집 조이필드`,
+  en: `After ${enArtist} (${year}) · pop edit by Joyfield`,
 });
 
 const CARDS: Record<FaceId, Entry> = {
-  /* ---------- 도형: 조이팩 그림 + 우스개 ---------- */
+  /* ---------- 도형: 조이필드 그림 + 우스개 ---------- */
   circle: joke('먹색 동그라미', '모서리가 없어 걸어 두면 자꾸 액자 밖으로 굴러 나간다.', 'Charcoal Circle', 'Not one corner. Hang it up and it keeps rolling out of the frame.'),
   triangle: joke('파란 세모', '세 변이 서로 자기가 밑변이라며 아직도 다투는 중.', 'Blue Triangle', 'All three sides still argue over which one is the bottom.'),
   square: joke('초록 네모', '네 변이 똑같아 자를 든 비평가들이 눈물을 흘렸다.', 'Green Square', 'Four equal sides. Critics with rulers wept openly.'),
@@ -45,7 +45,7 @@ const CARDS: Record<FaceId, Entry> = {
   plus: joke('청록 더하기', '더하기 같지만 작가는 빼기를 두 번 그렸을 뿐이라 주장.', 'Teal Plus', 'Looks like a plus. The artist insists it is two minuses.'),
   moon: joke('노란 초승달', '보름달이 되려다 누가 한 입 베어 먹었다. 범인은 아직 안 잡혔다.', 'Yellow Crescent', 'It was on its way to full moon until someone took a bite.'),
 
-  /* ---------- 팝아트: 조이팩 그림 + 우스개 ---------- */
+  /* ---------- 팝아트: 조이필드 그림 + 우스개 ---------- */
   lips: joke('쪽!', '키스 자국을 가장 많이 받은 그림. 대부분 관람객 것.', 'Smack!', 'The most-kissed painting in the gallery. Mostly by visitors.'),
   bolt: joke('번쩍!', '그리는 데 0.1초, 액자에 넣는 데는 3년 걸렸다고 한다.', 'Zap!', 'Painted in 0.1 seconds. Framing it took three years.'),
   eye: joke('눈', '지나가면 눈동자가 따라온다는 소문이 있다. 확인 금지.', 'The Eye', 'They say it follows you around the room. Don’t check.'),

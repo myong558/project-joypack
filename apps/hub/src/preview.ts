@@ -4,7 +4,7 @@
 // 공개 저장소라 비밀번호 대신 SHA-256 값만 둔다. 보안 장치가 아니라 미완성 게임을 일반 사용자 눈에서 숨기는 용도다.
 
 /** 값: 'on' = 켜짐, 그 밖(없음·'off') = 꺼짐. 예전(v1.10.x) 값 '1' 도 켜짐 */
-const KEY = 'joypack.preview';
+const KEY = 'joyfield.preview';
 const PASS_SHA256 = 'cd53601f3f65a23fc9f7c22319324670e59f6e0fe2bad42982cef0392e2b6d5c';
 
 export function previewOn(): boolean {

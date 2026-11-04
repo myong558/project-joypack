@@ -2,19 +2,19 @@ import { insertEntry, sanitizeRankings, type RankEntry } from './ranking';
 import type { Mode } from './ui/screens';
 
 /**
- * 온라인 순위표(Firebase Firestore). joypack 프로젝트를 다른 게임과 같이 쓰므로
+ * 온라인 순위표(Firebase Firestore). joyfield 프로젝트를 다른 게임과 같이 쓰므로
  * 두더지잡기 데이터는 games/hammer/rankings 아래에만 둔다.
  *   클래식:          games/hammer/rankings/classic
  *   오늘의 챌린지:   games/hammer/rankings/daily-YYYY-MM-DD (날짜마다 새 문서라 매일 새로 시작한다)
  * 문서 하나에 1~10위를 { entries: [...] }로 담는다. 웹 설정값은 공개되는 값이며, 쓰기 제한은 Firestore 규칙이 맡는다
  */
 const firebaseConfig = {
-  apiKey: 'AIzaSyChpbX7wDj2GQF7O4QqR-5g7QYpCVkx_9s',
-  authDomain: 'joypack-c6bd2.firebaseapp.com',
-  projectId: 'joypack-c6bd2',
-  storageBucket: 'joypack-c6bd2.firebasestorage.app',
-  messagingSenderId: '828719448319',
-  appId: '1:828719448319:web:2109d89aa4cc23ab718cca',
+  apiKey: 'AIzaSyDX5BIFO5ViBSMkSKaHNJVHDHZdrzWRRRg',
+  authDomain: 'joyfield-41b5a.firebaseapp.com',
+  projectId: 'joyfield-41b5a',
+  storageBucket: 'joyfield-41b5a.firebasestorage.app',
+  messagingSenderId: '433473215665',
+  appId: '1:433473215665:web:af7584b216d602902c9690',
 };
 
 /** 응답이 이보다 늦으면 오프라인으로 보고 기기에 남은 순위를 보여 준다 */

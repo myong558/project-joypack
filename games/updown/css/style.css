@@ -519,7 +519,7 @@ button:focus-visible {
   margin-bottom: auto;
 }
 
-/* 위 메뉴는 조이팩 공통(../../shared/topbar.css, .jp-topbar·.jp-top-btn): 조이팩·다른 게임과 같은 자리·크기로 화면 맨 위에 고정.
+/* 위 메뉴는 조이필드 공통(../../shared/topbar.css, .jp-topbar·.jp-top-btn): 조이필드·다른 게임과 같은 자리·크기로 화면 맨 위에 고정.
    여기서는 대표색만 정한다. 랭킹 등록이 남았을 때의 강조(.is-on)도 공통 규칙을 쓴다. */
 .topbar {
   --jp-top-accent: var(--action);
@@ -582,7 +582,7 @@ button:focus-visible {
   box-shadow: 0 6px 16px var(--shadow-brand), 0 1px 3px rgb(0 0 0 / 0.12);
 }
 
-/* 제목 + 게임 설명(조이팩 카드와 같은 문구) */
+/* 제목 + 게임 설명(조이필드 카드와 같은 문구) */
 .brand-text {
   display: flex;
   flex-direction: column;
@@ -2527,7 +2527,7 @@ button:focus-visible {
     padding-inline: 32px;
     padding-top: calc(var(--jp-top-space) / var(--pc-zoom, 1) + var(--space) * 0.5);
     zoom: var(--pc-zoom, 1);
-    /* 화면을 통째로 키워도 위 메뉴는 조이팩·다른 게임과 같은 크기·자리에 두도록 확대를 되돌린다 */
+    /* 화면을 통째로 키워도 위 메뉴는 조이필드·다른 게임과 같은 크기·자리에 두도록 확대를 되돌린다 */
     --jp-top-unzoom: var(--pc-zoom, 1);
   }
 

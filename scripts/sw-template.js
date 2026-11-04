@@ -1,8 +1,8 @@
-/* 조이팩 서비스 워커. scripts/build.mjs 가 빌드할 때 이 파일로 dist/sw.js 를 만든다(직접 고치지 말 것).
+/* 조이필드 서비스 워커. scripts/build.mjs 가 빌드할 때 이 파일로 dist/sw.js 를 만든다(직접 고치지 말 것).
  *
  * 캐시 정책(README 4.1)
  * - 허브: 서비스 워커 설치 때 미리 캐시(precache). 빌드마다 VERSION 이 바뀌어 새 캐시로 교체된다
- * - 게임: 그 게임을 처음 열 때 games/<id>/files.json 에 적힌 파일 전체를 게임별 캐시(joypack-game-<id>)에 담는다.
+ * - 게임: 그 게임을 처음 열 때 games/<id>/files.json 에 적힌 파일 전체를 게임별 캐시(joyfield-game-<id>)에 담는다.
  *         이후에는 해시가 바뀐 파일만 다시 받는다. 한 번도 안 연 게임은 받지 않는다
  *         게임을 열 때는 해시 붙은 빌드 파일(assets/)만 캐시 먼저, 나머지(페이지·해시 없는 파일)는 네트워크 먼저(브라우저 캐시도
  *         건너뜀) → 고쳐서 배포하면 다음 실행에 바로 새 버전. 오프라인이거나 3초 안에 응답이 없으면 캐시
@@ -10,8 +10,8 @@
  */
 const VERSION = '__VERSION__';
 const HUB_FILES = [] /* __HUB_FILES__ */;
-const HUB_CACHE = 'joypack-hub-' + VERSION;
-const GAME_PREFIX = 'joypack-game-';
+const HUB_CACHE = 'joyfield-hub-' + VERSION;
+const GAME_PREFIX = 'joyfield-game-';
 const NETWORK_TIMEOUT = 3000;
 const SCOPE = self.registration.scope; // 끝이 / 인 사이트 루트 주소
 
@@ -27,9 +27,10 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     (async () => {
-      // 지난 허브 캐시만 지운다. 게임 캐시와 다른 앱(예전 업다운 등)의 캐시는 건드리지 않는다
+      // 지난 허브 캐시만 지운다. 게임 캐시와 다른 앱(예전 업다운 등)의 캐시는 건드리지 않는다.
+      // 이름을 바꾸기 전(2026-11-04) 접두어 joypack- 의 허브·게임 캐시도 지운다(2027년 이후 이 조건은 지워도 됨)
       for (const key of await caches.keys()) {
-        if (key.startsWith('joypack-hub-') && key !== HUB_CACHE) await caches.delete(key);
+        if (key.startsWith('joypack-') || (key.startsWith('joyfield-hub-') && key !== HUB_CACHE)) await caches.delete(key);
       }
       await self.clients.claim();
     })(),

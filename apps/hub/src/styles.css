@@ -1,4 +1,4 @@
-/* 조이팩 허브. 색은 모두 아래 토큰으로만 쓴다(라이트/다크) */
+/* 조이필드 허브. 색은 모두 아래 토큰으로만 쓴다(라이트/다크) */
 @font-face {
   font-family: 'Jua';
   src: url('./fonts/jua-hub.woff2') format('woff2');
@@ -154,7 +154,7 @@ html {
 
 body {
   margin: 0;
-  /* 보이는 높이(Joypack.trackViewport → --jp-vh). 설치 앱에서 100dvh 가 실제보다 크게 잡혀 스크롤이 생기던 것 방지 */
+  /* 보이는 높이(Joyfield.trackViewport → --jp-vh). 설치 앱에서 100dvh 가 실제보다 크게 잡혀 스크롤이 생기던 것 방지 */
   min-height: var(--jp-vh, 100dvh);
   background:
     radial-gradient(42rem 26rem at 105% -10%, color-mix(in srgb, var(--brand) 22%, transparent), transparent 70%),
@@ -214,7 +214,7 @@ svg {
 
 /* ---------- 머리: 왼쪽 위 언어, 오른쪽 위 랭킹·설정 (게임 시작 화면과 같은 자리) ---------- */
 
-/* 위 메뉴 버튼 모양은 조이팩 공통(packages/shared/topbar.css, .jp-top-btn). 여기서는 대표색만 넘긴다 */
+/* 위 메뉴 버튼 모양은 조이필드 공통(packages/shared/topbar.css, .jp-top-btn). 여기서는 대표색만 넘긴다 */
 :root {
   --jp-top-accent: var(--brand);
 }
@@ -1086,7 +1086,7 @@ a.card:active .card-play {
 }
 
 /* 가운데 창(개발자 모드 비밀번호·켜고 끄기): 휴대폰에서도 아래 시트가 아니라 화면 가운데.
-   키패드가 올라오면 보이는 높이(--jp-vh, Joypack.trackViewport)가 줄어드니 그 남은 영역의 가운데로 옮겨 가리지 않게 한다 */
+   키패드가 올라오면 보이는 높이(--jp-vh, Joyfield.trackViewport)가 줄어드니 그 남은 영역의 가운데로 옮겨 가리지 않게 한다 */
 .sheet.center {
   width: min(380px, calc(100% - 32px));
   bottom: max(0px, calc(100% - var(--jp-vh, 100%)));
@@ -2072,7 +2072,7 @@ a.primary-btn {
   animation: shine 600ms ease-out calc(1000ms + var(--n, 0) * 110ms);
 }
 
-/* 복귀 연출(#app.intro-back, 약 1초): 뒤로 가기·게임 위 조이팩 버튼으로 돌아올 때.
+/* 복귀 연출(#app.intro-back, 약 1초): 뒤로 가기·게임 위 조이필드 버튼으로 돌아올 때.
    로고 얼굴 부품(십자·버튼·입·볼)이 차례로 한 번씩 콩콩(로고를 누를 때와 같은 움직임) → 반짝이가 크게 한 번 터짐.
    제목·소개는 그대로, 카드는 0.04초 간격으로 떠오름 */
 .intro-back .logo-tile {

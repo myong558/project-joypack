@@ -1,8 +1,8 @@
-// 조이팩 전체 빌드: 허브 + 모든 게임 → dist/ 한 곳 (README 3·4.1장)
+// 조이필드 전체 빌드: 허브 + 모든 게임 → dist/ 한 곳 (README 3·4.1장)
 //   1. 허브 빌드(apps/hub/dist) → dist/
 //   2. 게임마다: package.json 에 build 스크립트가 있으면 빌드해 그 dist/ 를, 없으면 package.json "files" 에 적힌 파일을 dist/games/<id>/ 로
 //      (빌드 없는 게임은 .js·.html 의 __APP_VERSION__ 을 package.json version 으로 바꿔 넣음)
-//   3. 공통 모듈 packages/shared/joypack.js·topbar.css → dist/shared/ (빌드 없는 게임이 불러옴)
+//   3. 공통 모듈 packages/shared/joyfield.js·topbar.css → dist/shared/ (빌드 없는 게임이 불러옴)
 //   4. 게임마다 파일 목록 dist/games/<id>/files.json (경로 + 해시). 처음 열 때 이 목록 전체를 캐시한다
 //   5. 서비스 워커 dist/sw.js: 허브 파일만 미리 캐시, 게임은 처음 열 때 캐시 (scripts/sw-template.js)
 //   0. 검사: 글꼴 서브셋에 빠진 글자(scripts/check-glyphs.mjs, 내 PC에서는 자동으로 다시 만듦), 감싸지 않은 :hover(scripts/check-hover.mjs)
@@ -94,7 +94,7 @@ for (const game of games) {
     }
   }
   if (!existsSync(join(out, 'index.html'))) throw new Error(`dist/games/${game.id}/index.html 이 없습니다`);
-  // 미리보기 표시: 게임은 Joypack.isPreview() 로 미리보기로 배포된 것을 안다(랭킹은 그대로 등록됨)
+  // 미리보기 표시: 게임은 Joyfield.isPreview() 로 미리보기로 배포된 것을 안다(랭킹은 그대로 등록됨)
   if (game.status === 'preview') {
     const index = join(out, 'index.html');
     // 공개 예약(open)이 있으면 그 시각도 적는다: 공통 모듈이 그 전에는 "곧 공개" 화면으로 막고, 지나면 공개된 게임으로 본다
@@ -106,7 +106,7 @@ for (const game of games) {
 
 // 3. 공통 모듈(빌드 없는 게임이 <script> 로 불러옴)
 mkdirSync(join(DIST, 'shared'), { recursive: true });
-cpSync(join(ROOT, 'packages/shared/joypack.js'), join(DIST, 'shared/joypack.js'));
+cpSync(join(ROOT, 'packages/shared/joyfield.js'), join(DIST, 'shared/joyfield.js'));
 cpSync(join(ROOT, 'packages/shared/topbar.css'), join(DIST, 'shared/topbar.css'));
 
 // 3-1. 효과음·진동 견본 페이지(제작용, 허브에 연결하지 않음, 미리 캐시하지 않음): dist/sounds/ (기준서 1.7)

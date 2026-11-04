@@ -12,8 +12,8 @@ export type Skin = (typeof SKINS)[number];
 export type SkinSetting = 'auto' | Skin;
 export const SKIN_SETTINGS: SkinSetting[] = ['auto', ...SKINS];
 
-/** 오늘의 톤 번호: 조이팩 공통 규칙(날마다 무작위, 이틀 연속 같은 톤 없음, 기준서 1.4) */
-const todayIndex = (date: Date) => Joypack.dailyPick('glasshouse', SKINS.length, date);
+/** 오늘의 톤 번호: 조이필드 공통 규칙(날마다 무작위, 이틀 연속 같은 톤 없음, 기준서 1.4) */
+const todayIndex = (date: Date) => Joyfield.dailyPick('glasshouse', SKINS.length, date);
 
 /** 오늘의 톤 */
 export const todaySkin = (date: Date): Skin => SKINS[todayIndex(date)];

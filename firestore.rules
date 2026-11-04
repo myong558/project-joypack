@@ -1,5 +1,5 @@
 // =====================================================================================================
-// 조이팩 Firestore 보안 규칙 원본 (Firebase 프로젝트 joypack-c6bd2)
+// 조이필드 Firestore 보안 규칙 원본 (Firebase 프로젝트 joyfield-41b5a)
 // 고친 뒤 Firebase 콘솔 → Firestore Database → 규칙 에 그대로 붙여 넣고 게시한다.
 //
 // 게임마다 games/<게임ID>/ 아래만 열어 두고, 나머지 경로는 모두 막힌다(규칙이 없는 경로는 거부).
@@ -21,7 +21,7 @@ service cloud.firestore {
     // -------------------------------------------------------------------------------------------------
 
     // 랭킹 이름: 영문 대문자 1~5자이고 금지어가 아님.
-    // 게임 안의 Joypack.isAllowedName(packages/shared/joypack.js)과 같은 목록을 서버에서도 검사한다
+    // 게임 안의 Joyfield.isAllowedName(packages/shared/joyfield.js)과 같은 목록을 서버에서도 검사한다
     // (앱을 거치지 않고 직접 보내는 요청 대비). 목록을 고치면 두 곳을 같이 고친다.
     function allowedName(n) {
       return n is string
@@ -34,7 +34,7 @@ service cloud.firestore {
     }
 
     // 기록의 dev(플레이한 입력, 2026-11-04~): 'm' 모바일(터치) · 'p' PC(마우스). 없어도 된다(예전 기록·예전 버전 화면).
-    // 순위표 이름 옆 기기 아이콘에만 쓰고 순위에는 영향 없음(Joypack.playDevice, 기준서 1.6)
+    // 순위표 이름 옆 기기 아이콘에만 쓰고 순위에는 영향 없음(Joyfield.playDevice, 기준서 1.6)
     function okDevice(d) {
       return d.get('dev', 'm') in ['m', 'p'];
     }

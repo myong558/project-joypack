@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-    <title>조이팩</title>
+    <title>조이필드</title>
     <meta name="description" content="하나씩 늘어나는 미니 게임 모음. 설치 없이 바로 플레이하고, 게임마다 랭킹에 도전하세요." />
     <meta name="theme-color" content="#f5f2ff" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#13101f" media="(prefers-color-scheme: dark)" />
@@ -12,17 +12,17 @@
     <link rel="icon" type="image/png" sizes="192x192" href="pwa-192x192.png?v=5" />
     <link rel="apple-touch-icon" href="apple-touch-icon-180x180.png?v=5" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-title" content="조이팩" />
+    <meta name="apple-mobile-web-app-title" content="조이필드" />
     <!-- 링크 미리보기(카카오톡·메신저·SNS). 스크래퍼는 상대 경로를 못 읽으므로 배포 주소를 그대로 적는다 -->
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="조이팩" />
-    <meta property="og:title" content="조이팩 — 미니 게임 모음" />
+    <meta property="og:site_name" content="조이필드" />
+    <meta property="og:title" content="조이필드 — 미니 게임 모음" />
     <meta property="og:description" content="업다운, 두더지잡기… 하나씩 늘어나는 미니 게임 모음" />
-    <meta property="og:url" content="https://myong558.github.io/project-joypack/" />
-    <meta property="og:image" content="https://myong558.github.io/project-joypack/og-image.png?v=2" />
+    <meta property="og:url" content="https://myong558.github.io/project-joyfield/" />
+    <meta property="og:image" content="https://myong558.github.io/project-joyfield/og-image.png?v=3" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="조이팩 — 미니 게임 모음" />
+    <meta property="og:image:alt" content="조이필드 — 미니 게임 모음" />
     <meta property="og:locale" content="ko_KR" />
     <meta name="twitter:card" content="summary_large_image" />
     <script>
@@ -30,14 +30,14 @@
       (function () {
         var pref = null;
         try {
-          pref = localStorage.getItem('joypack.theme') || localStorage.getItem('updown.theme');
+          pref = localStorage.getItem('joyfield.theme') || localStorage.getItem('updown.theme');
         } catch (e) {}
         var dark = pref === 'dark' || (pref !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
         document.documentElement.dataset.theme = dark ? 'dark' : 'light';
       })();
       // 오늘의 톤(스킨): 5개 중 날짜마다 하나. 같은 날은 모두 같은 톤이고, 이틀 연속 같은 톤은 나오지 않는다.
-      // 모든 게임의 스킨 "자동"과 같은 공통 규칙 Joypack.dailyPick('hub', …)(아래 함수는 그 글자 그대로의 복사본, 기준서 1.4).
-      // 사용자가 고르는 설정은 없다. joypack.hubSkin 은 개발자 모드(joypack.preview)에서만 쓰는 톤 미리보기 값(src/skins.ts).
+      // 모든 게임의 스킨 "자동"과 같은 공통 규칙 Joyfield.dailyPick('hub', …)(아래 함수는 그 글자 그대로의 복사본, 기준서 1.4).
+      // 사용자가 고르는 설정은 없다. joyfield.hubSkin 은 개발자 모드(joyfield.preview)에서만 쓰는 톤 미리보기 값(src/skins.ts).
       (function () {
         var SKINS = ['grape', 'candy', 'soda', 'lemon', 'mint'];
         /* dailyPick: begin — 허브·업다운 index.html 의 첫 화면 스크립트에 같은 글자 그대로 복사돼 있다(packages/shared/tests 가 같은지 검사) */
@@ -78,8 +78,8 @@
         var today = SKINS[dailyPick('hub', SKINS.length)];
         var preview = null;
         try {
-          var dev = localStorage.getItem('joypack.preview');
-          if (dev === 'on' || dev === '1') preview = localStorage.getItem('joypack.hubSkin');
+          var dev = localStorage.getItem('joyfield.preview');
+          if (dev === 'on' || dev === '1') preview = localStorage.getItem('joyfield.hubSkin');
         } catch (e) {}
         var root = document.documentElement;
         root.dataset.skinToday = today;

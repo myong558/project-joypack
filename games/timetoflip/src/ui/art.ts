@@ -26,7 +26,7 @@ const SHAPES: Record<string, string> = {
   hexagon: floor + `<path d="M32 9 51 20v22L32 53 13 42V20z" fill="#9333ea" stroke="#9333ea" stroke-width="4" stroke-linejoin="round"/>` + glint('M18 24v8'),
   ring: floor + `<circle cx="32" cy="31" r="15" fill="none" stroke="#ec4899" stroke-width="11"/>` + glint('M19 24a14 14 0 0 1 6-6'),
   plus: floor + `<path d="M25 10h14v14h14v14H39v14H25V38H11V24h14z" fill="#0d9488" stroke="#0d9488" stroke-width="4" stroke-linejoin="round"/>` + glint('M29 15v6'),
-  // 초승달: 조이팩 허브의 타임 투 플립 아이콘(public/favicon.svg) 앞면 카드의 달과 같은 모양
+  // 초승달: 조이필드 허브의 타임 투 플립 아이콘(public/favicon.svg) 앞면 카드의 달과 같은 모양
   moon: floor + `<path d="M38.4 11.6a19.6 19.6 0 1 0 6.9 30.4 17.2 17.2 0 0 1-6.9-30.4z" fill="#fbbf24"/>` + glint('M19 25a15 15 0 0 1 6-9'),
 };
 
@@ -148,7 +148,7 @@ export function preloadFaces(): void {
 }
 
 /**
- * 카드 뒷면: 조이팩 로고 얼굴(십자 버튼 눈·동그란 버튼 눈·웃는 입)을 가운데 볼록한 메달 안에 새겼다.
+ * 카드 뒷면: 조이필드 로고 얼굴(십자 버튼 눈·동그란 버튼 눈·웃는 입)을 가운데 볼록한 메달 안에 새겼다.
  * 층: 레몬 방사 그라데이션 → 사선 줄무늬 → 이중 테두리·모서리 점 → 메달(아래 그림자) → 얼굴(그림자 + 본체) → 왼쪽 위 광택.
  * 스킨 강조색 테두리와 지나가는 빛줄기는 CSS(.back::before/::after)
  */

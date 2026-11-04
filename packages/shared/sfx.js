@@ -1,6 +1,6 @@
 // 효과음 목록(sounds/catalog.json)의 "recipe" 를 그대로 소리로 내는 작은 재생기. 소리 파일 없이 Web Audio 로 합성한다.
 // 새 게임은 목록에서 고른 recipe 를 audio.ts 에 옮겨 적고 이 함수로 울리거나, 같은 방식으로 직접 합성한다(기준서 1.7).
-//   import { playRecipe } from '@joypack/shared/sfx.js';
+//   import { playRecipe } from '@joyfield/shared/sfx.js';
 //   playRecipe(ctx, recipe, { pitch: 1, volume: 1 });
 // recipe 는 음 목록이다. 음마다 k(종류)와 at(시작 초)을 갖는다.
 //   tone   : f(Hz) → to(Hz, 있으면 미끄러짐), dur(초), wave(sine·triangle·square·sawtooth), vol, attack(초, 0 이면 바로 최대)

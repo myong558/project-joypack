@@ -143,13 +143,13 @@
       'result.retry': '다시 하기',
       'result.home': '홈으로',
       'result.share': '기록 공유하기',
-      'share.install': '조이팩에서 같이 해요 👉',
-      'share.shared': '보냈어요! 조이팩 링크는 복사도 해 두었어요',
-      'share.saved': '결과 이미지를 저장하고 조이팩 링크를 복사했어요',
-      'share.copied': '조이팩 링크를 복사했어요',
+      'share.install': '조이필드에서 같이 해요 👉',
+      'share.shared': '보냈어요! 조이필드 링크는 복사도 해 두었어요',
+      'share.saved': '결과 이미지를 저장하고 조이필드 링크를 복사했어요',
+      'share.copied': '조이필드 링크를 복사했어요',
       'share.failed': '공유하지 못했어요',
       'nav.home': '홈',
-      'nav.hub': '조이팩 게임 목록',
+      'nav.hub': '조이필드 게임 목록',
       'ranking.open': '랭킹',
       'ranking.register': '랭킹 등록',
       'ranking.title': '랭킹 TOP 10',
@@ -329,13 +329,13 @@
       'result.retry': 'Play again',
       'result.home': 'Go home',
       'result.share': 'Share record',
-      'share.install': 'Play on Joypack 👉',
-      'share.shared': 'Sent! The Joypack link is copied too',
-      'share.saved': 'Result image saved and Joypack link copied',
-      'share.copied': 'Joypack link copied',
+      'share.install': 'Play on Joyfield 👉',
+      'share.shared': 'Sent! The Joyfield link is copied too',
+      'share.saved': 'Result image saved and Joyfield link copied',
+      'share.copied': 'Joyfield link copied',
       'share.failed': "Couldn't share",
       'nav.home': 'Home',
-      'nav.hub': 'Joypack games',
+      'nav.hub': 'Joyfield games',
       'ranking.open': 'Ranking',
       'ranking.register': 'Join ranking',
       'ranking.title': 'Top 10',
@@ -386,13 +386,13 @@
   // 언어 선택 버튼에 쓰는 이름. 어느 언어 화면에서든 그 언어 자체 표기로 보여준다.
   const NAMES = { ko: '한국어', en: 'English' };
 
-  // 저장된 선택이 없으면 기기 설정 언어를 따른다(한국어면 ko, 그 밖은 모두 en). 조이팩·모든 게임 공통 규칙(Joypack.deviceLang)
+  // 저장된 선택이 없으면 기기 설정 언어를 따른다(한국어면 ko, 그 밖은 모두 en). 조이필드·모든 게임 공통 규칙(Joyfield.deviceLang)
   function detectLang() {
     try {
-      const saved = Joypack.get('lang', LANG_KEY);
+      const saved = Joyfield.get('lang', LANG_KEY);
       if (MESSAGES[saved]) return saved;
     } catch (e) {}
-    return Joypack.deviceLang();
+    return Joyfield.deviceLang();
   }
 
   let lang = detectLang();
@@ -409,7 +409,7 @@
   function setLang(next) {
     if (!MESSAGES[next]) return;
     lang = next;
-    Joypack.set('lang', next, LANG_KEY);
+    Joyfield.set('lang', next, LANG_KEY);
   }
 
   global.UpDownI18n = { LANGS: Object.keys(MESSAGES), NAMES: NAMES, t: t, getLang: getLang, setLang: setLang };

@@ -1,9 +1,9 @@
-import type { ShareOutcome } from '@joypack/shared';
+import type { ShareOutcome } from '@joyfield/shared';
 import { t } from './i18n';
 
-/** 결과 화면 "기록 공유하기": 결과 캡처 이미지 + 조이팩 설치 주소를 한 번에 보낸다(모든 게임 같은 방식, Joypack.shareResult) */
+/** 결과 화면 "기록 공유하기": 결과 캡처 이미지 + 조이필드 설치 주소를 한 번에 보낸다(모든 게임 같은 방식, Joyfield.shareResult) */
 export function shareResult(image: Blob | null): Promise<ShareOutcome> {
-  return Joypack.shareResult({ gameId: 'hammer', image, title: t('app.title'), installText: t('share.install') });
+  return Joyfield.shareResult({ gameId: 'hammer', image, title: t('app.title'), installText: t('share.install') });
 }
 
 /**

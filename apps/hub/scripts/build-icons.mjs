@@ -38,7 +38,7 @@ const CHROME =
   process.env.CHROME ??
   ['C:/Program Files/Google/Chrome/Application/chrome.exe', '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', '/usr/bin/google-chrome'].find((p) => existsSync(p));
 if (!CHROME) throw new Error('og-image 를 그릴 Chrome 을 찾지 못했습니다. CHROME 환경 변수로 경로를 알려 주세요');
-const work = mkdtempSync(join(tmpdir(), 'joypack-og-'));
+const work = mkdtempSync(join(tmpdir(), 'joyfield-og-'));
 const font = pathToFileURL(resolve('src/fonts/jua-hub.woff2')).href;
 const mark = `data:image/svg+xml;base64,${logo.toString('base64')}`;
 writeFileSync(
@@ -54,7 +54,7 @@ writeFileSync(
   img { width: 330px; height: 330px; filter: drop-shadow(0 18px 24px rgb(154 91 0 / 0.25)); }
   h1 { margin: 0; font-size: 158px; font-weight: 400; line-height: 1; letter-spacing: 0.02em; }
   p { margin: 26px 0 0; font-size: 50px; line-height: 1.3; color: #8a6420; }
-</style><img src="${mark}"><div><h1>조이팩</h1><p>하나씩 늘어나는<br>미니 게임 모음</p></div>`,
+</style><img src="${mark}"><div><h1>조이필드</h1><p>하나씩 늘어나는<br>미니 게임 모음</p></div>`,
 );
 execFileSync(CHROME, [
   '--headless=new',

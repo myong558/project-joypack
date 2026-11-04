@@ -1,4 +1,6 @@
-import '@joypack/shared/topbar.css';
+// 공통 모듈을 맨 먼저 불러, 이름 바꾸기 전 저장 키를 다른 코드가 읽기 전에 옮긴다
+import '@joyfield/shared';
+import '@joyfield/shared/topbar.css';
 import './styles.css';
 import { Sound } from './audio';
 import { FLOWER } from './flora';
@@ -40,12 +42,12 @@ function vibrate(pattern: number | number[]): void {
 
 const today = () => dateKey(new Date());
 
-/** 랭킹 탭 공통 기준(Joypack.rankTab)에 쓸 등록 대기 탭. 오늘의 정원 대기 기록은 그날만 유효 */
+/** 랭킹 탭 공통 기준(Joyfield.rankTab)에 쓸 등록 대기 탭. 오늘의 정원 대기 기록은 그날만 유효 */
 function publishPending(): void {
   const items: (string | { board: string; day: string })[] = [];
   if (save.pending && placeOf(save.rankings, save.pending.score) >= 0) items.push(BOARD);
   if (dailyPendingRecord(ranking)) items.push({ board: 'daily', day: today() });
-  Joypack.setRankPending('glasshouse', items);
+  Joyfield.setRankPending('glasshouse', items);
 }
 
 const ranking: RankingView = {
@@ -63,7 +65,7 @@ const ranking: RankingView = {
     }
   },
   consider(score, flowers) {
-    Joypack.setRankBoard('glasshouse', BOARD);
+    Joyfield.setRankBoard('glasshouse', BOARD);
     // 이미 순위표에 같은 이름으로 이 점수 이상이 올라가 있으면 대기로 두지 않는다
     const mine = save.rankings.find((e) => e.name === save.playerName);
     if (mine && mine.score >= score) return -1;
@@ -77,7 +79,7 @@ const ranking: RankingView = {
   },
   async register(name, score, flowers) {
     save.playerName = name;
-    const entry: RankEntry = { name, score, flowers, date: today(), dev: Joypack.playDevice() };
+    const entry: RankEntry = { name, score, flowers, date: today(), dev: Joyfield.playDevice() };
     const { place, entries } = await submitEntry(entry);
     save.rankings = entries;
     if (save.pending && save.pending.score <= score) save.pending = null;
@@ -100,7 +102,7 @@ const ranking: RankingView = {
     }
   },
   considerDaily(rec) {
-    Joypack.setRankBoard('glasshouse', 'daily');
+    Joyfield.setRankBoard('glasshouse', 'daily');
     const date = today();
     const entries = todayDaily(ranking);
     const mine = entries.find((e) => e.name === save.playerName);
@@ -116,7 +118,7 @@ const ranking: RankingView = {
   },
   async registerDaily(name, rec) {
     save.playerName = name;
-    const entry: DailyEntry = { name, moves: rec.moves, time: rec.time, date: today(), dev: Joypack.playDevice() };
+    const entry: DailyEntry = { name, moves: rec.moves, time: rec.time, date: today(), dev: Joyfield.playDevice() };
     const { place, entries } = await submitDaily(entry);
     save.dailyRankings = { date: entry.date, entries };
     const p = save.dailyPending;
@@ -708,13 +710,13 @@ function showResult(result: ClearResult, test: boolean): void {
   teardown = () => window.removeEventListener('keydown', onKey);
 }
 
-Joypack.guardBottom();
-Joypack.trackViewport();
+Joyfield.guardBottom();
+Joyfield.trackViewport();
 mountScene();
 showStart(undefined, undefined, true);
 document.documentElement.classList.remove('booting');
 
 window.addEventListener('load', () => {
-  void Joypack.registerSW({ root: '../../', game: 'glasshouse' });
-  Joypack.inviteBar({ root: '../../' });
+  void Joyfield.registerSW({ root: '../../', game: 'glasshouse' });
+  Joyfield.inviteBar({ root: '../../' });
 });

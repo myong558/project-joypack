@@ -92,7 +92,7 @@ const ko = {
   'dex.lockedDesc': '{n}번째 꽃을 피우면 열려요.',
 
   'lang.label': '언어 선택',
-  'nav.hub': '조이팩 게임 목록',
+  'nav.hub': '조이필드 게임 목록',
   'settings.title': '설정',
   'settings.open': '설정 열기',
   'settings.feedback': '소리·진동',
@@ -142,10 +142,10 @@ const ko = {
 
   'toast.preparing': '결과 이미지를 만드는 중…',
   'toast.failed': '공유하지 못했어요',
-  'share.install': '조이팩에서 같이 해요 👉',
-  'toast.shared': '보냈어요! 조이팩 링크는 복사도 해 두었어요',
-  'toast.saved': '결과 이미지를 저장하고 조이팩 링크를 복사했어요',
-  'toast.copied': '조이팩 링크를 복사했어요',
+  'share.install': '조이필드에서 같이 해요 👉',
+  'toast.shared': '보냈어요! 조이필드 링크는 복사도 해 두었어요',
+  'toast.saved': '결과 이미지를 저장하고 조이필드 링크를 복사했어요',
+  'toast.copied': '조이필드 링크를 복사했어요',
 };
 
 export type MessageKey = keyof typeof ko;
@@ -241,7 +241,7 @@ const en: Record<MessageKey, string> = {
   'dex.lockedDesc': 'Bloom flower {n} to open it.',
 
   'lang.label': 'Choose language',
-  'nav.hub': 'Joypack games',
+  'nav.hub': 'Joyfield games',
   'settings.title': 'Settings',
   'settings.open': 'Open settings',
   'settings.feedback': 'Sound & vibration',
@@ -291,10 +291,10 @@ const en: Record<MessageKey, string> = {
 
   'toast.preparing': 'Making the result image…',
   'toast.failed': 'Could not share',
-  'share.install': 'Play with me on Joypack 👉',
-  'toast.shared': 'Sent! The Joypack link is copied too',
-  'toast.saved': 'Result image saved and Joypack link copied',
-  'toast.copied': 'Joypack link copied',
+  'share.install': 'Play with me on Joyfield 👉',
+  'toast.shared': 'Sent! The Joyfield link is copied too',
+  'toast.saved': 'Result image saved and Joyfield link copied',
+  'toast.copied': 'Joyfield link copied',
 };
 
 const dictionaries: Record<Lang, Record<MessageKey, string>> = { ko, en };
@@ -310,9 +310,9 @@ export function getLang(): Lang {
   return current;
 }
 
-/** 저장한 선택이 없을 때: 기기 설정 언어(한국어면 ko, 그 밖은 모두 en). 조이팩·모든 게임 공통 규칙(Joypack.deviceLang) */
+/** 저장한 선택이 없을 때: 기기 설정 언어(한국어면 ko, 그 밖은 모두 en). 조이필드·모든 게임 공통 규칙(Joyfield.deviceLang) */
 export function detectLang(): Lang {
-  return Joypack.deviceLang();
+  return Joyfield.deviceLang();
 }
 
 export function t(key: MessageKey, params: Record<string, string | number> = {}): string {

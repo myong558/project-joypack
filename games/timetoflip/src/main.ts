@@ -1,4 +1,6 @@
-import '@joypack/shared/topbar.css';
+// 공통 모듈을 맨 먼저 불러, 이름 바꾸기 전 저장 키를 다른 코드가 읽기 전에 옮긴다
+import '@joyfield/shared';
+import '@joyfield/shared/topbar.css';
 import './styles.css';
 import { Sound } from './audio';
 import { Game, type GameEvent, type GameResult } from './game/engine';
@@ -52,10 +54,10 @@ function cacheBoard(mode: Mode, today: string, entries: RankEntry[]): void {
   publishPending(today);
 }
 
-/** 랭킹 탭 공통 기준(Joypack.rankTab)에 쓸 등록 대기 탭 목록을 알린다. 오늘의 챌린지 대기 기록은 그날만 유효하다 */
+/** 랭킹 탭 공통 기준(Joyfield.rankTab)에 쓸 등록 대기 탭 목록을 알린다. 오늘의 챌린지 대기 기록은 그날만 유효하다 */
 function publishPending(today: string): void {
   const modes = (['classic', 'daily'] as Mode[]).filter((m) => pendingRecord(save.rankings, save.pending, m, today));
-  Joypack.setRankPending('timetoflip', modes.map((m) => (m === 'daily' ? { board: m, day: today } : m)));
+  Joyfield.setRankPending('timetoflip', modes.map((m) => (m === 'daily' ? { board: m, day: today } : m)));
 }
 
 /** 순위표 보기·등록. day는 그 판을 시작한 날로, 오늘의 챌린지 순위표가 어느 날 것인지 정한다 */
@@ -73,9 +75,9 @@ function rankingView(day: Date): RankingView {
         return false;
       }
     },
-    // 판이 끝날 때마다 불린다: 방금 한 모드를 최근 탭으로 남기고(조이팩 공통 기준), TOP 10 에 들면 등록 대기로 둔다
+    // 판이 끝날 때마다 불린다: 방금 한 모드를 최근 탭으로 남기고(조이필드 공통 기준), TOP 10 에 들면 등록 대기로 둔다
     consider(mode, score, stage) {
-      Joypack.setRankBoard('timetoflip', mode);
+      Joyfield.setRankBoard('timetoflip', mode);
       const place = placeOf(boardEntries(save.rankings, mode, today), score);
       if (place >= 0) {
         keepPending(save.pending, mode, today, { score, stage });
@@ -86,7 +88,7 @@ function rankingView(day: Date): RankingView {
     },
     async register(mode, name, score, stage) {
       save.playerName = name;
-      const { place, entries } = await submitEntry(mode, today, { name, score, stage, date: today, dev: Joypack.playDevice() });
+      const { place, entries } = await submitEntry(mode, today, { name, score, stage, date: today, dev: Joyfield.playDevice() });
       cacheBoard(mode, today, entries);
       // 그사이 다른 사람들에게 밀려 10위 밖이 됐어도 더 올릴 수 없으므로 대기에서 지운다
       clearPending(save.pending, mode, score);
@@ -480,18 +482,18 @@ function showResult(result: GameResult, mode: Mode, date: Date, dexBefore: Reado
 }
 
 // 설치 앱에서 내비게이션 바 높이가 0으로 와 아래 버튼이 바에 가리는 경우를 막는다(#app 아래 여백, styles.css)
-Joypack.guardBottom();
-// 화면 높이를 css(100dvh) 대신 실제 보이는 높이로 잡는다(설치 앱에서 조이팩 → 게임으로 넘어올 때 아래가 잘리던 것)
-Joypack.trackViewport();
+Joyfield.guardBottom();
+// 화면 높이를 css(100dvh) 대신 실제 보이는 높이로 잡는다(설치 앱에서 조이필드 → 게임으로 넘어올 때 아래가 잘리던 것)
+Joyfield.trackViewport();
 mountScene();
 showStart(undefined, undefined, true);
 document.documentElement.classList.remove('booting');
 
-// 조이팩 서비스 워커(사이트에 하나)를 등록하고, 이 게임 파일 전체를 캐시하라고 알린다
+// 조이필드 서비스 워커(사이트에 하나)를 등록하고, 이 게임 파일 전체를 캐시하라고 알린다
 window.addEventListener('load', () => {
   // 명화 카드 그림을 미리 받아 둔다(뒤집는 순간 빈칸이 보이지 않게)
   preloadFaces();
-  void Joypack.registerSW({ root: '../../', game: 'timetoflip' });
-  // 공유 링크로 바로 들어온 사람에게 조이팩 앱 설치 안내 띠
-  Joypack.inviteBar({ root: '../../' });
+  void Joyfield.registerSW({ root: '../../', game: 'timetoflip' });
+  // 공유 링크로 바로 들어온 사람에게 조이필드 앱 설치 안내 띠
+  Joyfield.inviteBar({ root: '../../' });
 });
