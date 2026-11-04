@@ -2589,6 +2589,24 @@ button.dex-item:focus-visible {
   box-shadow: 0 0.25em 0 #8f2329;
 }
 
+/* 내 기록 지우기 확인: 누르면 버튼은 사라지고(버튼의 display 가 hidden 을 덮지 않게) 설명·취소·지우기를 담은 상자가 그 자리에 열린다 */
+.reset-section [hidden] {
+  display: none !important;
+}
+.confirm {
+  margin-top: 0.6em;
+  padding: 0.6em;
+  border: 2px solid color-mix(in srgb, var(--bad) 45%, transparent);
+  border-radius: 0.8em;
+  background: color-mix(in srgb, var(--bad) 9%, var(--panel, #fff));
+  animation: confirm-open 220ms ease-out;
+}
+@keyframes confirm-open {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
 .confirm p {
   margin-top: 0.4em;
   font-size: max(18px, 0.8em);

@@ -1989,6 +1989,24 @@ h1 .word:nth-child(2) .tc-in {
   margin-top: 8px;
   width: 100%;
 }
+/* 내 기록 지우기 확인: 누르면 버튼은 사라지고(버튼의 display 가 hidden 을 덮지 않게) 설명·취소·지우기를 담은 상자가 그 자리에 열린다 */
+.reset-section [hidden] {
+  display: none !important;
+}
+.confirm {
+  margin-top: 12px;
+  padding: 12px;
+  border: 2px solid color-mix(in srgb, var(--danger) 45%, transparent);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--danger) 9%, var(--panel, #fff));
+  animation: confirm-open 220ms ease-out;
+}
+@keyframes confirm-open {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
 .confirm p {
   margin: 8px 0;
   font-size: 15px;
