@@ -90,6 +90,7 @@
           tries: Number(f.tries.integerValue),
           time: Number(f.time.integerValue),
           thermo: !!(f.thermo && f.thermo.booleanValue),
+          dev: f.dev && f.dev.stringValue,
           createdAt: new Date(f.createdAt.timestampValue),
         };
       })
@@ -113,6 +114,8 @@
               tries: { integerValue: String(entry.tries) },
               time: { integerValue: String(entry.time) },
               thermo: { booleanValue: !!entry.thermo },
+              // 플레이한 입력: m 모바일(터치)·p PC(마우스)(기준서 1.6)
+              dev: { stringValue: Joypack.playDevice() },
             },
           },
           updateTransforms: [{ fieldPath: 'createdAt', setToServerValue: 'REQUEST_TIME' }],

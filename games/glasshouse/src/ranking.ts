@@ -1,6 +1,10 @@
 /** 순위표는 하나: 정원 점수(24개 판 가장 좋은 판 점수의 합) */
 export const BOARD = 'garden';
 
+/** 랭킹 기록을 남긴 입력: m 모바일(터치)·p PC(마우스) */
+export type Device = 'm' | 'p';
+const isDevice = (dev: unknown): dev is Device => dev === 'm' || dev === 'p';
+
 /** 순위표에 남는 칸 수 */
 export const RANK_SIZE = 10;
 /** 이름은 영문 대문자 A–Z로 이 글자 수까지 */
@@ -15,6 +19,8 @@ export interface RankEntry {
   flowers: number;
   /** 기록한 날(YYYY-MM-DD) */
   date: string;
+  /** 플레이한 입력: m 모바일(터치)·p PC(마우스). 예전 기록에는 없음(Joypack.playDevice, 기준서 1.6) */
+  dev?: Device;
 }
 
 /** 결과 화면에서 등록하지 않고 넘어간 기록. 나중에 랭킹 창에서 등록할 수 있다 */
@@ -70,7 +76,7 @@ const validEntry = (e: unknown): e is RankEntry => {
 export function sanitizeEntries(raw: unknown): RankEntry[] {
   return (Array.isArray(raw) ? raw : [])
     .filter(validEntry)
-    .map(({ name, score, flowers, date }) => ({ name, score, flowers, date }))
+    .map(({ name, score, flowers, date, dev }) => (isDevice(dev) ? { name, score, flowers, date, dev } : { name, score, flowers, date }))
     .sort((a, b) => b.score - a.score)
     .slice(0, RANK_SIZE);
 }
@@ -95,6 +101,7 @@ export interface DailyEntry {
   /** 걸린 시간 ms(이동 수가 같으면 짧을수록 앞) */
   time: number;
   date: string;
+  dev?: Device;
 }
 
 export interface DailyRecord {
@@ -134,7 +141,7 @@ const validDaily = (e: unknown): e is DailyEntry => {
 export function sanitizeDaily(raw: unknown): DailyEntry[] {
   return (Array.isArray(raw) ? raw : [])
     .filter(validDaily)
-    .map(({ name, moves, time, date }) => ({ name, moves, time, date }))
+    .map(({ name, moves, time, date, dev }) => (isDevice(dev) ? { name, moves, time, date, dev } : { name, moves, time, date }))
     .sort((a, b) => a.moves - b.moves || a.time - b.time)
     .slice(0, RANK_SIZE);
 }

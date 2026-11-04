@@ -77,7 +77,7 @@ const ranking: RankingView = {
   },
   async register(name, score, flowers) {
     save.playerName = name;
-    const entry: RankEntry = { name, score, flowers, date: today() };
+    const entry: RankEntry = { name, score, flowers, date: today(), dev: Joypack.playDevice() };
     const { place, entries } = await submitEntry(entry);
     save.rankings = entries;
     if (save.pending && save.pending.score <= score) save.pending = null;
@@ -116,7 +116,7 @@ const ranking: RankingView = {
   },
   async registerDaily(name, rec) {
     save.playerName = name;
-    const entry: DailyEntry = { name, moves: rec.moves, time: rec.time, date: today() };
+    const entry: DailyEntry = { name, moves: rec.moves, time: rec.time, date: today(), dev: Joypack.playDevice() };
     const { place, entries } = await submitDaily(entry);
     save.dailyRankings = { date: entry.date, entries };
     const p = save.dailyPending;

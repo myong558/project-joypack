@@ -909,6 +909,7 @@
       const name = document.createElement('span');
       name.className = 'ranking-name';
       name.textContent = row.initials;
+      name.insertAdjacentHTML('beforeend', Joypack.deviceIcon(row.dev));
       const score = document.createElement('span');
       score.className = 'ranking-tries';
       score.textContent = t('ranking.score', { score: fmt(row.score) });

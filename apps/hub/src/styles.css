@@ -256,9 +256,11 @@ html.scrolled .top::before {
   transition: transform 140ms ease;
 }
 
-.icon-btn:hover {
-  border-color: var(--brand);
-  color: var(--brand);
+@media (hover: hover) {
+  .icon-btn:hover {
+    border-color: var(--brand);
+    color: var(--brand);
+  }
 }
 
 .icon-btn:active {
@@ -519,11 +521,13 @@ h1 {
     box-shadow 140ms ease;
 }
 
-a.card:hover {
-  transform: translateY(-4px);
-  box-shadow:
-    0 10px 0 var(--depth),
-    0 24px 30px -14px color-mix(in srgb, var(--c) 55%, transparent);
+@media (hover: hover) {
+  a.card:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      0 10px 0 var(--depth),
+      0 24px 30px -14px color-mix(in srgb, var(--c) 55%, transparent);
+  }
 }
 
 /* 누르는 동안: 아래로 쑥 들어가며 두께(아래 그림자)가 거의 사라진다 */
@@ -623,8 +627,10 @@ a.card:active {
   transform: translateX(-120%);
 }
 
-a.card:hover .card-art::after {
-  animation: shine 700ms ease-out;
+@media (hover: hover) {
+  a.card:hover .card-art::after {
+    animation: shine 700ms ease-out;
+  }
 }
 
 .card-icon {
@@ -637,8 +643,10 @@ a.card:hover .card-art::after {
   animation: bob 3.2s ease-in-out calc(var(--n, 0) * -0.8s) infinite;
 }
 
-a.card:hover .card-icon {
-  animation: wiggle 520ms ease-in-out;
+@media (hover: hover) {
+  a.card:hover .card-icon {
+    animation: wiggle 520ms ease-in-out;
+  }
 }
 
 .card-art > svg {
@@ -766,9 +774,13 @@ a.card:active .card-play {
   cursor: not-allowed;
 }
 
-.card.blocked:hover,
 .card.blocked:active {
   transform: none;
+}
+@media (hover: hover) {
+  .card.blocked:hover {
+    transform: none;
+  }
 }
 
 /* NEW 표시: 가장 최근에 추가한 게임 그림판 왼쪽 위에 붙는 작은 리본 */
@@ -1197,8 +1209,10 @@ a.card:active .card-play {
   stroke-width: 2.4;
 }
 
-.rank-more:hover {
-  text-decoration: underline;
+@media (hover: hover) {
+  .rank-more:hover {
+    text-decoration: underline;
+  }
 }
 
 .chips {

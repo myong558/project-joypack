@@ -1,5 +1,6 @@
+- [수정 후 확인 버전 알리기](report-version-after-change.md) — 수정할 때마다 버전 올리고 답변에 "확인 버전"과 확인 위치를 적는다
 - [두 PC 작업 준비](two-pc-setup.md) — 두 PC 번갈아 작업, 새 PC에서 막힌 Node·pnpm·git 작성자·GitHub 로그인
 - [임시 판 먼저](temp-levels-first.md) — 판 생성이 오래 걸리면 임시 판으로 진행, 완성 단계에서 전체 생성 제안
-- [수정 후 확인 버전 알리기](report-version-after-change.md) — 수정할 때마다 버전 올리고 답변에 "확인 버전"과 확인 위치를 적는다
 - [온실 정원 조작 개편](glasshouse-push-controls.md) — 드래그 한 번에 한 칸(밀기 포함), 희미한 화분 UI 폐기, 무르기 금지(v0.13.0)
 - [온실 정원 판 점검](glasshouse-level-review.md) — 사용자가 풀이 보기로 판 확인 후 구조·순서 수정 전달 예정, 판 바꾸면 solutions 다시 생성
+- [마켓 등록 때 랭킹 초기화](ranking-reset-at-store-launch.md) — 플레이 스토어 최초 공개 직전에 모든 랭킹 초기화를 사용자에게 먼저 요청(콘솔에서 지울 목록 정리)

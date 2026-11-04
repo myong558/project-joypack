@@ -5,7 +5,7 @@
 //   3. 공통 모듈 packages/shared/joypack.js·topbar.css → dist/shared/ (빌드 없는 게임이 불러옴)
 //   4. 게임마다 파일 목록 dist/games/<id>/files.json (경로 + 해시). 처음 열 때 이 목록 전체를 캐시한다
 //   5. 서비스 워커 dist/sw.js: 허브 파일만 미리 캐시, 게임은 처음 열 때 캐시 (scripts/sw-template.js)
-//   0. 검사: 글꼴 서브셋에 빠진 글자(scripts/check-glyphs.mjs, 내 PC에서는 자동으로 다시 만듦)
+//   0. 검사: 글꼴 서브셋에 빠진 글자(scripts/check-glyphs.mjs, 내 PC에서는 자동으로 다시 만듦), 감싸지 않은 :hover(scripts/check-hover.mjs)
 //   6~8. 검사: 글꼴·효과음 상업 이용, 용량(게임 하나·허브 크기 상한, scripts/check-size.mjs)
 // 게임 하나만 고쳤을 때: pnpm build <id> → 허브와 그 게임만 다시 빌드하고 다른 게임은 지난 dist 를 그대로 쓴다(빠른 확인용).
 // 배포(CI)·커밋 전 최종 확인은 인자 없이 전체 빌드한다
@@ -16,6 +16,7 @@ import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkFonts } from './check-fonts.mjs';
 import { checkGlyphs } from './check-glyphs.mjs';
+import { checkHover } from './check-hover.mjs';
 import { checkIcons, teaserWarnings } from './check-icons.mjs';
 import { LIMITS, checkSize } from './check-size.mjs';
 import { checkSounds } from './check-sounds.mjs';
@@ -46,6 +47,9 @@ if (glyphErrors.length) throw new Error(`글꼴 빠진 글자 검사 실패:\n- 
 // 허브 카드 아이콘: 파일이 있고, 바탕색이 카드 그림판 색과 충분히 달라야 한다(scripts/check-icons.mjs, 기준서 6장 1번)
 const iconErrors = checkIcons();
 if (iconErrors.length) throw new Error(`허브 카드 아이콘 검사 실패:\n- ${iconErrors.join('\n- ')}`);
+// :hover 규칙은 @media (hover: hover) 안에만(휴대폰은 누른 뒤 :hover 가 남음, scripts/check-hover.mjs --fix 로 자동 감싸기, 기준서 1.12)
+const hoverErrors = checkHover();
+if (hoverErrors.length) throw new Error(`:hover 검사 실패(node scripts/check-hover.mjs --fix 로 고침):\n- ${hoverErrors.join('\n- ')}`);
 // 공개 예약 게임: COMING SOON 카드 그림판 후보 모두와 비슷하면 경고만(그림판은 허브 빌드가 가장 잘 구분되는 것으로 고름)
 for (const warning of teaserWarnings()) console.warn(`! COMING SOON 카드: ${warning}`);
 // 다시 빌드하지 않고 지난 결과를 쓸 게임(게임 하나만 빌드할 때, 지난 dist 가 있는 다른 게임)

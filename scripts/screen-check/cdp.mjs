@@ -87,7 +87,8 @@ export async function launch() {
       const { data } = await send('Page.captureScreenshot', { format: 'png' });
       writeFileSync(file, Buffer.from(data, 'base64'));
     },
-    // 휴대폰 크기는 터치 기기로 흉내 낸다(pointer: coarse). 안 그러면 PC 전용 안내(키보드 도움말 등)가 보여 실제와 달라진다
+    // 휴대폰 크기는 터치 기기로 흉내 낸다(pointer: coarse). 안 그러면 PC 전용 안내(키보드 도움말 등)가 보여 실제와 달라진다.
+    // PC 크기는 mobile = false 로 마우스(pointer: fine, hover)
     async size(width, height, mobile = true) {
       await send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile });
       await send('Emulation.setTouchEmulationEnabled', mobile ? { enabled: true, maxTouchPoints: 5 } : { enabled: false });

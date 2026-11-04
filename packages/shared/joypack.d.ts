@@ -3,6 +3,8 @@ export type SharedSetting = 'theme' | 'lang' | 'sound' | 'vibrate' | 'initials';
 
 /** 공통 상단 메뉴 아이콘 이름(topbar.css 의 .jp-top-btn 안에 넣는다) */
 export type TopIcon = 'apps' | 'globe' | 'trophy' | 'gear' | 'home';
+/** 랭킹 기록을 남긴 입력: m 모바일(터치·펜), p PC(마우스) */
+export type Device = 'm' | 'p';
 
 export type ShareOutcome = 'shared' | 'cancelled' | 'saved' | 'copied' | 'failed';
 
@@ -29,7 +31,10 @@ export interface JoypackApi {
   topIcon(name: TopIcon): string;
   /** 기본 언어: 기기 설정 언어가 한국어면 'ko', 그 밖은 모두 'en' */
   deviceLang(): 'ko' | 'en';
-  /** 설치 앱에서 내비게이션 바 높이가 0으로 와 맨 아래가 가릴 때 --jp-bottom-guard(px)를 넣는다. 게임 css 의 아래 여백에 쓴다 */
+  /** 랭킹 기록의 기기: 마지막으로 누른 입력이 마우스면 'p'(PC), 터치·펜이면 'm'(모바일). 누른 적 없으면 기기 기본 입력으로 */
+  playDevice(): Device;
+  /** 순위표 이름 옆 기기 아이콘 HTML(.jp-dev). dev 가 없거나 이상하면 빈 문자열 */
+  deviceIcon(dev: unknown): string;  /** 설치 앱에서 내비게이션 바 높이가 0으로 와 맨 아래가 가릴 때 --jp-bottom-guard(px)를 넣는다. 게임 css 의 아래 여백에 쓴다 */
   guardBottom(): void;
   /** 보이는 화면 높이(페이지·보이는 영역 중 작은 값)를 --jp-vh(px)로 넣고 바뀔 때마다 갱신한다 */
   trackViewport(): void;

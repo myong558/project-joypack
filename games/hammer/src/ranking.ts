@@ -10,6 +10,8 @@ export interface RankEntry {
   score: number;
   /** 기록한 날(YYYY-MM-DD) */
   date: string;
+  /** 플레이한 입력: m 모바일(터치)·p PC(마우스). 예전 기록에는 없음(Joypack.playDevice, 기준서 1.6) */
+  dev?: 'm' | 'p';
 }
 
 export interface Rankings {

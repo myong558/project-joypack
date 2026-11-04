@@ -630,8 +630,10 @@ h1 .word:nth-child(2) .tc-in {
   cursor: pointer;
   transition: background 0.15s, transform 0.12s;
 }
-.hud-btn:hover {
-  background: color-mix(in srgb, var(--accent) 18%, transparent);
+@media (hover: hover) {
+  .hud-btn:hover {
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+  }
 }
 .hud-btn:active {
   transform: scale(0.92);
@@ -996,8 +998,10 @@ h1 .word:nth-child(2) .tc-in {
   border-radius: calc(var(--cw, 64px) * 0.08);
   box-shadow: 0 0 0 1px rgb(0 0 0 / 0.08);
 }
-.card:hover:not(.up):not(.gone) .back {
-  filter: brightness(1.08);
+@media (hover: hover) {
+  .card:hover:not(.up):not(.gone) .back {
+    filter: brightness(1.08);
+  }
 }
 .card:active:not(.up) .inner {
   scale: 0.94;
@@ -1836,8 +1840,10 @@ h1 .word:nth-child(2) .tc-in {
   height: 22px;
   stroke-width: 2.6;
 }
-.modal-x:hover {
-  background: color-mix(in srgb, var(--ink) 15%, var(--sheet));
+@media (hover: hover) {
+  .modal-x:hover {
+    background: color-mix(in srgb, var(--ink) 15%, var(--sheet));
+  }
 }
 .modal-x:active {
   transform: scale(0.94);
@@ -1899,11 +1905,17 @@ h1 .word:nth-child(2) .tc-in {
   font-size: 15px;
   cursor: pointer;
 }
-.stage-jump button:hover,
 .stage-jump button:focus-visible {
   border-color: var(--accent);
   background: var(--accent);
   color: #fff;
+}
+@media (hover: hover) {
+  .stage-jump button:hover {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #fff;
+  }
 }
 /* 출시 모드 보기 단추: 개발자 모드인 동안 늘 보인다(켜면 이 단추만 남음) */
 .dev-toggle {
@@ -2080,8 +2092,10 @@ h1 .word:nth-child(2) .tc-in {
 .modal:has(.dex) .modal-x {
   background: color-mix(in srgb, var(--ink) 9%, color-mix(in srgb, var(--accent) 16%, var(--sheet)));
 }
-.modal:has(.dex) .modal-x:hover {
-  background: color-mix(in srgb, var(--ink) 15%, color-mix(in srgb, var(--accent) 16%, var(--sheet)));
+@media (hover: hover) {
+  .modal:has(.dex) .modal-x:hover {
+    background: color-mix(in srgb, var(--ink) 15%, color-mix(in srgb, var(--accent) 16%, var(--sheet)));
+  }
 }
 .dex {
   flex: 1;

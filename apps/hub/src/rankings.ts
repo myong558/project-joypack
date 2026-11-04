@@ -21,8 +21,11 @@ const FRESH_MS = 5 * 60 * 1000;
 const TIMEOUT_MS = 8000;
 const CACHE_KEY = 'joypack.rankingCache';
 
-/** thermo: 업다운에서 온도계를 쓴 기록(🌡️ 표시, 순위에는 영향 없음) */
-export type Row = { name: string; tries: number; time: number } | { name: string; score: number; thermo?: boolean };
+/** thermo: 업다운에서 온도계를 쓴 기록(🌡️ 표시, 순위에는 영향 없음). dev: 플레이한 입력 m 모바일·p PC(이름 옆 아이콘, 예전 기록에는 없음) */
+export type Row = ({ name: string; tries: number; time: number } | { name: string; score: number; thermo?: boolean }) & { dev?: string };
+
+/** 서버 값의 dev 가 'm' | 'p' 일 때만 붙인다 */
+const devOf = (v?: { stringValue?: string }) => (v?.stringValue === 'm' || v?.stringValue === 'p' ? { dev: v.stringValue } : {});
 
 export interface BoardResult {
   rows: Row[];
@@ -87,6 +90,7 @@ function boardDoc(gameId: string, classic = 'classic'): { key: (board: string) =
         .map((v) => ({
           name: v.mapValue?.fields.name?.stringValue ?? '',
           score: Number(v.mapValue?.fields.score?.integerValue ?? 0),
+          ...devOf(v.mapValue?.fields.dev),
         }))
         .sort((a, b) => b.score - a.score)
         .slice(0, limit);
@@ -120,9 +124,10 @@ const FETCHERS: Record<string, { key: (board: string) => string; fetch: Fetcher 
           score: Number(document!.fields.score.integerValue),
           at: Date.parse(document!.fields.createdAt.timestampValue ?? ''),
           thermo: document!.fields.thermo?.booleanValue === true,
+          dev: devOf(document!.fields.dev),
         }))
         .sort((a, b) => b.score - a.score || a.at - b.at)
-        .map(({ name, score, thermo }) => (thermo ? { name, score, thermo } : { name, score }));
+        .map(({ name, score, thermo, dev }) => (thermo ? { name, score, thermo, ...dev } : { name, score, ...dev }));
     },
   },
   // 두더지잡기·타임 투 플립: 순위표 1개 = 문서 1개({ entries: [...] }). 오늘의 챌린지는 날짜마다 새 문서다
@@ -143,6 +148,7 @@ const FETCHERS: Record<string, { key: (board: string) => string; fetch: Fetcher 
           name: v.mapValue?.fields.name?.stringValue ?? '',
           tries: Number(v.mapValue?.fields.moves?.integerValue ?? 0),
           time: Number(v.mapValue?.fields.time?.integerValue ?? 0),
+          ...devOf(v.mapValue?.fields.dev),
         }))
         .sort((a, b) => a.tries - b.tries || a.time - b.time)
         .slice(0, limit);

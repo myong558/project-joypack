@@ -586,7 +586,7 @@ function openRanking(host: HTMLElement, view: RankingView, start: Mode, mark: nu
     list.innerHTML = Array.from({ length: RANK_SIZE }, (_, i) => {
       const e = entries[i];
       const cls = [i < 3 ? `top top${i + 1}` : '', e ? '' : 'empty', e && i === highlight ? 'me' : ''].filter(Boolean).join(' ');
-      return `<li class="${cls}"><span class="no">${i + 1}</span><span class="name">${e ? e.name : '-----'}</span><span class="stage">${e ? t('ranking.stage', { n: e.stage }) : ''}</span><span class="score">${e ? e.score.toLocaleString() : '-'}</span>${mode === 'classic' ? `<span class="date">${e ? shortDate(e.date) : ''}</span>` : ''}</li>`;
+      return `<li class="${cls}"><span class="no">${i + 1}</span><span class="name">${e ? e.name + Joypack.deviceIcon(e.dev) : '-----'}</span><span class="stage">${e ? t('ranking.stage', { n: e.stage }) : ''}</span><span class="score">${e ? e.score.toLocaleString() : '-'}</span>${mode === 'classic' ? `<span class="date">${e ? shortDate(e.date) : ''}</span>` : ''}</li>`;
     }).join('');
   };
   const render = () => {

@@ -614,10 +614,10 @@ export function openRanking(host: HTMLElement, view: RankingView, mark: number |
     list.innerHTML = Array.from({ length: RANK_SIZE }, (_, i) => {
       if (board === 'daily') {
         const e = daily[i];
-        return row(i, !!e, String(i + 1), e ? e.name : '-----', '', e ? t('ranking.moves', { n: e.moves }) : '-', e ? clock(e.time) : '');
+        return row(i, !!e, String(i + 1), e ? e.name + Joypack.deviceIcon(e.dev) : '-----', '',e ? t('ranking.moves', { n: e.moves }) : '-', e ? clock(e.time) : '');
       }
       const e = save.rankings[i];
-      return row(i, !!e, String(i + 1), e ? e.name : '-----', e ? t('ranking.flowers', { n: e.flowers }) : '', e ? e.score.toLocaleString() : '-', e ? shortDate(e.date) : '');
+      return row(i, !!e, String(i + 1), e ? e.name + Joypack.deviceIcon(e.dev) : '-----', e ? t('ranking.flowers', { n: e.flowers }) : '', e ? e.score.toLocaleString() : '-', e ? shortDate(e.date) : '');
     }).join('');
   };
   const done = (place: number) => {

@@ -13,6 +13,8 @@ export interface RankEntry {
   stage: number;
   /** 기록한 날(YYYY-MM-DD) */
   date: string;
+  /** 플레이한 입력: m 모바일(터치)·p PC(마우스). 예전 기록에는 없음(Joypack.playDevice, 기준서 1.6) */
+  dev?: 'm' | 'p';
 }
 
 export interface Rankings {
@@ -117,7 +119,7 @@ export function sanitizeRankings(raw: unknown): Rankings {
   const fix = (list: unknown): RankEntry[] =>
     (Array.isArray(list) ? list : [])
       .filter(validEntry)
-      .map(({ name, score, stage, date }) => ({ name, score, stage, date }))
+      .map(({ name, score, stage, date, dev }) => (dev === 'm' || dev === 'p' ?{ name, score, stage, date, dev } : { name, score, stage, date }))
       .sort((a, b) => b.score - a.score)
       .slice(0, RANK_SIZE);
   const r = (raw ?? {}) as Partial<Rankings>;

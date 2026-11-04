@@ -16,6 +16,18 @@
   font-family: inherit;
 }
 
+/* PC 마우스(기준서 1.12): 그림을 끌면 반투명 그림이 마우스를 따라다니고, 단추를 빠르게 두 번 누르면 글자가 파랗게 선택된다.
+ * 휴대폰에서는 길게 누를 때 뜨는 그림 저장·글자 선택 메뉴를 막는다. :where 로 우선순위 0(게임이 직접 정하면 그것이 이김).
+ * :hover 규칙은 @media (hover: hover) 안에만 둔다(휴대폰은 누른 뒤 :hover 가 남음, pnpm build 가 scripts/check-hover.mjs 로 검사) */
+:where(img, svg) {
+  -webkit-user-drag: none;
+}
+:where(button, [role='button']) {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
 :root {
   --jp-top-size: 50px;
   --jp-top-icon: 26px;
@@ -159,9 +171,32 @@
   opacity: 0.18;
 }
 
-.jp-top-btn:hover {
-  border-color: var(--jp-top-accent);
-  color: var(--jp-top-accent);
+/* 랭킹 이름 옆 기기 아이콘(Joypack.deviceIcon: 휴대폰 = 모바일, 모니터 = PC). 이름 글자 크기를 따라가고 옅게 */
+.jp-dev {
+  display: inline-block;
+  flex: none;
+  width: 0.9em;
+  height: 0.9em;
+  margin-left: 0.3em;
+  vertical-align: -0.08em;
+  opacity: 0.5;
+}
+.jp-dev svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (hover: hover) {
+  .jp-top-btn:hover {
+    border-color: var(--jp-top-accent);
+    color: var(--jp-top-accent);
+  }
 }
 
 .jp-top-btn:active {

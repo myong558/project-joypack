@@ -642,8 +642,10 @@ button.dex-item {
   transition: transform 80ms, border-color 120ms;
 }
 
-button.dex-item:hover {
-  border-color: var(--accent);
+@media (hover: hover) {
+  button.dex-item:hover {
+    border-color: var(--accent);
+  }
 }
 
 button.dex-item:active {
@@ -2309,8 +2311,10 @@ button.dex-item:focus-visible {
   transition: transform 200ms;
 }
 
-.icon-btn:hover {
-  transform: rotate(45deg);
+@media (hover: hover) {
+  .icon-btn:hover {
+    transform: rotate(45deg);
+  }
 }
 
 @media (orientation: landscape) {
@@ -2967,11 +2971,15 @@ button.dex-item:focus-visible {
   animation-play-state: paused;
 }
 
-.dex-item:hover .thumb .mole .body,
-.dex-item:hover .thumb .mole .eye,
-.dex-item:hover .thumb .mole .brow,
 .dex-item:focus-visible .thumb .mole * {
   animation-play-state: running;
+}
+@media (hover: hover) {
+  .dex-item:hover .thumb .mole .body,
+    .dex-item:hover .thumb .mole .eye,
+    .dex-item:hover .thumb .mole .brow {
+    animation-play-state: running;
+  }
 }
 
 /* 아직 못 만난 두더지는 실루엣만 */
@@ -3978,8 +3986,10 @@ body {
   stroke-width: 2.6;
 }
 
-.dex-arrow:hover {
-  background: color-mix(in srgb, var(--accent) 16%, var(--bg));
+@media (hover: hover) {
+  .dex-arrow:hover {
+    background: color-mix(in srgb, var(--accent) 16%, var(--bg));
+  }
 }
 
 .dex-arrow:active {

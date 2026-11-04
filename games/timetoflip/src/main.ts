@@ -86,7 +86,7 @@ function rankingView(day: Date): RankingView {
     },
     async register(mode, name, score, stage) {
       save.playerName = name;
-      const { place, entries } = await submitEntry(mode, today, { name, score, stage, date: today });
+      const { place, entries } = await submitEntry(mode, today, { name, score, stage, date: today, dev: Joypack.playDevice() });
       cacheBoard(mode, today, entries);
       // 그사이 다른 사람들에게 밀려 10위 밖이 됐어도 더 올릴 수 없으므로 대기에서 지운다
       clearPending(save.pending, mode, score);

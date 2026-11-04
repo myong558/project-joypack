@@ -1,7 +1,7 @@
 // 화면 크기 점검: 세로·가로(주소창·아래 버튼 포함)·폴드 펼침 크기에서 앱의 모든 화면을 찍고, 잘린 글자·버튼을 찾는다.
 // 쓰는 법(먼저 pnpm build):
 //   pnpm check:screens <앱>            예) pnpm check:screens hammer  /  pnpm check:screens hub
-//   pnpm check:screens <앱> quick      대표 4크기만(작은 폰·가장 낮은 가로·폴드·PC). 수정 뒤 확인은 보통 이것으로(기준서 7.1)
+//   pnpm check:screens <앱> quick      대표 4크기만(작은 폰·가장 낮은 가로·폴드·가장 낮은 PC). 수정 뒤 확인은 보통 이것으로(기준서 7.1)
 //   pnpm check:screens <앱> landscape  크기 묶음만: quick | portrait | landscape | fold | pc | all(기본)
 //   --motion  첫 진입 연출을 켠 채로 찍는다(기본은 동작 줄이기로 열어 연출을 건너뛰어 빠르게 찍음)
 //   pnpm check:screens <앱> all result,settings  화면 이름에 이 글자가 들어간 것만
@@ -34,11 +34,16 @@ export const SIZES = {
   portrait: ['320x560', '360x560', '344x690', '390x664'], // 작은 폰(아이폰 SE 1세대·글자 크게 쓴 안드로이드), 주소창+아래 버튼, 폴드 바깥 화면, 사파리
   landscape: ['844x390', '780x300', '667x375', '640x290', '740x260', '568x320'], // 가로: 바로가기 전체, 주소창+버튼, 작은 폰
   fold: ['720x740', '740x690', '884x1004', '1104x784'], // 폴드 펼침(거의 정사각형)
-  pc: ['1366x768'],
+  // PC(마우스로 흉내): 1920 노트북 150%·125% 배율(주소창·작업 표시줄 뺌), FHD·QHD 모니터, 휴대폰 폭으로 줄인 창
+  pc: ['1280x600', '1536x730', '1920x950', '2560x1300', '480x800'],
 };
-// 대표 크기: 문제는 대부분 가장 작은 세로·가장 낮은 가로·정사각 폴드·PC 에서 드러난다
-const QUICK = ['320x560', '740x260', '884x1004', '1366x768'];
-const sizes = (group === 'all' ? Object.values(SIZES).flat() : group === 'quick' ? QUICK : SIZES[group] ?? group.split(',')).map((s) => s.split('x').map(Number));
+// 대표 크기: 문제는 대부분 가장 작은 세로·가장 낮은 가로·정사각 폴드·가장 낮은 PC 에서 드러난다
+const QUICK = ['320x560', '740x260', '884x1004', '1280x600'];
+// PC 크기는 마우스(pointer: fine)로, 나머지는 터치로 흉내 낸다. 크기를 직접 적을 때 뒤에 p 를 붙이면 마우스(예: 1366x768p)
+const sizes = (group === 'all' ? Object.values(SIZES).flat() : group === 'quick' ? QUICK : SIZES[group] ?? group.split(',')).map((s) => {
+  const [w, h] = s.replace(/p$/, '').split('x').map(Number);
+  return [w, h, !(s.endsWith('p') || SIZES.pc.includes(s))];
+});
 
 const { screens, base = '' } = await import(pathToFileURL(defFile).href);
 const out = join(ROOT, 'screen-check', app);
@@ -99,11 +104,12 @@ async function open(setup = '') {
   await page.wait(motion ? 2500 : 500); // 첫 진입 연출이 끝날 때까지(동작 줄이기면 글꼴·첫 배치만 기다림)
 }
 
-async function record(name, w, h) {
+async function record(name, w, h, touch) {
   const res = await page.eval(CHECK);
   if (!res.startsWith('ok')) problems++;
-  console.log(`${name.padEnd(14)} ${`${w}x${h}`.padEnd(9)} ${res}`);
-  await page.shot(join(out, `${name}-${w}x${h}.png`));
+  const size = `${w}x${h}${touch ? '' : 'p'}`;
+  console.log(`${name.padEnd(14)} ${size.padEnd(10)} ${res}`);
+  await page.shot(join(out, `${name}-${size}.png`));
 }
 
 try {
@@ -113,18 +119,18 @@ try {
       await page.size(390, 844);
       await open(s.setup);
       await s.go(page);
-      for (const [w, h] of sizes) {
-        await page.size(w, h);
+      for (const [w, h, touch] of sizes) {
+        await page.size(w, h, touch);
         await page.wait(700);
-        await record(s.name, w, h);
+        await record(s.name, w, h, touch);
       }
     } else {
-      for (const [w, h] of sizes) {
-        await page.size(w, h);
+      for (const [w, h, touch] of sizes) {
+        await page.size(w, h, touch);
         await open(s.setup);
         if (s.go) await s.go(page);
         await page.wait(900);
-        await record(s.name, w, h);
+        await record(s.name, w, h, touch);
       }
     }
   }
@@ -140,12 +146,12 @@ for (const s of screens) {
   const items = readdirSync(out)
     .filter((f) => f.startsWith(s.name + '-'))
     .map((f) => {
-      const [w, h] = f.match(/(\d+)x(\d+)\.png$/).slice(1).map(Number);
+      const [w, h] = f.match(/(\d+)x(\d+)p?\.png$/).slice(1).map(Number);
       return { f, w, h };
     });
   if (!items.length) continue;
   const rows = [items.filter((i) => i.h > i.w && i.w < 500), items.filter((i) => i.w > i.h && i.h < 500), items.filter((i) => i.w >= 500 && i.h >= 500)].filter((r) => r.length);
-  const S = 0.5, GAP = 12, comps = [];
+  const S = items.some((i) => i.w > 1600) ? 0.35 : 0.5, GAP = 12, comps = [];
   let y = 0, W = 0;
   for (const row of rows) {
     let x = 0, rh = 0;

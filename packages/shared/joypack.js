@@ -416,6 +416,28 @@
     return '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' + (TOP_ICONS[name] || '') + '</svg>';
   }
 
+  // 랭킹 기기 표시(기준서 1.6): 마지막으로 누른 입력이 마우스면 'p'(PC), 터치·펜이면 'm'(모바일).
+  // 기기 종류가 아니라 실제로 쓴 입력으로 정한다(터치 노트북을 손가락으로 했으면 모바일, 태블릿에 마우스를 붙였으면 PC).
+  // 아직 누른 적이 없으면(키보드만) 기기의 기본 입력(pointer: coarse)으로. 랭킹 등록 때 기록에 dev 로 함께 올린다
+  let lastPointer = '';
+  if (typeof document !== 'undefined') {
+    document.addEventListener('pointerdown', (e) => (lastPointer = e.pointerType), { capture: true, passive: true });
+  }
+  function playDevice() {
+    if (lastPointer) return lastPointer === 'mouse' ? 'p' : 'm';
+    return global.matchMedia && global.matchMedia('(pointer: coarse)').matches ? 'm' : 'p';
+  }
+  const DEVICE_ICONS = {
+    m: '<rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18h3"/>',
+    p: '<rect x="2.5" y="4" width="19" height="12.5" rx="2"/><path d="M12 16.5v3.5M8 20.5h8"/>',
+  };
+  // 순위표 이름 옆 작은 아이콘(topbar.css 의 .jp-dev). dev 가 없는 예전 기록은 빈 문자열
+  function deviceIcon(dev) {
+    if (dev !== 'm' && dev !== 'p') return '';
+    const label = dev === 'p' ? 'PC' : (get('lang') || deviceLang()) === 'ko' ? '모바일' : 'Mobile';
+    return '<span class="jp-dev" role="img" title="' + label + '" aria-label="' + label + '"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' + DEVICE_ICONS[dev] + '</svg></span>';
+  }
+
   // 숨김 미리보기로 배포된 게임인지(games.json status "preview"). 빌드가 그 게임 index.html 의 <html> 에 data-jp-preview 를 붙인다.
   // 미리보기 동안에도 랭킹은 실제로 등록된다(테스트용). 공개 전 테스트 점수를 지울지는 사람이 정한다(기준서 7.3)
   // 공개 예약(games.json open)이 있으면 빌드가 data-jp-open 에 그 시각을 적는다. 그 시각이 지나면 미리보기가 아니라 공개된 게임으로 본다
@@ -640,6 +662,8 @@
     dailyPick: dailyPick,
     topIcon: topIcon,
     deviceLang: deviceLang,
+    playDevice: playDevice,
+    deviceIcon: deviceIcon,
     guardBottom: guardBottom,
     trackViewport: trackViewport,
     viewportReport: viewportReport,

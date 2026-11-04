@@ -683,12 +683,16 @@ button:focus-visible {
   --tone-line: var(--line-brick);
 }
 
-.difficulty:hover {
-  border-color: var(--primary);
+@media (hover: hover) {
+  .difficulty:hover {
+    border-color: var(--primary);
+  }
 }
 
-.difficulty:hover .difficulty-go {
-  transform: scale(1.08);
+@media (hover: hover) {
+  .difficulty:hover .difficulty-go {
+    transform: scale(1.08);
+  }
 }
 
 /* 누르는 동안: 두께만큼 내려앉는다 */
@@ -785,8 +789,10 @@ button:focus-visible {
   background: linear-gradient(to bottom, color-mix(in srgb, #fff 8%, var(--surface)), var(--surface) 60%);
 }
 
-.custom-start:hover {
-  border-color: var(--primary);
+@media (hover: hover) {
+  .custom-start:hover {
+    border-color: var(--primary);
+  }
 }
 
 .custom-start:not(:disabled):active {
@@ -1855,8 +1861,10 @@ button:focus-visible {
   font-size: 2rem;
 }
 
-.icon-button:hover {
-  color: var(--text);
+@media (hover: hover) {
+  .icon-button:hover {
+    color: var(--text);
+  }
 }
 
 .chip-row {
@@ -1883,8 +1891,10 @@ button:focus-visible {
   border-radius: 12px;
 }
 
-.chip:hover:not(:disabled) {
-  border-color: var(--selected);
+@media (hover: hover) {
+  .chip:hover:not(:disabled) {
+    border-color: var(--selected);
+  }
 }
 
 /* 기록 리셋: 다른 칩과 같은 모양으로 한 줄에 4개. 좁은 화면에서도 줄바꿈 없이 들어가게 좌우 여백을 줄인다. */
