@@ -5,7 +5,7 @@ import './styles.css';
 import { GAMES, byNewest, iconUrl, isNew, isPublic, isScheduled, patternOf, type GameMeta } from './games';
 import { LANG_LABEL, LANGS, formatNumber, getLang, t, type MessageKey } from './i18n';
 import { FULL, TOP, cachedBoard, hasRanking, loadBoard, type Row } from './rankings';
-import { externalOpenUrl, installState, isIos, manualGuide, onInstallChange, promptInstall } from './install';
+import { externalOpenUrl, installState, isIos, manualGuide, onInstallChange, playStoreUrl, promptInstall } from './install';
 import { previewOn } from './preview';
 import { bestRecord, canClearRecords, clearRecords } from './records';
 import { THEMES, applySettings, applyTheme, canVibrate, loadSettings, migrateLegacy, saveSetting, watchSystemTheme } from './settings';
@@ -185,7 +185,7 @@ function showInstallCard(): boolean {
     // 저장소를 못 쓰는 환경
   }
   if (dismissed) return false;
-  return invited || state === 'ready';
+  return invited || state === 'ready' || state === 'store';
 }
 
 /** 설치 방법 안내 문구. 설치 창을 바로 띄울 수 있으면 없음 */
@@ -249,6 +249,10 @@ function extraGuide(): string {
 /** 설치 버튼: 설치 창을 띄우거나, 앱 안 브라우저면 기본 브라우저로 연다. 둘 다 못 하면 안내만 */
 function installButton(): string {
   const state = installState();
+  // 플레이 스토어 앱(스위치가 켜진 안드로이드): 스토어 앱 페이지로
+  if (state === 'store') {
+    return `<a class="primary-btn" href="${esc(playStoreUrl()!)}" target="_blank" rel="noopener">${ICON.download}${lbl(t('install.play'))}</a>`;
+  }
   if (state === 'inapp') {
     return externalOpenUrl() ? `<a class="primary-btn" href="${esc(externalOpenUrl()!)}">${ICON.download}${lbl(t('install.openBrowser'))}</a>` : '';
   }
@@ -963,7 +967,7 @@ function renderInstall(section: HTMLElement, showGuide = false): void {
     </div>
     ${state === 'installed' ? '' : button}
     ${(showGuide || state === 'inapp') && extraGuide() ? `<p class="install-guide" role="status">${extraGuide()}</p>` : ''}
-    ${installHow(showGuide && !!guide)}`;
+    ${state === 'store' ? '' : installHow(showGuide && !!guide)}`;
   bindInstallHow(section);
   section.querySelector('[data-install]')?.addEventListener('click', async () => {
     // 브라우저가 설치 창을 준비해 두었으면 바로 띄우고, 아니면(아이폰 등) 직접 추가하는 방법을 보여 준다

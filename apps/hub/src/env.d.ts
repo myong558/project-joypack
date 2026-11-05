@@ -1,5 +1,7 @@
 /** 빌드할 때 vite.config.ts가 채워 넣는 값 */
 declare const __APP_VERSION__: string;
+/** 플레이 스토어 앱 패키지 이름(vite.config.ts PLAY_APP_ID 스위치). 비어 있으면 브라우저 설치(PWA) 안내 */
+declare const __PLAY_APP_ID__: string;
 /** 운영 빌드(main 배포, JOYFIELD_SITE=prod)면 true. 개발 전용 코드 앞에 `!__JOYFIELD_PROD__ && …` 를 붙이면 운영 빌드에서 통째로 빠진다(vite.config define) */
 declare const __JOYFIELD_PROD__: boolean;
 /** 게임 id → 게임 버전(빌드할 때 각 게임 package.json 에서 읽음) */

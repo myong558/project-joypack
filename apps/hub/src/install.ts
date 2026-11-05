@@ -12,7 +12,13 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-export type InstallState = 'standalone' | 'installed' | 'ready' | 'ios' | 'manual' | 'inapp';
+/** store: 플레이 스토어 앱 스위치가 켜진 안드로이드 브라우저 → "Google Play에서 받기" */
+export type InstallState = 'standalone' | 'installed' | 'store' | 'ready' | 'ios' | 'manual' | 'inapp';
+
+/** 플레이 스토어 앱 페이지 주소(스위치가 꺼져 있으면 null, vite.config.ts PLAY_APP_ID) */
+export function playStoreUrl(): string | null {
+  return __PLAY_APP_ID__ ? `https://play.google.com/store/apps/details?id=${encodeURIComponent(__PLAY_APP_ID__)}` : null;
+}
 
 let deferred: BeforeInstallPromptEvent | null = null;
 let installedNow = false;
@@ -86,6 +92,8 @@ export function installState(): InstallState {
   const standalone = matchMedia('(display-mode: standalone)').matches || (navigator as Navigator & { standalone?: boolean }).standalone === true;
   if (standalone) return 'standalone';
   if (installedNow) return 'installed';
+  // 스토어 앱이 공개됐으면 안드로이드는 브라우저 설치 대신 스토어 앱으로(앱 안 브라우저에서도 스토어 주소는 열린다)
+  if (playStoreUrl() && /android/i.test(navigator.userAgent)) return 'store';
   // 앱 안 브라우저는 설치 창을 받더라도 앱 쪽에서 막히는 경우가 많아 먼저 가린다
   if (inAppBrowser()) return 'inapp';
   if (deferred) return 'ready';
