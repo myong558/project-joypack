@@ -507,7 +507,7 @@ p {
 
 /* ---------- 오프닝: 페이지에 처음 들어왔을 때 한 번 ----------
  * 구멍이 솟고 → 두더지가 튀어나오고 → 제목 글자가 떨어지고 → 화면 밖에서 망치가 날아와 두더지를 콩! 치고 제목 오른쪽 제자리로 가고
- * → 맞은 두더지는 찌그러지며 구멍으로 쏙 → 버튼·도감이 차례로. 그 뒤로는 평소처럼 두더지가 나왔다 들어가고 망치가 흔들린다.
+ * → 맞은 두더지는 찌그러지며 구멍으로 쏙. 로고 아래 문구·버튼·도감은 제목 글자가 떨어지기 시작할 때(0.56초~) 함께 차례로 올라온다. 그 뒤로는 평소처럼 두더지가 나왔다 들어가고 망치가 흔들린다.
  * 망치가 두더지까지 가는 거리(--hit-x, --hit-y)는 화면 크기마다 달라 screens.ts 가 재서 넣는다.
  * 두더지 쪽 오프닝(intro-peek)은 아래 "시작 화면 두더지" 블록에 있다.
  * 단추의 눌림(transform)과 겹치지 않게 translate·scale 속성만 쓰고, 끝난 뒤에는 남지 않도록 backwards로 채운다.
@@ -533,15 +533,15 @@ p {
       title-swing 2.4s 2.3s ease-in-out infinite;
   }
 
-  .opening .tagline { animation: intro-rise 400ms 1250ms ease-out backwards; }
-  .opening .modes .btn { animation: intro-rise 450ms 1350ms cubic-bezier(0.3, 1.5, 0.6, 1) backwards; }
-  .opening .modes .btn + .btn { animation-delay: 1450ms; }
-  .opening .best { animation: intro-rise 400ms 1550ms ease-out backwards; }
-  .opening .dex { animation: intro-rise 400ms 1200ms ease-out backwards; }
-  .opening .dex h2 { animation: intro-rise 400ms 1300ms ease-out backwards; }
-  .opening .dex li { animation: intro-pop 350ms calc(1350ms + var(--i) * 50ms) cubic-bezier(0.3, 1.6, 0.6, 1) backwards; }
-  .opening .hint { animation: intro-rise 400ms 1700ms ease-out backwards; }
-  .opening .jp-topbar { animation: intro-fade 400ms 1500ms ease-out backwards; }
+  .opening .tagline { animation: intro-rise 400ms 600ms ease-out backwards; }
+  .opening .modes .btn { animation: intro-rise 450ms 680ms cubic-bezier(0.3, 1.5, 0.6, 1) backwards; }
+  .opening .modes .btn + .btn { animation-delay: 760ms; }
+  .opening .best { animation: intro-rise 400ms 840ms ease-out backwards; }
+  .opening .dex { animation: intro-rise 400ms 560ms ease-out backwards; }
+  .opening .dex h2 { animation: intro-rise 400ms 640ms ease-out backwards; }
+  .opening .dex li { animation: intro-pop 350ms calc(700ms + var(--i) * 40ms) cubic-bezier(0.3, 1.6, 0.6, 1) backwards; }
+  .opening .hint { animation: intro-rise 400ms 920ms ease-out backwards; }
+  .opening .jp-topbar { animation: intro-fade 400ms 800ms ease-out backwards; }
 }
 
 @keyframes intro-pop {
