@@ -280,7 +280,7 @@ pnpm --filter hub icons  # 로고(apps/hub/public/logo.svg)를 바꾼 뒤 앱 �
   | `main` | `https://pocketgamelab.com/joyfield/` | 운영 `joyfield-41b5a` |
   | `dev` | `https://dev.pocketgamelab.com/joyfield/` (검색 차단, 홈 화면 앱 이름 "조이필드 개발": 빌드 때 `JOYFIELD_SITE=dev`) | 개발 `joyfield-dev` |
   | (내 PC) | `pnpm dev`·`pnpm preview` → `http://localhost:4170/joyfield/` | 개발 `joyfield-dev` |
-- 흐름: 내 PC → `dev` 에 올려 개발 사이트에서 확인 → `main` 에 올려 운영(새 게임은 숨김 미리보기로 마지막 확인 → 정식 공개).
+- 흐름(2026-11-05 결정, 개발 먼저): 작업은 `dev` 브랜치에서 하고 푸시는 `dev` 에만 → 개발 사이트에서 확인 → "운영 반영"을 요청할 때만 `dev` 를 `main` 에 합쳐 푸시 → 운영(새 게임은 숨김 미리보기로 마지막 확인 → 정식 공개).
 - `pnpm site`(`scripts/site.mjs`)가 `dist/` 를 `site/joyfield/` 로 넣고 `_redirects`(첫 화면 `/` → `/joyfield/` 302, 스튜디오 소개를 만들 때까지)·`_headers`(`sw.js` no-cache, 개발 주소 noindex)·`robots.txt` 를 만듭니다. 도메인 최상위는 스튜디오(Pocket Game Lab) 자리라 나중에 소개·개인정보처리방침·스토어 앱 연결(`/.well-known/assetlinks.json`)을 둡니다.
 - **옛 주소** `https://myong558.github.io/project-joyfield/`: 쓰지 않습니다. 2026-11-05 잠시 "새 주소로 옮겼어요" 안내 페이지를 두었다가, 옛 주소 사용자가 거의 없어 안내 페이지(`moved.yml`·`scripts/moved-site.mjs`)를 지우고 GitHub Pages 를 껐습니다(사용자 결정). 공유 링크·문서에는 새 주소만 씁니다.
 - 서비스 워커와 게임별 `files.json` 은 빌드할 때마다 새로 만들어지므로 수동으로 캐시 버전을 올릴 필요가 없습니다.
