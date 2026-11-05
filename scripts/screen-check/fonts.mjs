@@ -101,7 +101,7 @@ try {
   if (!isHub) {
     // 결과 화면 공통 조각: 실제와 같은 짜임(rankEntryForm 오프라인 칸·leaveRankEntry 창)에 그 게임 문구를 넣어 그 게임 글꼴로 그린다
     const card = `<div class="rank-entry done offline" style="position:fixed;left:0;right:0;bottom:0;z-index:9999"><div class="rank-entry-done"><p class="rank-entry-title"><span>${say('ranking.offlineEntry')}</span></p></div></div>`;
-    const dialog = `<div class="modal-backdrop instant"><div class="modal rank-leave-modal" role="dialog"><div class="rank-leave"><h2>${say('ranking.leaveTitle')}</h2><p class="note">${say('ranking.leaveText')}</p><p class="note">${say('ranking.leaveFailed')}</p><div class="rank-leave-actions"><button type="button" class="btn primary">${say('ranking.leaveStay')}</button><button type="button" class="btn">${say('ranking.leaveGo')}</button></div></div></div></div>`;
+    const dialog = `<div class="modal-backdrop instant"><div class="modal rank-leave-modal" role="dialog"><div class="rank-leave"><h2>${say('ranking.leaveTitle')}</h2><p class="note">${say('ranking.leaveText')}</p><p class="note">${say('ranking.leaveFailed')}</p><div class="rank-leave-actions"><button type="button" class="btn primary">${say('ranking.leaveStay')}</button><button type="button" class="btn secondary">${say('ranking.leaveGo')}</button></div></div></div></div>`;
     await page.eval(`(() => { const host = document.querySelector('.screen, main, #app') || document.body; host.insertAdjacentHTML('beforeend', ${JSON.stringify(card)}); document.body.insertAdjacentHTML('beforeend', ${JSON.stringify(dialog)}); return true; })()`);
     await page.wait(500);
     await check('.rank-entry.offline', '오프라인 등록 카드');

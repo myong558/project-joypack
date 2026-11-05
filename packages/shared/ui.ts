@@ -297,7 +297,7 @@ export function leaveRankEntry(host: ParentNode, go: () => void): void {
       <p class="note">${t(state === 'failed' ? 'ranking.leaveFailed' : 'ranking.leaveText')}</p>
       <div class="rank-leave-actions">
         <button type="button" class="btn primary" data-stay>${t('ranking.leaveStay')}</button>
-        <button type="button" class="btn" data-go>${t('ranking.leaveGo')}</button>
+        <button type="button" class="btn secondary" data-go>${t('ranking.leaveGo')}</button>
       </div>
     </div>`);
   let leaving = false;
