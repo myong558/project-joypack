@@ -102,6 +102,7 @@
 - Access 앱 `pocketgamelab - Cloudflare Pages`(Pages → 설정 → 일반 "프리뷰 액세스"로 자동 생성): `*.pocketgamelab.pages.dev`(`dev.`·해시 미리보기), 정책 `Allow Members`(레거시, 계정 사용자). **이 앱에 `dev.pocketgamelab.com` 을 더하면 저장은 되는데 적용이 안 됐다** → 따로 앱을 만들어야 함(같은 주소를 두 앱에 넣으면 `destination belongs to another application` 오류).
 - 대량 리디렉션(계정 → 제공 및 성능 → 대량 리디렉션): 목록 `pages_dev_to_prod`(`pocketgamelab.pages.dev/` → `https://pocketgamelab.com/` 301, 쿼리·하위 경로·경로 접미사 유지, **하위 도메인 포함 끔**) + 규칙 `pages.dev to prod`.
 - 확인: `curl` 로 `dev.` 두 주소 302 → `plain-surf-bda7.cloudflareaccess.com`, `pocketgamelab.pages.dev/*` 301, 운영 200. 막힌 주소는 Cloudflare 대시보드에 로그인한 브라우저에서는 "Cloudflare" 버튼으로 바로 통과된다.
+- **잠그기 전에 개발 사이트를 연 기기는 로그인 없이 열린다:** 서비스 워커(`scripts/sw-template.js`)가 `/joyfield/` 를 캐시에서 내주기 때문(새로 받기는 Access 에 막혀 옛 화면이 그대로 남음). 처음 여는 기기·시크릿 창은 로그인 화면. 그런 기기는 서비스 워커 범위 밖인 `https://dev.pocketgamelab.com/` 을 열어 로그인하면 이후 새 버전을 받는다(세션 1개월이 끝나면 같은 방법으로 다시 로그인).
 
 2. **구글 플레이 등록 준비(코드·자료):** 스토어 그래픽(아이콘 512×512, 대표 그래픽 1024×500, 휴대폰 스크린샷), 스토어 설명문(짧은·자세한), 데이터 보안 양식 답변 초안(저장: 이니셜·점수·시각·입력 종류), 콘텐츠 등급 설문 답변 초안, TWA `/.well-known/assetlinks.json` 자리(서명 키 지문은 Play Console 앱 생성 뒤). 개발자 계정(25달러)·본인 인증·앱 만들기는 사용자가 한다(화면 순서대로 안내).
 3. **출시 전 점검:** 공개 게임 전체 `pnpm check:screens <id> all`, 서비스 워커 "옛 버전 설치 → 새 버전 업데이트" 확인, 오프라인 동작 확인.
