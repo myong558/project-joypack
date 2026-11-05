@@ -392,9 +392,10 @@ function teaserCard(game: GameMeta): string {
  * 목록은 최신 게임부터라 "앞으로 나올 게임"을 카드로 끼우면 순서가 어긋나므로 목록 밖, 끝맺음 자리에 둔다
  */
 function nextStrip(): string {
-  // 미리보기 게임도 비밀번호를 확인하지 않은 기기에서는 준비 중으로 보인다
+  // 운영 빌드에서는 준비 중인 게임 이름을 보이지 않는다(2026-11-05): 이름이 바뀌거나 출시를 접어도 알려진 것이 없게,
+  // 공개 예약 게임의 COMING SOON 카드가 공개 전까지 이름을 숨기는 것과 맞춘다. 개발 빌드에서만 이름을 보인다
   // 공개 예약 게임은 COMING SOON 카드가 대신하므로 띠에 넣지 않는다
-  const soon = GAMES.filter((g) => g.status === 'soon' || (g.status === 'preview' && !g.open && !live.includes(g)));
+  const soon = __JOYFIELD_PROD__ ? [] : GAMES.filter((g) => g.status === 'soon' || (g.status === 'preview' && !g.open && !live.includes(g)));
   const text = soon.length
     ? t('game.nextNamed', { name: soon.map((g) => g.name[getLang()]).join(', ') })
     : t('game.nextDesc');

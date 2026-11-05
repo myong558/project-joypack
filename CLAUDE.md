@@ -54,6 +54,7 @@
 ## 수정할 때
 
 - **작업 브랜치는 `dev`(2026-11-05 사용자 결정, 개발 먼저):** 게임 수정·새 게임·허브 수정은 모두 `dev` 에서 하고 "커밋 푸시"는 `dev` 에만 푸시한다 → 개발 사이트 `dev.pocketgamelab.com` 에만 나간다. 세션을 시작했는데 `main` 에 있으면 고친 파일이 없는지 보고 `git checkout dev` → `git pull` 뒤 작업한다(`dev` 가 `main` 보다 뒤처졌으면 `git merge --ff-only origin/main`).
+- **운영 반영 전에 나눠 보여 주기(2026-11-05 사용자 요청, 사용자가 하나하나 알려 줄 수 없음):** "운영 반영해줘"라고 하면 합치기 전에 `git diff --stat main..dev`·`git log main..dev` 를 파일 경로로 나눠 답변에 먼저 보인다. ① **걸러짐**(운영 빌드에 안 들어감): `games.json` 이 `preview` 이고 `open` 이 없는 게임의 `games/<id>/`, `!__JOYFIELD_PROD__` 뒤 개발자 모드 전용 코드 ② **나감**: 공개(live·공개 예약) 게임, 허브, `packages/shared`, 빌드·배포 스크립트, 문서 ③ **멈추고 묻기**: 공개된 게임·허브에 끝나지 않은 작업이 섞인 것(커밋 메시지·코드에 미완성·임시 흔적, 사용자가 진행 중이라고 한 작업), 미완성 게임 때문에 바뀐 공통 부분(`packages/shared`·허브), 저장 형식·Firestore 규칙 변경(운영 기준 절). ③이 없으면 묻지 않고 반영하고, 있으면 그 항목만 물은 뒤 진행한다. 반영 직전 `JOYFIELD_SITE=prod pnpm build` 가 통과해야 한다(개발 전용 코드가 남으면 실패).
 - **운영 반영은 요청할 때만:** "운영 반영해줘"(비슷한 말 포함)라고 하면 `dev` 를 `main` 에 합쳐(`git checkout main` → `git pull` → `git merge --ff-only dev`, 안 되면 `git merge dev`) `main` 을 푸시하고 다시 `dev` 로 돌아온다 → 운영 `pocketgamelab.com` 배포. 정식 공개(기준서 7.4)도 운영에 나가야 하므로 마지막에 이 운영 반영까지 한다. 작업 규칙만 고친 문서 변경(CLAUDE.md·기준서·README)은 다른 PC 가 `main` 에서도 같은 규칙을 보도록 `main` 에도 같이 올려도 된다.
 - 버전은 손으로 고치지 않고 **`pnpm bump <게임 id | hub> <patch | minor>`** 로 올린다(파일의 지금 값 + 1 이라 여러 세션이 번갈아 고쳐도 번호가 꼬이지 않음). 고치기 전에 `git pull`.
 - 게임·허브를 고치면 버전을 올린다: 게임은 `games/<id>/package.json`, 허브는 루트 `package.json` (기능 추가 minor, 수정 patch). 게임은 미리보기 동안 0.x.x, **정식 공개하면 1.0.0**(`pnpm release` 가 올림).
