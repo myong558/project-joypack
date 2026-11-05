@@ -69,7 +69,7 @@ export function settingsPanel(o: SettingsOptions): HTMLElement {
         </section>
         <section class="settings-group">
           <h3>${t('settings.fx')}</h3>
-          <div class="switches">
+          <div class="jp-switches">
             ${switchRow('sound', o.sound, t('settings.sound'), [icon('sound'), icon('sound')])}
             ${Joyfield.canVibrate() ? switchRow('vibrate', o.vibrate, t('settings.vibrate'), [icon('vibrate'), icon('vibrate')]) : '' /* 진동을 못 하는 기기(아이폰 등)에는 숨긴다 */}
           </div>

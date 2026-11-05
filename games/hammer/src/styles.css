@@ -3276,12 +3276,9 @@ small {
   display: none;
 }
 
-/* ---------- 설정: 소리·진동 = 공통 스위치 줄(@joyfield/shared/settings.css), 두 줄을 나란히 꽉 채운다 ---------- */
-.settings .switches {
-  display: grid;
-  /* 두 줄이 들어가면 나란히, 좁으면(작은 휴대폰) 위아래로 */
-  grid-template-columns: repeat(auto-fit, minmax(max(150px, 7.5em), 1fr));
-  gap: 0.5em;
+/* ---------- 설정: 소리·진동 = 공통 스위치 줄(@joyfield/shared/settings.css, 위아래로 한 줄씩) ---------- */
+.settings .jp-switches {
+  --jp-switches-gap: 0.5em;
   --jp-switch-on: var(--accent);
   --jp-switch-off: var(--border);
   --jp-switch-focus: var(--accent);
@@ -3533,11 +3530,6 @@ body {
  * 칸은 minmax(0, 1fr)로 똑같이 나눈다 */
 .settings-grid > section {
   min-width: 0;
-}
-
-/* 소리·진동: 들어가면 한 줄에 둘, 좁으면 위아래로 */
-.settings .switches {
-  grid-template-columns: repeat(auto-fit, minmax(max(150px, 7.5em), 1fr));
 }
 
 @media (orientation: landscape) {

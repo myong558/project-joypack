@@ -958,15 +958,13 @@ h2 .icon-pic {
   font-weight: 700;
 }
 /* 소리·진동: 공통 스위치 줄(@joyfield/shared/settings.css), 색·테두리만 이 게임 것 */
-.switches {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.jp-switches {
+  --jp-switches-gap: 8px;
   --jp-switch-on: var(--leaf);
   --jp-switch-off: var(--line);
   --jp-switch-focus: var(--leaf-ink);
 }
-.switches .jp-switch {
+.jp-switches .jp-switch {
   padding: 4px 8px 4px 12px;
   border: 1.5px solid var(--line);
   border-radius: 12px;

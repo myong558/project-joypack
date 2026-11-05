@@ -814,8 +814,10 @@ async function openSettings(): Promise<void> {
     </section>
     <section class="set-group">
       <h3>${t('settings.feedback')}</h3>
-      ${switchRow('sound', settings.sound, t('settings.sound'))}
-      ${canVibrate ? switchRow('vibrate', settings.vibrate, t('settings.vibrate')) : ''}
+      <div class="jp-switches">
+        ${switchRow('sound', settings.sound, t('settings.sound'))}
+        ${canVibrate ? switchRow('vibrate', settings.vibrate, t('settings.vibrate')) : ''}
+      </div>
     </section>
     <section class="set-group">
       <h3><label for="initials">${t('settings.initials')}</label></h3>

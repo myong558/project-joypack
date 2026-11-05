@@ -2105,17 +2105,15 @@ button:focus-visible {
   font-size: 1.25rem;
 }
 
-/* 소리·진동: 공통 스위치 줄(@joyfield/shared/settings.css). 칩과 같은 바탕·테두리로 두 줄을 나란히 */
-.switches {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 8px;
+/* 소리·진동: 공통 스위치 줄(@joyfield/shared/settings.css, 위아래로 한 줄씩). 칩과 같은 바탕·테두리 */
+.jp-switches {
+  --jp-switches-gap: 8px;
   --jp-switch-on: var(--selected);
   --jp-switch-off: var(--chip-line);
   --jp-switch-focus: var(--selected);
 }
 
-.switches .jp-switch {
+.jp-switches .jp-switch {
   min-height: 0;
   padding: clamp(2px, 0.8 * var(--vh), 6px) 8px clamp(2px, 0.8 * var(--vh), 6px) 12px;
   background: var(--chip-bg);
@@ -2124,7 +2122,7 @@ button:focus-visible {
   border-radius: 12px;
 }
 
-.switches .jp-switch-icon .icon {
+.jp-switches .jp-switch-icon .icon {
   font-size: 1.25rem;
 }
 

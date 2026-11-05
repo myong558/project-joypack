@@ -1,6 +1,13 @@
 /* 조이필드 설정 창 공통: 켜기/끄기 스위치 줄(settings.ts switchRow, 기준서 1.4). 허브·모든 게임이 같은 짜임·크기.
    앱은 색만 변수로 맞춘다: --jp-switch-on(켜짐 바탕) · --jp-switch-off(꺼짐 바탕) · --jp-switch-knob(동그라미) · --jp-switch-focus(초점 테두리).
    크기는 글자 크기(em)를 따라간다(16px 에서 48×28px). 이름 줄 글자·아이콘 모양은 앱 css(.jp-switch-name · .jp-switch-icon) */
+/* 소리·진동 줄 묶음: 모든 앱·화면 폭에서 늘 위아래로 한 줄씩(나란히 두지 않음, 기준서 1.4). 간격만 --jp-switches-gap */
+.jp-switches {
+  display: flex;
+  flex-direction: column;
+  gap: var(--jp-switches-gap, 8px);
+}
+
 .jp-switch {
   --jp-sw-on: var(--jp-switch-on, var(--jp-top-accent, #3f8f64));
   position: relative;

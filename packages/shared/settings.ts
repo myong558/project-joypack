@@ -1,6 +1,7 @@
 // 조이필드 설정 창 공통 조각(허브·모든 게임, 기준서 1.4). import '@joyfield/shared/settings' + '@joyfield/shared/settings.css'
 //   choiceGroup()  : 하나 고르기(컬러 모드·언어·스킨) — role="radiogroup" + 단추마다 role="radio" aria-checked
-//   switchRow()    : 켜기/끄기(소리·진동) — 이름 줄 + 스위치(<input type="checkbox" role="switch">)
+//   switchRow()    : 켜기/끄기(소리·진동) — 이름 줄 + 스위치(<input type="checkbox" role="switch">).
+//                    줄들은 <div class="jp-switches"> 로 감싼다 → 화면 폭과 상관없이 늘 위아래로 한 줄씩(settings.css)
 //   devSection()   : 개발자 모드 TEST 칸 — 맨 위, 제목 TEST → 안내 → 게임 도구 → "출시 화면" 단추 순서
 //   bindSettings() : 위 조각에 동작을 붙인다(고른 표시·스위치 아이콘은 여기서 바꾸고, 저장·적용은 앱이 함)
 // 짜임(태그·role·클래스·data-*)만 맞추고 모양은 앱마다 자기 styles.css 에 둔다(묶음 클래스는 cls 로: 'seg' · 'skins' · 'chip-row' …).

@@ -326,7 +326,7 @@ function settingsPanel(opts: StartOptions): HTMLElement {
       </section>
       <section>
         <h3>${t('settings.feedback')}</h3>
-        <div class="switches">
+        <div class="jp-switches">
           ${switchRow('sound', save.sound, t('sound.label'), TOGGLE_ICONS.sound)}
           ${Joyfield.canVibrate() ? switchRow('vibrate', save.vibrate, t('vibrate.label'), TOGGLE_ICONS.vibrate) : '' /* 진동을 못 하는 기기(아이폰 등)에는 숨긴다 */}
         </div>

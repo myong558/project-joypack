@@ -1974,15 +1974,13 @@ h1 .word:nth-child(2) .tc-in {
   color: var(--accent-ink);
 }
 /* 소리·진동: 공통 스위치 줄(@joyfield/shared/settings.css), 색·테두리만 이 게임 것 */
-.switches {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.jp-switches {
+  --jp-switches-gap: 6px;
   --jp-switch-on: var(--accent);
   --jp-switch-off: var(--line);
   --jp-switch-focus: var(--accent-ink);
 }
-.switches .jp-switch {
+.jp-switches .jp-switch {
   padding: 4px 8px 4px 12px;
   border: 2px solid var(--line);
   border-radius: 12px;
