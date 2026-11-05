@@ -838,7 +838,7 @@ async function openSettings(): Promise<void> {
         if (group.dataset.seg === 'theme') {
           saveSetting(settings, 'theme', value as typeof settings.theme);
           applyTheme(settings.theme);
-        } else if (group.dataset.seg === 'skin') {
+        } else if (!__JOYFIELD_PROD__ && group.dataset.seg === 'skin') {
           // 개발용 임시: 톤 미리보기(설정 창 뒤 화면에 바로 보인다)
           setPreviewSkin(value as Skin | 'auto', settings.theme);
         } else {

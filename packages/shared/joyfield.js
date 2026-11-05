@@ -16,12 +16,10 @@
 
   const GAME_CACHE_PREFIX = 'joyfield-game-';
 
-  // 운영 빌드인지: 운영 배포(main, JOYFIELD_SITE=prod) 때 __JOYFIELD_PROD__ 가 true 로 바뀐다
-  //   (Vite 로 묶는 허브·게임은 vite.config define, 그대로 쓰는 공통 모듈 사본 dist/shared/joyfield.js 는 scripts/build.mjs 가 바꿈).
-  // 운영 빌드에서는 개발자 모드가 주소와 상관없이 꺼지고(켜는 방법 없음) 개발자 모드 코드도 빌드 때 빠지며, 랭킹은 늘 운영 DB 다.
-  // 개발 빌드·내 PC·테스트에서는 false(또는 없음)라 주소로 판단한다
-  // eslint-disable-next-line no-undef
-  var PROD_BUILD = typeof __JOYFIELD_PROD__ !== 'undefined' && __JOYFIELD_PROD__ === true;
+  // 운영 빌드 표시 (typeof __JOYFIELD_PROD__ !== 'undefined' && __JOYFIELD_PROD__): 운영 배포(main, JOYFIELD_SITE=prod) 때 __JOYFIELD_PROD__ 가 true 로 바뀌고
+  //   빌드 도구가 그 뒤의 개발 전용 코드(개발 DB 설정·주소 판단·출시 화면 보기)를 지운다
+  //   (Vite 로 묶는 허브·게임은 vite.config define, 그대로 쓰는 공통 모듈 사본 dist/shared/joyfield.js 는 scripts/build.mjs 가 같은 방식으로 줄임).
+  // 변수에 담으면 빌드 도구가 지우지 못하므로 쓰는 곳마다 이 글자를 그대로 쓴다. 개발 빌드·내 PC·테스트에서는 false(또는 없음)라 주소로 판단
 
   function read(key) {
     try {
@@ -499,11 +497,11 @@
   }
 
   // 개발자 모드는 주소로 정한다(2026-11-05): 개발 사이트·내 PC(isDevHost)는 늘 켜짐, 운영(pocketgamelab.com, 마켓 앱이 여는 주소)은 늘 꺼짐.
-  // 운영 빌드(PROD_BUILD)에서는 주소와 상관없이 꺼짐.
+  // 운영 빌드에서는 주소와 상관없이 꺼짐(판단 코드째 빠짐).
   // 운영에는 켜는 방법이 없다(예전 "설정 버전 7번 누르기 + 비밀번호"와 기기 저장값 joyfield.preview 는 지움).
   // 켜진 곳에서만 숨김 미리보기 게임·게임의 출시 전 확인 기능(판별 바로 시작·도감 전부 열기 등)이 보인다
   function devMode() {
-    if (PROD_BUILD) return false;
+    if (typeof __JOYFIELD_PROD__ !== 'undefined' && __JOYFIELD_PROD__) return false;
     return isDevHost(typeof location !== 'undefined' ? location.hostname : '');
   }
   // 예전 기기 저장값(설정 버전 7번 누르기로 켜던 개발자 모드)을 지운다. 이제 읽는 곳이 없다
@@ -515,9 +513,11 @@
   // 실제 출시 화면 그대로 확인할 때 켠다. 끄고 켜는 단추는 개발자 모드인 동안 늘 보인다
   const RELEASE_VIEW_KEY = 'joyfield.releaseView';
   function releaseView() {
+    if (typeof __JOYFIELD_PROD__ !== 'undefined' && __JOYFIELD_PROD__) return false;
     return read(RELEASE_VIEW_KEY) === 'on';
   }
   function setReleaseView(on) {
+    if (typeof __JOYFIELD_PROD__ !== 'undefined' && __JOYFIELD_PROD__) return;
     try {
       if (on) localStorage.setItem(RELEASE_VIEW_KEY, 'on');
       else localStorage.removeItem(RELEASE_VIEW_KEY);
@@ -672,14 +672,17 @@
     messagingSenderId: '433473215665',
     appId: '1:433473215665:web:af7584b216d602902c9690',
   };
-  var FIREBASE_DEV = {
-    apiKey: 'AIzaSyDCn1yMgLde3dwNDJ9_SO3NXEYY57E9JUo',
-    authDomain: 'joyfield-dev.firebaseapp.com',
-    projectId: 'joyfield-dev',
-    storageBucket: 'joyfield-dev.firebasestorage.app',
-    messagingSenderId: '689947095413',
-    appId: '1:689947095413:web:085d86651f60a1cd56e33c',
-  };
+  // 운영 빌드에는 개발 DB 설정이 들어가지 않는다
+  var FIREBASE_DEV = (typeof __JOYFIELD_PROD__ !== 'undefined' && __JOYFIELD_PROD__)
+    ? null
+    : {
+        apiKey: 'AIzaSyDCn1yMgLde3dwNDJ9_SO3NXEYY57E9JUo',
+        authDomain: 'joyfield-dev.firebaseapp.com',
+        projectId: 'joyfield-dev',
+        storageBucket: 'joyfield-dev.firebasestorage.app',
+        messagingSenderId: '689947095413',
+        appId: '1:689947095413:web:085d86651f60a1cd56e33c',
+      };
   function isLocalHost(host) {
     host = String(host || '').toLowerCase().replace(/^\[|\]$/g, '');
     if (host === 'localhost' || host.endsWith('.localhost') || host.endsWith('.local') || host === '::1') return true;
@@ -698,7 +701,7 @@
     return host.endsWith('.pages.dev') && host.split('.').length >= 4;
   }
   function firebaseEnv() {
-    if (PROD_BUILD) return 'prod';
+    if (typeof __JOYFIELD_PROD__ !== 'undefined' && __JOYFIELD_PROD__) return 'prod';
     const forced = read('joyfield.db');
     if (forced === 'dev' || forced === 'prod') return forced;
     const host = typeof location !== 'undefined' ? location.hostname : '';
@@ -712,8 +715,9 @@
     COPYRIGHT: COPYRIGHT,
     FIREBASE: FIREBASE,
     FIREBASE_ENV: FIREBASE_ENV,
-    isLocalHost: isLocalHost,
-    isDevHost: isDevHost,
+    // 주소 판단은 개발 빌드에서만(운영 빌드에는 없음)
+    isLocalHost: (typeof __JOYFIELD_PROD__ !== 'undefined' && __JOYFIELD_PROD__) ? undefined : isLocalHost,
+    isDevHost: (typeof __JOYFIELD_PROD__ !== 'undefined' && __JOYFIELD_PROD__) ? undefined : isDevHost,
     isPreview: isPreview,
     devMode: devMode,
     releaseView: releaseView,

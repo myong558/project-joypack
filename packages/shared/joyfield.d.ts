@@ -26,6 +26,7 @@ export interface JoyfieldApi {
   /** 지금 쓰는 랭킹 DB: 'dev' 개발 · 'prod' 운영 */
   FIREBASE_ENV: 'dev' | 'prod';
   /** 내 PC·같은 와이파이 주소인지(localhost, 127.x, 10.x, 172.16~31.x, 192.168.x, *.local) */
+  /** 운영 빌드에는 없음(개발 빌드·테스트 전용) */
   isLocalHost(host: string): boolean;
   /** 개발 DB 를 쓸 주소인지: 내 PC·사설 주소, dev.pocketgamelab.com, Cloudflare Pages 브랜치·미리보기 주소(<이름>.<프로젝트>.pages.dev) */
   isDevHost(host: string): boolean;

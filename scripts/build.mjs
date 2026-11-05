@@ -12,8 +12,9 @@
 import { execSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { join, relative, sep } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { checkFonts } from './check-fonts.mjs';
 import { checkGlyphs } from './check-glyphs.mjs';
 import { checkHover } from './check-hover.mjs';
@@ -124,31 +125,37 @@ if (!PROD) {
   cpSync(join(ROOT, 'packages/shared/sfx.js'), join(DIST, 'sounds/sfx.js'));
 }
 
-// 3-1-1. 운영 빌드 표시: Vite 로 묶은 허브·게임은 vite.config define(__JOYFIELD_PROD__)이 이미 처리했다.
-//        여기서는 그대로 쓰는 파일만 바꾼다: 공통 모듈 사본(빌드 없는 게임이 부름)의 __JOYFIELD_PROD__ → true,
-//        허브 index.html 첫 화면 스크립트의 '__JOYFIELD_SITE__' → 'prod'. 파일 목록·서비스 워커 해시보다 먼저 바꾼다
+// 3-1-1. 운영 빌드 정리: Vite 로 묶은 허브·게임은 vite.config define(__JOYFIELD_PROD__) 뒤 빌드 도구가 개발 전용 코드를 이미 지웠다.
+//        여기서는 그대로 쓰는 파일만 같은 방식으로 줄인다. 파일 목록·서비스 워커 해시보다 먼저 한다
+//        - 공통 모듈 사본(빌드 없는 게임이 부름): __JOYFIELD_PROD__ = true 로 바꾼 뒤 Vite 의 축소기로 죽은 코드를 지움(이름·줄 모양은 둠)
+//        - 허브 index.html 첫 화면 스크립트: /* joyfield-dev-only:start */ ~ /* joyfield-dev-only:end */ 사이를 지움
 if (PROD) {
+  const vite = await import(pathToFileURL(createRequire(join(ROOT, 'apps/hub/package.json')).resolve('vite')).href);
   const sharedCopy = join(DIST, 'shared/joyfield.js');
   const js = readFileSync(sharedCopy, 'utf8');
   if (!js.includes('__JOYFIELD_PROD__')) throw new Error('공통 모듈 사본에 운영 빌드 표시(__JOYFIELD_PROD__)가 없습니다');
-  writeFileSync(sharedCopy, js.replaceAll('__JOYFIELD_PROD__', 'true'));
+  const defined = await vite.transformWithOxc(js, 'joyfield.js', { define: { __JOYFIELD_PROD__: 'true' } });
+  writeFileSync(sharedCopy, vite.minifySync('joyfield.js', defined.code, { compress: true, mangle: false, codegen: { removeWhitespace: false } }).code);
   const hubIndex = join(DIST, 'index.html');
   const html = readFileSync(hubIndex, 'utf8');
-  if (!html.includes('__JOYFIELD_SITE__')) throw new Error('허브 index.html 에 운영 빌드 표시(__JOYFIELD_SITE__)가 없습니다');
-  writeFileSync(hubIndex, html.replaceAll('__JOYFIELD_SITE__', 'prod'));
-  const left = walk(DIST).filter((f) => /.(js|html)$/.test(f) && /__JOYFIELD_(PROD|SITE)__/.test(readFileSync(f, 'utf8')));
-  if (left.length) throw new Error(`운영 빌드 표시가 남은 파일: ${left.map(sitePath).join(', ')}`);
-  // 개발 전용 화면이 운영 배포본에 남지 않았는지: 개발 전용 코드는 `!__JOYFIELD_PROD__ && …` 로 감싸 빌드 때 빠져야 한다(기준서 7.3).
+  const DEV_BLOCK = /[ \t]*\/\* joyfield-dev-only:start \*\/[\s\S]*?\/\* joyfield-dev-only:end \*\/[ \t]*\r?\n?/g;
+  if (!DEV_BLOCK.test(html)) throw new Error('허브 index.html 에 joyfield-dev-only 표시가 없습니다');
+  writeFileSync(hubIndex, html.replace(DEV_BLOCK, ''));
+  // 개발 전용 코드가 운영 배포본에 남지 않았는지(기준서 11.5). 개발 전용 코드는 `!__JOYFIELD_PROD__ && …` 를 앞에 붙여 빌드 때 빠져야 한다.
   // 새 개발 전용 화면을 만들면 아래 표시(설정 TEST 칸 dev-section·dev-toggle, 개발 문구)를 그대로 쓰거나 여기에 더한다
-  const DEV_ONLY = ['dev-section', 'dev-toggle', 'stage-jump', 'card-new test', 'Release view', 'Pre-release check', 'Tone preview'];
+  const DEV_ONLY = [
+    '__JOYFIELD_PROD__', 'joyfield-dev-only', // 운영 빌드 표시가 처리되지 않음
+    'dev-section', 'dev-toggle', 'stage-jump', 'card-new test', 'Release view', 'Pre-release check', 'Tone preview', // TEST 칸·카드·개발 문구
+    'joyfield-dev', 'dev.pocketgamelab.com', 'joyfield.hubSkin', 'joyfield.releaseView', 'joyfield.db', // 개발 DB·주소 판단·톤 미리보기·출시 화면 보기·DB 바꾸기
+  ];
   const devLeft = walk(DIST)
-    .filter((f) => /.(js|html)$/.test(f) && !f.endsWith(join('shared', 'joyfield.js')))
+    .filter((f) => /\.(js|html)$/.test(f))
     .flatMap((f) => {
       const text = readFileSync(f, 'utf8');
       return DEV_ONLY.filter((m) => text.includes(m)).map((m) => `${sitePath(f)}: ${m}`);
     });
-  if (devLeft.length) throw new Error(`운영 빌드에 개발 전용 코드가 남았습니다(!__JOYFIELD_PROD__ 로 감싸기):\n- ${devLeft.join('\n- ')}`);
-  console.log('운영 빌드: 개발자 모드 끔·운영 DB 고정·개발 전용 코드 없음');
+  if (devLeft.length) throw new Error(`운영 빌드에 개발 전용 코드가 남았습니다(앞에 !__JOYFIELD_PROD__ && 붙이기):\n- ${devLeft.join('\n- ')}`);
+  console.log('운영 빌드: 개발자 모드·개발 DB·주소 판단 코드 없음');
 }
 
 // 3-2. 개발 사이트(dev 브랜치 배포, JOYFIELD_SITE=dev)는 홈 화면 앱 이름을 "조이필드 개발"로 바꿔 운영 앱과 구분한다.
