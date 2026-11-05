@@ -2,7 +2,7 @@
 export const base = 'games/timetoflip/';
 
 // 도감을 일부 채운 기록(도감 창에 그림·잠긴 칸이 섞여 보이게). 공개 전에도 "곧 공개" 화면에 막히지 않게 개발자 미리보기를 켠다
-const SAVE = `localStorage.setItem('joyfield.preview', 'on'); localStorage.setItem('timetoflip:v1', JSON.stringify({ ...JSON.parse(localStorage.getItem('timetoflip:v1') || '{}'), dex: ['circle', 'triangle', 'square', 'diamond', 'hexagon', 'lips', 'bolt', 'heart', 'berceuse', 'wave'], best: 12340, bestStage: 6 }))`;
+const SAVE = `localStorage.setItem('timetoflip:v1', JSON.stringify({ ...JSON.parse(localStorage.getItem('timetoflip:v1') || '{}'), dex: ['circle', 'triangle', 'square', 'diamond', 'hexagon', 'lips', 'bolt', 'heart', 'berceuse', 'wave'], best: 12340, bestStage: 6 }))`;
 
 // 판 위에서 짝 하나를 찾아 누른다(그림이 같은 두 장. 닮은 카드는 class 로 구분)
 const MATCH_ONE = `(() => {

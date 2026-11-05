@@ -6,7 +6,7 @@ import { GAMES, byNewest, iconUrl, isNew, isPublic, isScheduled, patternOf, type
 import { LANG_LABEL, LANGS, formatNumber, getLang, t, type MessageKey } from './i18n';
 import { FULL, TOP, cachedBoard, hasRanking, loadBoard, type Row } from './rankings';
 import { externalOpenUrl, installState, isIos, manualGuide, onInstallChange, promptInstall } from './install';
-import { checkPassword, previewOn, setPreview } from './preview';
+import { previewOn } from './preview';
 import { bestRecord, canClearRecords, clearRecords } from './records';
 import { THEMES, applySettings, applyTheme, canVibrate, loadSettings, migrateLegacy, saveSetting, watchSystemTheme } from './settings';
 import { SKINS, previewSkin, setPreviewSkin, todaySkin, type Skin } from './skins';
@@ -822,7 +822,7 @@ async function openSettings(): Promise<void> {
         .join('')}</ul>
       <p class="hint">${t('data.hint')}</p>
     </details>
-    <p class="app-version"><span class="ver-tap" data-ver-tap>${t('app.title')} v${__APP_VERSION__}</span></p>
+    <p class="app-version">${t('app.title')} v${__APP_VERSION__}</p>
     <p class="app-copyright">${esc(Joyfield.COPYRIGHT)}</p>`;
   const dialog = openDialog('settings', body, t('settings.title'));
   renderInstall(dialog.querySelector<HTMLElement>('[data-install-section]')!);
@@ -883,17 +883,6 @@ async function openSettings(): Promise<void> {
       });
     }),
   );
-  // 숨김 미리보기: 버전 글자를 7번 연속(누름 사이 0.8초 안) 누르면 늘 비밀번호 창 → 맞으면 켜기·끄기 창.
-  // 설정 화면에는 미리보기용 항목을 두지 않는다(켜져 있어도 테스트 화면이 공개 화면과 같도록)
-  let taps = 0;
-  let tapTimer: ReturnType<typeof setTimeout> | undefined;
-  dialog.querySelector('[data-ver-tap]')!.addEventListener('click', () => {
-    clearTimeout(tapTimer);
-    tapTimer = setTimeout(() => (taps = 0), 800);
-    if (++taps < 7) return;
-    taps = 0;
-    openPreviewLock(dialog);
-  });
 }
 
 /** 지우기 확인 창(설정 창 위 가운데). 확인 버튼 이름은 창 제목과 같게 해 무엇을 하는지 한 번 더 보인다. 취소·X·바깥은 아무것도 안 함 */
@@ -911,52 +900,6 @@ function openConfirm(title: string, text: string, onOk: () => void | Promise<voi
   dialog.querySelector('[data-confirm-ok]')!.addEventListener('click', async () => {
     await onOk();
     dialog.close();
-  });
-}
-
-/** 미리보기 비밀번호 창. 맞으면 켜기·끄기 창으로 넘어간다 */
-function openPreviewLock(settingsDialog: HTMLDialogElement): void {
-  const body = `
-    <form class="preview-lock" data-preview-form>
-      <p class="sheet-sub">${t('preview.prompt')}</p>
-      <input class="initials" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" data-preview-pass aria-label="${t('preview.title')}" />
-      <p class="hint warn-text" data-preview-wrong role="alert" hidden>${t('preview.wrong')}</p>
-      <button class="primary-btn" type="submit">${lbl(t('preview.unlock'))}</button>
-    </form>`;
-  const dialog = openDialog('preview center', body, t('preview.title'));
-  const input = dialog.querySelector<HTMLInputElement>('[data-preview-pass]')!;
-  input.focus();
-  dialog.querySelector('[data-preview-form]')!.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (!(await checkPassword(input.value))) {
-      dialog.querySelector<HTMLElement>('[data-preview-wrong]')!.hidden = false;
-      input.select();
-      return;
-    }
-    dialog.close();
-    openPreviewSwitch(settingsDialog);
-  });
-}
-
-/** 미리보기 켜기·끄기 창. 닫으면 설정 창까지 닫아 첫 화면·랭킹을 새 상태로 다시 그린다 */
-function openPreviewSwitch(settingsDialog: HTMLDialogElement): void {
-  // 스위치는 고르기만 하고 "확인"을 눌러야 적용한다. X·바깥으로 닫으면 바꾼 것 없이 설정 창으로 돌아간다
-  const body = `
-    <div class="preview-lock">
-      <p class="sheet-sub">${t('preview.hint')}</p>
-      <label class="switch"><span>${t('preview.switch')}</span><input type="checkbox" role="switch" data-preview-toggle ${previewOn() ? 'checked' : ''} /><i aria-hidden="true"></i></label>
-      <button class="primary-btn" data-preview-apply>${lbl(t('preview.unlock'))}</button>
-    </div>`;
-  const dialog = openDialog('preview center', body, t('preview.title'));
-  dialog.querySelector('[data-preview-apply]')!.addEventListener('click', async () => {
-    const on = dialog.querySelector<HTMLInputElement>('[data-preview-toggle]')!.checked;
-    setPreview(on);
-    // 개발자 모드를 끄면 미리보기로 고른 톤을 지우고 오늘의 톤으로 돌아간다
-    if (!on) setPreviewSkin('auto', settings.theme);
-    live = shownGames();
-    await refreshCached();
-    dialog.close();
-    settingsDialog.close();
   });
 }
 

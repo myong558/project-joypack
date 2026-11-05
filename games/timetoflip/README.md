@@ -53,7 +53,7 @@
 
 - 도감 48장 모두 열림: `src/ui/screens.ts` `DEX_ALL_OPEN`(개발자 도구가 켜진 동안만, 정식 공개하면 저장된 기록대로)
 - 설정 창 맨 위 TEST 칸의 "2~8" 단추로 그 판부터 클래식 바로 시작(최고 기록·랭킹에 안 남음): `src/ui/screens.ts` `STAGE_JUMP`
-- 판단은 공용 `Joyfield.prerelease()` = 개발자 모드(`Joyfield.devMode()`, 허브 설정 맨 아래 버전 7번, 키 `joyfield.preview`)이면서 games.json `status: "preview"` 로 배포된 동안. 기능 자체는 `Joyfield.devTools()`(= prerelease 이고 "출시 화면" 보기가 꺼져 있을 때). 일반 사용자에게는 보이지 않고, `pnpm release` 로 정식 공개하면 개발자 모드여도 나오지 않는다
+- 판단은 공용 `Joyfield.prerelease()` = 개발자 모드(`Joyfield.devMode()`, 개발 사이트·내 PC 주소면 켜짐)이면서 games.json `status: "preview"` 로 배포된 동안. 기능 자체는 `Joyfield.devTools()`(= prerelease 이고 "출시 화면" 보기가 꺼져 있을 때). 일반 사용자에게는 보이지 않고, `pnpm release` 로 정식 공개하면 개발자 모드여도 나오지 않는다
 - **출시 화면 단추**: 출시 전 확인 단계(prerelease)인 동안 설정 창 맨 위 TEST 칸에 늘 보인다. 누르면 위 두 기능을 숨겨 실제 출시 화면 그대로 확인하고, 다시 누르면 돌아온다(공용 `Joyfield.setReleaseView`, 키 `joyfield.releaseView`)
 
 ## 게임 화면 위쪽

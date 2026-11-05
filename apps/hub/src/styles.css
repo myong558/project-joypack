@@ -994,18 +994,6 @@ a.card:active .card-play {
   animation: none;
 }
 
-/* 설정 맨 아래: 버전 글자(7번 누르면 미리보기 비밀번호 창). 연타해도 글자가 선택되지 않게 */
-.ver-tap {
-  -webkit-user-select: none;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.preview-lock {
-  display: grid;
-  gap: 12px;
-}
-
 /* 지우기 확인 창: [취소][지우기] 나란히 */
 .confirm .sheet-sub {
   margin: 0 2px 16px;
@@ -1026,15 +1014,6 @@ a.card:active .card-play {
   background: #d23b3b;
   color: #fff;
   box-shadow: 0 6px 16px rgb(210 59 59 / 0.3);
-}
-
-.preview-lock .initials {
-  text-transform: none;
-}
-
-.preview-lock [data-preview-wrong] {
-  margin: 0;
-  color: var(--warn);
 }
 
 /* 다음 게임 안내: 게임 목록 아래 점선 띠 한 줄. 카드가 아니라 목록 순서에 끼지 않는다.

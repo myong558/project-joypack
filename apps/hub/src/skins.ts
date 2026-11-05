@@ -16,8 +16,8 @@ export function todaySkin(): Skin {
 }
 
 // ---------- 개발자 모드: 설정에서 톤 미리보기 ----------
-// 개발자 모드(preview.ts)를 켠 기기에서만 설정에 보이고, index.html 도 개발자 모드일 때만 joyfield.hubSkin 을 읽는다.
-// 개발자 모드를 끄면 고른 톤을 지운다(main.ts openPreviewSwitch). 평소에는 날마다 정해진 톤으로 고정.
+// 개발자 모드(preview.ts, 개발 사이트·내 PC 주소)에서만 설정에 보이고, index.html 도 개발자 모드일 때만 joyfield.hubSkin 을 읽는다.
+// 운영 사이트에서는 고른 톤을 읽지 않아 늘 날마다 정해진 톤으로 고정된다.
 
 const PREVIEW_KEY = 'joyfield.hubSkin';
 

@@ -32,6 +32,7 @@ export interface JoyfieldApi {
   /** 숨김 미리보기(games.json status "preview")로 배포된 게임인지. 랭킹은 미리보기 동안에도 등록된다 */
   isPreview(): boolean;
   /** 이 기기에서 조이필드 개발자 모드(숨김 미리보기 보기)를 켰는지. 게임의 출시 전 확인 기능을 이때만 보인다 */
+  /** 개발자 모드인지: 주소로 정함. 개발 사이트·내 PC(isDevHost)는 늘 true, 운영 사이트는 늘 false(켜는 방법 없음) */
   devMode(): boolean;
   /** 개발자 모드에서 "출시 모드 보기"를 켰는지(출시 전 확인 기능을 숨기고 실제 출시 화면으로 봄) */
   releaseView(): boolean;

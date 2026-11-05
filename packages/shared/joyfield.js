@@ -491,16 +491,16 @@
     if (open) setTimeout(() => location.reload(), Math.min(open - Date.now() + 500, 2 ** 31 - 1));
   }
 
-  // 개발자 모드(조이필드 설정 맨 아래 버전을 7번 눌러 비밀번호로 켬, 허브 preview.ts 와 같은 키 joyfield.preview).
-  // 켠 기기에서만 게임의 출시 전 확인 기능(판별 바로 시작·도감 전부 열기 등)을 보인다
+  // 개발자 모드는 주소로 정한다(2026-11-05): 개발 사이트·내 PC(isDevHost)는 늘 켜짐, 운영(pocketgamelab.com, 마켓 앱이 여는 주소)은 늘 꺼짐.
+  // 운영에는 켜는 방법이 없다(예전 "설정 버전 7번 누르기 + 비밀번호"와 기기 저장값 joyfield.preview 는 지움).
+  // 켜진 곳에서만 숨김 미리보기 게임·게임의 출시 전 확인 기능(판별 바로 시작·도감 전부 열기 등)이 보인다
   function devMode() {
-    try {
-      const value = localStorage.getItem('joyfield.preview');
-      return value === 'on' || value === '1';
-    } catch (e) {
-      return false;
-    }
+    return isDevHost(typeof location !== 'undefined' ? location.hostname : '');
   }
+  // 예전 기기 저장값(설정 버전 7번 누르기로 켜던 개발자 모드)을 지운다. 이제 읽는 곳이 없다
+  try {
+    localStorage.removeItem('joyfield.preview');
+  } catch (e) {}
 
   // 출시 모드 보기: 개발자 모드를 켠 기기에서 출시 전 확인 기능(판별 바로 시작·도감 전부 열기 등)을 잠시 숨기고
   // 실제 출시 화면 그대로 확인할 때 켠다. 끄고 켜는 단추는 개발자 모드인 동안 늘 보인다

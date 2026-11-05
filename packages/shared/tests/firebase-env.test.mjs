@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 await import('../joyfield.js');
-const { isLocalHost, isDevHost, FIREBASE, FIREBASE_ENV, shareUrl } = globalThis.Joyfield;
+const { isLocalHost, isDevHost, devMode, FIREBASE, FIREBASE_ENV, shareUrl } = globalThis.Joyfield;
 
 test('개발 사이트(dev.pocketgamelab.com, Pages 브랜치·미리보기)는 개발 DB, 운영 주소는 운영 DB', () => {
   for (const host of ['localhost', '192.168.0.3', 'dev.pocketgamelab.com', 'dev.pocketgamelab.pages.dev', 'a1b2c3d4.pocketgamelab.pages.dev']) {
@@ -35,4 +35,9 @@ test('배포 사이트·공인 주소는 운영 DB 쪽', () => {
 test('주소가 없는 곳(node)은 운영 DB 설정을 쓴다', () => {
   assert.equal(FIREBASE_ENV, 'prod');
   assert.equal(FIREBASE.projectId, 'joyfield-41b5a');
+});
+
+test('개발자 모드는 주소로만 정한다: 주소가 없으면(운영과 같은 판단) 꺼짐, 예전 기기 저장값은 무시', () => {
+  globalThis.localStorage?.setItem?.('joyfield.preview', 'on');
+  assert.equal(devMode(), false);
 });
