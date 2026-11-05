@@ -55,7 +55,7 @@ writeFileSync(
   img { width: 330px; height: 330px; filter: drop-shadow(0 18px 24px rgb(154 91 0 / 0.25)); }
   h1 { margin: 0; font-size: 158px; font-weight: 400; line-height: 1; letter-spacing: 0.02em; }
   p { margin: 26px 0 0; font-size: 50px; line-height: 1.3; color: #8a6420; }
-</style><img src="${mark}"><div><h1>조이필드</h1><p>하나씩 늘어나는<br>미니 게임 모음</p></div>`,
+</style><img src="${mark}"><div><h1>조이필드</h1><p>하나씩 자라나는<br>미니 게임 마당</p></div>`,
 );
 execFileSync(CHROME, [
   '--headless=new',

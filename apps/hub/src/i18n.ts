@@ -4,7 +4,7 @@ export const LANG_LABEL: Record<Lang, string> = { ko: '한국어', en: 'English'
 
 const ko = {
   'app.title': '조이필드',
-  'app.tagline': '하나씩 늘어나는 미니 게임 모음',
+  'app.tagline': '하나씩 자라나는 미니 게임 마당',
   'games.label': '게임 목록',
   'game.play': '플레이',
   'skin.auto': '자동',
@@ -106,13 +106,13 @@ const ko = {
   'share.desc': '친구에게 조이필드를 보내 보세요. 받은 사람은 링크를 열고 바로 앱으로 설치할 수 있어요.',
   'share.button': '조이필드 공유하기',
   'share.copied': '링크를 복사했어요. 메신저에 붙여 넣어 보내 주세요.',
-  'share.text': '미니 게임 모음 조이필드! 업다운, 두더지잡기 같이 하자 🎮',
+  'share.text': '하나씩 자라나는 미니 게임 마당, 조이필드! 같이 한 판 하자 🎮',
   'close': '닫기',
 };
 
 const en: Record<keyof typeof ko, string> = {
   'app.title': 'Joyfield',
-  'app.tagline': 'A growing pack of mini games',
+  'app.tagline': 'A growing field of mini games',
   'games.label': 'Games',
   'game.play': 'Play',
   'skin.auto': 'Auto',
@@ -214,7 +214,7 @@ const en: Record<keyof typeof ko, string> = {
   'share.desc': 'Send Joyfield to a friend. They can open the link and install it as an app.',
   'share.button': 'Share Joyfield',
   'share.copied': 'Link copied. Paste it into a chat to send.',
-  'share.text': "Joyfield mini games! Let's play Up Down and Peekaboo Moles 🎮",
+  'share.text': "Joyfield — a growing field of mini games. Come play a round with me 🎮",
   close: 'Close',
 };
 

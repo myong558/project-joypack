@@ -1,6 +1,6 @@
 # 조이필드 (joyfield) 작업 규칙
 
-미니 게임 모음 웹앱(PWA). pnpm 워크스페이스: `apps/hub`(첫 화면), `games/<id>`(게임), `packages/shared`(공통 모듈). 플랫폼 설명은 [README.md](README.md).
+미니 게임 마당 웹앱(PWA, "하나씩 자라나는 미니 게임 마당"). pnpm 워크스페이스: `apps/hub`(첫 화면), `games/<id>`(게임), `packages/shared`(공통 모듈). 플랫폼 설명은 [README.md](README.md).
 
 ## 답변 언어 — 항상 한국어
 
