@@ -6,7 +6,7 @@
 
 - 모든 답변·설명·중간 안내·작업 보고·질문은 **반드시 한국어**로 쓴다. 코드·식별자·명령어·파일 경로만 원문 그대로 둔다.
 - `/compact` 등으로 대화가 압축된 뒤에도 똑같다. 요약문이나 이전 메시지·도구 결과가 영어여도 영어로 답하지 않는다.
-- 사용자가 "커밋 푸시"라고 할 때만 커밋·푸시한다. **"커밋 푸시"는 `dev` 브랜치에만**(개발 사이트로만 배포), 운영(`main`)은 "운영 반영해줘"라고 할 때만(아래 "수정할 때").
+- 사용자가 "커밋 푸시"라고 할 때만 커밋·푸시한다. **"커밋 푸시"는 `dev` 브랜치에만**(개발 사이트로만 배포, 단 문서·메모리만 바뀐 커밋은 `main` 에도 — 아래 "수정할 때"), 운영(`main`)은 "운영 반영해줘"라고 할 때만(아래 "수정할 때").
 
 ## 상업 배포 기준 — 모든 작업에서 반드시 지킴
 
@@ -56,7 +56,7 @@
 - **작업 브랜치는 `dev`(2026-11-05 사용자 결정, 개발 먼저):** 게임 수정·새 게임·허브 수정은 모두 `dev` 에서 하고 "커밋 푸시"는 `dev` 에만 푸시한다 → 개발 사이트 `dev.pocketgamelab.com` 에만 나간다. 세션을 시작했는데 `main` 에 있으면 고친 파일이 없는지 보고 `git checkout dev` → `git pull` 뒤 작업한다(`dev` 가 `main` 보다 뒤처졌으면 `git merge --ff-only origin/main`).
 - **운영 반영은 두 번에 나눠서(2026-11-05 사용자 결정, 반영한 뒤에 알리면 의미 없음):** ① "운영 반영해줘"(비슷한 말 포함) → 커밋 안 한 수정이 있으면 먼저 `dev` 에 커밋·푸시 → `JOYFIELD_SITE=prod pnpm build` → 아래 "나눠 보여 주기" 결과·나갈 커밋 목록·개발 사이트에서 확인 안 한 화면 변경을 보이고 **여기서 멈춘다**(`main` 은 건드리지 않음). ③ 항목이 없어도 멈춘다. ② 사용자가 확인하고 "진행"·"반영"(비슷한 말 포함)이라고 하면 그때 `main` 에 합쳐 푸시한다. 확인 뒤 `dev` 에 새 커밋이 생겼으면 ①부터 다시.
 - **운영 반영 전에 나눠 보여 주기(2026-11-05 사용자 요청, 사용자가 하나하나 알려 줄 수 없음):** 합치기 전에 `git diff --stat main..dev`·`git log main..dev` 를 파일 경로로 나눠 답변에 보인다. ① **걸러짐**(운영 빌드에 안 들어감): `games.json` 이 `preview` 이고 `open` 이 없는 게임의 `games/<id>/`, `!__JOYFIELD_PROD__` 뒤 개발자 모드 전용 코드 ② **나감**: 공개(live·공개 예약) 게임, 허브, `packages/shared`, 빌드·배포 스크립트, 문서 ③ **멈추고 묻기**: 공개된 게임·허브에 끝나지 않은 작업이 섞인 것(커밋 메시지·코드에 미완성·임시 흔적, 사용자가 진행 중이라고 한 작업), 미완성 게임 때문에 바뀐 공통 부분(`packages/shared`·허브), 저장 형식·Firestore 규칙 변경(운영 기준 절). ③이 있으면 그 항목을 따로 짚어 묻는다. 확인을 받기 전 `JOYFIELD_SITE=prod pnpm build` 가 통과해야 한다(개발 전용 코드가 남으면 실패).
-- **운영 반영은 요청할 때만:** 위 ②에서 사용자가 확인하면 `dev` 를 `main` 에 합쳐(`git checkout main` → `git pull` → `git merge --ff-only dev`, 안 되면 `git merge dev`) `main` 을 푸시하고 다시 `dev` 로 돌아온다 → 운영 `pocketgamelab.com` 배포. 정식 공개(기준서 7.4)도 운영에 나가야 하므로 마지막에 이 운영 반영까지 한다. **작업 규칙 문서만 바뀐 커밋(`CLAUDE.md`, 2026-11-05 사용자 결정)은 "커밋 푸시" 때 `main` 에도 같이 올린다**(운영 반영을 기다리지 않음): 세션은 시작할 때 열린 브랜치의 `CLAUDE.md` 를 읽으므로 `main` 이 옛 규칙이면 그 세션이 옛 방식(예: 확인 없이 운영 반영)으로 움직일 수 있다. 운영 사이트에는 `site/` 만 올라가 문서는 사용자에게 가지 않는다. `dev` 와 `main` 사이에 다른 커밋이 끼어 있으면(`git log main..dev` 에 문서 아닌 커밋) 합치지 않고 운영 반영 때 같이 올린다고 알린다.
+- **운영 반영은 요청할 때만:** 위 ②에서 사용자가 확인하면 `dev` 를 `main` 에 합쳐(`git checkout main` → `git pull` → `git merge --ff-only dev`, 안 되면 `git merge dev`) `main` 을 푸시하고 다시 `dev` 로 돌아온다 → 운영 `pocketgamelab.com` 배포. 정식 공개(기준서 7.4)도 운영에 나가야 하므로 마지막에 이 운영 반영까지 한다. **게임·사이트에 안 들어가는 파일만 바뀐 커밋은 "커밋 푸시" 때 `main` 에도 같이 올린다**(운영 반영·"진행" 확인을 기다리지 않음, 2026-11-05 사용자 결정): 대상은 `CLAUDE.md`·`README.md`·`docs/`·`setup/claude/`(메모리·개인 설정)뿐이다. 빌드(`scripts/build.mjs`·`site.mjs`)가 이 파일들을 읽지 않아 `main` 푸시로 배포가 다시 돌아도 운영 사이트 내용은 그대로다. `LICENSE`·`games.json`·`fonts/`·`sounds/`·`scripts/`·`.github/`·`firestore.rules`·`apps/`·`games/`·`packages/` 가 하나라도 섞이면 대상이 아니다(평소대로 운영 반영 때). 세션은 시작할 때 열린 브랜치의 `CLAUDE.md` 를 읽으므로 `main` 이 옛 규칙이면 그 세션이 옛 방식(예: 확인 없이 운영 반영)으로 움직일 수 있다. 운영 사이트에는 `site/` 만 올라가 문서는 사용자에게 가지 않는다. `dev` 와 `main` 사이에 다른 커밋이 끼어 있으면(`git log main..dev` 에 문서 아닌 커밋) 합치지 않고 운영 반영 때 같이 올린다고 알린다.
 - 버전은 손으로 고치지 않고 **`pnpm bump <게임 id | hub> <patch | minor>`** 로 올린다(파일의 지금 값 + 1 이라 여러 세션이 번갈아 고쳐도 번호가 꼬이지 않음). 고치기 전에 `git pull`.
 - 게임·허브를 고치면 버전을 올린다: 게임은 `games/<id>/package.json`, 허브는 루트 `package.json` (기능 추가 minor, 수정 patch). 게임은 미리보기 동안 0.x.x, **정식 공개하면 1.0.0**(`pnpm release` 가 올림).
 - 답변 끝에 **확인 버전**(바뀐 대상 → 새 버전, 확인 위치: 게임 설정 창 맨 아래 / 조이필드 설정 창 맨 아래)을 적는다.
@@ -86,6 +86,13 @@
 ## 다음 일정 (2026-11-05 정함, 다음 주 2026-11-09 주 앱 등록 때 진행, 어느 PC 든)
 
 사용자가 "다음 주 앱 등록 때 1~3을 진행한다(다른 PC 에서 할 수도 있음)"고 정함. **끝나기 전에는 세션 첫 답변에서 먼저 이 일을 알린다.** 끝난 항목은 지우고, 다 끝나면 이 절을 지운다. 등록 직전 할 일(랭킹 초기화·개인정보처리방침 주소)은 메모리 `ranking-reset-at-store-launch`, 이 목록은 메모리 `store-launch-prep`.
+
+**지금 상태(2026-11-05 회사 PC 마지막 정리, "다른 PC 이어하기" 때 이 순서로 알린다):**
+- **주소 지도(목표):** `pocketgamelab.com/` = 최상위 회사 페이지 자리(제작은 앱 등록 직전, 지금은 `/joyfield/` 로 302) · `pocketgamelab.com/joyfield/` = 운영, **유일하게 누구나 여는 주소**(TWA) · `dev.pocketgamelab.com/joyfield/` = 개발, **Access 로 잠금(본인·테스터)** · 그 밖의 주소는 잠그거나 `pocketgamelab.com` 으로 301.
+- **끝남:** `.kr`·`.co.kr`·`www` → `pocketgamelab.com` 301, 옛 github.io 끔, 도메인 잠금, `contact@pocketgamelab.com` 받기(아래 "스튜디오 최상위 사이트").
+- **집 PC 에서 할 일(아래 1번):** Zero Trust 결제 수단 등록 → Access 로 `dev.pocketgamelab.com`·`*.pocketgamelab.pages.dev` 잠금 → `pocketgamelab.pages.dev` → `https://pocketgamelab.com` 301 → 휴대폰에서 세 주소 막힘·운영만 열림 확인.
+- **앱 등록 주(어느 PC 든):** 아래 2·3번 → 등록 직전 개인정보처리방침·최상위 페이지(아래 "스튜디오 최상위 사이트") → 공개 직전 모든 랭킹 초기화(메모리 `ranking-reset-at-store-launch`).
+- **그 사이 어느 PC 에서나:** 온실정원(`games/glasshouse`, preview, 공개 예약 없음) 판 점검 → 정식 공개(메모리 `glasshouse-level-review`). 앱 등록 전에 공개해 첫 앱에 넣을지는 아직 안 정함 → 물어본다.
 
 1. **개발 사이트 잠그기(먼저 할 일, 방법 A 로 결정 · 집 PC 에서만, 2026-11-05 사용자 결정):** 회사 PC = 컴퓨터 이름 `DESKTOP-B51J711`(`hostname`). 다른 이름의 PC 에서 세션을 시작하면 집 PC 로 보고 첫 답변에서 "A 로 개발 사이트 잠그기"를 먼저 알리고 진행한다. 회사 PC 에서는 진행하지 않는다(카드 등록 불가). 같은 결정 — 운영 `pocketgamelab.com/joyfield/` 은 지금처럼 열어 둔다(아직 아무도 주소를 모름, 앱 등록 뒤 테스터에게 처음 알림). 개발은 앱 등록 뒤 주소가 알려져도 괜찮게 잠근다. 막을 주소: `dev.pocketgamelab.com`, `dev.pocketgamelab.pages.dev`(Pages 가 `dev` 브랜치에 자동으로 주는 같은 개발 사이트)·일회용 `<해시>.pocketgamelab.pages.dev`, 그리고 `pocketgamelab.pages.dev`(운영과 같은 내용, 사용자가 이것도 막자고 함). 운영 잠금은 하지 않는다(TWA 가 운영 주소를 그대로 열어야 함). 배포는 GitHub Actions → wrangler API 직접 업로드라 잠금과 무관.
    - **방법 A: Cloudflare Access(Zero Trust Free)** — 결제 수단 등록이 필요한데 회사 PC 에서 카드번호를 몰라 막힘(청구 주소 영문은 안내함). 집 PC 에서 카드·PayPal 로 등록되면: Zero Trust → Access → 애플리케이션 → 자체 호스팅, 도메인 `dev.pocketgamelab.com`·`*.pocketgamelab.pages.dev`·`pocketgamelab.pages.dev`, 정책 허용 = 본인 이메일(테스터는 나중에 추가), 로그인 일회용 PIN, 세션 1개월. Pages `pocketgamelab` → 설정 → 미리보기 배포 액세스 정책 사용.
