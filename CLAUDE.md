@@ -99,7 +99,8 @@
 도메인·주소 이전은 2026-11-05 끝났다(운영 `https://pocketgamelab.com/joyfield/`, 개발 `https://dev.pocketgamelab.com/joyfield/`, `.kr`·`.co.kr`·`www` → `pocketgamelab.com` 301, 옛 github.io 주소는 안내 없이 GitHub Pages 끔(사용자가 거의 없음), 도메인 잠금. 경위는 메모리 `studio-domain-pocketgamelab`).
 
 - **미룸(2026-11-05 사용자 결정): 최상위 `pocketgamelab.com/` 페이지와 거기 들어갈 개인정보처리방침은 앱 완성 뒤 만든다.** 지금 `/` 는 302 로 `/joyfield/`. 평소 세션에서는 꺼내지 않고, **앱 등록(구글 플레이·앱스토어) 직전에** 알린다(메모리 `ranking-reset-at-store-launch` 와 같은 시점).
-- 그때 할 일: 초안 `docs/drafts/privacy-policy.html`(연락처 `contact@pocketgamelab.com`, 책임자 실명 명범수 + Pocket Game Lab, 2026-11-05 사용자 결정)를 그때 저장 항목·광고 여부에 맞게 고쳐 `pocketgamelab.com/privacy/` 로 올림(`scripts/site.mjs` 가 만드는 `site/` 에 더함) → 허브 설정 맨 아래 링크 → Cloudflare 이메일 라우팅으로 `contact@` 연결·테스트 메일 → Firestore 위치 확인(초안은 "미국 등") → 구글 플레이·애플 최신 요구 사항 확인.
+- 그때 할 일: 초안 `docs/drafts/privacy-policy.html`(연락처 `contact@pocketgamelab.com`, 책임자 실명 명범수 + Pocket Game Lab, 2026-11-05 사용자 결정)를 그때 저장 항목·광고 여부에 맞게 고쳐 `pocketgamelab.com/privacy/` 로 올림(`scripts/site.mjs` 가 만드는 `site/` 에 더함) → 허브 설정 맨 아래 링크 → Firestore 위치 확인(초안은 "미국 등") → 구글 플레이·애플 최신 요구 사항 확인.
+- **`contact@pocketgamelab.com` 받기는 2026-11-05 연결함:** Cloudflare 이메일 라우팅(라우팅 규칙 `contact` → 개인 Gmail, 전체 수신 끔), DNS 에 MX 3개·SPF·DKIM(잠김)·DMARC `v=DMARC1; p=none;`. 네이버에서 보낸 테스트 메일 도착 확인. 받기 전용이고 Gmail 에서 `contact@` 이름으로 답장하는 설정은 하지 않음(필요하면 Gmail "다른 주소에서 메일 보내기" + SPF 에 `include:_spf.google.com`).
 
 끝나면 이 절을 지우고 메모리를 고친다.
 
