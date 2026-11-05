@@ -53,6 +53,7 @@ const ko = {
   'tip.stuck': '구석에 몰린 화분이 있어요 · 처음부터',
 
   'pause.title': '일시정지',
+  'pause.note': '멈춘 동안은 시간이 흐르지 않아요',
   'pause.resume': '계속하기',
   'pause.quit': '처음 화면으로',
 
@@ -202,6 +203,7 @@ const en: Record<MessageKey, string> = {
   'tip.stuck': 'A pot is stuck in a corner · Restart',
 
   'pause.title': 'Paused',
+  'pause.note': 'The clock is stopped while paused',
   'pause.resume': 'Resume',
   'pause.quit': 'Main menu',
 

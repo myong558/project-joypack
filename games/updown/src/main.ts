@@ -4,7 +4,7 @@
 import '@joyfield/shared';
 import '@joyfield/shared/topbar.css';
 import './styles.css';
-import { configureUi, openModal, openRanking as openSharedRanking, rankEntryForm, type RankTab } from '@joyfield/shared/ui';
+import { configureUi, openModal, openRanking as openSharedRanking, pauseLayer, rankEntryForm, type RankTab } from '@joyfield/shared/ui';
 import { play as fx, isOn as fxOn, setOn as setFx } from './audio';
 import {
   LUCK_TONE,
@@ -670,7 +670,7 @@ function startGame(max: number, practice = false): void {
   startedAt = Date.now();
   pausedTotal = 0;
   paused = false;
-  $('pause-menu').hidden = true;
+  showPauseLayer(false);
   pick = null;
   renderPlay(false);
   show('play');
@@ -811,8 +811,7 @@ function pause(): void {
   if (screen !== 'play' || paused || game.status !== 'playing') return;
   paused = true;
   pausedAt = Date.now();
-  $('pause-menu').hidden = false;
-  $('pause-resume').focus();
+  showPauseLayer(true);
   syncBack();
 }
 
@@ -828,6 +827,15 @@ function resume(): void {
 }
 
 document.addEventListener('visibilitychange', () => document.hidden && pause());
+// PC: Esc·P 로 일시정지 ↔ 계속하기(다른 게임과 같음). 대화상자가 열려 있으면 Esc 는 대화상자 몫
+document.addEventListener('keydown', (e) => {
+  if (screen !== 'play' || game.status !== 'playing' || document.querySelector('.modal-backdrop')) return;
+  if (e.key !== 'Escape' && e.key !== 'p' && e.key !== 'P') return;
+  if (e.target instanceof HTMLInputElement) return;
+  e.preventDefault();
+  if (paused) resume();
+  else pause();
+});
 
 // ── 언어 ──
 function changeLang(lang: Lang): void {
@@ -961,6 +969,7 @@ $('lang-toggle').addEventListener('click', () => changeLang(LANGS[(LANGS.indexOf
 $('settings-open').addEventListener('click', () => openSettings());
 $('ranking-open').addEventListener('click', () => openRanking());
 $('thermo-open').addEventListener('click', openThermo);
+const showPauseLayer = pauseLayer($('pause-menu'));
 $('pause-resume').addEventListener('click', resume);
 $('pause-open').addEventListener('click', pause);
 $('pause-quit').addEventListener('click', goToStart);

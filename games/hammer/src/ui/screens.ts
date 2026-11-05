@@ -5,7 +5,7 @@ import type { GameResult, MoleKind } from '../game/types';
 import type { MissionId } from '../game/missions';
 import { LANGS, getLang, moleDesc, moleName, t, type Lang, type MessageKey } from '../i18n';
 import type { SaveData } from '../storage';
-import { closeButton, html, openModal as openSharedModal, openRanking as openSharedRanking, rankEntryForm } from '@joyfield/shared/ui';
+import { closeButton, html, openModal as openSharedModal, openRanking as openSharedRanking, pauseLayer, rankEntryForm } from '@joyfield/shared/ui';
 import { shortDate } from '@joyfield/shared/rank';
 import { boardEntries, pendingScore, placeOf } from '../ranking';
 import { SKIN_SETTINGS, THEMES, type Skin, type SkinSetting, type Theme } from '../theme';
@@ -542,6 +542,7 @@ export function gameScreen(opts: {
           <div class="countdown" hidden></div>
           <div class="pause-menu" hidden>
             <h2>${t('pause.title')}</h2>
+            <p class="pause-note">${t('pause.note')}</p>
             <button class="btn primary" data-act="resume">${t('pause.resume')}</button>
             <button class="btn" data-act="restart">${t('pause.restart')}</button>
             <button class="btn ghost" data-act="quit">${t('pause.quit')}</button>
@@ -551,7 +552,7 @@ export function gameScreen(opts: {
     </main>`);
   const q = (s: string) => el.querySelector<HTMLElement>(s)!;
   const countdown = q('.countdown');
-  const pauseMenu = q('.pause-menu');
+  const showPauseLayer = pauseLayer(q('.pause-menu'));
   q('.pause-btn').addEventListener('click', opts.onPause);
   q('[data-act="resume"]').addEventListener('click', opts.onResume);
   q('[data-act="restart"]').addEventListener('click', opts.onRestart);
@@ -575,8 +576,7 @@ export function gameScreen(opts: {
       countdown.classList.add('pop');
     },
     showPause(show) {
-      pauseMenu.hidden = !show;
-      if (show) pauseMenu.querySelector<HTMLButtonElement>('button')!.focus();
+      showPauseLayer(show);
     },
   };
 }

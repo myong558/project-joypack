@@ -68,6 +68,7 @@ const ko = {
   'hole': '구멍 {n}',
 
   'pause.title': '일시정지',
+  'pause.note': '멈춘 동안은 시간이 흐르지 않아요',
   'pause.resume': '계속하기',
   'pause.restart': '다시 시작',
   'pause.quit': '처음 화면으로',
@@ -221,6 +222,7 @@ const en: Record<MessageKey, string> = {
   'hole': 'Hole {n}',
 
   'pause.title': 'Paused',
+  'pause.note': 'The clock is stopped while paused',
   'pause.resume': 'Resume',
   'pause.restart': 'Restart',
   'pause.quit': 'Main menu',

@@ -237,6 +237,41 @@ export interface FlipOptions {
  * show(open, apply): 앞면끼리 바꿀 때는 옆으로 세워(90°) 안 보이는 순간에 apply(그림·설명 바꾸기)를 하고 다시 펼친다(첫 회전은 끝 자세를
  * 붙잡아 두 회전 사이에 원래 각도가 한 프레임 비치지 않게). 뒷면 ↔ 앞면은 css 전환으로 뒤집고, 잠긴 카드(open false)는 뒷면으로 돌아간 뒤 바꾼다
  */
+/**
+ * 일시정지 레이어(기준서 1.3, 모든 게임 같은 동작): 화면 전체를 불투명하게 덮어 판·기록·점수·시간이 보이지 않게 한다
+ * (멈춘 채 판을 보며 생각·외우지 못하게). 바깥 누르기로 닫히지 않고 계속하기 단추·Esc(게임 키 처리)로만 닫힌다.
+ * 열면 첫 단추(계속하기)에 초점, Tab 은 창 안에서만 돈다. 모양(배경 색·글자·단추)은 게임 css 의 .pause-menu,
+ * 가리는 범위는 position: fixed; inset: 0 + 불투명 배경 + 위 메뉴보다 위(z-index 100 이상).
+ * 단추 순서: 계속하기(주 단추) → 게임별 단추(예: 두더지잡기 다시 시작) → 처음 화면으로
+ */
+export function pauseLayer(menu: HTMLElement): (show: boolean) => void {
+  menu.setAttribute('role', 'dialog');
+  menu.setAttribute('aria-modal', 'true');
+  const title = menu.querySelector('h2');
+  if (title) {
+    title.id ||= 'jf-pause-title';
+    menu.setAttribute('aria-labelledby', title.id);
+  }
+  menu.addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab') return;
+    const buttons = [...menu.querySelectorAll<HTMLElement>('button:not([disabled])')];
+    if (!buttons.length) return;
+    const first = buttons[0];
+    const last = buttons[buttons.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  });
+  return (show) => {
+    menu.hidden = !show;
+    if (show) menu.querySelector<HTMLButtonElement>('button')?.focus();
+  };
+}
+
 export function cardFlipper(flip: HTMLElement, opts: FlipOptions = {}): (open: boolean, apply: () => void) => void {
   const reduced = () => !!opts.reduced?.();
   return (open, apply) => {

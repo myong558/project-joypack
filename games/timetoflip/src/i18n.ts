@@ -68,6 +68,7 @@ const ko = {
   'card.gone': '{n}번 카드: 맞힘',
 
   'pause.title': '일시정지',
+  'pause.note': '멈춘 동안은 시간이 흐르지 않아요',
   'pause.resume': '계속하기',
   'pause.quit': '처음 화면으로',
 
@@ -207,6 +208,7 @@ const en: Record<MessageKey, string> = {
   'card.gone': 'Card {n}: matched',
 
   'pause.title': 'Paused',
+  'pause.note': 'The clock is stopped while paused',
   'pause.resume': 'Resume',
   'pause.quit': 'Main menu',
 

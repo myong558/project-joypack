@@ -1,7 +1,7 @@
 import { FLOWER, FLOWERS, type Flower, type FlowerId } from '../flora';
 import { LEVELS, levelName } from '../game/levels';
 import { LANGS, getLang, iga, t, type Lang } from '../i18n';
-import { cardFlipper, closeButton, html, openModal as openSharedModal, openRanking as openSharedRanking, rankEntryForm } from '@joyfield/shared/ui';
+import { cardFlipper, closeButton, html, openModal as openSharedModal, openRanking as openSharedRanking, pauseLayer, rankEntryForm } from '@joyfield/shared/ui';
 import { shortDate } from '@joyfield/shared/rank';
 import { clock, pendingRecord, placeOf, placeOfDaily, type DailyEntry, type DailyRecord } from '../ranking';
 import { captureResult, type ShareOutcome } from '../share';
@@ -541,6 +541,7 @@ export function gameScreen(opts: {
         <div class="fx-layer" aria-hidden="true"></div>
         <div class="pause-menu" hidden>
           <h2>${t('pause.title')}</h2>
+          <p class="pause-note">${t('pause.note')}</p>
           <button class="btn primary" data-act="resume">${t('pause.resume')}</button>
           <button class="btn" data-act="quit">${t('pause.quit')}</button>
         </div>
@@ -559,7 +560,7 @@ export function gameScreen(opts: {
       </div>
     </main>`);
   const q = <T extends HTMLElement = HTMLElement>(s: string) => el.querySelector<T>(s)!;
-  const pauseMenu = q('.pause-menu');
+  const showPauseLayer = pauseLayer(q('.pause-menu'));
   q('.pause-btn').addEventListener('click', opts.onPause);
   q('[data-act="resume"]').addEventListener('click', opts.onResume);
   el.querySelectorAll('[data-act="restart"]').forEach((b) => b.addEventListener('click', opts.onRestart));
@@ -593,9 +594,8 @@ export function gameScreen(opts: {
     moves: q('.moves'),
     note: q('.note-line'),
     showPause(show) {
-      pauseMenu.hidden = !show;
+      showPauseLayer(show);
       el.classList.toggle('paused', show);
-      if (show) pauseMenu.querySelector<HTMLButtonElement>('button')!.focus();
     },
   };
 }

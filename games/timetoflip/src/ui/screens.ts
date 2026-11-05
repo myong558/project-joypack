@@ -3,7 +3,7 @@ import { ALL_FACES, FACE_SETS, ITEMS, ITEM_FROM, type FaceId, type ItemId } from
 import { cardInfo, faceName, setName } from '../cards';
 import { LANGS, getLang, t, type Lang } from '../i18n';
 import type { SaveData } from '../storage';
-import { cardFlipper, closeButton, html, openModal as openSharedModal, openRanking as openSharedRanking, rankEntryForm } from '@joyfield/shared/ui';
+import { cardFlipper, closeButton, html, openModal as openSharedModal, openRanking as openSharedRanking, pauseLayer, rankEntryForm } from '@joyfield/shared/ui';
 import { shortDate } from '@joyfield/shared/rank';
 import { boardEntries, pendingRecord, placeOf, type Mode } from '../ranking';
 import { SKIN_SETTINGS, THEMES, type Skin, type SkinSetting, type Theme } from '../theme';
@@ -478,13 +478,14 @@ export function gameScreen(opts: { daily: boolean; onPause: () => void; onResume
         <div class="message" hidden></div>
         <div class="pause-menu" hidden>
           <h2>${t('pause.title')}</h2>
+          <p class="pause-note">${t('pause.note')}</p>
           <button class="btn primary" data-act="resume">${t('pause.resume')}</button>
           <button class="btn" data-act="quit">${t('pause.quit')}</button>
         </div>
       </div>
     </main>`);
   const q = (s: string) => el.querySelector<HTMLElement>(s)!;
-  const pauseMenu = q('.pause-menu');
+  const showPauseLayer = pauseLayer(q('.pause-menu'));
   const message = q('.message');
   const countdown = q('.countdown');
   let shownNum = -1;
@@ -527,9 +528,8 @@ export function gameScreen(opts: { daily: boolean; onPause: () => void; onResume
       if (n) num.classList.add('pop');
     },
     showPause(show) {
-      pauseMenu.hidden = !show;
+      showPauseLayer(show);
       el.classList.toggle('paused', show);
-      if (show) pauseMenu.querySelector<HTMLButtonElement>('button')!.focus();
     },
     showMessage(text, variant = '') {
       message.hidden = text === null;
