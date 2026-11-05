@@ -1,7 +1,9 @@
 import { FLOWER, FLOWERS, type Flower, type FlowerId } from '../flora';
 import { LEVELS, levelName } from '../game/levels';
 import { LANGS, getLang, iga, t, type Lang } from '../i18n';
-import { NAME_MAX, RANK_SIZE, cleanName, clock, isValidName, pendingRecord, placeOf, placeOfDaily, type DailyEntry, type DailyRecord } from '../ranking';
+import { cardFlipper, closeButton, html, openModal as openSharedModal, openRanking as openSharedRanking, rankEntryForm } from '@joyfield/shared/ui';
+import { shortDate } from '@joyfield/shared/rank';
+import { clock, pendingRecord, placeOf, placeOfDaily, type DailyEntry, type DailyRecord } from '../ranking';
 import { captureResult, type ShareOutcome } from '../share';
 import { flowerCount, gardenScore, nextLevel, petalCount, type SaveData } from '../storage';
 import { SKIN_SETTINGS, THEMES, type Skin, type SkinSetting, type Theme } from '../theme';
@@ -10,17 +12,12 @@ import { GARDENER, POT } from './board';
 import { flowerSvg } from './flowers';
 import { ICONS, SUN_ICON, SKIN_ICONS, THEME_ICONS } from './icons';
 
+/** 대화상자(공통 @joyfield/shared/ui). kind 는 .modal 에 더할 클래스(창 크기 고정 등) */
+function openModal(host: HTMLElement, content: HTMLElement, label: string, reopen?: string, kind = ''): () => void {
+  return openSharedModal(host, content, label, { reopen, kind: kind || undefined });
+}
+
 const LANG_LABEL: Record<Lang, string> = { ko: '한국어', en: 'English' };
-
-function html(markup: string): HTMLElement {
-  const tpl = document.createElement('template');
-  tpl.innerHTML = markup.trim();
-  return tpl.content.firstElementChild as HTMLElement;
-}
-
-function closeButton(): string {
-  return `<button class="modal-x icon-btn" data-close aria-label="${t('common.close')}">${ICONS.close}</button>`;
-}
 
 const pressed = (on: boolean) => `aria-pressed="${on}"`;
 
@@ -50,47 +47,6 @@ export const ALL_OPEN = () => !__JOYFIELD_PROD__ && Joyfield.devJump();
 
 /** 판을 고를 수 있는지: 첫 판이거나 앞 판을 깼을 때 */
 export const unlocked = (save: SaveData, i: number) => ALL_OPEN() || i === 0 || !!save.levels[i - 1] || !!save.levels[i];
-
-/**
- * 화면 안에 띄우는 대화상자. Esc·바깥 누르기·닫기 버튼으로 닫힌다.
- * reopen은 화면을 다시 그린 뒤 같은 창을 되살리는 경우라 등장 연출 없이 그대로 보이고, 그 선택자에 초점을 둔다
- */
-function openModal(host: HTMLElement, content: HTMLElement, label: string, reopen?: string, kind = ''): () => void {
-  const backdrop = html(`<div class="modal-backdrop"><div class="modal ${kind}" role="dialog" aria-modal="true"></div></div>`);
-  if (reopen) backdrop.classList.add('instant');
-  const modal = backdrop.querySelector('.modal')!;
-  modal.setAttribute('aria-label', label);
-  modal.append(content);
-  const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-  const onKey = (e: KeyboardEvent) => {
-    if (!backdrop.isConnected) return document.removeEventListener('keydown', onKey, true);
-    if (e.key !== 'Escape') return;
-    e.stopPropagation();
-    close();
-  };
-  const watch = new MutationObserver(() => host.isConnected || close());
-  if (host.parentNode) watch.observe(host.parentNode, { childList: true });
-  const close = () => {
-    backdrop.remove();
-    watch.disconnect();
-    document.removeEventListener('keydown', onKey, true);
-    if (opener?.isConnected) opener.focus();
-  };
-  // 딤을 눌러 닫을 때는 누름과 뗌이 모두 딤 위여야 한다(곧바로 닫으면 이어지는 click 이 아래 화면에 떨어짐)
-  let downOnBackdrop = false;
-  backdrop.addEventListener('pointerdown', (e) => (downOnBackdrop = e.target === backdrop));
-  backdrop.addEventListener('click', (e) => {
-    if (e.target === backdrop && downOnBackdrop) close();
-    downOnBackdrop = false;
-  });
-  content.addEventListener('click', (e) => {
-    if ((e.target as Element).closest('[data-close]')) close();
-  });
-  document.addEventListener('keydown', onKey, true);
-  document.body.append(backdrop);
-  (content.querySelector<HTMLElement>(reopen || '[aria-pressed="true"]') ?? content.querySelector('button'))?.focus();
-  return close;
-}
 
 /**
  * 로고 = 게임 시연(실제 규칙대로)이 든 4×2 작은 온실. 위 줄은 네 칸을 덮는 막돌 블록 한 장에 게임 이름을 새긴 간판(판 벽과 같은 돌, 스킨마다 바뀜), 아래 줄은 빈칸 → 정원사 → 화분 → 창 칸(게임 판의 벽·창 칸과 같은 그림).
@@ -277,6 +233,12 @@ export function openDex(host: HTMLElement, save: SaveData, start: number | null,
     </div>`);
 
   const flip = box.querySelector<HTMLElement>('.dex-flip')!;
+
+  // 큰 카드 뒤집기는 조이필드 공통(@joyfield/shared/ui cardFlipper, 타임 투 플립 도감과 같음). 다 뒤집힌 앞면은 3D 를 풀어 평면으로(.flat):
+
+  // 3D 층 속에서 꽃이 피면 브라우저가 낮은 해상도로 그려 흐려 보인다. 다시 돌릴 때는 전환 없이 3D 자세로 되돌린다
+
+  const flipTo = cardFlipper(flip, { reduced: () => reducedMotion.matches, flatClass: 'flat', onShown: () => flip.classList.add('flat') });
   const front = flip.querySelector<HTMLElement>('.front')!;
   const [title, by, facts, desc] = [...box.querySelector<HTMLElement>('.dex-info')!.children] as HTMLElement[];
   let selected: HTMLButtonElement | null = null;
@@ -310,32 +272,8 @@ export function openDex(host: HTMLElement, save: SaveData, start: number | null,
         item.classList.remove('new');
       }
     };
-    const wasUp = flip.classList.contains('up');
-    // 다 뒤집힌 앞면은 3D 를 풀어 평면으로(.flat): 3D 층 속에서 꽃이 피면 브라우저가 낮은 해상도로 그려 흐려 보인다
-    const flatten = () => isOpen && flip.classList.add('flat');
-    // 평면을 풀 때는 전환 없이 바로 3D 자세로(풀면서 한 바퀴 도는 것 방지)
-    if (flip.classList.contains('flat')) {
-      flip.style.transition = 'none';
-      flip.classList.remove('flat');
-      void flip.offsetWidth;
-      flip.style.transition = '';
-    }
     pageSound?.();
-    // 앞면끼리 바꿀 때는 옆으로 세워(90°) 안 보이는 순간에 그림을 갈아 끼우고 다시 펼친다(첫 회전은 끝 자세를 붙잡아 한 프레임 비침 방지)
-    if (wasUp && isOpen && !reducedMotion.matches) {
-      const out = flip.animate([{ transform: 'rotateY(180deg)' }, { transform: 'rotateY(270deg)' }], { duration: 120, easing: 'ease-in', fill: 'forwards' });
-      out.onfinish = () => {
-        apply();
-        flip.animate([{ transform: 'rotateY(90deg)' }, { transform: 'rotateY(180deg)' }], { duration: 180, easing: 'cubic-bezier(.3,1.4,.5,1)' }).onfinish = flatten;
-        out.cancel();
-      };
-    } else {
-      // 뒷면 ↔ 앞면은 CSS 전환으로 뒤집는다(잠긴 꽃은 뒷면으로 돌아감)
-      if (isOpen) apply();
-      else setTimeout(apply, wasUp ? 130 : 0);
-      flip.classList.toggle('up', isOpen);
-      setTimeout(flatten, reducedMotion.matches ? 0 : 440);
-    }
+    flipTo(isOpen, apply);
   };
   const items = [...box.querySelectorAll<HTMLButtonElement>('.dex-item')];
   items.forEach((b) => b.addEventListener('click', () => show(b)));
@@ -398,7 +336,7 @@ function settingsPanel(opts: StartOptions): HTMLElement {
         <h3>${t('settings.feedback')}</h3>
         <div class="toggles">
           ${toggleChip('sound', save.sound)}
-          ${'vibrate' in navigator ? toggleChip('vibrate', save.vibrate) : '' /* 진동을 못 하는 기기(아이폰 등)에는 숨긴다 */}
+          ${Joyfield.canVibrate() ? toggleChip('vibrate', save.vibrate) : '' /* 진동을 못 하는 기기(아이폰 등)에는 숨긴다 */}
         </div>
       </section>
       <section class="reset-section">
@@ -501,186 +439,58 @@ export function longDate(key: string): string {
   return new Date(y, m - 1, d).toLocaleDateString(getLang() === 'ko' ? 'ko-KR' : 'en-US', { month: 'long', day: 'numeric' });
 }
 
-function shortDate(key: string): string {
-  const [, m, d] = key.split('-');
-  return `${Number(m)}/${Number(d)}`;
-}
+/* ---------- 게임 화면 ---------- */
 
 /**
- * 이름 입력 카드. 영문 대문자 5자까지만 받고, 지난번 이름을 미리 채운다. 입력 칸과 완료 칸을 처음부터 같은 자리에 겹쳐 두어
- * 등록 전·중·후에 카드 높이가 바뀌지 않게 한다(타임 투 플립과 같은 방식, 공통화 대기 2번)
- */
-function rankEntryForm(opts: { title: string; name: string; compact?: boolean; onSubmit: (name: string) => Promise<number>; onView?: (place: number | null) => void }): HTMLElement {
-  const el = html(`
-    <form class="rank-entry" novalidate>
-      <div class="rank-entry-form">
-        <p class="rank-entry-title">${ICONS.trophy}<span>${opts.title}</span></p>
-        <div class="rank-entry-row">
-          <input name="name" value="${opts.name}" maxlength="${NAME_MAX}" placeholder="AAAAA" inputmode="email" lang="en" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="done" aria-label="${t('ranking.nameLabel')}">
-          <button class="btn primary" type="submit">${t('ranking.submit')}</button>
-        </div>
-        <p class="rank-entry-hint">${opts.compact ? '' : t('ranking.nameLabel')}</p>
-      </div>
-      <div class="rank-entry-done" aria-hidden="true">
-        <p class="rank-entry-title" role="status">${ICONS.trophy}<span>${t('ranking.done', { n: 10 })}</span></p>
-        ${opts.onView ? `<button class="btn primary rank-view" type="button" data-view tabindex="-1">${ICONS.trophy}<span>${t('ranking.open')}</span></button>` : ''}
-      </div>
-    </form>`);
-  const input = el.querySelector('input')!;
-  const submit = el.querySelector<HTMLButtonElement>('[type="submit"]')!;
-  const hint = el.querySelector<HTMLElement>('.rank-entry-hint')!;
-  const hintText = hint.innerHTML;
-  let sending = false;
-  // 금지어(욕설 등)는 등록 버튼을 끄고 안내 줄에 알린다(조이필드 공통 Joyfield.isAllowedName, 기준서 10.3)
-  const sync = (clean = cleanName(input.value)) => {
-    const blocked = isValidName(clean) && !Joyfield.isAllowedName(clean);
-    submit.disabled = !isValidName(clean) || blocked;
-    if (!sending) hint.innerHTML = blocked ? `<span class="rank-error">${t('ranking.badName')}</span>` : hintText;
-  };
-  Joyfield.initialsInput(input, sync);
-  sync();
-  el.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    sync();
-    if (submit.disabled || sending) return;
-    sending = true;
-    const label = submit.textContent!;
-    submit.style.minWidth = `${submit.offsetWidth}px`;
-    submit.disabled = input.disabled = true;
-    if (opts.compact) submit.textContent = '…';
-    else hint.textContent = t('ranking.sending');
-    let place: number;
-    try {
-      place = await opts.onSubmit(input.value);
-    } catch {
-      sending = false;
-      input.disabled = false;
-      submit.textContent = label;
-      submit.style.minWidth = '';
-      sync();
-      hint.innerHTML = `<span class="rank-error">${t('ranking.failed')}</span>${hintText ? `<br>${hintText}` : ''}`;
-      return;
-    }
-    const form = el.querySelector<HTMLElement>('.rank-entry-form')!;
-    const done = el.querySelector<HTMLElement>('.rank-entry-done')!;
-    done.querySelector('span')!.innerHTML = place < 0 ? t('ranking.missed') : t('ranking.done', { n: place + 1 });
-    form.setAttribute('aria-hidden', 'true');
-    form.inert = true;
-    done.removeAttribute('aria-hidden');
-    el.classList.add('done');
-    const view = done.querySelector<HTMLButtonElement>('[data-view]');
-    view?.removeAttribute('tabindex');
-    view?.addEventListener('click', () => opts.onView!(place < 0 ? null : place));
-    view?.focus();
-  });
-  return el;
-}
-
-/**
- * 랭킹 창: 정원 점수 · 오늘의 정원 두 탭. 처음 탭은 조이필드 공통 기준(Joyfield.rankTab: 등록 대기 → 최근 탭 → 정원 점수)이고,
- * tab 을 주면 그 탭. 등록 대기 기록이 있으면 맨 위에서 올린다. mark 는 방금 올린 순위(0부터, 처음 탭에만)
+ * 랭킹 창(공통 모양 @joyfield/shared/ui). 정원 점수·오늘의 정원 두 순위표를 탭으로 바꿔 보고, 등록 대기 기록이 있으면 맨 위에서 올린다.
+ * mark 는 방금 올린 순위(0부터). 창 높이는 css(.rank-modal)로 고정해 탭이 바뀌어도 탭 단추가 움직이지 않게 한다
  */
 export function openRanking(host: HTMLElement, view: RankingView, mark: number | null, onChange?: () => void, tab?: RankTab): void {
   const { save } = view;
-  let board: RankTab = tab ?? (Joyfield.rankTab('glasshouse', ['garden', 'daily'], 'garden') as RankTab);
-  let highlight = mark;
-  const box = html(`
-    <div class="ranking">
-      ${closeButton()}
-      <h2>${ICONS.trophy} ${t('ranking.title')}</h2>
-      <div class="seg rank-tabs" role="group" aria-label="${t('ranking.title')}">
-        <button type="button" data-tab="garden">${t('ranking.board')}</button>
-        <button type="button" data-tab="daily">${t('ranking.daily')}</button>
-      </div>
-      <p class="note rank-note"></p>
-      <div class="rank-pending"></div>
-      <ol class="rank-list"></ol>
-    </div>`);
-  const list = box.querySelector<HTMLElement>('.rank-list')!;
-  const slot = box.querySelector<HTMLElement>('.rank-pending')!;
-  const status: Record<RankTab, 'loading' | 'online' | 'offline'> = { garden: 'loading', daily: 'loading' };
-  const renderNote = () => {
-    const note = box.querySelector('.rank-note')!;
-    const s = status[board];
-    note.textContent =
-      s === 'loading' ? t('ranking.loading') : s === 'offline' ? t('ranking.offline') : board === 'garden' ? t('ranking.note') : t('ranking.dailyNote', { date: longDate(view.today()) });
-    note.classList.toggle('rank-error', s === 'offline');
-  };
-  const row = (i: number, e: boolean, no: string, name: string, stage: string, score: string, date: string) => {
-    const cls = [i < 3 ? `top top${i + 1}` : '', e ? '' : 'empty', e && i === highlight ? 'me' : ''].filter(Boolean).join(' ');
-    return `<li class="${cls}"><span class="no">${no}</span><span class="name">${name}</span><span class="stage">${stage}</span><span class="score">${score}</span><span class="date">${date}</span></li>`;
-  };
-  const renderList = () => {
-    const daily = todayDaily(view);
-    list.innerHTML = Array.from({ length: RANK_SIZE }, (_, i) => {
-      if (board === 'daily') {
-        const e = daily[i];
-        return row(i, !!e, String(i + 1), e ? e.name + Joyfield.deviceIcon(e.dev) : '-----', '',e ? t('ranking.moves', { n: e.moves }) : '-', e ? clock(e.time) : '');
-      }
-      const e = save.rankings[i];
-      return row(i, !!e, String(i + 1), e ? e.name + Joyfield.deviceIcon(e.dev) : '-----', e ? t('ranking.flowers', { n: e.flowers }) : '', e ? e.score.toLocaleString() : '-', e ? shortDate(e.date) : '');
-    }).join('');
-  };
-  const done = (place: number) => {
-    highlight = place < 0 ? null : place;
-    onChange?.();
-    if (place >= 0) render();
-    else renderList();
-    return place;
-  };
-  const render = () => {
-    renderNote();
-    box.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.tab === board)));
-    let form: HTMLElement | null = null;
-    if (board === 'garden') {
-      const rec = pendingRecord(save.rankings, save.pending);
-      if (rec)
-        form = rankEntryForm({
-          title: t('ranking.pending', { score: rec.score, n: placeOf(save.rankings, rec.score) + 1 }),
-          name: save.playerName,
-          onSubmit: async (name) => done(await view.register(name, rec.score, rec.flowers)),
-        });
-    } else {
-      const rec = dailyPendingRecord(view);
-      if (rec)
-        form = rankEntryForm({
-          title: t('ranking.dailyPending', { moves: rec.moves, n: placeOfDaily(todayDaily(view), rec) + 1 }),
-          name: save.playerName,
-          onSubmit: async (name) => done(await view.registerDaily(name, rec)),
-        });
-    }
-    const empty = board === 'garden' ? !save.rankings.length : !todayDaily(view).length;
-    slot.replaceChildren(...(form ? [form] : empty ? [html(`<p class="note rank-empty">${t('ranking.empty')}</p>`)] : []));
-    renderList();
-  };
-  const load = (which: RankTab) =>
-    void (which === 'garden' ? view.refresh() : view.refreshDaily()).then((ok) => {
-      status[which] = ok ? 'online' : 'offline';
-      if (!box.isConnected || board !== which) return;
-      if (slot.contains(document.activeElement)) {
-        renderNote();
-        renderList();
-      } else render();
-    });
-  const select = (next: RankTab) => {
-    board = next;
-    Joyfield.setRankBoard('glasshouse', board);
-    if (status[board] !== 'online') load(board);
-    render();
-  };
-  box.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach((b) =>
-    b.addEventListener('click', () => {
-      if (b.dataset.tab === board) return;
-      highlight = null;
-      select(b.dataset.tab as RankTab);
-    }),
-  );
-  select(board);
-  // 창 높이를 고정해(styles.css .rank-modal) 탭·기록 등록 칸·목록이 바뀌어도 탭 단추가 위아래로 움직이지 않게
-  openModal(host, box, t('ranking.title'), '[data-tab][aria-pressed="true"]', 'rank-modal');
+  const columns = [{ cls: 'stage' }, { cls: 'score', empty: '-' }, { cls: 'date' }];
+  openSharedRanking(host, {
+    gameId: 'glasshouse',
+    start: tab,
+    mark,
+    name: () => save.playerName,
+    onChange,
+    height: 'rank-modal',
+    tabs: [
+      {
+        id: 'garden',
+        label: t('ranking.board'),
+        columns,
+        note: () => t('ranking.note'),
+        rows: () => save.rankings.map((e) => ({ name: e.name, dev: e.dev, cells: [t('ranking.flowers', { n: e.flowers }), e.score.toLocaleString(), shortDate(e.date)] })),
+        pending: () => {
+          const rec = pendingRecord(save.rankings, save.pending);
+          if (!rec) return null;
+          return {
+            title: t('ranking.pending', { score: rec.score, n: placeOf(save.rankings, rec.score) + 1 }),
+            submit: (name: string) => view.register(name, rec.score, rec.flowers),
+          };
+        },
+        refresh: () => view.refresh(),
+      },
+      {
+        id: 'daily',
+        label: t('ranking.daily'),
+        columns,
+        note: () => t('ranking.dailyNote', { date: longDate(view.today()) }),
+        rows: () => todayDaily(view).map((e) => ({ name: e.name, dev: e.dev, cells: ['', t('ranking.moves', { n: e.moves }), clock(e.time)] })),
+        pending: () => {
+          const rec = dailyPendingRecord(view);
+          if (!rec) return null;
+          return {
+            title: t('ranking.dailyPending', { moves: rec.moves, n: placeOfDaily(todayDaily(view), rec) + 1 }),
+            submit: (name: string) => view.registerDaily(name, rec),
+          };
+        },
+        refresh: () => view.refreshDaily(),
+      },
+    ],
+  });
 }
-
-/* ---------- 게임 화면 ---------- */
 
 export interface GameView {
   el: HTMLElement;

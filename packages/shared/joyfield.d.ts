@@ -92,6 +92,26 @@ export interface JoyfieldApi {
   setRankPending(gameId: string, items: (string | number | { board: string | number; day?: string })[]): void;
   /** 랭킹 창을 열 때 처음 고를 탭: 등록 대기 → 최근 탭(방금 한 판·마지막으로 본 탭) → fallback */
   rankTab(gameId: string, boards: (string | number)[], fallback: string | number): string;
+  /** 진동 세기표(sounds/catalog.json "vibrations" 와 같은 값, ms) */
+  VIBRATIONS: Record<VibrationName, number | number[]>;
+  /** 이 기기가 진동을 할 수 있는지(아이폰 등은 false → 설정의 진동 칩을 숨김) */
+  canVibrate(): boolean;
+  /** 진동: 세기표 이름이나 패턴(ms). on 이 false(진동 설정 끔)면 아무것도 안 함 */
+  vibrate(pattern: VibrationName | number | number[], on?: boolean): void;
+  /** 뒤로 가기 단계(기준서 1.3): 화면 깊이·대화상자 층 */
+  back: BackNav;
+}
+
+export type VibrationName = 'tick' | 'press' | 'light' | 'match' | 'hit' | 'fever' | 'good' | 'up' | 'down' | 'big' | 'warn' | 'fail' | 'lost' | 'celebrate';
+
+export interface BackNav {
+  /**
+   * 지금 화면의 깊이(뒤로 가기를 몇 번 받아 낼지)와 그때 할 일. 화면을 바꿀 때마다 부른다.
+   * 시작 0 · 결과 1 · 일시정지 1 · 플레이 2. onBack 은 뒤로 가기 한 번마다 불린다(플레이 → 일시정지, 일시정지·결과 → 시작 화면)
+   */
+  screen(depth: number, onBack?: () => void): void;
+  /** 대화상자를 열 때: 뒤로 가기가 오면 onClose 로 닫는다. 돌려받은 함수는 창이 다른 방법으로 닫힐 때 부른다 */
+  layer(onClose: () => void): () => void;
 }
 
 declare global {

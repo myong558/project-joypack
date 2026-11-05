@@ -7,7 +7,8 @@
 //
 // 목차
 //   ■ 공통        allowedName(랭킹 이름 검사)
-//   ■ 업다운      games/updown/scores-{50|100|200}/{id}   기록 1건 = 문서 1개
+//   ■ 업다운      games/updown/rankings/{50|100|200}   순위표 1개 = 문서 1개(v1.21.0~)
+//                 games/updown/scores-{50|100|200}/{id}   기록 1건 = 문서 1개(옛 버전 화면용으로 남김)
 //   ■ 두더지잡기  games/hammer/rankings/{classic|daily-YYYY-MM-DD}   순위표 1개 = 문서 1개
 //   ■ 타임 투 플립 games/timetoflip/rankings/{classic|daily-YYYY-MM-DD}   순위표 1개 = 문서 1개
 //   ■ 온실정원   games/glasshouse/rankings/{garden|daily-YYYY-MM-DD}   순위표 1개 = 문서 1개(이름마다 한 줄)
@@ -84,6 +85,69 @@ service cloud.firestore {
         && updownScore(request.resource.data)
         && request.resource.data.createdAt == request.time;
       allow update, delete: if false;
+    }
+
+    // -------------------------------------------------------------------------------------------------
+    // ■ 게임: 업다운 (updown) — 순위표 문서 방식(업다운 v1.21.0~, 다른 게임과 같은 방식)
+    //   경로   games/updown/rankings/50 · 100 · 200
+    //   모양   순위표 1개 = 문서 1개 { entries: [{ name, score, tries, time, thermo?, date, dev? }, ...] } (점수 높은 순 1~10위)
+    //   권한   누구나 읽기. 등록은 두더지잡기와 같이 "기존 순위표에 새 기록 1개를 끼운 것"만 받는다(기존 줄 바꾸기·지우기 금지)
+    //   점수   위 예전 방식과 같은 상한: 1000 + 100 × (정석 횟수 − 시도 횟수) − (시간 ms ÷ 100, 버림) − 온도계 차감, 1점 이상
+    //   예전 방식(scores-*)은 설치 앱·오프라인 캐시에 남은 옛 버전 화면이 한동안 올릴 수 있게 그대로 둔다
+    // -------------------------------------------------------------------------------------------------
+    match /games/updown/rankings/{board} {
+      function udBoard() {
+        return board in ['50', '100', '200'];
+      }
+      function udEntry(e) {
+        return e is map
+          && e.keys().hasOnly(['name', 'score', 'tries', 'time', 'thermo', 'date', 'dev'])
+          && okDevice(e)
+          && allowedName(e.name)
+          && e.get('thermo', false) is bool
+          && e.tries is int && e.tries >= 1 && e.tries <= {'50': 50, '100': 100, '200': 200}[board]
+          && e.time is int && e.time >= 0 && e.time <= 86400000
+          && e.score is int && e.score >= 1
+          && e.score <= 1000
+            + 100 * ({'50': 6, '100': 7, '200': 8}[board] - e.tries)
+            - math.floor(e.time / 100)
+            - (e.get('thermo', false) == true ? {'50': 250, '100': 300, '200': 300}[board] : 0)
+          && e.date is string && e.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$');
+      }
+      function udSorted(e) {
+        return (e.size() < 2 || e[0].score >= e[1].score)
+          && (e.size() < 3 || e[1].score >= e[2].score)
+          && (e.size() < 4 || e[2].score >= e[3].score)
+          && (e.size() < 5 || e[3].score >= e[4].score)
+          && (e.size() < 6 || e[4].score >= e[5].score)
+          && (e.size() < 7 || e[5].score >= e[6].score)
+          && (e.size() < 8 || e[6].score >= e[7].score)
+          && (e.size() < 9 || e[7].score >= e[8].score)
+          && (e.size() < 10 || e[8].score >= e[9].score);
+      }
+      function udInsert(old, next) {
+        let added = next.removeAll(old);
+        let dropped = old.removeAll(next);
+        return next.size() == (old.size() < 10 ? old.size() + 1 : 10)
+          && added.size() == 1
+          && udEntry(added[0])
+          && udSorted(next)
+          && (old.size() < 10
+            ? dropped.size() == 0
+            : added[0].score > old[9].score && (dropped.size() == 0 || (dropped.size() == 1 && dropped[0] == old[9])));
+      }
+
+      allow read: if udBoard();
+      allow create: if udBoard()
+        && request.resource.data.keys().hasOnly(['entries'])
+        && request.resource.data.entries is list
+        && request.resource.data.entries.size() == 1
+        && udEntry(request.resource.data.entries[0]);
+      allow update: if udBoard()
+        && request.resource.data.keys().hasOnly(['entries'])
+        && request.resource.data.entries is list
+        && udInsert(resource.data.entries, request.resource.data.entries);
+      allow delete: if false;
     }
 
     // -------------------------------------------------------------------------------------------------

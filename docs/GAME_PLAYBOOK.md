@@ -4,7 +4,7 @@
 
 이 문서는 게임이 하나 늘 때마다 고칩니다. 새 게임까지 포함한 모든 게임을 다시 보고, 공통 요소는 1·2장과 8장에, 정체성(게임에 맞게 고르는 톤·색·캐릭터 등)은 3장 등록부에 반영합니다(9장 "문서 키우기").
 
-- 문서 버전: **1.74** (2026-11-05, 업다운 v1.15.5 · 두더지잡기 v1.0.2 · 타임 투 플립 v1.3.3 · 온실정원 v0.5.0 · 허브 v1.33.11 기준)
+- 문서 버전: **1.75** (2026-11-05, 업다운 v1.21.0 · 두더지잡기 v1.2.0 · 타임 투 플립 v1.7.0 · 온실정원 v0.16.0 · 허브 v1.41.0 기준)
 - **조이필드와 모든 게임은 상업적으로 씁니다(광고, 구글 플레이·앱스토어).** 10장 "상업 배포·마켓 기준"은 모든 단계에서 지키는 필수 기준입니다.
 - 저장소 구조·배포·서비스 워커 같은 플랫폼 설명은 루트 [README.md](../README.md)에 있습니다. 이 문서는 "게임 하나를 어떻게 만드는가"만 다룹니다.
 
@@ -57,7 +57,7 @@
 | 경로 | 모두 **상대 경로**. `/` 로 시작하는 절대 경로 금지(하위 경로 배포에서 깨짐) |
 | 배포 주소 | `https://pocketgamelab.com/joyfield/games/<id>/` (개발 사이트 `https://dev.pocketgamelab.com/joyfield/games/<id>/`) |
 | 서비스 워커·manifest | 게임이 만들지 않음. `<link rel="manifest" href="../../manifest.webmanifest">` 와 `Joyfield.registerSW({ root: '../../', game: '<id>' })` |
-| 공통 모듈 | 빌드하는 게임: `import '@joyfield/shared'`(전역 `Joyfield`). 빌드 없는 게임: `<script src="../../shared/joyfield.js">` 를 다른 스크립트보다 먼저 |
+| 공통 모듈 | 모든 게임이 Vite + TypeScript(업다운도 v1.21.0부터). `import '@joyfield/shared'`(전역 `Joyfield`)를 맨 먼저, 화면 조각·랭킹·결과 이미지·허브 메타는 `@joyfield/shared/ui`·`/rank`·`/capture`·`/meta`(1.2) |
 | og 태그 | `og:url`·`og:image` 는 위 배포 주소 기준 절대 주소, 링크 미리보기 이미지 1200×630 `og-image.png`(캐시 제외) |
 | `apple-mobile-web-app-title` | `조이필드` (설치하면 조이필드 앱 하나) |
 
@@ -78,6 +78,23 @@
 | `Joyfield.guardBottom()` | 설치 앱이 내비게이션 바 높이를 0으로 알려 줄 때 `--jp-bottom-guard` 로 아래 여백(1.3) |
 | `Joyfield.viewportReport()` | 화면 높이 값들을 한 줄 글로(사용자 기기에서 잘림 원인을 찾을 때 설정 맨 아래에 잠깐 띄움) |
 | `Joyfield.isGameCached(id)` / `clearGameCache(id)` | 허브 설정의 오프라인 저장 표시·비우기(게임은 보통 안 씀) |
+| `Joyfield.vibrate(이름, save.vibrate)` · `Joyfield.canVibrate()` | 진동은 직접 `navigator.vibrate` 를 부르지 않고 1.7 세기표 이름으로(`tick`·`light`·`match`·`hit`·`good`·`big`·`warn`·`fail`·`celebrate` …, `Joyfield.VIBRATIONS`). 설정의 진동 칩은 `canVibrate()` 일 때만 |
+| `Joyfield.back.screen(깊이, onBack)` · `Joyfield.back.layer(onClose)` | 휴대폰 뒤로 가기 단계(1.3). 화면을 바꿀 때마다 `screen`, 대화상자는 공통 `openModal` 이 알아서 `layer` |
+
+**공통 화면 조각·랭킹·결과 이미지·허브 메타(TypeScript, `packages/shared/*.ts`)** — 새 게임은 아래를 가져다 쓰고 게임 안에 다시 만들지 않습니다(모양 css 만 게임 `styles.css` 에 같은 클래스 이름으로).
+
+**공통화는 틀·동작만, 개성은 게임마다(2026-11-05 사용자 결정)**: 공통 모듈은 같은 동작(창 열고 닫기·뒤로 가기·랭킹 저장·결과 찍기·소리 재생기·진동 호출)만 맡는다. **색·소리 결·진동 세기·글꼴·연출·게임별 특이점은 공통화 대상이 아니다** — 게임마다 고르고, 모양 css·recipe·진동 이름은 게임 쪽에 둔다. 지금 아무 게임도 안 쓰는 목록 항목(`sounds/catalog.json` 소리·진동, `fonts/catalog.json` 글꼴)과 공통 함수의 선택지는 "안 쓴다"는 이유로 지우지 않는다(새 게임의 다양성). 공통 모듈이 게임에 필요한 모양·동작을 못 내면 선택지를 더하고, 기존 선택지는 줄이지 않는다. `Joyfield.vibrate` 도 이름 대신 ms 값·배열을 그대로 받는다.
+
+| 가져오기 | 하는 일 |
+| --- | --- |
+| `@joyfield/shared/ui` `configureUi({ t, icons: { trophy, close } })` | 시작할 때 한 번: 공통 조각이 쓸 게임 문구(i18n 키 `common.close`·`ranking.title`·`ranking.open`·`ranking.loading`·`ranking.offline`·`ranking.sending`·`ranking.failed`·`ranking.missed`·`ranking.empty`·`ranking.nameLabel`·`ranking.badName`·`ranking.submit`·`ranking.done`{n})와 아이콘 |
+| `openModal(host, 내용, 이름, { reopen, kind, fitFont, onClose })` | 대화상자(`.modal-backdrop > .modal`). Esc·바깥 누르기·`[data-close]`·휴대폰 뒤로 가기로 닫힘, host 가 화면에서 빠지면 함께 닫힘 |
+| `rankEntryForm({ title, name, compact, onSubmit, onView })` | 랭킹 이름 등록 카드(`.rank-entry`, 입력 칸·완료 칸을 겹쳐 높이 그대로, 금지어 거름) |
+| `openRanking(host, { gameId, tabs, start, mark, name, onChange, height })` | 랭킹 창(`.ranking`: 탭 `.rank-tabs`·안내 `.rank-note`·등록 대기 `.rank-pending`·10줄 `ol.rank-list`). 탭마다 `columns`(칸 클래스)·`rows()`·`pending()`·`refresh()`·`note()` 만 넘긴다. 처음 탭은 `Joyfield.rankTab` |
+| `cardFlipper(flip, { reduced, onShown, flatClass })` | 도감 큰 카드 뒤집기(앞면끼리 90° 세워 갈아 끼우기) |
+| `@joyfield/shared/rank` `rankStore(id, 불러오기)` · `placeBy` · `insertBy` · `shortDate` | 순위표 문서 읽기·트랜잭션 등록·8초 제한(1.6). Firebase 는 게임이 `() => Promise.all([import('firebase/app'), import('firebase/firestore/lite')])` 로 넘김 |
+| `@joyfield/shared/capture` `captureResult(결과 화면, { load: () => import('html-to-image'), title, remove })` | 결과 공유 이미지(1.5) |
+| `@joyfield/shared/meta` `HubMeta`·`boardDoc` | 허브 연결 메타 `games/<id>/joyfield.meta.ts`(6장): 허브 카드 최고 기록·내 기록 지우기·전체 랭킹 읽기 |
 
 공통 모듈에 없는 기능을 두 게임 이상이 똑같이 쓰게 되면 공통 모듈로 옮깁니다(9장).
 
@@ -91,16 +108,17 @@
 | 플레이 | 홈(시작 화면으로) 또는 일시 정지. 점수·남은 시간/기회 같은 현재 상태 |
 | 결과 | 결과(점수·등급·횟수 등), 신기록 연출, **랭킹 등록 카드**(TOP 10 안이면 결과 화면 안에서 바로), **다시 하기**(가장 큰 버튼, Enter/스페이스), **기록 공유하기**(글자 있는 버튼), 홈 |
 
-- **위 메뉴는 조이필드 공통 모양·자리**를 씁니다(1.8, 자리는 1.9부터). 버튼은 `<nav class="jp-topbar">` 안 왼쪽 `.jp-topbar-group`(조이필드·언어), 오른쪽 `.jp-topbar-group`(랭킹·설정)에 넣습니다. 메뉴 줄은 화면 맨 위에 고정(상태 표시줄 아래 16px, 좌우 16px, PC는 24px·단추 60px)이라 조이필드 → 게임으로 넘어가도 버튼이 움직이지 않습니다. 내용은 `--jp-top-space`(메뉴 아래 끝) 아래에서 시작하고, 화면을 통째로 확대(zoom)하는 게임은 `--jp-top-unzoom` 에 그 배수를 넣어 메뉴만 확대에서 뺍니다. 자리·모양만 맞추고 버튼 구성은 앱마다 필요한 것만 둡니다(조이필드 첫 화면에는 조이필드 가기 버튼이 없어 언어 버튼이 맨 왼쪽, 업다운 게임 중에는 홈 버튼 등). 모양·크기·톤은 `packages/shared/topbar.css`(`.jp-top-btn`, 글자 있는 언어·홈 버튼은 `.jp-top-pill`), 아이콘은 `Joyfield.topIcon('apps' | 'globe' | 'trophy' | 'gear' | 'home')`. 랭킹·설정은 아이콘만 두고 이름은 `aria-label`로. 등록 대기는 `.is-on`(대표색 채움) 또는 `.jp-top-dot`(모서리 점). 글꼴도 공통(Jua 18px, 앱은 `Jua` 글꼴을 준비)이고, 언어 버튼 글자에는 그 언어를 `lang` 으로 답니다(한글 위치 보정). 게임은 자리와 `--jp-top-accent`(대표색)만 정하고, 화면 비율로 통째로 커지는 게임은 휴대폰(폭 390)에서 단추 50px·아이콘 26px·글자 18px이 되게 `--jp-top-size/icon/font` 를 맞추되 PC에서 64px를 넘지 않게 합니다. 불러오기: Vite 게임은 `import '@joyfield/shared/topbar.css'`, 빌드 없는 게임은 `<link rel="stylesheet" href="../../shared/topbar.css">`.
+- **위 메뉴는 조이필드 공통 모양·자리**를 씁니다(1.8, 자리는 1.9부터). 버튼은 `<nav class="jp-topbar">` 안 왼쪽 `.jp-topbar-group`(조이필드·언어), 오른쪽 `.jp-topbar-group`(랭킹·설정)에 넣습니다. 메뉴 줄은 화면 맨 위에 고정(상태 표시줄 아래 16px, 좌우 16px, PC는 24px·단추 60px)이라 조이필드 → 게임으로 넘어가도 버튼이 움직이지 않습니다. 내용은 `--jp-top-space`(메뉴 아래 끝) 아래에서 시작하고, 화면을 통째로 확대(zoom)하는 게임은 `--jp-top-unzoom` 에 그 배수를 넣어 메뉴만 확대에서 뺍니다. 자리·모양만 맞추고 버튼 구성은 앱마다 필요한 것만 둡니다(조이필드 첫 화면에는 조이필드 가기 버튼이 없어 언어 버튼이 맨 왼쪽, 업다운 게임 중에는 홈 버튼 등). 모양·크기·톤은 `packages/shared/topbar.css`(`.jp-top-btn`, 글자 있는 언어·홈 버튼은 `.jp-top-pill`), 아이콘은 `Joyfield.topIcon('apps' | 'globe' | 'trophy' | 'gear' | 'home')`. 랭킹·설정은 아이콘만 두고 이름은 `aria-label`로. 등록 대기는 `.is-on`(대표색 채움) 또는 `.jp-top-dot`(모서리 점). 글꼴도 공통(Jua 18px, 앱은 `Jua` 글꼴을 준비)이고, 언어 버튼 글자에는 그 언어를 `lang` 으로 답니다(한글 위치 보정). 게임은 자리와 `--jp-top-accent`(대표색)만 정하고, 화면 비율로 통째로 커지는 게임은 휴대폰(폭 390)에서 단추 50px·아이콘 26px·글자 18px이 되게 `--jp-top-size/icon/font` 를 맞추되 PC에서 64px를 넘지 않게 합니다. 불러오기: `import '@joyfield/shared/topbar.css'`(모든 게임 Vite).
 - 글자를 스크립트로 채우는 게임은, 다 채우기 전에는 내용을 숨겨(`visibility: hidden`) 늦게 채워지며 화면이 덜컥 밀리지 않게 합니다(업다운 `.booting`).
 - 화면 높이에 비례하는 크기(`dvh` 등)는 설치 앱에서 1~2초 뒤 높이가 조금 바뀌면 다시 계산돼 화면이 덜컥 움직입니다. 휴대폰에서는 처음 연 높이로 정해 두고 폭이 바뀔 때만 다시 잽니다(업다운 `--vh-px`, 시작 화면 여백 고정). 화면에 다 안 들어가면 줄이거나(두더지잡기 `--fit`) 안쪽 스크롤로 맞춥니다. 화면 높이를 꽉 채워 맞추는 게임은 `Joyfield.trackViewport()` 를 부르고 html·body·게임 영역 높이를 `var(--jp-vh, 100dvh)` 로 둡니다(설치 앱에서 조이필드 → 게임으로 넘어올 때 css 화면 높이가 실제보다 크게 잡혀 아래가 잘리던 문제, 두더지잡기 v0.11.3에서 확인). 또 화면 맨 아래에 꼭 보여야 할 것이 있는 게임은 `Joyfield.guardBottom()` 을 부르고 아래 여백을 `max(env(safe-area-inset-bottom), var(--jp-bottom-guard, 0px))` 로 둡니다(설치 앱이 내비게이션 바 높이를 0으로 알려 줄 때 대비).
 - 첫 실행 인트로 연출(1~1.5초, 누르면 건너뜀, 동작 줄이기면 생략)을 둡니다.
+- **휴대폰 뒤로 가기 단계(모든 게임 같은 동작, 2026-11-05)**: 게임 안 화면은 주소가 바뀌지 않아 그대로 두면 뒤로 가기 한 번에 조이필드로 나갑니다. 화면마다 `Joyfield.back.screen(깊이, onBack)` 을 불러 단계를 맞춥니다: **대화상자가 열려 있으면 → 창만 닫힘**(공통 `openModal` 이 저절로) · **플레이 중 → 일시정지 창**(깊이 2, onBack 에서 일시정지) · **일시정지 중·판이 끝난 뒤 → 시작 화면**(깊이 1) · **결과 → 시작 화면**(깊이 1) · **시작 화면 → 조이필드**(깊이 0). 일시정지·이어하기·그만하기 때마다 다시 부르고(이어하기는 누른 순간이라 기록 칸이 다시 쌓임), 단추로 시작 화면에 오면 남은 칸은 공통 모듈이 조용히 걷어 내 뒤로 가기가 헛돌지 않습니다. 플레이에는 **일시정지 창(이어하기·그만하기)이 꼭 있고**, 앱을 내렸을 때(`visibilitychange`)도 일시정지해 그동안 시간이 흐르지 않게 합니다(업다운 v1.21.0, 시간이 점수에 드는 게임은 공정성).
 - 결과 화면에 들어온 직후 0.6초 동안은 누름을 막아, 플레이하던 손가락이 버튼을 잘못 누르지 않게 합니다. 결과 화면에 `locked` 클래스를 0.6초 붙여 버튼·등록 카드에 `pointer-events: none`, 키보드(Enter·스페이스)도 그동안 무시합니다.
 - **판을 차례로 여는 퍼즐**(정해진 판을 하나씩 깨는 게임, 온실정원)은 결과 화면의 가장 큰 단추를 "다시 하기" 대신 **"다음 판"**(Enter)으로 하고, "다시 하기"(R)는 바로 옆에 둡니다. 판을 깨는 것이 목표라 같은 판을 다시 하는 일이 드물기 때문입니다. 끝없는 판·점수 경쟁 게임은 지금처럼 "다시 하기"가 가장 큰 단추입니다.
 
 ### 1.4 설정 (게임 안 설정 창)
 
-순서와 이름을 맞춥니다. 언어와 소리·진동을 한 줄에 나란히 두어 창 높이를 줄일 때는 "컬러 모드 → 스킨 → 언어 | 소리·진동" 순서도 됩니다(업다운). **공유 버튼은 설정에 두지 않습니다**(공유는 결과 화면의 "기록 공유하기" 하나, 1.5). 허브 설정과 같은 값(`joyfield.*`)을 쓰므로 어디서 바꿔도 모든 게임에 적용됩니다.
+순서와 이름을 맞춥니다(업다운도 v1.21.0부터 이 순서). **공유 버튼은 설정에 두지 않습니다**(공유는 결과 화면의 "기록 공유하기" 하나, 1.5). 허브 설정과 같은 값(`joyfield.*`)을 쓰므로 어디서 바꿔도 모든 게임에 적용됩니다.
 
 | 순서 | 항목 | 규칙 |
 | --- | --- | --- |
@@ -140,7 +158,7 @@
   - 게임이 할 일 세 가지: ① 판이 끝나면 `Joyfield.setRankBoard(id, 그 판의 탭)`(연습 판처럼 랭킹 없는 판은 빼기) ② 랭킹 창에서 탭을 누르면 `Joyfield.setRankBoard(id, 탭)` ③ 등록 대기가 바뀔 때마다(생김·등록·10위 밖으로 밀림·순위표 새로 받음, 시작할 때 한 번) `Joyfield.setRankPending(id, [대기 탭…])`. 날짜마다 바뀌는 순위표(오늘의 챌린지)는 `{ board, day: 'YYYY-MM-DD' }` 로 그날만 유효하게.
   - 결과 화면의 "랭킹 보기"처럼 방금 한 판을 보여 주는 곳은 그 판의 탭으로 바로 엽니다(위 1·2와 결과가 같음).
   - 이니셜 등록 뒤 나오는 "랭킹 보기" 버튼은 가로를 꽉 채우지 않고 **최대 220px, 가운데**(`width: min(100%, 220px)`)로 둡니다. 모든 게임 같은 크기 느낌.
-- **새 게임의 기본 저장 방식: 순위표 1개 = 문서 1개**(`games/<id>/rankings/<board>` = `{ entries: [...] }`, 10개 이하, 트랜잭션으로 등록). 두더지잡기 방식입니다. 읽기 1번으로 TOP 10 이 오고 복합 색인이 필요 없습니다. (업다운의 "기록 1건 = 문서 1개" 방식은 범위마다 컬렉션을 나눠 점수 하나로만 정렬해야 색인 없이 되므로, 새 게임에는 쓰지 않습니다.)
+- **저장 방식: 순위표 1개 = 문서 1개**(`games/<id>/rankings/<board>` = `{ entries: [...] }`, 10개 이하, 트랜잭션으로 등록). 모든 게임 같은 방식(업다운도 v1.21.0부터, 예전 "기록 1건 = 문서 1개" 경로는 옛 버전 화면용 규칙만 남김). 읽기 1번으로 TOP 10 이 오고 복합 색인이 필요 없습니다. **코드는 공통**: 읽기·등록은 `@joyfield/shared/rank` 의 `rankStore`, 순서·자리는 `placeBy`·`insertBy`(앞서는 기준 함수만 게임이 정함), 랭킹 창·등록 카드는 `@joyfield/shared/ui` 의 `openRanking`·`rankEntryForm`(1.2). 게임은 `ranking.ts`(항목 모양·정리·등록 대기)와 `online.ts`(10줄 안팎)만 둡니다.
 - 순위표 이름(board)은 모드·난이도별(`classic`, `daily-YYYY-MM-DD` …). 랭킹 탭 ID는 `games.json` 의 `ranking.boards[].id` 와 같게 둡니다(조이필드 전체 랭킹과 탭 기준을 같이 쓰므로).
 - **기기 아이콘(문서 1.65부터)**: 등록할 때 기록에 `dev: Joyfield.playDevice()` 를 함께 올리고, 순위표 이름 뒤에 `Joyfield.deviceIcon(e.dev)`(휴대폰 = 모바일, 모니터 = PC, 옅은 작은 아이콘, `topbar.css` 의 `.jp-dev`)를 붙입니다. 기기 종류가 아니라 **실제로 누른 입력**으로 정합니다(마지막 pointerdown 이 마우스면 `'p'`, 터치·펜이면 `'m'`). 순위·정렬에는 쓰지 않고 마우스와 터치 기록을 구분해 보여 주기만 합니다. 예전 기록에는 없어 아이콘이 안 보입니다. 기록을 정리하는 함수가 필드를 골라 담는다면 `dev` 도 남깁니다(빼면 다음 등록 때 남의 기록이 바뀐 것으로 보여 규칙이 거부). 규칙은 공통 `okDevice()` 로 검사합니다.
 - 규칙은 저장소의 `firestore.rules` 에 블록을 더하고 콘솔에 게시합니다. **새 필드를 더하면 콘솔 게시를 먼저 하고 그다음 배포(푸시)합니다**(반대 순서면 게시 전까지 등록이 모두 거부됨).
@@ -150,7 +168,7 @@
 
 조이필드 게임은 **누를 때마다 몸으로 느껴져야** 합니다. 아래 단계를 기준으로, 게임 성격에 맞게 고릅니다.
 
-**진동 세기표** (ms, 배열은 진동·쉼·진동…). 10ms 아래는 대부분 기기에서 느껴지지 않습니다.
+**진동 세기표** (ms, 배열은 진동·쉼·진동…). 10ms 아래는 대부분 기기에서 느껴지지 않습니다. 게임은 값을 직접 쓰지 않고 `Joyfield.vibrate('tick' | 'light' | 'match' | 'hit' | 'fever' | 'good' | 'up' | 'down' | 'big' | 'warn' | 'fail' | 'lost' | 'celebrate', save.vibrate)` 로 부릅니다(값은 `sounds/catalog.json` "vibrations" 와 같음).
 
 | 단계 | 값 | 쓰는 곳 예 |
 | --- | --- | --- |
@@ -167,7 +185,7 @@
 
 - 효과음 51개(기존 3게임 39개 + 새 후보 12개)와 진동 18개(새 후보 6개)가 상황 묶음(누름·맞힘·특별·실패·큰 사건·시간·흐름·끝)별로 들어 있습니다. 항목마다 느낌·쓰는 곳·쓴 게임·합성 방법(`recipe`)이 있습니다.
 - **견본 페이지**: 배포 주소 `/sounds/`(로컬은 `pnpm preview` 뒤 http://localhost:4170/joyfield/sounds/). 휴대폰으로 열어 소리를 듣고 진동을 느껴 보고 고릅니다(허브에 연결하지 않고 미리 캐시하지 않는 제작용 페이지).
-- **새 게임 만들 때**: 게임의 순간(누름·맞힘·실패·특별·시간·끝…)마다 목록에서 어울리는 소리·진동을 고르고, 게임 소리 결(정체성)에 맞게 음높이·파형을 바꿔도 됩니다. `recipe` 는 `packages/shared/sfx.js` 의 `playRecipe(ctx, recipe)` 로 그대로 울리거나(Vite 게임은 `import { playRecipe } from '@joyfield/shared/sfx.js'`, 타입 `sfx.d.ts` 포함, 온실정원 `audio.ts` 가 본보기) 게임 `audio.ts` 에 옮겨 적습니다. 쓴 항목은 `usedBy` 에 게임을 더합니다.
+- **새 게임 만들 때**: 게임의 순간(누름·맞힘·실패·특별·시간·끝…)마다 목록에서 어울리는 소리·진동을 고르고, 게임 소리 결(정체성)에 맞게 음높이·파형을 바꿔도 됩니다. `recipe` 는 `packages/shared/sfx.js` 의 `playRecipe(ctx, recipe, { pitch })` 로 울립니다(`import { playRecipe } from '@joyfield/shared/sfx.js'`, 네 게임 모두 이 방식: 게임 `audio.ts` 에는 소리마다 recipe 만 적음, 두더지잡기·타임 투 플립 `audio.ts` 가 본보기). Web Audio 를 직접 합성하는 코드는 새로 만들지 않습니다. 쓴 항목은 `usedBy` 에 게임을 더합니다.
 - **목록에 없는 더 좋은 효과**를 만들었으면 같은 커밋에서 목록에 항목을 더합니다(id `<게임>/<이름>`, 아직 안 쓴 후보는 `new/<이름>`). 기존 게임에 더 잘 맞는 새 효과가 생기면 바꿔 넣는 것도 열려 있습니다(바꾼 게임 버전 올림).
 - **⛔ 저작권**: 소리는 **직접 합성(`synth`) 또는 CC0 파일만**. CC0 파일은 `file`·`url`·`author`·`license` 를 적고 README 8.1·`LICENSE` 에도 기록합니다. 출처 모르는 소리·CC-BY·비상업·"무료 효과음" 사이트 자체 약관 소리, 유명 게임·기기 소리 흉내(마리오 동전·젤다 비밀·팩맨·소닉 링·윈도우·아이폰·카카오톡 알림음 등)는 쓰지 않습니다. 진동 패턴(켜짐·쉼 ms)은 창작물이 아니라 저작권이 없습니다.
 - **강제 장치**: `pnpm build` 가 `scripts/check-sounds.mjs` 로 목록(출처·recipe·진동 패턴)과 배포본의 모든 소리 파일(mp3·wav·ogg 등)을 검사합니다. 목록의 CC0 항목에 없는 소리 파일이 하나라도 있으면 **빌드가 실패**합니다.
@@ -261,15 +279,15 @@
 
 | 항목 | 기본값 | 비고 |
 | --- | --- | --- |
-| 빌드 | **Vite + TypeScript** (pnpm 워크스페이스) | 두더지잡기와 같은 방식. 아주 작은 게임만 빌드 없는 정적 파일 허용(업다운 방식) |
+| 빌드 | **Vite + TypeScript** (pnpm 워크스페이스) | 두더지잡기와 같은 방식. 빌드 없는 정적 게임은 만들지 않음(업다운도 v1.21.0에 옮김, 공통 화면 조각·랭킹을 같이 쓰려고) |
 | 구조 | `src/game/`(DOM 모르는 규칙·상태) ↔ `src/ui/`(그리기) 분리 | 규칙은 Vitest 로 단독 테스트 |
 | 난수 | 시드 난수(`mulberry32`)를 주입 | "오늘의 챌린지"(날짜 시드, 모두 같은 판)를 쉽게 붙임 |
 | 시간 | 게임 루프는 `requestAnimationFrame` + 경과 시간(dt) | 일시 정지·hitstop 을 루프에서 처리 |
 | 그림 | SVG·CSS 로 직접 그림(이미지 파일 최소) | 오프라인 캐시가 작고 선명함 |
 | 소리 | Web Audio 합성 | 소리 파일이 필요하면 `games/<id>/` 안에 작은 파일로 |
 | 글꼴 | 무료·상업 사용 가능 글꼴을 woff2 로 `games/<id>/` 안에. 큰 한글 글꼴은 서브셋(라이선스가 수정·서브셋을 허락할 때만). **라이선스 파일을 배포본에 함께**(Vite 게임은 `public/fonts/`, 빌드 없는 게임은 `fonts/` + package.json `files`) | 게임 분위기에 맞게(3장) |
-| 결과 이미지 | `html-to-image` 로 결과 화면 복제본을 찍음 | 두더지잡기 `share.ts` 참고 |
-| 랭킹 | Firestore lite SDK, 처음 필요할 때 동적 import | 두더지잡기 `online.ts` 참고 |
+| 결과 이미지 | 공통 `captureResult`(v1.21.0, 예전 캔버스 직접 그림을 바꿈) | 공통 `captureResult` | 공통 `captureResult` | 공통 `captureResult` | ✅ 공통 모듈(`@joyfield/shared/capture`, 2026-11-05) |
+| 랭킹 | Firestore lite SDK, 처음 필요할 때 동적 import | 공통 `@joyfield/shared/rank` `rankStore`(게임 `online.ts` 는 몇 줄) |
 
 ---
 
@@ -345,6 +363,7 @@ games/<id>/
 ├── screen-check.mjs       화면 크기 점검에서 찍을 화면 목록(7.1). 기존 게임 것을 본떠 시작·게임·결과·랭킹·설정 등을 적는다
 ├── index.html             og 태그, manifest(../../manifest.webmanifest), apple-mobile-web-app-title=조이필드
 ├── vite.config.ts         base: './', __APP_VERSION__ (두더지잡기 설정 참고)
+├── joyfield.meta.ts       허브 연결 메타(최고 기록·내 기록 지우기·순위 읽기, @joyfield/shared/meta, 6장)
 ├── tsconfig.json
 ├── public/                favicon.svg(허브 카드 아이콘으로도 씀), og-image.png
 ├── src/
@@ -352,10 +371,10 @@ games/<id>/
 │   ├── i18n.ts            ko/en 문구
 │   ├── storage.ts         <id>:v1 저장, 공통 설정은 Joyfield.get/set
 │   ├── theme.ts           컬러 모드·스킨 적용
-│   ├── audio.ts           Web Audio 효과음
-│   ├── share.ts           결과 캡처 이미지 + Joyfield.shareResult
-│   ├── online.ts          랭킹 읽기·등록(있으면)
-│   ├── ranking.ts         순위 규칙(TOP 10, 동점, 이름)
+│   ├── audio.ts           효과음 recipe 목록 + 공통 playRecipe(1.7)
+│   ├── share.ts           공통 captureResult + Joyfield.shareResult
+│   ├── online.ts          공통 rankStore 로 랭킹 읽기·등록(있으면)
+│   ├── ranking.ts         항목 모양·정리·등록 대기(자리·끼우기는 공통 placeBy·insertBy)
 │   ├── game/              규칙·상태(DOM 없음)
 │   ├── ui/                화면·연출(effects.ts: 팝업·파티클·흔들림)
 │   ├── fonts/             woff2 (라이선스 파일은 public/fonts/ 에 두어 배포본에 함께)
@@ -365,29 +384,30 @@ games/<id>/
 
 ### 5.1 참고 파일 지도 (무엇을 어디서 보고 본뜰까)
 
-새 게임은 **두더지잡기(Vite + TS)를 기본 본보기**로 삼습니다. 업다운은 빌드 없는 정적 게임이라 일부 기법만 참고합니다. 파일을 통째로 복사하지 말고, 필요한 부분을 찾아 새 게임에 맞게 다시 씁니다(3장 정체성).
+새 게임은 **두더지잡기(Vite + TS)를 기본 본보기**로 삼습니다. 네 게임 모두 같은 구조(Vite + TS)이고 대화상자·랭킹 창·등록 카드·순위표 저장·결과 이미지·진동·뒤로 가기·허브 메타는 공통 모듈(1.2)이라 게임에서 다시 만들지 않습니다. 파일을 통째로 복사하지 말고, 필요한 부분을 찾아 새 게임에 맞게 다시 씁니다(3장 정체성).
 
 | 만들 것 | 볼 파일 | 볼 부분 |
 | --- | --- | --- |
 | Vite 설정·버전 | `games/hammer/vite.config.ts`, `package.json` | `base: './'`, `define: { __APP_VERSION__ }`, `@joyfield/shared` 의존 |
-| 시작 흐름·화면 전환 | `games/hammer/src/main.ts` | `mount`·`showStart`·`play`·결과 연결, `registerSW`·`inviteBar`·`trackViewport`·`guardBottom` 부르는 곳 |
-| 화면(시작·게임·결과·대화 상자) | `games/hammer/src/ui/screens.ts` | `startScreen`(위 메뉴 `.jp-topbar`), `openModal`(딤·Esc·초점), `fitStart`(화면에 맞춰 줄이기), `rankEntryForm`(등록 카드), `resultScreen`(0.6초 누름 막기) |
-| 랭킹 | `games/hammer/src/online.ts`, `ranking.ts` | 순위표 문서 1개·트랜잭션 등록·8초 제한, TOP 10·동점·등록 대기·사본 |
+| 시작 흐름·화면 전환 | `games/hammer/src/main.ts` | `mount`·`showStart`·`play`·결과 연결, `configureUi`, 뒤로 가기 단계(`Joyfield.back.screen`: 시작 0 · 플레이 2 · 일시정지·결과 1), `registerSW`·`inviteBar`·`trackViewport`·`guardBottom` 부르는 곳 |
+| 화면(시작·게임·결과·대화 상자) | `games/hammer/src/ui/screens.ts`, 공통 `packages/shared/ui.ts` | `startScreen`(위 메뉴 `.jp-topbar`), `fitStart`(화면에 맞춰 줄이기), `gameScreen`(일시정지 창), `resultScreen`(0.6초 누름 막기), 공통 `openModal`·`rankEntryForm`·`openRanking`(게임은 탭 설정만 넘기는 `openRanking` 몇 줄) |
+| 랭킹 | `games/hammer/src/online.ts`, `ranking.ts`, 공통 `packages/shared/rank.ts` | `rankStore`(순위표 문서 1개·트랜잭션 등록·8초 제한), `placeBy`·`insertBy`(TOP 10·동점), 게임 쪽은 등록 대기·사본. 점수 말고 이동·시간으로 겨루면 온실정원 `ranking.ts` `dailyAhead` |
 | 저장·설정 | `games/hammer/src/storage.ts`, `theme.ts` | `<id>:v1` 한 키, 공통 설정은 `Joyfield.get/set`, 스킨 "자동"(`Joyfield.dailyPick`) |
-| 결과 공유 이미지 | `games/hammer/src/share.ts` | `html-to-image` 로 결과 화면 복제를 찍어 `Joyfield.shareResult` |
-| 소리·연출 | `games/hammer/src/audio.ts`, `ui/effects.ts` | Web Audio 합성, 팝업·파티클·흔들림·히트 스톱 |
+| 결과 공유 이미지 | `games/hammer/src/share.ts`, 공통 `packages/shared/capture.ts` | `captureResult(결과 화면, { load, title, remove })` → `Joyfield.shareResult` |
+| 소리·연출 | `games/hammer/src/audio.ts`, `ui/effects.ts` | 소리마다 recipe + 공통 `playRecipe`(음높이 배수), 팝업·파티클·흔들림·히트 스톱 |
 | 글꼴 고르기·서브셋 | `fonts/catalog.json`, `scripts/font-subset.mjs`, `games/timetoflip/package.json` `font`, `src/styles.css` 맨 위 `@font-face` | 목록에서 id 고르기, 화면 글자만 서브셋·라이선스 복사, `size-adjust` |
 | 깊이감 있는 움직이는 배경 | `games/timetoflip/src/ui/scene.ts`, `styles.css` `.scene` | 먼·중간·가까운 층, 게임 중 흐리게, 마우스 시차, 동작 줄이기 |
 | 규칙·테스트 | `games/hammer/src/game/*`, `tests/*` | DOM 없는 엔진·시드 난수(`rng.ts`), Vitest |
 | 문구 | `games/hammer/src/i18n.ts` | ko/en 한 파일, `detectLang` 은 `Joyfield.deviceLang()` |
 | 화면 크기 점검 목록 | `games/hammer/screen-check.mjs` | 화면마다 `{ name, setup, go, reach }` |
-| 글자 채우기 전 숨김·높이 고정 | `games/updown/index.html`, `js/app.js` | `.booting`, `--vh-px`(폭이 바뀔 때만 다시 잼), 시작 화면 여백 고정 |
-| 가로 낮은 화면 두 칸 배치 | `games/updown/css/style.css` | `@media (orientation: landscape) and (max-height: 559px)` 블록 |
-| 장난감 버튼(두께·눌림) | `games/updown/css/style.css` `.difficulty`, `apps/hub/src/styles.css` `.card` | 아래 두께 그림자, 누르면 `translateY` |
-| 허브 연결 | `games.json`, `apps/hub/src/records.ts`·`rankings.ts`·`i18n.ts` | 6장 체크리스트 |
-| 공통 모듈 | `packages/shared/joyfield.js`(+ `.d.ts`), `topbar.css` | 1.2 표 |
+| 글자 채우기 전 숨김·높이 고정 | `games/updown/index.html`, `src/main.ts` | `.booting`, `--vh-px`(폭이 바뀔 때만 다시 잼), 시작 화면 여백 고정(`freezeStartLayout`) |
+| 가로 낮은 화면 두 칸 배치 | `games/updown/src/styles.css` | `@media (orientation: landscape) and (max-height: 559px)` 블록 |
+| 장난감 버튼(두께·눌림) | `games/updown/src/styles.css` `.difficulty`, `apps/hub/src/styles.css` `.card` | 아래 두께 그림자, 누르면 `translateY` |
+| 일시정지 창·앱을 내렸을 때 시간 멈춤 | `games/updown/src/main.ts` `pause`·`resume`·`elapsed`, `games/hammer/src/ui/screens.ts` `.pause-menu` | 멈춘 동안 뺀 시간으로 점수, 뒤로 가기 단계와 같이 |
+| 허브 연결 | `games.json`, `games/<id>/joyfield.meta.ts`(본보기 `games/hammer/joyfield.meta.ts`), `apps/hub/src/i18n.ts` | 6장 체크리스트 |
+| 공통 모듈 | `packages/shared/joyfield.js`(+ `.d.ts`), `ui.ts`·`rank.ts`·`capture.ts`·`meta.ts`·`sfx.js`, `topbar.css` | 1.2 표 |
 | 칸 퍼즐·풀이기·판 만들기 | `games/glasshouse/src/game/rules.ts`·`solver.ts`, `tools/levelgen.ts`, `tests/levels.test.ts`·`balance.test.ts` | 칸 규칙을 DOM 없이, 너비 우선 풀이기로 기준 이동 수, 무작위 판을 풀어 골라 고정, 모의 플레이 봇(깨는 데 가까워지는 수를 실력 확률로) |
-| 삽화 그림 두 단계(도감 사실적 · 게임 약식) | `games/glasshouse/src/ui/flowers.ts` `flowerSvg(id, open, 'dex' | 'game')`, `styles.css` `.fl` | 꽃잎마다 핀·오므린 각도(`--r`·`--c`)로 한 그림에서 개화 움직임, 게임 칸에서는 잎을 빼고 꽃 머리 자리(`FOCUS`)를 가운데로 잘라 씀. 도감 짜임(큰 카드 + 작은 카드)은 타임 투 플립 `openDex` |
+| 삽화 그림 두 단계(도감 사실적 · 게임 약식) | `games/glasshouse/src/ui/flowers.ts` `flowerSvg(id, open, 'dex' | 'game')`, `styles.css` `.fl` | 꽃잎마다 핀·오므린 각도(`--r`·`--c`)로 한 그림에서 개화 움직임, 게임 칸에서는 잎을 빼고 꽃 머리 자리(`FOCUS`)를 가운데로 잘라 씀. 도감 짜임(큰 카드 + 작은 카드)은 타임 투 플립 `openDex`, 큰 카드 뒤집기는 공통 `cardFlipper` |
 | 효과음 목록 그대로 울리기 | `games/glasshouse/src/audio.ts` | `@joyfield/shared/sfx.js` `playRecipe` |
 
 ---
@@ -397,8 +417,8 @@ games/<id>/
 | # | 파일 | 할 일 |
 | --- | --- | --- |
 | 1 | `games.json` | 항목 추가: id, name/desc(ko·en), path, icon, color(허브 카드색), ranking(boards), `added`(공개하는 날, 허브는 최신 게임부터 보이고 7일 동안 NEW), `status: "soon"`(배포 안 함, 목록 아래 "다음 게임" 띠에 이름만) → 휴대폰 확인은 `"preview"`(7.3) → 완성되면 `pnpm release <id>`(지금 공개) 또는 `--at`(공개 예약, `open`)으로 `"live"`(7.4). 허브 카드는 위쪽이 `color` 그림판이고 그 위에 아이콘(72px)이 떠 있으므로, 아이콘은 **자기 배경이 있는 둥근 네모**로 만들고 `color` 는 흰 글자가 올라가도 되는 진한 색으로 고릅니다(플레이 버튼은 이 색을 어둡게 섞어 씀). **아이콘 바탕색과 `color` 는 서로 다른 계열**이어야 아이콘이 그림판에 묻히지 않습니다: 밝기 대비 1.8 이상이거나 색상 차이 45° 이상(예: 남색 아이콘 + 파랑 카드, 초록 아이콘 + 주황 카드). `pnpm build` 가 `scripts/check-icons.mjs` 로 검사해 어기면 빌드가 실패합니다. 설명은 카드에서 두 줄까지 보입니다 |
-| 2 | `apps/hub/src/records.ts` | `READERS`(허브 카드 "최고 …")와 `CLEARERS`(허브 "내 기록 지우기", 게임 안 버튼과 같은 범위)에 게임 추가 |
-| 3 | `apps/hub/src/rankings.ts` | `FETCHERS` 에 순위 읽는 방법 추가(`limit` 줄 수만큼: 처음 1위, "TOP 10 보기"로 펼치면 10위까지). 순위표 문서 방식이면 `<id>: boardDoc('<id>')` 한 줄 |
+| 2 | `games/<id>/joyfield.meta.ts` | 허브 연결 메타(`@joyfield/shared/meta` 의 `HubMeta` 를 default 로): `best()`(허브 카드 "최고 …" 문구 값, 기록 없으면 null), `clear()`(허브 "내 기록 지우기", 게임 안 버튼과 같은 범위), `ranking`(순위표 문서 방식이면 `boardDoc('<id>')` 한 줄). 허브가 `import.meta.glob` 으로 저절로 모으므로 **허브 코드는 고치지 않음**. 게임 `tsconfig.json` 의 include 에 `joyfield.meta.ts` 를 넣어 타입 검사 |
+| 3 | (없음) | 예전에는 `apps/hub/src/records.ts`·`rankings.ts` 에 게임마다 적었다(허브 v1.41.0부터 2번 메타로 바뀜) |
 | 4 | `apps/hub/src/i18n.ts` | 허브 카드 최고 기록 문구(`best.<id>`) |
 | 5 | `firestore.rules` | `games/<id>/…` 블록 추가 → Firebase 콘솔에 게시(사람이 해야 함, 답변에 알림) |
 | 6 | 허브 글꼴 | 게임 이름·설명이 허브에 새 글자를 쓰면 `pnpm --filter hub font` |
@@ -541,36 +561,38 @@ games/<id>/
 | 서비스 워커·오프라인 | `Joyfield.registerSW` | `Joyfield.registerSW` | `Joyfield.registerSW` | `Joyfield.registerSW` | ✅ 공통 모듈 |
 | 공유 링크·설치 안내 띠 | `shareUrl`·`inviteBar` | `shareUrl`·`inviteBar` | `shareUrl`·`inviteBar` | `shareUrl`·`inviteBar` | ✅ 공통 모듈 |
 | 위 메뉴(조이필드 목록·언어·랭킹·설정, 자리 포함) | `.jp-top-btn` + `Joyfield.topIcon`(아이콘은 `data-top-icon` 으로 시작할 때 넣음) | `.jp-top-btn` + `Joyfield.topIcon`(크기는 `--u` 에 묶음) | `.jp-top-btn` + `Joyfield.topIcon`(크기는 공통 기본값) | `.jp-top-btn` + `Joyfield.topIcon`(시작 화면, 게임 중은 자체 HUD) | ✅ 공통 모듈(`topbar.css`, 허브도 같이 씀, 1.8) |
-| 설정 창 | `index.html` dialog, 언어·소리 한 줄 | `screens.ts` 모달, 항목마다 한 줄 | `screens.ts` 모달, 항목마다 한 줄 | `screens.ts` 모달, 항목마다 한 줄 | 🟡 게임마다(순서·이름은 1.4로 통일, 내 기록 지우기는 맨 아래) |
-| 설정 맨 아래 버전 | 빌드가 `__APP_VERSION__` 을 채움 | Vite `define` `__APP_VERSION__` | Vite `define` `__APP_VERSION__` | Vite `define` `__APP_VERSION__` | ✅ 같은 자리 표시 이름(1.4) |
+| 설정 창 | `panels.ts` 모달, 항목마다 한 줄(v1.21.0) | `screens.ts` 모달, 항목마다 한 줄 | `screens.ts` 모달, 항목마다 한 줄 | `screens.ts` 모달, 항목마다 한 줄 | 🟡 게임마다(순서·이름은 1.4로 통일, 내 기록 지우기는 맨 아래). 창 틀은 ✅ 공통 `openModal` |
+| 설정 맨 아래 버전 | Vite `define` `__APP_VERSION__` | Vite `define` `__APP_VERSION__` | Vite `define` `__APP_VERSION__` | Vite `define` `__APP_VERSION__` | ✅ 같은 자리 표시 이름(1.4) |
 | 결과 화면 0.6초 누름 막기 | `#screen-result.locked` | `.result.locked` + 키 무시 | `.result.locked` + 키 무시 | `.result.locked` + 키 무시 | ✅ 동작 통일(1.3) |
 | 기록 공유하기(결과 화면) | `Joyfield.shareResult` | `Joyfield.shareResult` | `Joyfield.shareResult` | `Joyfield.shareResult` | ✅ 공통 모듈(이미지 + 조이필드 주소 한 번에) |
 | 결과 이미지 | 캔버스로 직접 그림(1080²) | `html-to-image` 결과 화면 복제 | `html-to-image` 결과 화면 복제(두더지잡기 `share.ts` 와 거의 같음) | `html-to-image` 결과 화면 복제(세 번째 같은 코드) | 🟠 공통화 후보(두더지잡기·타임 투 플립 `captureResult` 가 거의 같음) |
-| 랭킹 저장 방식 | 기록 1건 = 문서 1개 + 색인(REST) | 순위표 = 문서 1개(SDK lite) | 순위표 = 문서 1개(SDK lite), 줄에 `stage`(도달한 판) 더함 | 순위표 = 문서 1개(SDK lite), 탭 둘 `garden`(정원 점수)·`daily-YYYY-MM-DD`(오늘의 정원: 이동 수 → 시간 순), 이름마다 한 줄(누적 점수라) | 🟡 업다운만 다름, 새 게임은 순위표 문서(1.6) |
-| 랭킹 등록 대기·순위표 사본·8초 제한 | `updown.pending`·`updown.rankings`(난이도별) | `project-hammer:v1` 의 `pending`·`rankings` | `timetoflip:v1` 의 `pending`(점수·판)·`rankings` | `glasshouse:v1` 의 `pending`·`dailyPending`(그날만)·`rankings` | 🟡 동작 통일(1.6), 코드는 게임마다 |
-| 랭킹 창·등록 카드 UI | 게임마다 | 게임마다 | 게임마다(두더지잡기 것을 옮겨 판 칸만 더함) | 게임마다(타임 투 플립 것을 옮김, 오늘의 정원 탭은 이동·시간 칸) | 🟠 공통화 후보, 세 게임째 복사(규칙: TOP 10, A–Z 5자, 등록 대기) |
-| 효과음 | `fx.js` 합성 | `audio.ts` 합성 | `audio.ts` 합성(마림바 사인파, 콤보 음계) | 공통 `sfx.js` `playRecipe` 로 목록 recipe 를 그대로 울림(첫 게임) | 🟡 게임마다(소리 결은 정체성). 모두 `sounds/catalog.json` 목록에 있음, 새 게임은 `packages/shared/sfx.js` `playRecipe` 로 목록 recipe 를 울릴 수 있음 |
-| 진동 | `fx.js` 패턴표 | `main.ts` 직접 | `main.ts` 직접 | `main.ts` 직접 | 🟠 공통화 후보(1.7 단계표를 함수로: `Joyfield.vibrate('tick')`) |
+| 랭킹 저장 방식 | 순위표 = 문서 1개(v1.21.0, 범위마다 `rankings/50·100·200`, 줄에 `tries`·`time`·`thermo`) | 순위표 = 문서 1개 | 순위표 = 문서 1개, 줄에 `stage` | 순위표 = 문서 1개, `garden`·`daily-YYYY-MM-DD`(이동 수 → 시간 순, 이름마다 한 줄) | ✅ 모두 같은 방식, 읽기·등록은 공통 `rankStore`(`@joyfield/shared/rank`) |
+| 랭킹 등록 대기·순위표 사본·8초 제한 | `updown.pending2`·`updown.boards` | `project-hammer:v1` 의 `pending`·`rankings` | `timetoflip:v1` 의 `pending`(점수·판)·`rankings` | `glasshouse:v1` 의 `pending`·`dailyPending`(그날만)·`rankings` | 🟡 동작 통일(1.6), 8초 제한은 공통 `rankStore`, 대기·사본 저장은 게임마다(저장 키가 달라서) |
+| 랭킹 창·등록 카드 UI | 공통 `openRanking`·`rankEntryForm` | 공통 | 공통 | 공통 | ✅ 공통 모듈(`@joyfield/shared/ui`, 2026-11-05). 게임은 탭 설정(칸·줄·대기·새로 받기)만 넘기고 모양 css 는 게임 것 |
+| 효과음 | 공통 `playRecipe`(목록 `updown/*` recipe 그대로) | 공통 `playRecipe`(소리마다 recipe, 피버 음높이) | 공통 `playRecipe`(마림바 mallet, 콤보 음계) | 공통 `playRecipe` | ✅ 재생기 공통(소리 결은 정체성, 게임 `audio.ts` 는 recipe 목록) |
+| 진동 | `Joyfield.vibrate` | `Joyfield.vibrate` | `Joyfield.vibrate` | `Joyfield.vibrate` | ✅ 공통 모듈(1.7 세기표 이름, 2026-11-05) |
 | 스킨 "자동"(날짜마다) | `Joyfield.dailyPick` 로 계절 | `Joyfield.dailyPick` 로 장소 | `Joyfield.dailyPick` 로 시간대 | `Joyfield.dailyPick` 날씨 톤, 시작 화면·정원 모두 같은 톤(v0.12.8, 예전엔 정원마다 다음 톤) | 🟢 공통(연속 같은 스킨 없음), 묶음은 정체성 |
 | 인트로 연출 | 있음 | 있음 | 있음(제목 글자 카드 뒤집기) | 있음(로고 = 시연, 소개·단추가 차례로 떠오름) | 🟡 게임마다 |
 | 글꼴 | Jua(서브셋) | Jua 하나(공용 서브셋 스크립트) | Do Hyeon(본문·숫자) + Dongle Bold(제목·팝업), 서브셋 스크립트 | Jua(화면 전체) + Gowun Dodum(긴 설명 글), 서브셋 스크립트 | 🟡 게임마다(정체성), 규칙은 1.10 |
 | 움직이는 배경 | 계절 입자(벚꽃잎·물방울·낙엽·눈송이) | 하늘·산·땅 겹 배경 | 먼 빛망울 + 중간·가까운 층 뒤집히는 카드, 게임 중 흐리게, PC 마우스 시차 | 캔버스 한 장(하늘·해·구름·먼 언덕·온실 창틀·날씨·햇살 줄기·먼지·선반 화분·모서리 큰 잎, 잎은 층마다 경로 하나로 한 번에 칠함) + 덩굴·꽃잎 DOM, 게임 중 흐리게·DOM 숨김, PC 마우스 시차 | 🟡 게임마다(정체성), 규칙은 1.10 |
 | 내 기록 지우기 | 설정(전체·난이도별) | 설정(전체) | 설정(전체) | 설정(전체: 판 기록·도감) | 🟡 범위 규칙은 통일(1.4) |
 | 기본 언어 | `Joyfield.deviceLang()` | `Joyfield.deviceLang()` | `Joyfield.deviceLang()` | `Joyfield.deviceLang()` | ✅ 공통 모듈(1.4) |
+| 휴대폰 뒤로 가기 단계 | `Joyfield.back`(일시정지 창 새로, 앱을 내리면 시간 멈춤) | `Joyfield.back` | `Joyfield.back` | `Joyfield.back` | ✅ 공통 모듈(1.3, 2026-11-05): 창 닫기 → 일시정지 → 시작 화면 → 조이필드 |
+| 대화상자·도감 뒤집기 | 공통 `openModal` | 공통 `openModal`(판 글자 크기 따름 `fitFont`) | 공통 `openModal`·`cardFlipper` | 공통 `openModal`·`cardFlipper` | ✅ 공통 모듈(`@joyfield/shared/ui`) |
+| 코드 구조 | Vite + TS(v1.21.0, 예전 빌드 없는 정적 파일) | Vite + TS | Vite + TS | Vite + TS | ✅ 모두 같은 구조(5장) |
 | 랭킹 이름 입력 | `Joyfield.initialsInput`(결과·랭킹 창) | `Joyfield.initialsInput`(등록 카드) | `Joyfield.initialsInput`(등록 카드) | `Joyfield.initialsInput`(등록 카드) | ✅ 공통 모듈(1.6, 허브 설정도) |
-| 화면 높이 맞추기 | `--vh-px` 고정 + 안쪽 스크롤 | `trackViewport`·`guardBottom` + `--fit` 줄이기 | `trackViewport`·`guardBottom` + `safe center` 안쪽 스크롤, 카드 크기는 판 자리에 맞춰 JS 로 계산(`board.ts` `layout`) | `trackViewport`·`guardBottom`, 판 칸 크기를 판 자리에 맞춰 JS 로 계산(`board.ts` `layout`) | 🟡 방식은 게임마다, 규칙은 1.3 |
+| 화면 높이 맞추기 | `--vh-px` 고정 + 안쪽 스크롤 | `trackViewport`·`guardBottom` + `--fit` 줄이기 | `trackViewport`·`guardBottom` + `safe center` 안쪽 스크롤, 카드 크기는 판 자리에 맞춰 JS 로 계산(`board.ts` `layout`) | `trackViewport`·`guardBottom`, 판 칸 크기를 판 자리에 맞춰 JS 로 계산(`board.ts` `layout`) | 🟡 방식은 게임마다(배치가 달라서), 규칙은 1.3 |
 | 가로 낮은 화면 | 두 칸 배치(시작 2×2·게임·결과) | 가로 배치 + `safe center` 스크롤 | 시작·결과 두 칸, 게임은 왼쪽 상태 칸 + 오른쪽 판(판은 행·열을 바꿔 크게) | 시작·결과 두 칸, 게임은 왼쪽 상태·안내·되돌리기 + 오른쪽 판 | 🟡 게임마다, 규칙은 1.9 |
 | 화면 크기 점검 목록 | `screen-check.mjs` | `screen-check.mjs` | `screen-check.mjs` | `screen-check.mjs`(결과는 풀이기 길을 키로 입력) | ✅ 도구 공통(`pnpm check:screens`, 7.1) |
-| 허브 연결(최고 기록·지우기·순위 읽기) | `records.ts`·`rankings.ts` 에 직접 | 같음 | `records.ts` 직접, 순위 읽기는 `rankings.ts` `boardDoc('timetoflip')` 한 줄 | `records.ts` 직접(정원 점수·핀 꽃), 순위 읽기는 정원 점수 `boardDoc('glasshouse', 'garden')` + 오늘의 정원 따로(이동·시간을 업다운처럼 횟수·시간 줄로) | 🟠 순위 읽기는 순위표 문서 방식이면 `boardDoc(id)` 로 합침(허브 v1.25.0). 최고 기록·지우기는 게임이 늘면 `joyfield.meta.js` 방식 검토 |
+| 허브 연결(최고 기록·지우기·순위 읽기) | `joyfield.meta.ts` | `joyfield.meta.ts` | `joyfield.meta.ts` | `joyfield.meta.ts`(오늘의 정원은 이동·시간 줄) | ✅ 허브 연결 메타(`@joyfield/shared/meta`, 허브 v1.41.0). 허브가 저절로 모음 |
 
 ### 공통화 대기 목록 (다음에 게임을 만들 때 함께 처리하면 좋은 것)
 
-1. `Joyfield.vibrate(level)`: 1.7 진동 세기표를 공통 모듈 함수로(진동 설정 확인 포함). 네 게임 모두 직접 부름.
-2. 랭킹 클라이언트·랭킹 창 UI: 순위표 문서 방식으로 공통 패키지화(`packages/ranking`). 두더지잡기·타임 투 플립의 `online.ts`·`ranking.ts`·`screens.ts`(`openModal`·`rankEntryForm`·`openRanking`)가 거의 같다(타임 투 플립은 줄에 `stage` 를 더함, 온실정원은 줄에 `flowers`, 오늘의 정원 탭은 점수 대신 이동·시간 순·이름마다 한 줄 — 네 번째 복사라 다음 게임 전에 하는 것을 권함). 업다운 이전은 데이터 이전이 필요하므로 별도 판단.
-4. 결과 이미지 `captureResult`(html-to-image 복제 찍기): 두더지잡기·타임 투 플립·온실정원 `share.ts` 가 거의 같다(세 게임째) → 공통 모듈 함수로(복제본에서 뺄 선택자·브랜드 붙일 자리만 인자로).
-5. 효과음 재생: 온실정원은 목록 recipe 를 공통 `sfx.js` 로 그대로 울린다(이번에 `@joyfield/shared/sfx.js` 내보내기·타입 추가). 다른 세 게임의 `audio.ts`·`fx.js` 직접 합성도 같은 recipe 라 옮길 수 있음(소리는 같게, 코드만 줄어듦).
-6. 도감 짜임(위 큰 카드 뒤집기 + 아래 묶음별 작은 카드, 설명 칸 높이 고정): 타임 투 플립 `openDex` 와 온실정원 `openDex`(v0.4.0)가 같은 짜임·같은 뒤집기 코드(앞면끼리 90° 세워 갈아 끼우기)다 → 공통 모듈로(카드 앞면·설명 채우기만 게임이 넘김)
-3. 허브 연결 메타: 게임이 `games/<id>/joyfield.meta.ts`(최고 기록 읽기·지우기·순위 읽기)를 내보내고 허브가 자동으로 모음 → 6장 2~4번이 사라짐.
+2026-11-05 에 예전 목록(진동·랭킹 클라이언트·랭킹 창·결과 이미지·효과음 재생·도감 뒤집기·허브 메타, 업다운 구조)을 모두 공통 모듈로 옮겼습니다(위 표 ✅). 남은 것:
+
+1. 랭킹 등록 대기·순위표 사본 저장: 게임마다 저장 키(`<id>:v1` 안 `pending`·`rankings`, 업다운 `updown.pending2`·`updown.boards`)가 달라 코드가 따로다. 다섯 번째 게임에서 같은 모양이 또 나오면 `@joyfield/shared/rank` 에 "대기 기록 + 사본" 도우미(저장 읽기·쓰기 함수만 게임이 넘김)를 만든다. 기존 저장 키는 바꾸지 않는다(사용자 기록 보존).
+2. 도감 짜임 전체(큰 카드 + 묶음별 작은 카드 + 설명 칸 높이 고정): 뒤집기만 공통(`cardFlipper`)이고 짜임·설명 채우기는 타임 투 플립·온실정원이 따로다. 도감이 있는 세 번째 게임이 생기면 `openDex` 틀을 공통으로.
+3. 설정 창 내용: 순서·이름은 같지만(1.4) 칩 모양이 게임마다 달라 각자 만든다. 항목 묶음(컬러 모드·언어·스킨·소리·진동·내 기록 지우기·버전)을 공통 함수로 만들지는 게임이 더 늘 때 판단.
 
 ---
 
@@ -591,6 +613,7 @@ games/<id>/
 
 | 문서 버전 | 날짜 | 내용 |
 | --- | --- | --- |
+| 1.75 | 2026-11-05 | 게임 공통화: 휴대폰 뒤로 가기 단계(1.3 `Joyfield.back`, 일시정지 창 필수), 진동 `Joyfield.vibrate`(1.7), 공통 화면 조각 `@joyfield/shared/ui`(대화상자·등록 카드·랭킹 창·도감 뒤집기), 랭킹 저장 `@joyfield/shared/rank`, 결과 이미지 `@joyfield/shared/capture`, 허브 연결 메타 `joyfield.meta.ts`(6장, 허브 v1.41.0), 효과음은 모두 `playRecipe`. 업다운을 Vite + TS 로 옮기고(v1.21.0) 랭킹을 순위표 문서 방식으로, 앱을 내리면 시간 멈춤. 1.2·5장·5.1·6장·8장·대기 목록 갱신. 공통화는 틀·동작만, 색·소리·진동·특이점은 게임마다·안 쓰는 목록 항목 안 지움(1.2) |
 | 1.74 | 2026-11-05 | 운영 허브 "다음 게임" 띠에서 준비 중 게임 이름 숨김(7.3, 허브 v1.40.4). 운영 반영 전에 바뀐 내용을 걸러짐·나감·묻기로 나눠 보이는 규칙(CLAUDE.md) |
 | 1.73 | 2026-11-05 | 운영 빌드에서 남은 개발 코드도 지움(7.3, 허브 v1.40.3): 개발 DB 설정·주소 판단·출시 화면 보기·톤 미리보기, 공통 모듈 사본은 Vite 축소기로 줄임, 허브 첫 화면 주소 판단 정규식 역슬래시 빠짐 고침 |
 | 1.72 | 2026-11-05 | 개발 전용 코드를 운영 빌드에서 잘라 냄(11.5, 허브 v1.40.2): 판단 앞에 `!__JOYFIELD_PROD__ &&`, 개발 문구 빈 글자, 온실정원 풀이 데이터·워커는 개발 빌드에서만. 운영 빌드에 개발 전용 표시가 남으면 빌드 실패 |

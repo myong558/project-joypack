@@ -628,6 +628,138 @@
     return last || String(fallback);
   }
 
+  // ── 진동(모든 게임 공통, 기준서 1.7 세기표 = sounds/catalog.json "vibrations") ──
+  // Joyfield.vibrate('hit', save.vibrate) 처럼 목록 이름이나 패턴(ms)을 넘긴다. on 이 false 거나 진동을 못 하는 기기면 아무것도 안 한다
+  const VIBRATIONS = {
+    tick: 12,
+    press: 15,
+    light: 30,
+    match: 35,
+    hit: 40,
+    fever: 55,
+    good: [45, 30, 60],
+    up: [30, 40, 70],
+    down: [70, 40, 30],
+    big: [60, 40, 120],
+    warn: [90, 70, 90],
+    fail: [90, 50, 140],
+    lost: [140, 80, 380],
+    celebrate: [60, 50, 60, 50, 220],
+  };
+  function canVibrate() {
+    return typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function';
+  }
+  function vibrate(pattern, on) {
+    if (on === false || !canVibrate()) return;
+    const p = typeof pattern === 'string' ? VIBRATIONS[pattern] : pattern;
+    if (p === undefined) return;
+    try {
+      navigator.vibrate(p);
+    } catch (e) {}
+  }
+
+  // ── 뒤로 가기 단계(휴대폰 뒤로 가기·브라우저 뒤로, 기준서 1.3) ──
+  // 게임 화면은 주소가 바뀌지 않아 뒤로 가기를 누르면 바로 조이필드로 나갔다. 화면마다 "뒤로 가기를 몇 번 받아 낼지"(깊이)를 정하면
+  // 주소는 그대로 둔 채 기록 칸을 그만큼 쌓고, 뒤로 가기가 오면 칸 하나마다 위 창 닫기 → 화면 처리(onBack)를 한다.
+  //   시작 화면 0(뒤로 = 조이필드) · 결과 1(→ 시작) · 일시정지 1(→ 시작) · 플레이 2(→ 일시정지 → 시작) · 대화상자는 열려 있는 동안 +1(→ 닫기)
+  // 깊이를 늘리는 일(플레이 시작·창 열기)은 사용자가 누른 순간에 일어나므로 기록 칸도 그때 쌓인다(크롬은 누름 없이 쌓은 칸을 건너뜀).
+  // 깊이가 줄면(게임 끝 → 결과, 창을 닫기 단추로 닫음) 남는 칸을 조용히 걷어 내 뒤로 가기가 헛돌지 않게 한다.
+  const back = (function () {
+    let base = 0;
+    let onBase = null;
+    const layers = [];
+    let actual = 0;
+    let trimTo = null;
+    let handling = false;
+    let started = false;
+    function depthOf(state) {
+      return state && typeof state.jfBack === 'number' ? state.jfBack : 0;
+    }
+    function start() {
+      if (started || typeof history === 'undefined') return;
+      started = true;
+      actual = depthOf(history.state);
+      window.addEventListener('popstate', onPop);
+    }
+    // 같은 순간의 변화는 모아서 한 번에 맞춘다(화면을 다시 그리며 창을 닫았다 곧바로 다시 열면 기록을 건드리지 않음)
+    let scheduled = false;
+    function sync() {
+      if (scheduled) return;
+      scheduled = true;
+      queueMicrotask(function () {
+        scheduled = false;
+        apply();
+      });
+    }
+    function apply() {
+      if (!started || handling || trimTo !== null) return;
+      const want = base + layers.length;
+      if (want < actual) {
+        trimTo = want;
+        history.go(want - actual);
+        return;
+      }
+      while (actual < want) {
+        actual++;
+        history.pushState(Object.assign({}, history.state, { jfBack: actual }), '');
+      }
+    }
+    function onPop(e) {
+      const depth = depthOf(e.state);
+      let steps;
+      if (trimTo !== null) {
+        // 걷어 내기가 끝났다(그사이 사용자가 더 눌렀으면 그만큼은 뒤로 가기로 처리)
+        steps = Math.max(0, trimTo - depth);
+        trimTo = null;
+        if (!steps) {
+          actual = depth;
+          sync();
+          return;
+        }
+      } else {
+        steps = actual - depth;
+      }
+      actual = depth;
+      handling = true;
+      try {
+        for (; steps > 0; steps--) {
+          if (layers.length) {
+            const top = layers.pop();
+            top.closed = true;
+            top.close();
+          } else if (base > 0 && onBase) {
+            onBase();
+          }
+        }
+      } finally {
+        handling = false;
+      }
+      sync();
+    }
+    // 지금 화면의 깊이와 뒤로 가기 처리. 화면을 바꿀 때마다 부른다(시작 화면은 screen(0))
+    function screen(depth, handler) {
+      start();
+      base = Math.max(0, depth | 0);
+      onBase = handler || null;
+      sync();
+    }
+    // 대화상자 같은 위 창: 열 때 부르고, 돌려받은 함수를 창이 닫힐 때 부른다. 뒤로 가기가 오면 onClose 로 창을 닫는다
+    function layer(onClose) {
+      start();
+      const item = { close: onClose, closed: false };
+      layers.push(item);
+      sync();
+      return function release() {
+        if (item.closed) return;
+        item.closed = true;
+        const i = layers.indexOf(item);
+        if (i >= 0) layers.splice(i, 1);
+        sync();
+      };
+    }
+    return { screen: screen, layer: layer };
+  })();
+
   // 화면 확대·축소 막기(허브와 모든 게임 공통, 이 파일을 불러오면 바로 적용).
   // 게임 중 두 손가락이 닿거나 두 번 톡톡 쳐서 화면이 커지면 판·버튼이 밀려 조작이 망가지기 때문이다.
   //   - touch-action: pan-x pan-y → 스크롤만 허용하고 두 손가락 확대·두 번 탭 확대는 막는다(안드로이드·iOS 13+)
@@ -750,5 +882,9 @@
     setRankBoard: setRankBoard,
     setRankPending: setRankPending,
     rankTab: rankTab,
+    VIBRATIONS: VIBRATIONS,
+    canVibrate: canVibrate,
+    vibrate: vibrate,
+    back: back,
   };
 })(typeof window !== 'undefined' ? window : globalThis);

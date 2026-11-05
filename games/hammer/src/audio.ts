@@ -1,3 +1,5 @@
+import { playRecipe, type RecipeNote } from '@joyfield/shared/sfx.js';
+
 export type SoundName =
   | 'hit'
   | 'golden'
@@ -18,13 +20,40 @@ export type SoundName =
   | 'end'
   | 'record';
 
+// 효과음 recipe(sounds/catalog.json 과 같은 형식, 조이필드 공통 재생기 playRecipe 로 울림).
+// 이 게임 소리는 모두 바로 최대 크기로 시작한다(attack 0). 잡음(noise)은 피버 음높이를 따르지 않는다
+const tone = (f: number, dur: number, wave: OscillatorType, vol: number, to?: number, at = 0): RecipeNote => ({ k: 'tone', f, dur, wave, vol, to, at, attack: 0 });
+const noise = (dur: number, vol: number, at = 0): RecipeNote => ({ k: 'noise', dur, vol, at });
+const run = (freqs: number[], step: number, dur: number, wave: OscillatorType, vol: number) => freqs.map((f, i) => tone(f, dur, wave, vol, undefined, i * step));
+
+const RECIPES: Record<SoundName, RecipeNote[]> = {
+  // 뿅망치: 짧게 퉁 하는 소리 위로 뿅! 하고 올라가는 소리
+  hit: [tone(220, 0.06, 'triangle', 0.25, 110), tone(700, 0.09, 'sine', 0.22, 1700), noise(0.025, 0.08)],
+  golden: run([880, 1175, 1568], 0.05, 0.12, 'triangle', 0.18),
+  clink: [tone(1500, 0.08, 'triangle', 0.2, 1100), tone(2300, 0.06, 'sine', 0.08)],
+  king: [tone(180, 0.12, 'square', 0.22, 90), noise(0.08, 0.15)],
+  bomb: [noise(0.45, 0.35), tone(140, 0.45, 'sine', 0.4, 35)],
+  whiff: [tone(260, 0.07, 'sine', 0.08, 160)],
+  tease: [tone(420, 0.14, 'sawtooth', 0.05, 700)],
+  jump: [tone(300, 0.1, 'triangle', 0.1, 900)],
+  comboUp: run([660, 990], 0.06, 0.1, 'square', 0.1),
+  comboBreak: [tone(330, 0.18, 'triangle', 0.12, 160)],
+  fever: run([523, 659, 784, 1047, 1319], 0.06, 0.12, 'square', 0.12),
+  tick: [tone(1200, 0.03, 'square', 0.08)],
+  count: [tone(440, 0.12, 'square', 0.12)],
+  go: [tone(880, 0.3, 'square', 0.14)],
+  timeBonus: [tone(784, 0.08, 'triangle', 0.18), tone(1175, 0.14, 'triangle', 0.18, undefined, 0.07)],
+  freeze: [tone(1600, 0.4, 'sine', 0.12, 500), tone(2400, 0.3, 'sine', 0.05, 900, 0.05)],
+  end: run([784, 587, 392], 0.14, 0.18, 'triangle', 0.18),
+  record: run([523, 659, 784, 1047, 784, 1047], 0.1, 0.16, 'square', 0.12),
+};
+
 /** 효과음은 파일 없이 Web Audio로 합성한다 */
 export class Sound {
   enabled: boolean;
   /** 피버 때 음높이를 올린다 */
   pitch = 1;
   private ctx: AudioContext | null = null;
-  private noiseBuffer: AudioBuffer | null = null;
 
   constructor(enabled: boolean) {
     this.enabled = enabled;
@@ -42,103 +71,6 @@ export class Sound {
 
   play(name: SoundName): void {
     if (!this.enabled || !this.ctx) return;
-    const t = this.ctx.currentTime;
-    switch (name) {
-      case 'hit':
-        // 뿅망치: 짧게 퉁 하는 소리 위로 뿅! 하고 올라가는 소리
-        this.tone(220, 0.06, 'triangle', 0.25, 110, t);
-        this.tone(700, 0.09, 'sine', 0.22, 1700, t);
-        this.noise(0.025, 0.08, t);
-        break;
-      case 'golden':
-        [880, 1175, 1568].forEach((f, i) => this.tone(f, 0.12, 'triangle', 0.18, undefined, t + i * 0.05));
-        break;
-      case 'clink':
-        this.tone(1500, 0.08, 'triangle', 0.2, 1100, t);
-        this.tone(2300, 0.06, 'sine', 0.08, undefined, t);
-        break;
-      case 'king':
-        this.tone(180, 0.12, 'square', 0.22, 90, t);
-        this.noise(0.08, 0.15, t);
-        break;
-      case 'bomb':
-        this.noise(0.45, 0.35, t);
-        this.tone(140, 0.45, 'sine', 0.4, 35, t);
-        break;
-      case 'whiff':
-        this.tone(260, 0.07, 'sine', 0.08, 160, t);
-        break;
-      case 'tease':
-        this.tone(420, 0.14, 'sawtooth', 0.05, 700, t);
-        break;
-      case 'jump':
-        this.tone(300, 0.1, 'triangle', 0.1, 900, t);
-        break;
-      case 'comboUp':
-        [660, 990].forEach((f, i) => this.tone(f, 0.1, 'square', 0.1, undefined, t + i * 0.06));
-        break;
-      case 'comboBreak':
-        this.tone(330, 0.18, 'triangle', 0.12, 160, t);
-        break;
-      case 'fever':
-        [523, 659, 784, 1047, 1319].forEach((f, i) => this.tone(f, 0.12, 'square', 0.12, undefined, t + i * 0.06));
-        break;
-      case 'tick':
-        this.tone(1200, 0.03, 'square', 0.08, undefined, t);
-        break;
-      case 'count':
-        this.tone(440, 0.12, 'square', 0.12, undefined, t);
-        break;
-      case 'go':
-        this.tone(880, 0.3, 'square', 0.14, undefined, t);
-        break;
-      case 'timeBonus':
-        this.tone(784, 0.08, 'triangle', 0.18, undefined, t);
-        this.tone(1175, 0.14, 'triangle', 0.18, undefined, t + 0.07);
-        break;
-      case 'freeze':
-        this.tone(1600, 0.4, 'sine', 0.12, 500, t);
-        this.tone(2400, 0.3, 'sine', 0.05, 900, t + 0.05);
-        break;
-      case 'end':
-        [784, 587, 392].forEach((f, i) => this.tone(f, 0.18, 'triangle', 0.18, undefined, t + i * 0.14));
-        break;
-      case 'record':
-        [523, 659, 784, 1047, 784, 1047].forEach((f, i) =>
-          this.tone(f, 0.16, 'square', 0.12, undefined, t + i * 0.1),
-        );
-        break;
-    }
-  }
-
-  private tone(freq: number, dur: number, type: OscillatorType, vol: number, slideTo: number | undefined, at: number): void {
-    const ctx = this.ctx!;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq * this.pitch, at);
-    if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo * this.pitch, at + dur);
-    gain.gain.setValueAtTime(vol, at);
-    gain.gain.exponentialRampToValueAtTime(0.0001, at + dur);
-    osc.connect(gain).connect(ctx.destination);
-    osc.start(at);
-    osc.stop(at + dur + 0.02);
-  }
-
-  private noise(dur: number, vol: number, at: number): void {
-    const ctx = this.ctx!;
-    if (!this.noiseBuffer) {
-      this.noiseBuffer = ctx.createBuffer(1, ctx.sampleRate * 0.5, ctx.sampleRate);
-      const data = this.noiseBuffer.getChannelData(0);
-      for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
-    }
-    const src = ctx.createBufferSource();
-    const gain = ctx.createGain();
-    src.buffer = this.noiseBuffer;
-    gain.gain.setValueAtTime(vol, at);
-    gain.gain.exponentialRampToValueAtTime(0.0001, at + dur);
-    src.connect(gain).connect(ctx.destination);
-    src.start(at);
-    src.stop(at + dur);
+    playRecipe(this.ctx, RECIPES[name], { pitch: this.pitch });
   }
 }

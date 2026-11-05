@@ -1,4 +1,6 @@
 import '@joyfield/shared';
+import type { HubRow } from '@joyfield/shared/meta';
+import { META } from './meta';
 /**
  * 전체 랭킹 화면용 읽기 전용 순위 조회(Firestore REST, SDK 없이 fetch).
  * 게임들과 같은 Firebase 프로젝트(운영 joyfield-41b5a · 내 PC 에서는 개발 joyfield-dev)를 읽기만 한다. 등록은 각 게임이 한다.
@@ -20,11 +22,8 @@ const FRESH_MS = 5 * 60 * 1000;
 const TIMEOUT_MS = 8000;
 const CACHE_KEY = 'joyfield.rankingCache';
 
-/** thermo: 업다운에서 온도계를 쓴 기록(🌡️ 표시, 순위에는 영향 없음). dev: 플레이한 입력 m 모바일·p PC(이름 옆 아이콘, 예전 기록에는 없음) */
-export type Row = ({ name: string; tries: number; time: number } | { name: string; score: number; thermo?: boolean }) & { dev?: string };
-
-/** 서버 값의 dev 가 'm' | 'p' 일 때만 붙인다 */
-const devOf = (v?: { stringValue?: string }) => (v?.stringValue === 'm' || v?.stringValue === 'p' ? { dev: v.stringValue } : {});
+/** 랭킹 한 줄(@joyfield/shared/meta 의 HubRow). thermo: 업다운 온도계(🌡️), tries·time: 이동·시간으로 겨루는 순위표, dev: 기기 아이콘 */
+export type Row = HubRow;
 
 export interface BoardResult {
   rows: Row[];
@@ -64,96 +63,12 @@ async function request(path: string, init?: RequestInit): Promise<Response> {
   }
 }
 
-/** 두더지잡기와 같은 날짜 규칙(기기 시각 기준 YYYY-MM-DD) */
-function dateKey(d = new Date()): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
-
-type Fetcher = (board: string, limit: number) => Promise<Row[]>;
-
-/**
- * 순위표 1개 = 문서 1개 방식(기준서 1.6 새 게임 기본) 게임의 읽기. games/<id>/rankings/classic · daily-YYYY-MM-DD
- * 새 게임이 이 방식이면 FETCHERS 에 boardDoc('<id>') 한 줄만 더한다
- */
-function boardDoc(gameId: string, classic = 'classic'): { key: (board: string) => string; fetch: Fetcher } {
-  const doc = (board: string) => (board === 'daily' ? `daily-${dateKey()}` : classic);
-  return {
-    key: doc,
-    async fetch(board, limit) {
-      const res = await request(`games/${gameId}/rankings/${doc(board)}`);
-      if (res.status === 404) return []; // 오늘 아직 아무도 안 올림
-      if (!res.ok) throw new Error(`firestore ${res.status}`);
-      type Value = { stringValue?: string; integerValue?: string; mapValue?: { fields: Record<string, Value> } };
-      const data = (await res.json()) as { fields?: { entries?: { arrayValue?: { values?: Value[] } } } };
-      return (data.fields?.entries?.arrayValue?.values ?? [])
-        .map((v) => ({
-          name: v.mapValue?.fields.name?.stringValue ?? '',
-          score: Number(v.mapValue?.fields.score?.integerValue ?? 0),
-          ...devOf(v.mapValue?.fields.dev),
-        }))
-        .sort((a, b) => b.score - a.score)
-        .slice(0, limit);
-    },
-  };
-}
-
-const FETCHERS: Record<string, { key: (board: string) => string; fetch: Fetcher }> = {
-  // 업다운: 기록 1건 = 문서 1개, 범위(1~50·1~100·1~200)마다 컬렉션이 따로(scores-<끝 숫자>). 게임과 같은 정렬(점수 높은 순 → 먼저 등록)
-  updown: {
-    key: (board) => `s${board}`,
-    async fetch(board, limit) {
-      const res = await request('games/updown:runQuery', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          structuredQuery: {
-            from: [{ collectionId: `scores-${board}` }],
-            orderBy: [{ field: { fieldPath: 'score' }, direction: 'DESCENDING' }],
-            limit,
-          },
-        }),
-      });
-      if (!res.ok) throw new Error(`firestore ${res.status}`);
-      type Fields = Record<string, { stringValue?: string; integerValue?: string; timestampValue?: string; booleanValue?: boolean }>;
-      const rows = (await res.json()) as { document?: { fields: Fields } }[];
-      return rows
-        .filter((r) => r.document)
-        .map(({ document }) => ({
-          name: document!.fields.initials.stringValue ?? '',
-          score: Number(document!.fields.score.integerValue),
-          at: Date.parse(document!.fields.createdAt.timestampValue ?? ''),
-          thermo: document!.fields.thermo?.booleanValue === true,
-          dev: devOf(document!.fields.dev),
-        }))
-        .sort((a, b) => b.score - a.score || a.at - b.at)
-        .map(({ name, score, thermo, dev }) => (thermo ? { name, score, thermo, ...dev } : { name, score, ...dev }));
-    },
-  },
-  // 두더지잡기·타임 투 플립: 순위표 1개 = 문서 1개({ entries: [...] }). 오늘의 챌린지는 날짜마다 새 문서다
-  hammer: boardDoc('hammer'),
-  timetoflip: boardDoc('timetoflip'),
-  // 온실정원: 정원 점수는 garden 문서(점수 높은 순), 오늘의 정원은 daily-YYYY-MM-DD 문서(이동 수 적은 순 → 시간 짧은 순, 횟수·시간으로 보임)
-  glasshouse: {
-    key: (board) => (board === 'daily' ? `daily-${dateKey()}` : 'garden'),
-    async fetch(board, limit) {
-      if (board !== 'daily') return boardDoc('glasshouse', 'garden').fetch(board, limit);
-      const res = await request(`games/glasshouse/rankings/daily-${dateKey()}`);
-      if (res.status === 404) return [];
-      if (!res.ok) throw new Error(`firestore ${res.status}`);
-      type Value = { stringValue?: string; integerValue?: string; mapValue?: { fields: Record<string, Value> } };
-      const data = (await res.json()) as { fields?: { entries?: { arrayValue?: { values?: Value[] } } } };
-      return (data.fields?.entries?.arrayValue?.values ?? [])
-        .map((v) => ({
-          name: v.mapValue?.fields.name?.stringValue ?? '',
-          tries: Number(v.mapValue?.fields.moves?.integerValue ?? 0),
-          time: Number(v.mapValue?.fields.time?.integerValue ?? 0),
-          ...devOf(v.mapValue?.fields.dev),
-        }))
-        .sort((a, b) => a.tries - b.tries || a.time - b.time)
-        .slice(0, limit);
-    },
-  },
-};
+/** 게임마다 순위 읽기(허브 연결 메타 games/<id>/joyfield.meta.ts 의 ranking). 새 게임은 그 파일에 ranking 을 적으면 된다 */
+const FETCHERS: Record<string, { key: (board: string) => string; fetch: (board: string, limit: number) => Promise<Row[]> }> = Object.fromEntries(
+  Object.entries(META)
+    .filter(([, m]) => m.ranking)
+    .map(([id, m]) => [id, { key: m.ranking!.key, fetch: (board: string, limit: number) => m.ranking!.fetch(board, limit, request) }]),
+);
 
 export function hasRanking(gameId: string): boolean {
   return gameId in FETCHERS;

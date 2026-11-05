@@ -60,18 +60,29 @@ export const screens = [
       await p.wait(300);
       await p.click('#thermo-open');
       await p.wait(300);
-      await p.click('#thermo-use');
+      await p.click('.thermo [data-use]');
       await p.wait(400);
     },
   },
   { name: 'result', reach: 'once', go: finish },
-  // TOP 10 에 든 결과: 랭킹 등록 칸이 펼쳐진 가장 긴 결과 화면(온라인 없이 칸만 펼쳐 본다)
+  // TOP 10 에 든 결과: 등록 카드(공통 @joyfield/shared/ui)가 버튼 위에 들어온 가장 긴 결과 화면. 순위표가 비었거나 덜 찬 개발 DB·오프라인이면 늘 나온다
   {
     name: 'result-rank',
     reach: 'once',
     async go(p) {
       await finish(p);
-      await p.eval(`(() => { document.getElementById('result-rank').hidden = false; document.getElementById('result-rank-prompt').textContent = '1 ~ 200 1,240점(5번 · 12.3초)! TOP 10 에 들었어요. 이니셜을 등록하세요'; document.getElementById('result-best').hidden = false; return true; })()`);
+      await p.wait(1200);
+      await p.eval(`(() => { document.getElementById('result-best').hidden = false; return true; })()`);
+    },
+  },
+  // 일시정지 창(휴대폰 뒤로 가기·앱을 내렸을 때)
+  {
+    name: 'pause',
+    async go(p) {
+      await p.click('.difficulty');
+      await p.wait(600);
+      await p.eval(`(() => { history.back(); return true; })()`);
+      await p.wait(400);
     },
   },
 ];

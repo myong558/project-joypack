@@ -1,9 +1,12 @@
+import { insertBy, placeBy } from '@joyfield/shared/rank';
+import { RANK_SIZE, isValidName } from '@joyfield/shared/ui';
 import type { Mode } from './ui/screens';
 
-/** 순위표에 남는 칸 수 */
-export const RANK_SIZE = 10;
-/** 이름은 영문 대문자 A–Z로 이 글자 수까지 */
-export const NAME_MAX = 5;
+// 순위표 칸 수(10)·이름 규칙(영문 대문자 5자)은 조이필드 공통(@joyfield/shared/ui)
+export { NAME_MAX, RANK_SIZE, cleanName, isValidName } from '@joyfield/shared/ui';
+
+/** 점수가 높을수록 앞(같으면 먼저 올린 기록이 앞) */
+const higher = (a: { score: number }, b: { score: number }) => a.score > b.score;
 
 export interface RankEntry {
   name: string;
@@ -34,33 +37,19 @@ export function emptyPending(): PendingRanks {
   return { classic: 0, daily: null };
 }
 
-/** 입력한 글자를 대문자로 바꾸고 A–Z가 아닌 글자는 버린다 */
-export function cleanName(raw: string): string {
-  return raw.toUpperCase().replace(/[^A-Z]/g, '').slice(0, NAME_MAX);
-}
-
-export function isValidName(name: string): boolean {
-  return new RegExp(`^[A-Z]{1,${NAME_MAX}}$`).test(name);
-}
-
 /**
  * 이 점수가 들어갈 자리(0부터). 같은 점수면 먼저 올린 기록이 앞서므로 그 뒤에 선다.
  * 10위 안에 들지 못하면 -1
  */
 export function placeOf(entries: readonly RankEntry[], score: number): number {
   if (score <= 0) return -1;
-  const below = entries.findIndex((e) => e.score < score);
-  const at = below === -1 ? entries.length : below;
-  return at < RANK_SIZE ? at : -1;
+  return placeBy(entries, { score } as RankEntry, higher);
 }
 
 /** 기록을 끼워 넣고 10위 밖으로 밀린 최하위를 지운다. 들어가지 못하면 그대로 두고 -1을 돌려준다 */
 export function insertEntry(entries: RankEntry[], entry: RankEntry): number {
-  const at = placeOf(entries, entry.score);
-  if (at === -1) return -1;
-  entries.splice(at, 0, entry);
-  entries.length = Math.min(entries.length, RANK_SIZE);
-  return at;
+  if (entry.score <= 0) return -1;
+  return insertBy(entries, entry, higher);
 }
 
 /** 지금 보여 줄 순위표. 오늘의 챌린지는 오늘 날짜의 것만 */

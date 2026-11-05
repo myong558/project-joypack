@@ -1,5 +1,6 @@
 // 공통 모듈을 맨 먼저 불러, 이름 바꾸기 전 저장 키를 다른 코드가 읽기 전에 옮긴다
 import '@joyfield/shared';
+import type { VibrationName } from '@joyfield/shared';
 import '@joyfield/shared/topbar.css';
 import './styles.css';
 import { Sound } from './audio';
@@ -12,6 +13,8 @@ import { setLang, t } from './i18n';
 import { fetchBoard, submitEntry } from './online';
 import { boardEntries, clearPending, keepPending, pendingRecord, placeOf, type Mode, type RankEntry } from './ranking';
 import { shareResult } from './share';
+import { ICONS } from './ui/icons';
+import { configureUi } from '@joyfield/shared/ui';
 import { emptyRecords, loadSave, writeSave } from './storage';
 import { applySkin, applyTheme, resolveSkin } from './theme';
 import { Board } from './ui/board';
@@ -26,6 +29,8 @@ setLang(save.lang);
 applyTheme(save.theme);
 applySkin(resolveSkin(save.skin, new Date()));
 let teardown: (() => void) | null = null;
+// 공통 화면 조각(대화상자·랭킹 창·등록 카드)이 쓸 문구·아이콘
+configureUi({ t, icons: { trophy: ICONS.trophy, close: ICONS.close } });
 
 function mount(el: HTMLElement): void {
   teardown?.();
@@ -37,9 +42,9 @@ function todayLabel(d: Date): string {
   return `${d.getMonth() + 1}/${d.getDate()}`;
 }
 
-/** 진동 세기는 기준서 1.7 표: 눈금 12, 가벼운 타격 35, 좋은 타격 [45,30,60], 큰 사건 [60,40,120] … */
-function vibrate(pattern: number | number[]): void {
-  if (save.vibrate) navigator.vibrate?.(pattern);
+/** 진동: 조이필드 공통 세기표(기준서 1.7, Joyfield.vibrate) */
+function vibrate(pattern: VibrationName): void {
+  Joyfield.vibrate(pattern, save.vibrate);
 }
 
 /** 초 단위 글(1.5 → "1.5", 2 → "2") */
@@ -102,6 +107,8 @@ function rankingView(day: Date): RankingView {
 function showStart(settings?: 'open' | 'reset', settingsFocus?: string, opening = false): void {
   const today = new Date();
   publishPending(dateKey(today));
+  // 뒤로 가기: 시작 화면에서는 조이필드로(기준서 1.3)
+  Joyfield.back.screen(0);
   applySkin(resolveSkin(save.skin, today));
   mount(
     startScreen({
@@ -233,7 +240,7 @@ function play(mode: Mode, from = 1): void {
         break;
       case 'flip':
         sound.play('flip');
-        vibrate(12);
+        vibrate('tick');
         board.flip(e.card);
         break;
       case 'hide':
@@ -247,7 +254,7 @@ function play(mode: Mode, from = 1): void {
         if (a.special === 'clock') sound.play('clock');
         if (a.special === 'peek') sound.play('peek');
         const strong = a.gold || e.combo >= 5;
-        vibrate(strong ? [45, 30, 60] : 35);
+        vibrate(strong ? 'good' : 'match');
         board.match(a, b);
         const el = cardEl(b.index);
         lastMatch = el;
@@ -279,7 +286,7 @@ function play(mode: Mode, from = 1): void {
         break;
       case 'mismatch':
         sound.play(e.mistake ? 'mistake' : 'miss');
-        if (e.mistake) vibrate(30);
+        if (e.mistake) vibrate('light');
         board.wrong(e.a, e.b);
         if (e.mistake) {
           fx.popup(cardEl(e.b.index), t('popup.penalty', { s: secs(e.penalty) }), 'bad');
@@ -293,7 +300,7 @@ function play(mode: Mode, from = 1): void {
       case 'stageClear':
         sound.play('clear');
         if (e.perfect) sound.play('perfect');
-        vibrate([60, 50, 60, 50, 220]);
+        vibrate('celebrate');
         fx.banner(e.perfect ? t('banner.perfect') : t('banner.clear', { n: e.stage }), e.perfect ? 'perfect' : 'clear');
         fx.shake('small');
         view.showMessage(`+${e.bonus.toLocaleString()}`, 'bonus');
@@ -304,13 +311,15 @@ function play(mode: Mode, from = 1): void {
         break;
       case 'pause':
         view.showPause(true);
+        syncBack();
         break;
       case 'resume':
         view.showPause(false);
+        syncBack();
         break;
       case 'over':
         sound.play('end');
-        vibrate([90, 50, 140]);
+        vibrate('fail');
         board.showAll();
         view.el.classList.remove('hot', 'danger');
         view.showMessage(t('countdown.end'), 'end');
@@ -320,6 +329,14 @@ function play(mode: Mode, from = 1): void {
     }
   };
   const off = game.on(handle);
+  // 뒤로 가기(기준서 1.3): 플레이 중 → 일시정지, 일시정지 중 → 시작 화면. 일시정지할 수 없는 때(끝난 뒤 등)는 바로 시작 화면
+  const syncBack = () =>
+    Joyfield.back.screen(game.phase === 'paused' ? 1 : 2, () => {
+      const before = game.phase;
+      if (before !== 'paused') game.pause();
+      if (before === 'paused' || game.phase !== 'paused') showStart();
+    });
+  syncBack();
 
   // HUD: 판·점수·콤보·시간 막대. 스톱워치는 막대 끝을 따라가며 바늘이 남은 시간을 가리키고, 5초 아래면 빨개져 떤다
   let lastSecond = -1;
@@ -380,7 +397,7 @@ function play(mode: Mode, from = 1): void {
       }
       if (!warned) {
         warned = true;
-        vibrate([90, 70, 90]);
+        vibrate('warn');
       }
     } else if (game.remaining > WARN_MS + 1000) {
       warned = false;
@@ -462,8 +479,10 @@ function showResult(result: GameResult, mode: Mode, date: Date, dexBefore: Reado
   );
   if (isRecord) {
     sound.play('record');
-    vibrate([60, 40, 120]);
+    vibrate('big');
   }
+  // 뒤로 가기: 결과 → 시작 화면
+  Joyfield.back.screen(1, () => showStart());
   const onKey = (e: KeyboardEvent) => {
     // 이름을 치는 중이거나 랭킹 창·등록 카드 안에서 누른 키는 그쪽에 맡긴다
     if ((e.target as Element | null)?.closest?.('input, .rank-entry, .modal')) return;

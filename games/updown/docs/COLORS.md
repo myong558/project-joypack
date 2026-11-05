@@ -1,6 +1,6 @@
 # 색상 레퍼런스
 
-업다운 게임의 색 체계입니다. 글자에 쓰는 색은 배경 위에서도 글자 대비(WCAG)를 넘도록 정했습니다. 실제 값은 [css/style.css](../css/style.css)에 있으며, 색을 바꿀 때는 CSS와 이 문서를 함께 고칩니다.
+업다운 게임의 색 체계입니다. 글자에 쓰는 색은 배경 위에서도 글자 대비(WCAG)를 넘도록 정했습니다. 실제 값은 [src/styles.css](../src/styles.css)에 있으며, 색을 바꿀 때는 CSS와 이 문서를 함께 고칩니다.
 
 ## 구조
 
@@ -96,11 +96,11 @@
 | 그림자 | `--shadow-thumb` | 라이트 진한 계절색 35%, 다크 검정 40% (다이얼 손잡이) |
 | 팝업 뒤 막 | `--backdrop` | 라이트 진한 계절색 45%, 다크 계절 배경색 75% |
 
-주소창·상태바 색(`theme-color`)은 현재 `--bg`를 따릅니다. 처음 그릴 때는 `<head>` 스크립트가 정하고, 이후에는 `js/app.js`가 정합니다. 설치 앱의 실행 화면 배경(`manifest.webmanifest`의 `background_color`)은 `#fcfbec`입니다. 로고 색(남색 바탕, 빨강 위·파랑 아래 삼각형)은 `images/icon.svg`와 시작 화면 인라인 SVG에 있습니다.
+주소창·상태바 색(`theme-color`)은 현재 `--bg`를 따릅니다. 처음 그릴 때는 `<head>` 스크립트가 정하고, 이후에는 `src/main.ts`가 정합니다. 설치 앱의 실행 화면 배경(`manifest.webmanifest`의 `background_color`)은 `#fcfbec`입니다. 로고 색(남색 바탕, 빨강 위·파랑 아래 삼각형)은 `public/images/icon.svg`와 시작 화면 인라인 SVG에 있습니다.
 
 ### 배경 입자와 위쪽 색
 
-배경 입자 색은 `js/skins.js`의 `STYLES`에 있고, 화면 위쪽에 옅게 까는 계절 색은 `css/style.css`의 `html[data-skin] body` 규칙에 있습니다. 입자는 글자 뒤에 라이트 60%·다크 50% 불투명도로 그려서 글자 대비에 영향을 주지 않습니다.
+배경 입자 색은 `src/skins.ts`의 `STYLES`에 있고, 화면 위쪽에 옅게 까는 계절 색은 `src/styles.css`의 `html[data-skin] body` 규칙에 있습니다. 입자는 글자 뒤에 라이트 60%·다크 50% 불투명도로 그려서 글자 대비에 영향을 주지 않습니다.
 
 | 스킨 | 입자 | 라이트 | 다크 | 위쪽 색 (라이트 / 다크) |
 | --- | --- | --- | --- | --- |

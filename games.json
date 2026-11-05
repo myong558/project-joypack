@@ -4,12 +4,12 @@
     "name": { "ko": "업다운", "en": "Up Down" },
     "desc": { "ko": "UP · DOWN 힌트로 숨은 숫자 맞히기", "en": "Find the hidden number with UP/DOWN hints" },
     "path": "games/updown/",
-    "icon": "games/updown/images/icon.svg",
+    "icon": "games/updown/public/images/icon.svg",
     "color": "#0f66ff",
     "status": "live",
     "added": "2026-10-16",
     "ranking": {
-      "path": "games/updown/scores-<끝 숫자>",
+      "path": "games/updown/rankings",
       "default": "100",
       "boards": [
         { "id": "50", "name": { "ko": "1~50", "en": "1~50" } },

@@ -1,5 +1,6 @@
 // 공통 모듈을 맨 먼저 불러, 이름 바꾸기 전 저장 키를 다른 코드가 읽기 전에 옮긴다
 import '@joyfield/shared';
+import type { VibrationName } from '@joyfield/shared';
 import '@joyfield/shared/topbar.css';
 import './styles.css';
 import { Sound } from './audio';
@@ -13,6 +14,8 @@ import { setLang, t } from './i18n';
 import { fetchBoard, fetchDaily, submitDaily, submitEntry } from './online';
 import { BOARD, dailyAhead, placeOf, placeOfDaily, type DailyEntry, type RankEntry } from './ranking';
 import { shareResult } from './share';
+import { ICONS } from './ui/icons';
+import { configureUi } from '@joyfield/shared/ui';
 import { emptyRecords, flowerCount, gardenScore, loadSave, writeSave } from './storage';
 import { applySkin, applyTheme, resolveSkin, todaySkin } from './theme';
 import { BoardView, IDLE_KINDS, type IdleKind } from './ui/board';
@@ -28,6 +31,8 @@ applyTheme(save.theme);
 applySkin(resolveSkin(save.skin, new Date()));
 setPageSound(() => sound.play('page'));
 let teardown: (() => void) | null = null;
+// 공통 화면 조각(대화상자·랭킹 창·등록 카드)이 쓸 문구·아이콘
+configureUi({ t, icons: { trophy: ICONS.trophy, close: ICONS.close } });
 
 function mount(el: HTMLElement): void {
   teardown?.();
@@ -35,9 +40,9 @@ function mount(el: HTMLElement): void {
   app.replaceChildren(el);
 }
 
-/** 진동 세기는 기준서 1.7 표: 눈금 12, 가벼운 타격 30~40, 좋은 타격 [45,30,60], 성공 축하 [60,50,60,50,220] … */
-function vibrate(pattern: number | number[]): void {
-  if (save.vibrate) navigator.vibrate?.(pattern);
+/** 진동: 조이필드 공통 세기표(기준서 1.7, Joyfield.vibrate) */
+function vibrate(pattern: VibrationName): void {
+  Joyfield.vibrate(pattern, save.vibrate);
 }
 
 const today = () => dateKey(new Date());
@@ -131,6 +136,8 @@ const ranking: RankingView = {
 function showStart(settings?: 'open' | 'reset', settingsFocus?: string, opening = false): void {
   const now = new Date();
   publishPending();
+  // 뒤로 가기: 시작 화면에서는 조이필드로(기준서 1.3)
+  Joyfield.back.screen(0);
   applySkin(resolveSkin(save.skin, now));
   mount(
     startScreen({
@@ -247,7 +254,7 @@ function play(level: number | 'daily'): void {
       lit.forEach((ok, i) => {
         if (ok && !lastLit[i] && !game.done) {
           sound.play('happy');
-          vibrate(30);
+          vibrate('light');
           fx.ring(board.pots[i].el);
         } else if (!ok && lastLit[i]) sound.play('unhappy');
       });
@@ -314,14 +321,14 @@ function play(level: number | 'daily'): void {
     if (!r.moved) {
       board.bump(dir);
       sound.play('bump');
-      vibrate(12);
+      vibrate('tick');
       stopWalk();
       return;
     }
     // 소리 → 진동 → 화면 연출 순
     if (r.pushed >= 0) {
       sound.play('push');
-      vibrate(35);
+      vibrate('match');
       board.place(game.state, dir);
       board.push();
       fx.shake('tiny');
@@ -369,6 +376,7 @@ function play(level: number | 'daily'): void {
     stopWalk();
     solAutoOff();
     view.showPause(on);
+    syncBack();
     if (!on) view.boardHost.focus({ preventScroll: true });
   };
 
@@ -383,7 +391,7 @@ function play(level: number | 'daily'): void {
     const f = FLOWER[daily ? species[0] : LEVELS[level as number].flower];
     later(260, () => {
       sound.play('bloom');
-      vibrate([60, 50, 60, 50, 220]);
+      vibrate('celebrate');
       fx.shake('small');
       board.bloom();
       later(260, () => board.pots.forEach((p) => fx.petals(p.el, accentOf(f.id))));
@@ -640,6 +648,14 @@ function play(level: number | 'daily'): void {
   };
   solInit();
 
+  // 뒤로 가기(기준서 1.3): 플레이 중 → 일시정지, 일시정지 중·판을 깬 뒤 → 시작 화면
+  function syncBack() {
+    Joyfield.back.screen(paused ? 1 : 2, () => {
+      if (paused || game.done) showStart();
+      else setPaused(true);
+    });
+  }
+  syncBack();
   const onVisibility = () => document.hidden && !game.done && setPaused(true);
   window.addEventListener('keydown', onKey);
   document.addEventListener('visibilitychange', onVisibility);
@@ -671,8 +687,10 @@ function showDailyResult(result: DailyResult): void {
   mount(dailyResultScreen({ result, onRetry: () => play('daily'), onHome: () => showStart(), onShare: shareResult, ranking }));
   if (result.better) {
     sound.play('record');
-    vibrate([60, 40, 120]);
+    vibrate('big');
   }
+  // 뒤로 가기: 결과 → 시작 화면
+  Joyfield.back.screen(1, () => showStart());
   const onKey = (e: KeyboardEvent) => {
     if ((e.target as Element | null)?.closest?.('input, .rank-entry, .modal')) return;
     if (document.querySelector('.screen.result.locked')) return;
@@ -684,6 +702,8 @@ function showDailyResult(result: DailyResult): void {
 }
 
 function showResult(result: ClearResult, test: boolean): void {
+  // 뒤로 가기: 결과 → 시작 화면
+  Joyfield.back.screen(1, () => showStart());
   const { level } = result;
   const next = level + 1 < LEVELS.length ? level + 1 : -1;
   mount(
@@ -701,7 +721,7 @@ function showResult(result: ClearResult, test: boolean): void {
   if (result.firstBloom) sound.play('unlock');
   if (result.better && !result.firstBloom) {
     sound.play('record');
-    vibrate([60, 40, 120]);
+    vibrate('big');
   }
   const onKey = (e: KeyboardEvent) => {
     if ((e.target as Element | null)?.closest?.('input, .rank-entry, .modal')) return;

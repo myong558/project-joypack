@@ -1,5 +1,6 @@
 // 공통 모듈을 맨 먼저 불러, 이름 바꾸기 전 저장 키를 다른 코드가 읽기 전에 옮긴다
 import '@joyfield/shared';
+import type { VibrationName } from '@joyfield/shared';
 import '@joyfield/shared/topbar.css';
 import './styles.css';
 import { Sound, type SoundName } from './audio';
@@ -16,6 +17,8 @@ import { boardEntries, clearPending, keepPending, pendingScore, placeOf, type Ra
 import { emptyRecords, loadSave, writeSave } from './storage';
 import { applySkin, applyTheme, resolveSkin } from './theme';
 import { Board } from './ui/board';
+import { MORE_ICONS } from './ui/icons';
+import { configureUi } from '@joyfield/shared/ui';
 import { Effects, Hammer } from './ui/effects';
 import { Hud } from './ui/hud';
 import { gameScreen, resultScreen, startScreen, type Mode, type RankingView } from './ui/screens';
@@ -27,6 +30,8 @@ setLang(save.lang);
 applyTheme(save.theme);
 applySkin(resolveSkin(save.skin, new Date()));
 let teardown: (() => void) | null = null;
+// 공통 화면 조각(대화상자·랭킹 창·등록 카드)이 쓸 문구·아이콘
+configureUi({ t, icons: { trophy: MORE_ICONS.trophy, close: MORE_ICONS.close } });
 
 /** 숫자패드 배치: 7 8 9 / 4 5 6 / 1 2 3 */
 const NUMPAD: Record<string, number> = { '7': 0, '8': 1, '9': 2, '4': 3, '5': 4, '6': 5, '1': 6, '2': 7, '3': 8 };
@@ -43,9 +48,9 @@ function todayLabel(d: Date): string {
   return `${d.getMonth() + 1}/${d.getDate()}`;
 }
 
-/** 진동은 30ms 아래면 거의 느껴지지 않아, 보통 타격도 40ms 이상으로 준다 */
-function vibrate(pattern: number | number[]): void {
-  if (save.vibrate) navigator.vibrate?.(pattern);
+/** 진동: 조이필드 공통 세기표(기준서 1.7, Joyfield.vibrate) */
+function vibrate(pattern: VibrationName): void {
+  Joyfield.vibrate(pattern, save.vibrate);
 }
 
 function cacheBoard(mode: Mode, today: string, entries: RankEntry[]): void {
@@ -107,6 +112,8 @@ function rankingView(day: Date): RankingView {
 function showStart(settings?: 'open' | 'reset', settingsFocus?: string, opening = false): void {
   const today = new Date();
   publishPending(dateKey(today));
+  // 뒤로 가기: 시작 화면에서는 조이필드로(기준서 1.3)
+  Joyfield.back.screen(0);
   const todaySkin = resolveSkin('auto', today);
   applySkin(resolveSkin(save.skin, today));
   mount(
@@ -251,7 +258,7 @@ function play(mode: Mode): void {
           fx.shake('small');
         }
         hitstop(50);
-        vibrate(30);
+        vibrate('light');
         break;
       case 'hit': {
         const { mole, points } = e;
@@ -273,15 +280,15 @@ function play(mode: Mode): void {
           fx.banner(t('banner.kingDown'), 'king');
           fx.shake('big');
           hitstop(160);
-          vibrate([60, 40, 120]);
+          vibrate('big');
         } else if (mole.kind === 'golden') {
           fx.shake('small');
           hitstop(90);
-          vibrate([45, 30, 60]);
+          vibrate('good');
         } else {
           fx.shake('tiny');
           hitstop(70);
-          vibrate(game.inFever ? 55 : 40);
+          vibrate(game.inFever ? 'fever' : 'hit');
         }
         break;
       }
@@ -295,7 +302,7 @@ function play(mode: Mode): void {
         record('bomb', holeEl(e.mole.hole));
         fx.shake('big');
         hitstop(140);
-        vibrate([90, 50, 140]);
+        vibrate('fail');
         break;
       case 'whiff':
         sound.play('whiff');
@@ -330,9 +337,11 @@ function play(mode: Mode): void {
         break;
       case 'pause':
         view.showPause(true);
+        syncBack();
         break;
       case 'resume':
         view.showPause(false);
+        syncBack();
         break;
       case 'over':
         view.el.classList.remove('fever', 'spurt', 'frozen');
@@ -344,6 +353,13 @@ function play(mode: Mode): void {
     }
   };
   const off = game.on(handle);
+  // 뒤로 가기(기준서 1.3): 플레이 중 → 일시정지, 일시정지 중 → 시작 화면. 카운트다운·끝난 뒤에는 바로 시작 화면
+  const syncBack = () =>
+    Joyfield.back.screen(game.phase === 'paused' ? 1 : 2, () => {
+      if (game.phase === 'playing') game.pause();
+      else showStart();
+    });
+  syncBack();
 
   let raf = 0;
   let last = performance.now();
@@ -425,6 +441,8 @@ function showResult(result: GameResult, missionId: MissionId, mode: Mode, date: 
     }),
   );
   if (isRecord) sound.play('record');
+  // 뒤로 가기: 결과 → 시작 화면
+  Joyfield.back.screen(1, () => showStart());
 
   const onKey = (e: KeyboardEvent) => {
     // 이름을 치는 중이거나 랭킹 창·등록 카드 안에서 누른 키는 그쪽에 맡긴다

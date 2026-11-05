@@ -55,7 +55,7 @@
 ### 결정: **A로 먼저 열고, B로 완성한다** (C는 쓰지 않음)
 
 - 게임은 **각자 독립된 페이지**로 둡니다. 허브에서 게임으로는 일반 페이지 이동입니다. 게임마다 글꼴·색·CSS 가 달라도 서로 간섭하지 않고, 게임 쪽 코드는 거의 그대로 씁니다.
-- 기술 스택을 하나로 억지로 맞추지 않습니다. 업다운은 빌드 없는 정적 파일로, 두더지잡기는 Vite 빌드 결과로 같은 `dist/` 에 모읍니다.
+- 모든 게임이 Vite + TypeScript 로 빌드해 같은 `dist/` 에 모읍니다(업다운도 v1.21.0, 2026-11-05 에 정적 파일에서 옮김). 대화상자·랭킹 창·등록 카드·순위표 저장·결과 이미지·진동·뒤로 가기·허브 메타는 `packages/shared` 공통 모듈(기준서 1.2).
 - 앞으로 만들 게임은 조이필드 안에서 바로 시작합니다(9장 "새 게임 추가").
 
 ---
@@ -72,14 +72,15 @@ project-joyfield/
 │       │   ├── skins.ts        오늘의 톤 5개(포도·캔디·소다·레몬·민트), 톤 미리보기(개발자 모드에서만)
 │       │   ├── games.ts        games.json 읽기, 게임 아이콘을 허브 빌드에 포함
 │       │   ├── settings.ts     공통 설정 읽기·쓰기, 통합 전 설정 옮기기, 컬러 모드
-│       │   ├── records.ts      카드의 "내 최고 기록"(각 게임 저장 키를 읽기만 함)
-│       │   ├── rankings.ts     전체 랭킹(Firestore REST 읽기 전용, 5분 기기 캐시)
+│       │   ├── records.ts      카드의 "내 최고 기록"·내 기록 지우기(게임 메타 joyfield.meta.ts 를 씀)
+│       │   ├── meta.ts         games/*/joyfield.meta.ts 를 자동으로 모음
+│       │   ├── rankings.ts     전체 랭킹(게임 메타의 ranking, Firestore REST 읽기 전용, 5분 기기 캐시)
 │       │   ├── i18n.ts         한국어·영어 문구
 │       │   └── fonts/          Jua 서브셋(pnpm font)
 │       ├── public/             로고, 앱 아이콘, manifest, og-image
 │       └── scripts/            build-icons.mjs(로고 → PNG·og-image)
 ├── games/
-│   ├── updown/                 업다운 (git subtree, 빌드 없음 → package.json "files" 를 그대로 복사)
+│   ├── updown/                 업다운 (git subtree, Vite + TS, v1.21.0~)
 │   └── hammer/                 두더지잡기 (git subtree, vite build → dist/)
 ├── packages/
 │   └── shared/joyfield.js       공통 모듈 window.Joyfield (공통 설정, 랭킹 이름 규칙, 서비스 워커 등록, 게임 캐시 확인·비우기)
@@ -95,7 +96,7 @@ project-joyfield/
 └── package.json
 ```
 
-공통 모듈(`packages/shared/joyfield.js`)은 빌드 없는 게임과 TypeScript 쪽이 같은 파일 하나를 쓰도록 `window.Joyfield` 전역을 만드는 일반 스크립트입니다. 업다운은 `<script src="../../shared/joyfield.js">` 로, 허브·두더지잡기는 `import '@joyfield/shared'` 로 불러옵니다(타입은 `joyfield.d.ts`).
+공통 모듈(`packages/shared/joyfield.js`)은 `window.Joyfield` 전역을 만드는 일반 스크립트이고 허브·모든 게임이 `import '@joyfield/shared'` 로 불러옵니다(타입은 `joyfield.d.ts`). 게임 화면 조각·랭킹·결과 이미지·허브 연결 메타는 TypeScript 로 `@joyfield/shared/ui`·`/rank`·`/capture`·`/meta` 에 있습니다(기준서 1.2). 허브 첫 화면 깜빡임 방지 스크립트 등 그대로 쓰는 파일을 위해 빌드가 `dist/shared/joyfield.js` 사본도 둡니다.
 
 배포 결과(`dist/`)와 주소:
 
@@ -197,12 +198,12 @@ dist/                       → https://pocketgamelab.com/joyfield/ (배포 묶�
   "name": { "ko": "업다운", "en": "Up Down" },
   "desc": { "ko": "UP · DOWN 힌트로 숨은 숫자 맞히기", "en": "Find the hidden number with UP/DOWN hints" },
   "path": "games/updown/",
-  "icon": "games/updown/images/icon.svg",
+  "icon": "games/updown/public/images/icon.svg",
   "color": "#0f66ff",
   "status": "live",
   "added": "2026-10-21",
   "ranking": {
-    "path": "games/updown/scores-<끝 숫자>",
+    "path": "games/updown/rankings",
     "default": "100",
     "boards": [{ "id": "50", "name": { "ko": "1~50", "en": "1~50" } }, "…"]
   }
@@ -215,7 +216,7 @@ dist/                       → https://pocketgamelab.com/joyfield/ (배포 묶�
 - `status` 가 `soon` 이면 카드로 보이지 않고 배포에서도 빠지며, 게임 목록 아래 "다음 게임" 띠에 이름만 나옵니다. `soon` 인 게임이 없으면 띠에 "다음 미니 게임을 만들고 있어요"가 보입니다.
 - `open`(선택)은 공개 예약 시각(ISO, `+09:00`)입니다. `status: "preview"` 와 함께 쓰면 그 전까지 누를 수 없는 COMING SOON 카드, 그 시각부터 모두에게 정식 카드로 보입니다(`pnpm release <id> --at`).
 - `status` 가 `preview` 면 배포는 하지만 허브에는 `soon` 처럼 보입니다(운영 사이트의 "다음 게임" 띠에는 이름 없이 "다음 미니 게임을 만들고 있어요"). 개발자 모드(개발 사이트·내 PC 주소에서는 늘 켜짐, 운영에서는 켤 수 없음)에서만 `TEST` 표시 카드로 보입니다(휴대폰 확인은 개발 사이트에서, 기준서 7.3). 허브 랭킹 창에도 개발자 모드에서만 그 게임 탭이 보입니다.
-- 허브 카드의 "내 최고 기록"과 전체 랭킹 조회는 게임마다 저장 형식이 달라 `apps/hub/src/records.ts`, `rankings.ts` 에 게임별로 읽는 방법을 하나씩 둡니다.
+- 허브 카드의 "내 최고 기록"·내 기록 지우기·전체 랭킹 조회는 게임마다 저장 형식이 달라, 각 게임이 `games/<id>/joyfield.meta.ts`(허브 연결 메타, `@joyfield/shared/meta`)에 읽는 방법을 두고 허브가 자동으로 모읍니다(허브 v1.41.0~).
 
 ---
 
@@ -334,7 +335,7 @@ pnpm --filter hub icons  # 로고(apps/hub/public/logo.svg)를 바꾼 뒤 앱 �
 4. **지원 연락처**: `contact@pocketgamelab.com`(2026-11-05 결정, 2026-11-05 Cloudflare 이메일 라우팅으로 개인 Gmail 에 전달하도록 연결함, 받기 전용). 개인정보 보호책임자는 실명(명범수) + Pocket Game Lab. 마켓 등록 정보·개인정보 처리방침에 넣고, 랭킹 이름 신고 등을 받습니다.
 5. **마켓 포장**: 구글 플레이는 TWA(Bubblewrap) + `assetlinks.json`, 애플은 Capacitor 로 감싸고 앱다운 기능을 함께(웹 감싸기만은 심사 지침 4.2 거절 위험).
 6. **광고를 붙일 때**: 광고 자리(기준서 10.7, PC 는 옆 여백), 동의 창(UMP)·iOS 추적 허가(ATT), 데이터 보안 양식·개인정보 라벨 갱신.
-7. **플레이 스토어 최초 공개 직전 랭킹 초기화**(2026-11-04 결정): 테스트 점수를 지우고 새로 시작합니다(기기 아이콘 `dev` 가 없는 예전 기록도 함께 정리). 규칙상 앱에서는 못 지우므로 Firebase 콘솔에서 사람이 지웁니다: `games/updown/scores-50`·`scores-100`·`scores-200` 의 문서 전부, `games/hammer/rankings/*`, `games/timetoflip/rankings/*`, `games/glasshouse/rankings/*`(그 뒤 생긴 게임은 `firestore.rules` 목차로 확인). Claude 는 출시 작업 때 이 일을 먼저 요청합니다(메모리 `ranking-reset-at-store-launch`).
+7. **플레이 스토어 최초 공개 직전 랭킹 초기화**(2026-11-04 결정): 테스트 점수를 지우고 새로 시작합니다(기기 아이콘 `dev` 가 없는 예전 기록도 함께 정리). 규칙상 앱에서는 못 지우므로 Firebase 콘솔에서 사람이 지웁니다: `games/updown/rankings/*`(v1.21.0~)와 옛 `games/updown/scores-50`·`scores-100`·`scores-200` 의 문서 전부, `games/hammer/rankings/*`, `games/timetoflip/rankings/*`, `games/glasshouse/rankings/*`(그 뒤 생긴 게임은 `firestore.rules` 목차로 확인). Claude 는 출시 작업 때 이 일을 먼저 요청합니다(메모리 `ranking-reset-at-store-launch`).
 
 ---
 
@@ -345,9 +346,9 @@ pnpm --filter hub icons  # 로고(apps/hub/public/logo.svg)를 바꾼 뒤 앱 �
 1. `games/<id>/` 만들기(템플릿 복사). 게임 ID 는 영문 소문자, 한 번 정하면 바꾸지 않습니다(랭킹 경로·저장 키에 쓰임).
 2. 게임 로직은 DOM 과 분리하고 Vitest 로 테스트합니다.
 3. 기기 저장 키는 `<id>.` 로 시작합니다. 공통 설정은 `Joyfield.get('theme')` 처럼 공통 모듈로 읽고 씁니다.
-4. 상대 경로만 쓰고, 자기 서비스 워커·manifest 는 만들지 않습니다. 대신 `Joyfield.registerSW({ root: '../../', game: '<id>' })` 를 부르고, manifest 는 `../../manifest.webmanifest` 를 가리킵니다. 빌드하는 게임은 `package.json` 에 `build` 스크립트(결과는 `dist/`), 빌드 없는 게임은 `"files"` 에 배포할 파일을 적습니다. 오프라인에 필요한 파일은 모두 `games/<id>/` 안에 둡니다. 그래야 `files.json` 에 들어가 처음 열 때 함께 캐시됩니다.
+4. 상대 경로만 쓰고, 자기 서비스 워커·manifest 는 만들지 않습니다. 대신 `Joyfield.registerSW({ root: '../../', game: '<id>' })` 를 부르고, manifest 는 `../../manifest.webmanifest` 를 가리킵니다. 게임은 `package.json` 에 `build` 스크립트(결과는 `dist/`)를 둡니다(빌드 없는 게임은 `"files"` 에 배포할 파일을 적는 길도 빌드 스크립트에 남아 있지만 지금은 쓰는 게임이 없음). 오프라인에 필요한 파일은 모두 `games/<id>/` 안에 둡니다. 그래야 `files.json` 에 들어가 처음 열 때 함께 캐시됩니다.
 5. 랭킹이 있으면 `games/<id>/` 아래에만 쓰고, `firestore.rules` 에 블록 추가 → 콘솔 게시, 필요한 복합 색인 추가.
-6. `games.json` 에 항목 추가(처음엔 `status: "soon"`, 완성되면 `"live"`). 허브 카드에 최고 기록·전체 랭킹을 보이려면 `apps/hub/src/records.ts`, `rankings.ts` 에 읽는 방법을 추가하고, 게임 이름이 바뀌었으면 `pnpm font`.
+6. `games.json` 에 항목 추가(처음엔 `status: "soon"`, 완성되면 `"live"`). 허브 카드에 최고 기록·전체 랭킹을 보이려면 `games/<id>/joyfield.meta.ts` 를 만들고(허브 코드는 고치지 않음), 게임 이름이 바뀌었으면 `pnpm font`.
 7. 시작 화면 왼쪽 위에 조이필드 게임 목록 버튼(`../../`)을 둡니다.
 8. 한국어·영어 문구, 라이트·다크, 동작 줄이기 설정, 휴대폰 세로·PC 화면 확인.
 9. 링크 미리보기 이미지(1200×630) 준비. 게임 `index.html` 의 og:url·og:image 는 `https://pocketgamelab.com/joyfield/games/<id>/` 기준.

@@ -1,0 +1,28 @@
+import { readFileSync } from 'node:fs';
+import { defineConfig, type Plugin } from 'vite';
+
+// 설정 팝업에 보여 줄 버전(package.json의 vX.Y.Z)
+const { version } = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')) as { version: string };
+
+/**
+ * 조이필드 안에서는 앱 설치·오프라인을 조이필드가 맡는다(manifest·서비스 워커는 사이트 루트).
+ * 게임 페이지에서도 조이필드 앱으로 설치되도록 루트 manifest를 가리킨다. 빌드 대상 밖 파일이라 Vite 처리 뒤에 넣는다
+ */
+const joyfieldManifest: Plugin = {
+  name: 'joyfield-manifest',
+  transformIndexHtml: {
+    order: 'post',
+    handler: () => [{ tag: 'link', attrs: { rel: 'manifest', href: '../../manifest.webmanifest' }, injectTo: 'head' }],
+  },
+};
+
+export default defineConfig({
+  base: './',
+  define: {
+    // 운영 빌드(main 배포, JOYFIELD_SITE=prod)면 true: 공통 모듈의 개발자 모드를 끄고 그 코드를 빌드 때 뺀다(packages/shared/joyfield.js PROD_BUILD)
+    __JOYFIELD_PROD__: JSON.stringify(process.env.JOYFIELD_SITE === 'prod'),
+    __APP_VERSION__: JSON.stringify(version),
+  },
+  server: { port: 5174, open: false },
+  plugins: [joyfieldManifest],
+});

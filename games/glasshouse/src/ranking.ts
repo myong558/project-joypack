@@ -1,3 +1,5 @@
+import { placeBy } from '@joyfield/shared/rank';
+import { RANK_SIZE, isValidName } from '@joyfield/shared/ui';
 /** 순위표는 하나: 정원 점수(24개 판 가장 좋은 판 점수의 합) */
 export const BOARD = 'garden';
 
@@ -5,10 +7,8 @@ export const BOARD = 'garden';
 export type Device = 'm' | 'p';
 const isDevice = (dev: unknown): dev is Device => dev === 'm' || dev === 'p';
 
-/** 순위표에 남는 칸 수 */
-export const RANK_SIZE = 10;
-/** 이름은 영문 대문자 A–Z로 이 글자 수까지 */
-export const NAME_MAX = 5;
+// 순위표 칸 수(10)·이름 규칙(영문 대문자 5자)은 조이필드 공통(@joyfield/shared/ui)
+export { NAME_MAX, RANK_SIZE, cleanName, isValidName } from '@joyfield/shared/ui';
 /** 판 점수 상한 1000 × 24판(서버 규칙도 같은 상한을 검사) */
 export const SCORE_MAX = 24_000;
 
@@ -30,20 +30,10 @@ export interface PendingRecord {
 }
 
 /** 입력한 글자를 대문자로 바꾸고 A–Z가 아닌 글자는 버린다 */
-export function cleanName(raw: string): string {
-  return raw.toUpperCase().replace(/[^A-Z]/g, '').slice(0, NAME_MAX);
-}
-
-export function isValidName(name: string): boolean {
-  return new RegExp(`^[A-Z]{1,${NAME_MAX}}$`).test(name);
-}
-
 /** 이 점수가 들어갈 자리(0부터). 같은 점수면 먼저 올린 기록이 앞서므로 그 뒤에 선다. 10위 밖이면 -1 */
 export function placeOf(entries: readonly RankEntry[], score: number): number {
   if (score <= 0) return -1;
-  const below = entries.findIndex((e) => e.score < score);
-  const at = below === -1 ? entries.length : below;
-  return at < RANK_SIZE ? at : -1;
+  return placeBy(entries, { score } as RankEntry, (a, b) => a.score > b.score);
 }
 
 /**
@@ -114,9 +104,7 @@ export const dailyAhead = (a: DailyRecord, b: DailyRecord) => a.moves < b.moves 
 
 /** 이 기록이 들어갈 자리(0부터). 10위 밖이면 -1 */
 export function placeOfDaily(entries: readonly DailyEntry[], rec: DailyRecord): number {
-  const at = entries.findIndex((e) => dailyAhead(rec, e));
-  const place = at === -1 ? entries.length : at;
-  return place < RANK_SIZE ? place : -1;
+  return placeBy(entries as readonly DailyRecord[], rec, dailyAhead);
 }
 
 /** 기록을 끼워 넣는다. 같은 날 여러 번 해도 이름마다 가장 좋은 한 줄만 남긴다. 들어가지 못하면 -1 */

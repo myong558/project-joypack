@@ -1,70 +1,19 @@
 import '@joyfield/shared';
+import { rankStore } from '@joyfield/shared/rank';
 import { BOARD, dailyBoard, insertDaily, insertEntry, sanitizeDaily, sanitizeEntries, type DailyEntry, type RankEntry } from './ranking';
 
 /**
- * 온라인 순위표(Firebase Firestore). joyfield 프로젝트를 다른 게임과 같이 쓰므로
+ * 온라인 순위표(Firebase Firestore, 조이필드 공통 순위표 문서 방식 @joyfield/shared/rank).
  * 온실정원 데이터는 games/glasshouse/rankings/ 아래 문서에만 둔다(순위표 하나 = 문서 하나, 1~10위).
  *   정원 점수:    garden               { entries: [{ name, score, flowers, date }, ...] }
  *   오늘의 정원:  daily-YYYY-MM-DD     { entries: [{ name, moves, time, date }, ...] } (날짜마다 새 문서라 매일 새로 시작한다)
- * 웹 설정값은 공개되는 값이며, 쓰기 제한은 Firestore 규칙이 맡는다
+ * 쓰기 제한은 Firestore 규칙이 맡는다. 올릴 때 "10위까지, 같은 기록은 기존 우선, 이름마다 한 줄"이 지켜진다
  */
-// 개발(내 PC)·운영(배포 사이트) DB 는 공통 모듈이 주소를 보고 고른다(packages/shared/joyfield.js 의 FIREBASE)
-const firebaseConfig = Joyfield.FIREBASE;
+// 첫 화면을 가볍게 열도록 Firebase(서버 없이 쓰는 가벼운 lite SDK)는 순위표가 필요할 때 불러온다
+const store = rankStore('glasshouse', () => Promise.all([import('firebase/app'), import('firebase/firestore/lite')]));
 
-/** 응답이 이보다 늦으면 오프라인으로 보고 기기에 남은 순위를 보여 준다 */
-const TIMEOUT_MS = 8000;
+export const fetchBoard = async (): Promise<RankEntry[]> => sanitizeEntries(await store.read(BOARD));
+export const submitEntry = (entry: RankEntry) => store.insert(BOARD, sanitizeEntries, (list) => insertEntry(list, entry));
 
-// 첫 화면을 가볍게 열도록 Firebase는 순위표가 필요할 때 불러온다. 서버 없이 쓰는 가벼운(lite) SDK를 쓴다
-let sdk: Promise<{ db: import('firebase/firestore/lite').Firestore; fs: typeof import('firebase/firestore/lite') }> | null = null;
-function load() {
-  sdk ??= Promise.all([import('firebase/app'), import('firebase/firestore/lite')]).then(([app, fs]) => ({
-    db: fs.getFirestore(app.initializeApp(firebaseConfig, 'glasshouse')),
-    fs,
-  }));
-  // 불러오기에 실패하면(오프라인 등) 다음에 다시 시도한다
-  sdk.catch(() => (sdk = null));
-  return sdk;
-}
-
-function withTimeout<T>(p: Promise<T>): Promise<T> {
-  return new Promise((resolve, reject) => {
-    const id = setTimeout(() => reject(new Error('timeout')), TIMEOUT_MS);
-    p.then(resolve, reject).finally(() => clearTimeout(id));
-  });
-}
-
-const entriesOf = (raw: unknown) => (raw as { entries?: unknown } | undefined)?.entries;
-
-async function readDoc(id: string): Promise<unknown> {
-  return withTimeout(
-    (async () => {
-      const { db, fs } = await load();
-      return entriesOf((await fs.getDoc(fs.doc(db, 'games', 'glasshouse', 'rankings', id))).data());
-    })(),
-  );
-}
-
-/**
- * 순위표 문서에 기록 하나를 끼운다. 트랜잭션이라 여러 사람이 동시에 올려도 "10위까지, 같은 기록은 기존 우선, 이름마다 한 줄"이 지켜진다.
- * 그사이 밀려 10위 밖이 됐으면 place는 -1
- */
-async function insertDoc<T>(id: string, clean: (raw: unknown) => T[], insert: (list: T[]) => number): Promise<{ place: number; entries: T[] }> {
-  return withTimeout(
-    (async () => {
-      const { db, fs } = await load();
-      const ref = fs.doc(db, 'games', 'glasshouse', 'rankings', id);
-      return fs.runTransaction(db, async (tx) => {
-        const entries = clean(entriesOf((await tx.get(ref)).data()));
-        const place = insert(entries);
-        if (place >= 0) tx.set(ref, { entries });
-        return { place, entries };
-      });
-    })(),
-  );
-}
-
-export const fetchBoard = async (): Promise<RankEntry[]> => sanitizeEntries(await readDoc(BOARD));
-export const submitEntry = (entry: RankEntry) => insertDoc(BOARD, sanitizeEntries, (list) => insertEntry(list, entry));
-
-export const fetchDaily = async (date: string): Promise<DailyEntry[]> => sanitizeDaily(await readDoc(dailyBoard(date)));
-export const submitDaily = (entry: DailyEntry) => insertDoc(dailyBoard(entry.date), sanitizeDaily, (list) => insertDaily(list, entry));
+export const fetchDaily = async (date: string): Promise<DailyEntry[]> => sanitizeDaily(await store.read(dailyBoard(date)));
+export const submitDaily = (entry: DailyEntry) => store.insert(dailyBoard(entry.date), sanitizeDaily, (list) => insertDaily(list, entry));

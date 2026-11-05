@@ -1,14 +1,14 @@
 /* Jua (SIL OFL 1.1, fonts/OFL.txt). 화면에 쓰는 글자만 담은 서브셋 — 문구를 바꾸면 `pnpm font` */
 @font-face {
   font-family: 'Jua';
-  src: url('../fonts/jua-subset.woff2') format('woff2');
+  src: url('./fonts/jua-subset.woff2') format('woff2');
   font-display: swap;
 }
 /* 기호 채움(Gothic A1 Bold, SIL OFL 1.1): Jua 에 없는 … → © ① ※ ℃ 등만 그린다(약 8 KB, 그 글자가 화면에 나올 때만 받음).
  * 위 Jua 와 같은 이름·같은 굵기 설명이어야 한 글꼴처럼 섞여 쓰인다. unicode-range 는 pnpm font 출력(fonts.lock.json)과 같게, 기준서 1.10 */
 @font-face {
   font-family: 'Jua';
-  src: url('../fonts/gothic-a1-bold-symbols.woff2') format('woff2');
+  src: url('./fonts/gothic-a1-bold-symbols.woff2') format('woff2');
   font-display: swap;
   unicode-range: U+60, U+A9, U+AE, U+B0-B3, U+B7, U+B9, U+BC-BE, U+D7, U+F7, U+2013-2014, U+2018-2019, U+2022, U+2025-2026, U+2030, U+203B, U+2103, U+2116, U+2122, U+2190-2194, U+21D2, U+2212, U+221E, U+2260, U+2264-2265, U+2460-2469, U+25A0-25A1, U+25B2-25B3, U+25B6-25B7, U+25BC-25BD, U+25C0-25C1, U+25C6-25C7, U+25CB, U+25CE-25CF, U+2660, U+2662-2664, U+2666-2667, U+266A, U+266C, U+2713-2716, U+3008-3011, U+3014-3015;
 }
@@ -894,8 +894,59 @@ button:focus-visible {
 /* ── 게임 화면 ────────────────────────── */
 .status {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: auto 1fr 1fr;
   gap: 12px;
+}
+
+/* 일시정지 단추: 옆 상태 카드와 같은 높이·둥글기, 색은 튀지 않게 옅은 알약 색 */
+.status-pause {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  padding: 0;
+  background: var(--pill-bg);
+  color: var(--text-muted);
+  border: 1px solid var(--pill-line);
+  border-radius: 14px;
+  box-shadow: var(--shadow-box);
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: transform 0.12s, color 0.15s;
+}
+
+.status-pause:active {
+  transform: scale(0.92);
+}
+
+.status-pause:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* 좁은 화면: 단추가 들어온 만큼 간격·안쪽 여백을 줄여 카드 글자가 한 줄로 */
+@media (max-width: 379px) {
+  .status {
+    gap: 8px;
+  }
+
+  .status-pause {
+    width: 40px;
+  }
+
+  .status-item {
+    gap: 5px;
+    padding-inline: 4px;
+  }
+}
+
+.status-value {
+  white-space: nowrap;
+}
+
+@media (hover: hover) {
+  .status-pause:hover {
+    color: var(--text);
+  }
 }
 
 .status-item {
@@ -1563,12 +1614,12 @@ button:focus-visible {
 }
 
 /* 랭킹 등록 칸이 펼쳐지면 자리가 모자라 다시 하기 버튼이 화면 밖으로 밀리지 않게 사이 간격을 줄인다 */
-#screen-result:has(.result-rank:not([hidden])) {
+#screen-result:has(.rank-entry) {
   gap: calc(var(--space) * 0.6);
 }
 
 /* 이때는 등록 칸이 확인 버튼 자리를 이미 비켜 두므로 버튼 아래 여백도 줄인다 */
-#screen-result:has(.result-rank:not([hidden])) .actions {
+#screen-result:has(.rank-entry) .actions {
   padding-bottom: calc(var(--space) * 0.5);
 }
 
@@ -1685,13 +1736,11 @@ button:focus-visible {
   display: none;
 }
 
-/* 결과 화면 랭킹 등록 칸(app.js 의 renderResultRank): 축하 문구 아래, 버튼 위. 대표색 테두리로 눈에 띄게 한다. */
-.result-rank {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+/* 랭킹 등록 카드(공통 @joyfield/shared/ui 의 rankEntryForm): 결과 화면 버튼 위·랭킹 창 맨 위. 대표색 테두리로 눈에 띄게 한다.
+   입력 칸(.rank-entry-form)과 완료 칸(.rank-entry-done)을 같은 자리에 겹쳐 등록 전·중·후 카드 높이가 그대로 */
+.rank-entry {
+  display: grid;
   width: 100%;
-  margin-top: calc(var(--space) * 0.75);
   padding: 12px;
   background: var(--surface);
   border: 2px solid var(--action-line);
@@ -1699,25 +1748,114 @@ button:focus-visible {
   box-shadow: var(--shadow-action);
 }
 
-.result-rank.enter {
-  animation: pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+#screen-result .rank-entry {
+  margin-top: calc(var(--space) * 0.75);
+  animation: pop 0.35s 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
 }
 
-.result-rank-prompt {
+.rank-entry-form,
+.rank-entry-done {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.rank-entry-done {
+  visibility: hidden;
+}
+
+.rank-entry.done .rank-entry-form {
+  visibility: hidden;
+}
+
+.rank-entry.done .rank-entry-done {
+  visibility: visible;
+}
+
+.rank-entry-title {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
   margin: 0;
   color: var(--success);
   font-weight: 700;
   text-align: center;
 }
 
-/* 등록 전에는 입력 칸, 등록 뒤에는 랭킹 보기 버튼만 */
-.result-rank.done .ranking-entry,
-.result-rank:not(.done) .result-rank-view {
+.rank-entry-title b {
+  color: var(--action);
+}
+
+/* 완료 문구는 늘 한 줄(길면 말줄임): 문구에 따라 카드 높이가 바뀌지 않게 */
+.rank-entry-done .rank-entry-title span {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rank-entry-row {
+  display: flex;
+  gap: 8px;
+}
+
+.rank-entry input {
+  flex: 1;
+  min-width: 0;
+  width: 0;
+  padding: 10px 14px;
+  background: var(--field-bg);
+  color: var(--text);
+  border: 2px solid var(--field-line);
+  border-radius: 12px;
+  font: inherit;
+  font-size: 1.25rem;
+  letter-spacing: 0.15em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.rank-entry input:focus {
+  outline: none;
+  border-color: var(--field-focus);
+}
+
+.rank-entry input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+
+.rank-entry-row .primary {
+  flex: none;
+  padding-block: 10px;
+}
+
+.rank-entry-row .primary:disabled {
+  opacity: 0.5;
+}
+
+.rank-entry-hint {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.rank-entry-hint:empty {
   display: none;
 }
 
+.rank-error {
+  color: var(--danger);
+}
+
 /* 등록 뒤 랭킹 보기 버튼: 가로를 꽉 채우지 않고 적당한 폭(최대 220px)으로 가운데. 모든 게임 같은 기준(기준서 1.6) */
-.result-rank-view {
+.rank-entry .rank-view {
   align-self: center;
   width: min(100%, 220px);
   padding-block: 10px;
@@ -1733,7 +1871,8 @@ button:focus-visible {
 }
 
 /* 결과 화면이 막 뜬 직후에는 버튼을 누를 수 없다(app.js 의 finishGame). 확인 버튼을 연달아 누르다 잘못 눌리는 것을 막는다. */
-#screen-result.locked .actions {
+#screen-result.locked .actions,
+#screen-result.locked .rank-entry {
   pointer-events: none;
 }
 
@@ -1810,26 +1949,36 @@ button:focus-visible {
   margin-top: calc(4px - var(--space) * 1.25);
 }
 
-/* 너비 = 화면 - 좌우 여백, 최대 375px. max-width:none 은 브라우저 기본 제한(100% - 6px - 2em) 해제 */
-.settings {
-  width: min(375px, calc(100% - var(--gutter) * 2));
-  max-width: none;
-  max-height: calc(100% - var(--gutter) * 2);
+/* 대화상자(공통 @joyfield/shared/ui 의 openModal): 딤(.modal-backdrop)이 화면을 덮고 가운데에 창(.modal). 너비 = 화면 - 좌우 여백, 최대 375px */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: var(--gutter);
+  background: var(--backdrop);
+  animation: fade-in 0.15s ease-out;
+}
+
+.modal {
+  position: relative;
+  width: min(375px, 100%);
+  max-height: 100%;
+  overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 0;
   background: var(--dialog-bg);
   color: var(--text);
   border: 1px solid var(--dialog-line);
   border-radius: 18px;
   box-shadow: 0 16px 40px var(--shadow-dialog);
-}
-
-.settings::backdrop {
-  background: var(--backdrop);
-}
-
-.settings[open] {
   animation: pop 0.2s ease-out;
+}
+
+/* 같은 창을 다시 그릴 때(언어 바꿈)는 등장 연출 없이 */
+.modal-backdrop.instant,
+.modal-backdrop.instant .modal {
+  animation: none;
 }
 
 .settings-body {
@@ -1862,7 +2011,8 @@ button:focus-visible {
 /* 설정 닫기: 테두리 없는 X. 글자보다 크고 굵게 그려 잘 보이고, 누르는 영역은 padding 포함 약 44px.
    음수 margin 으로 X 획의 오른쪽 끝을 아래 칩들의 오른쪽 끝에 맞추고, 제목 줄 높이는 제목 글자 높이로 둔다.
    Jua 글자는 줄 상자 가운데보다 약 0.065em(32px 제목이면 2px) 위에 그려져 X 도 그만큼 올려 제목과 눈으로 보이는 가운데를 맞춘다. */
-.icon-button {
+.icon-button,
+.modal-x {
   position: relative;
   top: -2px;
   display: inline-flex;
@@ -1876,7 +2026,8 @@ button:focus-visible {
 }
 
 @media (hover: hover) {
-  .icon-button:hover {
+  .icon-button:hover,
+  .modal-x:hover {
     color: var(--text);
   }
 }
@@ -1987,88 +2138,86 @@ button:focus-visible {
   transform: rotate(45deg);
 }
 
-/* ── 랭킹 팝업 ───────────────────────── */
-.ranking .settings-body {
-  gap: calc(var(--space) * 0.75);
-}
-
-.ranking-form {
+/* ── 랭킹 창(공통 @joyfield/shared/ui 의 openRanking) ───────────────────────── */
+.ranking {
   display: flex;
   flex-direction: column;
+  gap: calc(var(--space) * 0.75);
+  padding: clamp(12px, 3 * var(--vh), 20px) 20px;
+}
+
+.ranking h2 {
+  display: flex;
+  align-items: center;
   gap: 8px;
-}
-
-.ranking-prompt {
   margin: 0;
-  color: var(--success);
-  font-weight: 700;
+  padding-right: 36px;
+  font-size: min(2rem, 5.5 * var(--vh));
+  line-height: 1.25;
 }
 
-.ranking-entry {
+.ranking h2 .icon {
+  color: var(--star);
+}
+
+.ranking > .modal-x {
+  position: absolute;
+  top: clamp(12px, 3 * var(--vh), 20px);
+  right: 20px;
+  margin: -6px -12px 0 0;
+}
+
+/* 범위 탭: 설정의 칩과 같은 모양 */
+.rank-tabs {
   display: flex;
   gap: 8px;
 }
 
-.ranking-input {
-  flex: 1;
-  min-width: 0;
-  padding: 10px 14px;
-  background: var(--field-bg);
-  color: var(--text);
-  border: 2px solid var(--field-line);
+.rank-tabs > button {
+  flex: 1 1 0;
+  padding: clamp(6px, 1.5 * var(--vh), 10px) 4px;
+  background: var(--chip-bg);
+  border: 1px solid var(--chip-line);
+  box-shadow: var(--shadow-button);
   border-radius: 12px;
-  font: inherit;
-  font-size: 1.25rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-}
-
-.ranking-input:focus {
-  outline: none;
-  border-color: var(--field-focus);
-}
-
-.ranking-input::placeholder {
-  color: var(--text-muted);
-  font-size: 1.125rem;
-  letter-spacing: 0;
-  text-transform: none;
-}
-
-.ranking-entry .primary {
-  flex: none;
-  padding-block: 10px;
-}
-
-.ranking-tabs .chip {
-  padding-inline: 4px;
   white-space: nowrap;
 }
 
-/* 등록 대기 기록이 있는 난이도: 이름 뒤에 작은 점 */
-.ranking-tabs .chip.has-pending::after {
-  content: "";
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  margin-left: 4px;
-  border-radius: 50%;
-  background: var(--heart);
-  vertical-align: 0.3em;
+.rank-tabs > button[aria-pressed='true'] {
+  background: var(--selected);
+  color: var(--text-on-selected);
+  border-color: var(--selected);
+  box-shadow: var(--shadow-selected);
 }
 
-/* 목록 높이는 기록 수와 관계없이 늘 10줄 높이: 난이도 탭을 바꿔도 팝업 크기가 변하지 않는다.
-   한 줄 높이는 화면 높이에 따라 32~40px. */
-/* 한 줄 높이: 오른쪽 점수 칸이 두 줄(점수 + 시도·시간)이라 위아래 여백이 남도록 48px.
-   목록 칸은 10줄 높이로 잡되 화면이 낮으면 화면에 맞춰 줄이고(최소 3줄), 넘치는 줄은 목록 안에서 스크롤한다.
-   260px = 팝업 위아래 여백·제목·범위 칩·안내 줄 몫 */
-.ranking-list {
+/* 목록 위 안내 한 줄(불러오는 중·연결 안 됨·순위 설명). 비어 있어도 한 줄 자리를 둬 높이가 변하지 않게 한다 */
+.rank-note {
+  min-height: 1.5em;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+  text-align: center;
+}
+
+.rank-empty {
+  margin: 0;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.rank-pending:empty {
+  display: none;
+}
+
+/* 목록은 늘 10줄(빈 줄 포함)이라 범위 탭을 바꿔도 창 크기가 변하지 않는다. 한 줄 높이: 오른쪽 점수 칸이 두 줄(점수 + 시도·시간)이라 48px.
+   화면이 낮으면 화면에 맞춰 줄이고(최소 3줄), 넘치는 줄은 목록 안에서 스크롤한다. 280px = 창 위아래 여백·제목·탭·안내 줄 몫 */
+.rank-list {
   --rank-row: 48px;
   display: grid;
   grid-auto-rows: var(--rank-row);
   align-content: start;
   gap: 4px;
-  height: max(var(--rank-row) * 3 + 4px * 2, min(var(--rank-row) * 10 + 4px * 9, 100 * var(--vh) - 260px));
+  height: max(var(--rank-row) * 3 + 4px * 2, min(var(--rank-row) * 10 + 4px * 9, 100 * var(--vh) - 280px));
   margin: 0;
   padding: 0;
   overflow-y: auto;
@@ -2076,7 +2225,7 @@ button:focus-visible {
   list-style: none;
 }
 
-.ranking-list li {
+.rank-list li {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -2086,13 +2235,18 @@ button:focus-visible {
   border-radius: 10px;
 }
 
-/* 방금 올린 기록: 테두리를 두 겹으로. 목록이 스크롤 상자(overflow)라 바깥 그림자는 좌우·위아래가 잘리므로 안쪽 그림자로 */
-.ranking-list li.mine {
+.rank-list li.empty {
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+/* 방금 올린 기록: 테두리를 두 겹으로. 목록이 스크롤 상자(overflow)라 바깥 그림자는 잘리므로 안쪽 그림자로 */
+.rank-list li.me {
   border-color: var(--action-line);
   box-shadow: inset 0 0 0 1px var(--action-line);
 }
 
-.ranking-place {
+.rank-list .no {
   flex: none;
   width: 28px;
   height: 28px;
@@ -2104,28 +2258,32 @@ button:focus-visible {
 }
 
 /* 1~3위: 금·은·동 원 */
-.ranking-place.top1 {
+.rank-list li.top1:not(.empty) .no {
   background: var(--gold-300);
   color: var(--gray-900);
 }
 
-.ranking-place.top2 {
+.rank-list li.top2:not(.empty) .no {
   background: var(--gray-200);
   color: var(--gray-900);
 }
 
-.ranking-place.top3 {
+.rank-list li.top3:not(.empty) .no {
   background: var(--bronze-300);
   color: var(--gray-900);
 }
 
-.ranking-name {
+.rank-list .name {
   flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
   letter-spacing: 0.1em;
   font-weight: 700;
 }
 
-.ranking-tries {
+.rank-list .score {
   padding-block: 4px;
   font-weight: 700;
   line-height: 1.15;
@@ -2133,40 +2291,12 @@ button:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 
-.ranking-tries small {
+.rank-list .score small {
   display: block;
   margin-top: 2px;
   color: var(--text-muted);
   font-size: 0.75em;
   font-weight: 400;
-}
-
-.ranking-board {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-/* 안내 한 줄(등록 결과 등). 비어 있어도 한 줄 자리를 둬 높이가 변하지 않게 한다. */
-.ranking-status {
-  min-height: 1.5em;
-  margin: 0;
-  color: var(--text-muted);
-  text-align: center;
-}
-
-/* 목록이 비었을 때(불러오는 중·기록 없음·실패): 목록 칸 가운데에 겹쳐 보여 높이를 바꾸지 않는다. */
-.ranking-list:empty + .ranking-status {
-  position: absolute;
-  inset: 0 16px calc(1.5em + 8px);
-  display: grid;
-  place-items: center;
-}
-
-/* 겹쳐 보이는 동안 비는 안내 줄 자리는 그대로 남긴다. */
-.ranking-board:has(.ranking-list:empty) {
-  padding-bottom: calc(1.5em + 8px);
 }
 
 /* 내 기록 지우기 확인 상자(설정 창 안): 범위 칩을 누르면 바로 아래에 열린다(팝업 없음). 칩은 탭처럼 고른 것만 빨간 테두리 */
@@ -2267,7 +2397,7 @@ button:focus-visible {
   flex: 1;
 }
 
-.thermo .confirm-actions > #thermo-use {
+.thermo .confirm-actions > [data-use] {
   flex: 1.5;
 }
 
@@ -2522,19 +2652,23 @@ button:focus-visible {
     gap: 10px;
   }
 
-  .result-side > .result-rank,
+  .result-side > .rank-entry,
   .result-side > .actions {
     margin: 0;
     padding-bottom: 0;
   }
 
   /* 낮은 화면이라 랭킹 등록 칸을 촘촘하게 */
-  .result-rank {
-    gap: 6px;
+  .rank-entry {
     padding: 8px 10px;
   }
 
-  .result-rank-prompt {
+  .rank-entry-form,
+  .rank-entry-done {
+    gap: 6px;
+  }
+
+  .rank-entry-title {
     font-size: 1rem;
     line-height: 1.35;
   }
@@ -2631,7 +2765,7 @@ button:focus-visible {
   }
 
   .actions,
-  .result-rank {
+  #screen-result .rank-entry {
     width: min(440px, 100%);
     margin-inline: auto;
   }
@@ -2666,10 +2800,80 @@ button:focus-visible {
   .hint.pop.up,
   .hint.pop.down,
   #range.narrowed,
-  .settings[open],
+  .modal,
+  .modal-backdrop,
+  .pause-card,
+  .pause-menu,
   .result-art .result-icon,
   .result-art .sparkle,
-  .result-rank.enter {
+  #screen-result .rank-entry {
     animation: none;
   }
+}
+
+/* ── 일시정지(휴대폰 뒤로 가기·앱을 내렸을 때, 기준서 1.3) ── 게임 화면을 흐리게 덮고 가운데에 카드 */
+#screen-play {
+  position: relative;
+}
+
+.pause-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: var(--gutter);
+  background: var(--backdrop);
+  animation: fade-in 0.15s ease-out;
+}
+
+.pause-menu[hidden] {
+  display: none;
+}
+
+.pause-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(320px, 100%);
+  padding: 20px;
+  background: var(--dialog-bg);
+  border: 1px solid var(--dialog-line);
+  border-radius: 18px;
+  box-shadow: 0 16px 40px var(--shadow-dialog);
+  text-align: center;
+  animation: pop 0.2s ease-out;
+}
+
+.pause-card h2 {
+  margin: 0;
+  font-size: 1.75rem;
+}
+
+.pause-note {
+  margin: 0 0 4px;
+  color: var(--text-muted);
+}
+
+/* ── 공유 이미지(공통 captureResult): 복제본 맨 위 게임 아이콘·이름, 움직임 없이 찍는다 ── */
+.capturing,
+.capturing * {
+  animation: none !important;
+  transition: none !important;
+}
+
+.share-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.share-brand img {
+  width: 1.6em;
+  height: 1.6em;
+  border-radius: 22%;
 }

@@ -21,6 +21,7 @@
   },
   "include": [
     "src",
-    "tests"
+    "tests",
+    "joyfield.meta.ts"
   ]
 }
