@@ -61,19 +61,22 @@
 - **15개쯤부터 · 설정 "게임 데이터"를 새 창으로:** 지금은 설정 안 접힘 구역(펼치면 게임 전부, 허브 v1.34.2)이다. 길어지면 설정에 "게임 데이터 ›" 한 줄만 두고 누르면 게임 데이터 전용 창(팝업)이 열리게 바꾼다(필요하면 "오프라인 저장 모두 비우기"도). 설정 안에 안쪽 스크롤을 두는 방식은 이중 스크롤이라 쓰지 않는다(2026-10-25 사용자 결정).
 - 맨 위로 가기 떠 있는 버튼은 권하지 않는다(위 메뉴가 이미 고정이고, 오른쪽 카드의 플레이 버튼을 가림). 필요하면 "조이필드 제목 누르면 맨 위로" 같은 숨은 방식으로 한다.
 
-## 다음 일정 (2026-11-05, 다른 PC에서 진행)
+## 다음 일정 (2026-11-05, 집 PC에서 진행)
 
-사용자가 "다른 PC에서 진행"이라고 정함. **끝나기 전에는 세션 첫 답변에서 먼저 이 두 가지를 알린다.** 끝난 항목은 지우고, 다 끝나면 이 절을 지운다.
+사용자가 "집 PC로 다시 할 예정"이라고 정함. **끝나기 전에는 세션 첫 답변에서 먼저 이 두 가지를 알린다.** 끝난 항목은 지우고, 다 끝나면 이 절을 지운다.
 
-1. **최상위 주소에 개인정보처리방침 페이지**(마켓 등록 전 필수). 예: `pocketgamelab.com/privacy/` 한 쪽(소개 사이트 전체는 아래대로 미룸). `scripts/site.mjs` 가 만드는 `site/` 에 넣으면 운영·개발 모두 배포된다. 내용은 실제 저장 범위(이니셜·점수·시각·플레이 입력 종류 모바일/PC, Firestore, 광고를 붙이면 그 내용)만, 연락처는 사용자에게 묻는다. 허브 설정에서 이 주소로 가는 링크도 검토. 쓰기 전에 구글 플레이·애플 최신 요구 사항을 다시 확인하라고 알린다.
-2. **개발자 모드를 주소로 고정:** 운영(`pocketgamelab.com`, 앱 등록용)은 **항상 일반 화면**(개발자 모드 켜기 = 설정 맨 아래 버전 7번 누르기·비밀번호를 없애거나 막음), 개발(`dev.pocketgamelab.com`)은 **항상 개발자 모드**. 지금은 기기마다 `joyfield.preview` 저장값으로 켬(`packages/shared/joyfield.js` `devMode()`, 허브 `preview.ts`). DB 를 주소로 고르는 `Joyfield.FIREBASE` 처럼 주소로 정하는 방식이 자연스럽다. 정할 것(사용자에게 확인): 로컬(`pnpm dev`·`preview`)은 어느 쪽인지, 개발에서 "출시 화면 보기" 단추는 남길지. **영향:** 숨김 미리보기 게임이 운영에서는 아무에게도 안 보이게 되므로 "운영에서 숨김 미리보기로 마지막 확인 → 정식 공개" 흐름(README 8장 흐름, 기준서 7.4)이 "개발 사이트에서 확인 → 정식 공개"로 바뀐다 → 문서도 함께 고친다. 허브·공통 모듈이라 허브 버전 올리고 `pnpm check:screens hub quick` 은 배치를 안 바꾸면 생략.
+1. **개발 사이트 잠그기(먼저 할 일):** 2026-11-05 사용자 결정 — 운영 `pocketgamelab.com/joyfield/` 은 지금처럼 열어 둔다(아직 아무도 주소를 모름, 앱 등록 뒤 테스터에게 처음 알림). 개발은 앱 등록 뒤 주소가 알려져도 괜찮게 잠근다. 막을 주소: `dev.pocketgamelab.com`, `dev.pocketgamelab.pages.dev`(Pages 가 `dev` 브랜치에 자동으로 주는 같은 개발 사이트)·일회용 `<해시>.pocketgamelab.pages.dev`, 그리고 `pocketgamelab.pages.dev`(운영과 같은 내용, 사용자가 이것도 막자고 함). 운영 잠금은 하지 않는다(TWA 가 운영 주소를 그대로 열어야 함). 배포는 GitHub Actions → wrangler API 직접 업로드라 잠금과 무관.
+   - **방법 A: Cloudflare Access(Zero Trust Free)** — 결제 수단 등록이 필요한데 회사 PC 에서 카드번호를 몰라 막힘(청구 주소 영문은 안내함). 집 PC 에서 카드·PayPal 로 등록되면: Zero Trust → Access → 애플리케이션 → 자체 호스팅, 도메인 `dev.pocketgamelab.com`·`*.pocketgamelab.pages.dev`·`pocketgamelab.pages.dev`, 정책 허용 = 본인 이메일(테스터는 나중에 추가), 로그인 일회용 PIN, 세션 1개월. Pages `pocketgamelab` → 설정 → 미리보기 배포 액세스 정책 사용.
+   - **방법 B(카드 없이, Claude 추천 대안):** `site/_worker.js`(Pages 고급 모드, `scripts/site.mjs` 가 만듦)가 주소를 보고 `pocketgamelab.pages.dev` → `https://pocketgamelab.com` 301, 개발 주소들은 Basic 인증(아이디·비밀번호는 Pages 비밀 변수, 코드·저장소에 넣지 않음), 나머지는 `env.ASSETS.fetch`. 아이폰 홈 화면 설치 앱은 인증 창이 잘 안 뜰 수 있음.
+   - 세션 첫 답변에서 A(카드 등록 됐는지)·B 중 무엇으로 할지 묻고 진행. 끝나면 휴대폰에서 세 주소는 막히고 `pocketgamelab.com/joyfield/` 만 열리는지 사용자에게 확인을 부탁한다(회사 PC 에서는 이 주소들에 연결이 안 됨).
+2. **개발자 모드를 주소로 고정:** 운영(`pocketgamelab.com`, 앱 등록용)은 **항상 일반 화면**(개발자 모드 켜기 = 설정 맨 아래 버전 7번 누르기·비밀번호를 없애거나 막음), 개발(`dev.pocketgamelab.com`)은 **항상 개발자 모드**. 지금은 기기마다 `joyfield.preview` 저장값으로 켬(`packages/shared/joyfield.js` `devMode()`, 허브 `preview.ts`). DB 를 주소로 고르는 `Joyfield.FIREBASE` 처럼 주소로 정하는 방식이 자연스럽다. 정할 것(사용자에게 확인): 로컬(`pnpm dev`·`preview`)은 어느 쪽인지, 개발에서 "출시 화면 보기" 단추는 남길지 → **2026-11-05 사용자 결정: 로컬은 개발자 모드, "출시 화면 보기" 단추는 남김.** **영향:** 숨김 미리보기 게임이 운영에서는 아무에게도 안 보이게 되므로 "운영에서 숨김 미리보기로 마지막 확인 → 정식 공개" 흐름(README 8장 흐름, 기준서 7.4)이 "개발 사이트에서 확인 → 정식 공개"로 바뀐다 → 문서도 함께 고친다. 허브·공통 모듈이라 허브 버전 올리고 `pnpm check:screens hub quick` 은 배치를 안 바꾸면 생략.
 
 ## 스튜디오 최상위 사이트 (2026-11-05 미룸)
 
-도메인·주소 이전은 2026-11-05 끝났다(운영 `https://pocketgamelab.com/joyfield/`, 개발 `https://dev.pocketgamelab.com/joyfield/`, `.kr`·`.co.kr`·`www` → `pocketgamelab.com` 301, 옛 github.io 주소 안내, 도메인 잠금. 경위는 메모리 `studio-domain-pocketgamelab`).
+도메인·주소 이전은 2026-11-05 끝났다(운영 `https://pocketgamelab.com/joyfield/`, 개발 `https://dev.pocketgamelab.com/joyfield/`, `.kr`·`.co.kr`·`www` → `pocketgamelab.com` 301, 옛 github.io 주소는 안내 없이 GitHub Pages 끔(사용자가 거의 없음), 도메인 잠금. 경위는 메모리 `studio-domain-pocketgamelab`).
 
-- **미룸:** 최상위 `pocketgamelab.com/` 의 스튜디오 소개(지금은 302 로 `/joyfield/`). 사용자가 "앱이 하나라 뒤로 미룸" → 앱(게임 묶음)이 둘 이상 생기거나 마켓 등록을 준비할 때 먼저 제안한다.
-- **마켓 등록 전 필수:** 개인정보처리방침 공개 주소(구글 플레이·앱스토어 요구). 최상위 사이트를 미뤄도 이것만은 등록 전에 만든다(메모리 `ranking-reset-at-store-launch` 와 같은 시점에 알린다).
+- **미룸(2026-11-05 사용자 결정): 최상위 `pocketgamelab.com/` 페이지와 거기 들어갈 개인정보처리방침은 앱 완성 뒤 만든다.** 지금 `/` 는 302 로 `/joyfield/`. 평소 세션에서는 꺼내지 않고, **앱 등록(구글 플레이·앱스토어) 직전에** 알린다(메모리 `ranking-reset-at-store-launch` 와 같은 시점).
+- 그때 할 일: 초안 `docs/drafts/privacy-policy.html`(연락처 `contact@pocketgamelab.com`, 책임자 실명 명범수 + Pocket Game Lab, 2026-11-05 사용자 결정)를 그때 저장 항목·광고 여부에 맞게 고쳐 `pocketgamelab.com/privacy/` 로 올림(`scripts/site.mjs` 가 만드는 `site/` 에 더함) → 허브 설정 맨 아래 링크 → Cloudflare 이메일 라우팅으로 `contact@` 연결·테스트 메일 → Firestore 위치 확인(초안은 "미국 등") → 구글 플레이·애플 최신 요구 사항 확인.
 
 끝나면 이 절을 지우고 메모리를 고친다.
 

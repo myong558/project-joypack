@@ -4,7 +4,7 @@
 
 이 문서는 **이미 따로 만든 게임들을 조이필드 하나로 합치는 계획**입니다. 진행하면서 체크박스를 채우고, 결정이 바뀌면 이 문서를 먼저 고칩니다.
 
-> **진행 상황 (2026-10-21)**: 0~3단계 구현 완료(6장). 업다운·두더지잡기가 `games/` 아래로 옮겨졌고, 허브·공통 설정·전체 랭킹·사이트 서비스 워커가 동작합니다. 남은 일은 GitHub Pages 설정·첫 배포, Firestore 규칙 대조, 4단계(기존 사이트 이사 마무리)입니다.
+> **진행 상황 (2026-10-21)**: 0~3단계 구현 완료(6장). 업다운·두더지잡기가 `games/` 아래로 옮겨졌고, 허브·공통 설정·전체 랭킹·사이트 서비스 워커가 동작합니다. 남은 일은 Firestore 규칙 대조입니다. 통합 전 저장소 `project-updown`·`project-hammer` 는 2026-11-05 삭제했습니다(코드·이력은 subtree 로 `games/` 에 있음, 4단계).
 >
 > | 주소 (2026-11 `github.io` → `pocketgamelab.com` 이전, 8장) | |
 > | --- | --- |
@@ -13,11 +13,12 @@
 > | 두더지잡기 | `https://pocketgamelab.com/joyfield/games/hammer/` |
 > | 타임 투 플립 | `https://pocketgamelab.com/joyfield/games/timetoflip/` |
 > | 온실정원 | `https://pocketgamelab.com/joyfield/games/glasshouse/` (미리보기: 개발자 모드에서만) |
-> | 옛 주소 | `https://myong558.github.io/project-joyfield/` → 같은 경로의 새 주소로 넘김 |
 
 ---
 
-## 1. 현재 상태
+## 1. 통합 전 상태 (기록)
+
+> 아래 두 저장소와 주소는 **2026-11-05 삭제**했습니다(사용자 결정). 코드와 커밋 이력은 2단계의 `git subtree add` 로 `games/updown`·`games/hammer` 에 남아 있고, 랭킹은 Firebase 에 그대로 있습니다. 표는 통합할 때의 기록입니다.
 
 | 항목 | 업다운 (`project-updown`) | 두더지잡기 (`project-hammer`) |
 | --- | --- | --- |
@@ -219,13 +220,7 @@ dist/                       → https://pocketgamelab.com/joyfield/ (배포 묶�
 
 ## 5. 기존 주소와 설치한 앱 처리
 
-이미 `project-updown`, `project-hammer` 를 설치했거나 링크를 공유한 사람이 있으므로 갑자기 끊지 않습니다.
-
-1. 조이필드가 배포되고 안정되면, 기존 저장소에 **마지막 버전**을 하나씩 올립니다.
-   - 시작 화면에 "조이필드로 이사했어요" 안내와 이동 버튼(기록·설정은 그대로라는 문구 포함).
-   - 서비스 워커는 옛 캐시를 지우고 스스로 해제(`registration.unregister()`)하도록 바꿉니다. 그래야 설치한 앱이 옛 파일에 갇히지 않습니다.
-2. 2~4주 뒤 기존 사이트의 `index.html` 을 새 주소로 바로 넘기는 페이지(`<meta http-equiv="refresh">` + `location.replace`)로 바꿉니다.
-3. 기존 저장소는 README 맨 위에 이사 안내를 쓰고 **Archive** 합니다(코드와 이력은 조이필드 저장소에도 subtree 로 남아 있음).
+처음에는 `project-updown`, `project-hammer` 에 이사 안내 버전을 올리고 Archive 할 계획이었으나, 옛 주소 사용자가 거의 없어 안내 없이 **두 저장소를 삭제**했습니다(2026-11-05 사용자 결정, 옛 `project-joyfield` github.io 주소를 끈 것과 같은 판단). 옛 주소 `myong558.github.io/project-updown/`·`/project-hammer/` 는 열리지 않습니다. 다시 안내 페이지나 넘김 페이지를 만들지 않습니다.
 
 ---
 
@@ -243,7 +238,7 @@ dist/                       → https://pocketgamelab.com/joyfield/ (배포 묶�
 ### 1단계 — 링크 허브 공개 (방식 A) — 건너뜀
 
 ### 2단계 — 게임 코드 옮기기 (방식 B)
-- [x] `git subtree add --prefix=games/updown https://github.com/myong558/project-updown.git main` (이력 보존)
+- [x] `git subtree add --prefix=games/updown https://github.com/myong558/project-updown.git main` (이력 보존, 원본 저장소는 2026-11-05 삭제)
 - [x] `git subtree add --prefix=games/hammer https://github.com/myong558/project-hammer.git main`
 - [x] 두더지잡기: `dist/`, `dev-dist/` 는 `.gitignore` 처리(원래도 커밋돼 있지 않았음)
 - [x] 업다운: 자기 서비스 워커·manifest 제거, 조이필드 서비스 워커 등록
@@ -381,9 +376,7 @@ dist/                       → https://pocketgamelab.com/joyfield/ (배포 묶�
   공유 링크는 `?from=share` 가 붙어, 받은 사람이 열면 첫 화면 맨 위에 설치 안내 카드가 뜬다. 카카오톡 등 앱 안 브라우저에서는 설치가 안 되므로 "브라우저로 열기"(카카오톡은 `kakaotalk://web/openExternal`, 그 밖의 안드로이드 앱은 Chrome intent)로 넘긴다. 아이폰의 앱 안 브라우저는 "Safari로 열기" 안내만 한다
 
 ### 4단계 — 이사 마무리
-- [ ] 기존 두 사이트에 이사 안내 버전 배포, 서비스 워커 자체 해제
-- [ ] 2~4주 뒤 기존 주소를 새 주소로 넘기는 페이지로 교체
-- [ ] 기존 저장소 Archive
+- [x] 기존 저장소 `project-updown`·`project-hammer` 정리: 이사 안내·넘김 페이지 없이 삭제(2026-11-05 사용자 결정, 5장)
 
 ### 5단계 — 이후
 - [ ] 새 게임 템플릿(`games/_template`) 정리
@@ -434,7 +427,7 @@ pnpm --filter hub icons  # 로고(apps/hub/public/logo.svg)를 바꾼 뒤 앱 �
   | (내 PC) | `pnpm dev`·`pnpm preview` → `http://localhost:4170/joyfield/` | 개발 `joyfield-dev` |
 - 흐름: 내 PC → `dev` 에 올려 개발 사이트에서 확인 → `main` 에 올려 운영(새 게임은 숨김 미리보기로 마지막 확인 → 정식 공개).
 - `pnpm site`(`scripts/site.mjs`)가 `dist/` 를 `site/joyfield/` 로 넣고 `_redirects`(첫 화면 `/` → `/joyfield/` 302, 스튜디오 소개를 만들 때까지)·`_headers`(`sw.js` no-cache, 개발 주소 noindex)·`robots.txt` 를 만듭니다. 도메인 최상위는 스튜디오(Pocket Game Lab) 자리라 나중에 소개·개인정보처리방침·스토어 앱 연결(`/.well-known/assetlinks.json`)을 둡니다.
-- **옛 주소** `https://myong558.github.io/project-joyfield/`: `.github/workflows/moved.yml`(손으로 한 번 실행)이 GitHub Pages 에 `pnpm moved`(`scripts/moved-site.mjs`) 묶음을 올립니다. 어떤 경로든 같은 경로의 새 주소로 넘기고(설치 앱으로 열면 "새 주소에서 다시 설치" 안내), 옛 서비스 워커는 캐시를 비우고 스스로 해제합니다. 주소(출처)가 달라 기기에 저장된 설정·기록은 따라가지 않습니다(2026-11-04 결정: 안내만).
+- **옛 주소** `https://myong558.github.io/project-joyfield/`: 쓰지 않습니다. 2026-11-05 잠시 "새 주소로 옮겼어요" 안내 페이지를 두었다가, 옛 주소 사용자가 거의 없어 안내 페이지(`moved.yml`·`scripts/moved-site.mjs`)를 지우고 GitHub Pages 를 껐습니다(사용자 결정). 공유 링크·문서에는 새 주소만 씁니다.
 - 서비스 워커와 게임별 `files.json` 은 빌드할 때마다 새로 만들어지므로 수동으로 캐시 버전을 올릴 필요가 없습니다.
 - 게임별 버전은 각 게임 `package.json` 의 `version` 을 쓰고, 그 게임 설정 화면 맨 아래에 `vX.Y.Z` 로 표시합니다. 조이필드 전체 버전은 루트 `package.json` 이고 조이필드 설정 창 맨 아래와 첫 화면 맨 아래에 보입니다(게임별 버전은 나열하지 않음).
 
@@ -481,8 +474,8 @@ pnpm --filter hub icons  # 로고(apps/hub/public/logo.svg)를 바꾼 뒤 앱 �
    - 상표 검색(2026-10-23, KIPRIS·USPTO 웹 검색): "PEEKABOO MOLES" 그대로는 한국·미국 모두 없음. 다만 "PEEKABOO"는 흔한 낱말이라 이미 많이 등록돼 있음 — 미국 살아 있는 34건(9류 컴퓨터 하드웨어·음원, 28류 카드게임 소품 등, 게임 소프트웨어는 못 봄), 한국 222건 중 53건 확인(28류 장난감 "피카부(PEEKABOO)" 등록, 9류 "PEEKABOO MONSTER" 등록, 9류 "피카부랩스" 출원 중). 일부만 확인했으므로 출시 전 변리사 확인 권장.
 2. **앱 이름 "조이필드/Joyfield" 상표**: 마켓 등록 직전에 한국 KIPRIS(9·41류)·미국 USPTO·구글 플레이·앱스토어 이름 검색을 한 번 더 하고, 가능하면 변리사 확인을 받습니다.
    - 상표 검색(2026-11-04, 웹 검색): USPTO "JOYFIELD" 2건 — 97404331(Bluebird Aspen, 16·20·35류, 소멸), 98905375(Hong Kong Joyfield Biological Technology, 5류 의약품, 등록). 게임·소프트웨어(9·41류)는 못 찾음. 웹·마켓에서 "조이필드" 게임 앱도 못 찾음. 마켓 등록 직전에 KIPRIS(9·41류)·USPTO·구글 플레이·앱스토어 이름 검색을 한 번 더 하고, 가능하면 변리사 확인을 받습니다.
-3. **개인정보 처리방침 페이지**: 마켓 등록에 공개 URL 이 필요합니다(저장 항목: 랭킹 이니셜·점수·시각·플레이 입력 종류(모바일·PC), 광고를 붙이면 광고 ID 등). 조이필드 사이트 안에 페이지를 두고 설정 → 정보에서 연결하는 방식을 권합니다.
-4. **지원 연락처**: 정함 — `myong558@gmail.com`. 마켓 등록 정보·개인정보 처리방침에 넣고, 랭킹 이름 신고 등을 받습니다.
+3. **개인정보 처리방침 페이지**: 마켓 등록에 공개 URL 이 필요합니다. 최상위 도메인 페이지(스튜디오 소개)와 함께 **앱 완성 뒤 만듭니다**(2026-11-05 사용자 결정, 앱 등록 직전에 Claude 가 알림). 초안 `docs/drafts/privacy-policy.html`(한국어·영어, 지금 저장 항목 기준, 2026-11-05 작성)을 고쳐 `pocketgamelab.com/privacy/` 에 올리고 허브 설정 맨 아래에 링크합니다. 쓰기 전에 Firestore 위치(콘솔)와 구글 플레이·애플 최신 요구 사항을 다시 확인합니다.
+4. **지원 연락처**: `contact@pocketgamelab.com`(2026-11-05 결정, 처리방침을 만들 때 Cloudflare 이메일 라우팅으로 개인 Gmail 에 전달하도록 연결. 아직 연결 안 함). 개인정보 보호책임자는 실명(명범수) + Pocket Game Lab. 마켓 등록 정보·개인정보 처리방침에 넣고, 랭킹 이름 신고 등을 받습니다.
 5. **마켓 포장**: 구글 플레이는 TWA(Bubblewrap) + `assetlinks.json`, 애플은 Capacitor 로 감싸고 앱다운 기능을 함께(웹 감싸기만은 심사 지침 4.2 거절 위험).
 6. **광고를 붙일 때**: 광고 자리(기준서 10.7, PC 는 옆 여백), 동의 창(UMP)·iOS 추적 허가(ATT), 데이터 보안 양식·개인정보 라벨 갱신.
 7. **플레이 스토어 최초 공개 직전 랭킹 초기화**(2026-11-04 결정): 테스트 점수를 지우고 새로 시작합니다(기기 아이콘 `dev` 가 없는 예전 기록도 함께 정리). 규칙상 앱에서는 못 지우므로 Firebase 콘솔에서 사람이 지웁니다: `games/updown/scores-50`·`scores-100`·`scores-200` 의 문서 전부, `games/hammer/rankings/*`, `games/timetoflip/rankings/*`, `games/glasshouse/rankings/*`(그 뒤 생긴 게임은 `firestore.rules` 목차로 확인). Claude 는 출시 작업 때 이 일을 먼저 요청합니다(메모리 `ranking-reset-at-store-launch`).

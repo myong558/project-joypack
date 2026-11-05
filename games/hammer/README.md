@@ -2,7 +2,7 @@
 
 > 게임 이름: 한국어 **두더지잡기** · 영어 **Peekaboo Moles**. 게임 ID·주소·저장 키는 `hammer`.
 
-> **조이필드로 통합됨 (2026-10-21)**: 이 게임은 이제 조이필드 저장소의 `games/` 아래에서 관리하고 `https://myong558.github.io/project-joyfield/games/hammer/` 로 배포합니다.
+> **조이필드로 통합됨 (2026-10-21)**: 이 게임은 이제 조이필드 저장소의 `games/` 아래에서 관리하고 `https://pocketgamelab.com/joyfield/games/hammer/` 로 배포합니다. 통합 전 저장소 `project-hammer` 는 2026-11-05 삭제했습니다(코드·이력은 이 폴더에 subtree 로 남음).
 > 앱 설치·오프라인(서비스 워커·manifest)·배포는 조이필드가 맡고, 컬러 모드·언어·효과음·진동·랭킹 이름은 조이필드 공통 설정(`joyfield.*`)을 먼저 따릅니다.
 > 아래의 배포·서비스 워커·주소 설명은 통합 전 기준입니다. 현재 방식은 저장소 루트 README 를 보세요.
 

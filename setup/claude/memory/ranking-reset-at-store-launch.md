@@ -17,4 +17,5 @@ metadata:
 - 시점은 공개 직전(그 전에 지우면 테스트 기록이 다시 쌓임).
 - 규칙이 `delete: if false` 라 앱에서는 못 지운다. 콘솔에서 사람이 지울 것: `games/updown/scores-50`·`scores-100`·`scores-200` 컬렉션의 문서 전부, `games/hammer/rankings/*`, `games/timetoflip/rankings/*`, `games/glasshouse/rankings/*`(그 사이 새 게임이 생겼으면 `firestore.rules` 목차로 다시 확인).
 - 초기화 뒤 허브·게임의 기기 저장 순위 사본은 다음에 랭킹을 열 때 새로 받으므로 따로 할 일 없음.
-- 관련: [[two-pc-setup]]
+- **같은 시점에 함께 알릴 것(2026-11-05 사용자 지시):** 최상위 도메인 페이지와 개인정보처리방침은 앱 완성 뒤 만들기로 미룸 → 앱 등록 직전에 "처리방침 공개 주소가 필요하다"고 먼저 알린다. 초안 `docs/drafts/privacy-policy.html`, 할 일 순서는 CLAUDE.md "스튜디오 최상위 사이트" 절.
+- 관련: [[two-pc-setup]] [[studio-domain-pocketgamelab]]
