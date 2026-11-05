@@ -16,6 +16,13 @@
 
   const GAME_CACHE_PREFIX = 'joyfield-game-';
 
+  // 운영 빌드인지: 운영 배포(main, JOYFIELD_SITE=prod) 때 __JOYFIELD_PROD__ 가 true 로 바뀐다
+  //   (Vite 로 묶는 허브·게임은 vite.config define, 그대로 쓰는 공통 모듈 사본 dist/shared/joyfield.js 는 scripts/build.mjs 가 바꿈).
+  // 운영 빌드에서는 개발자 모드가 주소와 상관없이 꺼지고(켜는 방법 없음) 개발자 모드 코드도 빌드 때 빠지며, 랭킹은 늘 운영 DB 다.
+  // 개발 빌드·내 PC·테스트에서는 false(또는 없음)라 주소로 판단한다
+  // eslint-disable-next-line no-undef
+  var PROD_BUILD = typeof __JOYFIELD_PROD__ !== 'undefined' && __JOYFIELD_PROD__ === true;
+
   function read(key) {
     try {
       return localStorage.getItem(key);
@@ -492,9 +499,11 @@
   }
 
   // 개발자 모드는 주소로 정한다(2026-11-05): 개발 사이트·내 PC(isDevHost)는 늘 켜짐, 운영(pocketgamelab.com, 마켓 앱이 여는 주소)은 늘 꺼짐.
+  // 운영 빌드(PROD_BUILD)에서는 주소와 상관없이 꺼짐.
   // 운영에는 켜는 방법이 없다(예전 "설정 버전 7번 누르기 + 비밀번호"와 기기 저장값 joyfield.preview 는 지움).
   // 켜진 곳에서만 숨김 미리보기 게임·게임의 출시 전 확인 기능(판별 바로 시작·도감 전부 열기 등)이 보인다
   function devMode() {
+    if (PROD_BUILD) return false;
     return isDevHost(typeof location !== 'undefined' ? location.hostname : '');
   }
   // 예전 기기 저장값(설정 버전 7번 누르기로 켜던 개발자 모드)을 지운다. 이제 읽는 곳이 없다
@@ -689,6 +698,7 @@
     return host.endsWith('.pages.dev') && host.split('.').length >= 4;
   }
   function firebaseEnv() {
+    if (PROD_BUILD) return 'prod';
     const forced = read('joyfield.db');
     if (forced === 'dev' || forced === 'prod') return forced;
     const host = typeof location !== 'undefined' ? location.hostname : '';

@@ -32,7 +32,8 @@ jobs:
       - run: pnpm build
         env:
           # dev 브랜치는 홈 화면 앱 이름을 "조이필드 개발"로(scripts/build.mjs 3-2)
-          JOYFIELD_SITE: ${{ github.ref_name == 'dev' && 'dev' || '' }}
+          # main 은 운영 빌드: 미리보기 게임·견본 페이지 빼고, 개발자 모드 끔·운영 DB 고정(scripts/build.mjs 2·3-1)
+          JOYFIELD_SITE: ${{ github.ref_name == 'dev' && 'dev' || 'prod' }}
       - run: pnpm site
       # wrangler-action 은 저장소 루트(pnpm 작업 공간)에 wrangler 를 설치하려다 실패해서 pnpm dlx 로 따로 받아 쓴다
       - name: Deploy (wrangler pages deploy)

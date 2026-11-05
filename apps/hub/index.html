@@ -85,6 +85,8 @@
             h === 'localhost' || /.(localhost|local)$/.test(h) || h === '::1' || h === 'dev.pocketgamelab.com' ||
             (/.pages.dev$/.test(h) && h.split('.').length >= 4) ||
             (!!ip && (+ip[1] === 127 || +ip[1] === 10 || (+ip[1] === 192 && +ip[2] === 168) || (+ip[1] === 172 && +ip[2] >= 16 && +ip[2] <= 31)));
+          // 운영 빌드는 scripts/build.mjs 가 아래 글자를 'prod' 로 바꿔 개발자 모드가 꺼지게 한다(공통 모듈 PROD_BUILD 와 같은 판단)
+          if ('__JOYFIELD_SITE__' === 'prod') dev = false;
           if (dev) preview = localStorage.getItem('joyfield.hubSkin');
         } catch (e) {}
         var root = document.documentElement;

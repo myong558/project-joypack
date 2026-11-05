@@ -19,6 +19,8 @@ const joyfieldManifest: Plugin = {
 export default defineConfig({
   base: './',
   define: {
+    // 운영 빌드(main 배포, JOYFIELD_SITE=prod)면 true: 공통 모듈의 개발자 모드를 끄고 그 코드를 빌드 때 뺀다(packages/shared/joyfield.js PROD_BUILD)
+    __JOYFIELD_PROD__: JSON.stringify(process.env.JOYFIELD_SITE === 'prod'),
     __APP_VERSION__: JSON.stringify(version),
   },
   server: { port: 5176, open: false },

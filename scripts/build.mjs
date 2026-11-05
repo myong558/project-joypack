@@ -70,8 +70,15 @@ run('pnpm --filter hub build');
 cpSync(join(ROOT, 'apps/hub/dist'), DIST, { recursive: true });
 
 // 2. 게임
-// preview(숨김 미리보기)도 배포한다. 허브는 비밀번호를 확인한 기기에서만 카드를 보인다
-const games = readJson('games.json').filter((g) => g.status === 'live' || g.status === 'preview');
+// 개발 빌드(dev 브랜치·내 PC)는 preview(숨김 미리보기)도 넣는다. 개발자 모드(개발 사이트·내 PC 주소)에서만 카드가 보인다.
+// 운영 빌드(main, JOYFIELD_SITE=prod)는 공개 예약(open)이 없는 preview 게임을 아예 넣지 않는다 → 운영에는 미완성 게임 파일이 없다.
+//   공개 예약된 게임은 공개 시각에 다시 배포하지 않아도 열리도록 넣고, 그 전에는 "곧 공개" 화면·Firestore 규칙(서버 시각)이 막는다
+const PROD = process.env.JOYFIELD_SITE === 'prod';
+const games = readJson('games.json').filter((g) => g.status === 'live' || (g.status === 'preview' && (!PROD || g.open)));
+if (PROD) {
+  const left = readJson('games.json').filter((g) => g.status === 'preview' && !g.open);
+  if (left.length) console.log(`운영 빌드: 미리보기 게임 ${left.map((g) => g.id).join(', ')} 은 넣지 않음(개발 사이트에서만)`);
+}
 for (const game of games) {
   const dir = join(ROOT, 'games', game.id);
   const pkg = readJson(`games/${game.id}/package.json`);
@@ -100,7 +107,7 @@ for (const game of games) {
     // 공개 예약(open)이 있으면 그 시각도 적는다: 공통 모듈이 그 전에는 "곧 공개" 화면으로 막고, 지나면 공개된 게임으로 본다
     const openAttr = game.open ? ` data-jp-open="${game.open}"` : '';
     writeFileSync(index, readFileSync(index, 'utf8').replace(/<html\b/i, `<html data-jp-preview${openAttr}`));
-    console.log(`games/${game.id}: 숨김 미리보기(비밀번호 확인한 기기의 허브에만 보임)`);
+    console.log(`games/${game.id}: 숨김 미리보기(개발자 모드 허브에만 보임)`);
   }
 }
 
@@ -109,11 +116,30 @@ mkdirSync(join(DIST, 'shared'), { recursive: true });
 cpSync(join(ROOT, 'packages/shared/joyfield.js'), join(DIST, 'shared/joyfield.js'));
 cpSync(join(ROOT, 'packages/shared/topbar.css'), join(DIST, 'shared/topbar.css'));
 
-// 3-1. 효과음·진동 견본 페이지(제작용, 허브에 연결하지 않음, 미리 캐시하지 않음): dist/sounds/ (기준서 1.7)
-mkdirSync(join(DIST, 'sounds'), { recursive: true });
-cpSync(join(ROOT, 'sounds/index.html'), join(DIST, 'sounds/index.html'));
-cpSync(join(ROOT, 'sounds/catalog.json'), join(DIST, 'sounds/catalog.json'));
-cpSync(join(ROOT, 'packages/shared/sfx.js'), join(DIST, 'sounds/sfx.js'));
+// 3-1. 효과음·진동 견본 페이지(제작용, 허브에 연결하지 않음, 미리 캐시하지 않음): dist/sounds/ (기준서 1.7). 운영 빌드에는 넣지 않는다
+if (!PROD) {
+  mkdirSync(join(DIST, 'sounds'), { recursive: true });
+  cpSync(join(ROOT, 'sounds/index.html'), join(DIST, 'sounds/index.html'));
+  cpSync(join(ROOT, 'sounds/catalog.json'), join(DIST, 'sounds/catalog.json'));
+  cpSync(join(ROOT, 'packages/shared/sfx.js'), join(DIST, 'sounds/sfx.js'));
+}
+
+// 3-1-1. 운영 빌드 표시: Vite 로 묶은 허브·게임은 vite.config define(__JOYFIELD_PROD__)이 이미 처리했다.
+//        여기서는 그대로 쓰는 파일만 바꾼다: 공통 모듈 사본(빌드 없는 게임이 부름)의 __JOYFIELD_PROD__ → true,
+//        허브 index.html 첫 화면 스크립트의 '__JOYFIELD_SITE__' → 'prod'. 파일 목록·서비스 워커 해시보다 먼저 바꾼다
+if (PROD) {
+  const sharedCopy = join(DIST, 'shared/joyfield.js');
+  const js = readFileSync(sharedCopy, 'utf8');
+  if (!js.includes('__JOYFIELD_PROD__')) throw new Error('공통 모듈 사본에 운영 빌드 표시(__JOYFIELD_PROD__)가 없습니다');
+  writeFileSync(sharedCopy, js.replaceAll('__JOYFIELD_PROD__', 'true'));
+  const hubIndex = join(DIST, 'index.html');
+  const html = readFileSync(hubIndex, 'utf8');
+  if (!html.includes('__JOYFIELD_SITE__')) throw new Error('허브 index.html 에 운영 빌드 표시(__JOYFIELD_SITE__)가 없습니다');
+  writeFileSync(hubIndex, html.replaceAll('__JOYFIELD_SITE__', 'prod'));
+  const left = walk(DIST).filter((f) => /.(js|html)$/.test(f) && /__JOYFIELD_(PROD|SITE)__/.test(readFileSync(f, 'utf8')));
+  if (left.length) throw new Error(`운영 빌드 표시가 남은 파일: ${left.map(sitePath).join(', ')}`);
+  console.log('운영 빌드: 개발자 모드 끔·운영 DB 고정');
+}
 
 // 3-2. 개발 사이트(dev 브랜치 배포, JOYFIELD_SITE=dev)는 홈 화면 앱 이름을 "조이필드 개발"로 바꿔 운영 앱과 구분한다.
 //      파일 목록·서비스 워커 해시보다 먼저 바꿔야 오프라인 캐시가 어긋나지 않는다
