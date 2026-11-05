@@ -5,7 +5,7 @@ import { LANGS, getLang, t, type Lang } from '../i18n';
 import type { SaveData } from '../storage';
 import { cardFlipper, closeButton, html, openModal as openSharedModal, openRanking as openSharedRanking, pauseLayer, rankEntryForm } from '@joyfield/shared/ui';
 import { shortDate } from '@joyfield/shared/rank';
-import { boardEntries, pendingRecord, placeOf, type Mode } from '../ranking';
+import { boardEntries, type Mode } from '../ranking';
 import { SKIN_SETTINGS, THEMES, type Skin, type SkinSetting, type Theme } from '../theme';
 import { captureResult, type ShareOutcome } from '../share';
 import { CARD_BACK, MASCOT, faceSvg } from './art';
@@ -96,7 +96,6 @@ export function startScreen(opts: StartOptions): HTMLElement {
   const dailyBest = save.daily?.date === opts.today ? save.daily.best : 0;
   const lang = getLang();
   const otherLang = LANGS.find((l) => l !== lang)!;
-  const pendingIn = (m: Mode) => !!pendingRecord(save.rankings, save.pending, m, opts.today);
   const el = html(`
     <main class="screen start">
       <nav class="jp-topbar" aria-label="${t('app.title')}">
@@ -105,8 +104,8 @@ export function startScreen(opts: StartOptions): HTMLElement {
           <button class="jp-top-btn jp-top-pill top-lang" data-lang="${otherLang}" aria-label="${t('lang.label')}: ${LANG_LABEL[lang]} → ${LANG_LABEL[otherLang]}">${Joyfield.topIcon('globe')}<span lang="${otherLang}">${LANG_LABEL[otherLang]}</span></button>
         </div>
         <div class="jp-topbar-group">
-          <button class="jp-top-btn rank-btn" data-ranking aria-label="${t('ranking.open')}">${Joyfield.topIcon('trophy')}${pendingIn('classic') || pendingIn('daily') ? `<i class="jp-top-dot" role="img" aria-label="${t('ranking.newBadge')}"></i>` : ''}</button>
-          <button class="jp-top-btn settings-btn" aria-label="${t('settings.open')}">${Joyfield.topIcon('gear')}</button>
+          <button class="jp-top-btn rank-btn" data-ranking aria-label="${t('ranking.open')}" title="${t('ranking.open')}">${Joyfield.topIcon('trophy')}</button>
+          <button class="jp-top-btn settings-btn" aria-label="${t('settings.open')}" title="${t('settings.open')}">${Joyfield.topIcon('gear')}</button>
         </div>
       </nav>
       <div class="col main-col">
@@ -145,12 +144,11 @@ export function startScreen(opts: StartOptions): HTMLElement {
   el.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((b) => b.addEventListener('click', () => opts.onPlay(b.dataset.mode as Mode)));
   el.querySelector('.top-lang')!.addEventListener('click', () => opts.onLang(otherLang));
   el.querySelector('[data-dex]')!.addEventListener('click', () => openDex(el, save));
-  el.querySelector('[data-ranking]')!.addEventListener('click', () =>
-    // 처음 탭은 조이필드 공통 기준: 등록 대기 → 최근 모드(방금 한 판·마지막으로 본 탭) → 클래식
-    openRanking(el, opts.ranking, Joyfield.rankTab('timetoflip', ['classic', 'daily'], 'classic') as Mode, null, () => {
-      if (!pendingIn('classic') && !pendingIn('daily')) el.querySelector('.jp-top-dot')?.remove();
-    }),
-  );
+  // 처음 탭은 조이필드 공통 기준: 최근 모드(방금 한 판·마지막으로 본 탭) → 클래식
+  const rankBtn = el.querySelector('[data-ranking]')!;
+  rankBtn.addEventListener('click', () => openRanking(el, opts.ranking, Joyfield.rankTab('timetoflip', ['classic', 'daily'], 'classic') as Mode, null));
+  // 오프라인이면 판을 시작하기 전에 랭킹에 올릴 수 없음을 알린다(조이필드 공통, 기준서 1.6)
+  Joyfield.offlineMark(rankBtn, t('ranking.offlineBadge'));
   const showSettings = (reopen?: string) => openModal(el, settingsPanel(opts), t('settings.title'), reopen);
   el.querySelector('.settings-btn')!.addEventListener('click', () => showSettings());
   if (opts.settings) queueMicrotask(() => showSettings(opts.settingsFocus ?? (opts.settings === 'reset' ? '[data-reset]' : '[aria-pressed="true"]')));
@@ -384,17 +382,17 @@ export interface RankingView {
   todayLabel: string;
   /** 온라인 순위표를 받아 save.rankings에 남긴다. 실패(오프라인 등)하면 false */
   refresh: (mode: Mode) => Promise<boolean>;
-  /** 지금 알고 있는 순위표에서 이 점수의 자리(0부터, 밖이면 -1). 안에 들면 등록 대기로 남긴다 */
-  consider: (mode: Mode, score: number, stage: number) => number;
+  /** 지금 알고 있는 순위표에서 이 점수의 자리(0부터, 밖이면 -1) */
+  consider: (mode: Mode, score: number) => number;
   /** 온라인 순위표에 이름을 올리고 순위(0부터)를 돌려준다. 그사이 밀려났으면 -1, 연결 실패면 예외 */
   register: (mode: Mode, name: string, score: number, stage: number) => Promise<number>;
 }
 
 /**
- * 랭킹 창(공통 모양 @joyfield/shared/ui). 클래식·오늘의 챌린지 순위표를 탭으로 바꿔 보고, 등록 대기 기록이 있으면 맨 위에서 올린다.
+ * 랭킹 창(공통 모양 @joyfield/shared/ui). 클래식·오늘의 챌린지 순위표를 탭으로 바꿔 본다(등록은 결과 화면에서만).
  * 줄마다 도달한 판을 함께 보인다. mark는 방금 올린 순위(0부터)로, 그 줄을 강조한다
  */
-function openRanking(host: HTMLElement, view: RankingView, start: Mode, mark: number | null, onChange?: () => void): void {
+function openRanking(host: HTMLElement, view: RankingView, start: Mode, mark: number | null): void {
   const { save } = view;
   const tab = (mode: Mode, label: string, note: () => string) => ({
     id: mode,
@@ -408,22 +406,12 @@ function openRanking(host: HTMLElement, view: RankingView, start: Mode, mark: nu
         dev: e.dev,
         cells: [t('ranking.stage', { n: e.stage }), e.score.toLocaleString(), ...(mode === 'classic' ? [shortDate(e.date)] : [])],
       })),
-    pending: () => {
-      const rec = pendingRecord(save.rankings, save.pending, mode, view.today);
-      if (!rec) return null;
-      return {
-        title: t('ranking.pending', { score: rec.score, n: placeOf(boardEntries(save.rankings, mode, view.today), rec.score) + 1 }),
-        submit: (name: string) => view.register(mode, name, rec.score, rec.stage),
-      };
-    },
     refresh: () => view.refresh(mode),
   });
   openSharedRanking(host, {
     gameId: 'timetoflip',
     start,
     mark,
-    name: () => save.playerName,
-    onChange,
     tabs: [
       tab('classic', t('mode.classic'), () => t('ranking.classicNote')),
       tab('daily', t('ranking.daily'), () => t('ranking.dailyNote', { date: view.todayLabel })),
@@ -608,7 +596,7 @@ export function resultScreen(opts: {
   countUp(q('.final-score'), result.score);
   if (opts.isRecord) setTimeout(() => confetti(q('.confetti-layer')), 400);
 
-  // 10위 안에 들면 점수 바로 아래에서 이름을 받는다. 그냥 넘어가도 등록 대기로 남아 메인의 랭킹에서 올릴 수 있다.
+  // 10위 안에 들면 점수 바로 아래에서 이름을 받는다. 등록 대기는 없어서, 올리지 않고 나가려 하면 main.ts 가 leaveRankEntry 로 묻는다.
   // 먼저 기기에 남은 순위표로 판단해 바로 보여 주고, 온라인 순위표를 받으면 자리를 다시 맞춘다
   const mode: Mode = opts.daily ? 'daily' : 'classic';
   let entryForm: HTMLElement | null = null;
@@ -634,8 +622,8 @@ export function resultScreen(opts: {
   };
   // 출시 전 확인용 바로 시작 판은 랭킹 등록을 받지 않는다
   if (!opts.test) {
-    showEntry(opts.ranking.consider(mode, result.score, result.stage));
-    void opts.ranking.refresh(mode).then((ok) => ok && el.isConnected && showEntry(opts.ranking.consider(mode, result.score, result.stage)));
+    showEntry(opts.ranking.consider(mode, result.score));
+    void opts.ranking.refresh(mode).then((ok) => ok && el.isConnected && showEntry(opts.ranking.consider(mode, result.score)));
   }
 
   q('[data-act="retry"]').addEventListener('click', opts.onRetry);

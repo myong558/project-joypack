@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { SCORE_MAX, cleanName, insertEntry, pendingRecord, placeOf, sanitizeEntries, type RankEntry } from '../src/ranking';
+import { SCORE_MAX, cleanName, insertEntry, placeOf, sanitizeEntries, type RankEntry } from '../src/ranking';
 import { LEVELS } from '../src/game/levels';
 
 const e = (name: string, score: number): RankEntry => ({ name, score, flowers: 3, date: '2026-10-25' });
@@ -23,12 +23,6 @@ describe('정원 점수 순위표', () => {
     expect(insertEntry(list, e('ZZ', 5))).toBe(-1);
     expect(insertEntry(list, e('ZZ', 2000))).toBe(0);
     expect(list).toHaveLength(10);
-  });
-
-  it('대기 기록은 아직 10위 안일 때만', () => {
-    const list = Array.from({ length: 10 }, (_, i) => e(`N${'ABCDEFGHIJ'[i]}`, 1000 - i));
-    expect(pendingRecord(list, { score: 10, flowers: 1 })).toBeNull();
-    expect(pendingRecord(list, { score: 5000, flowers: 4 })).toEqual({ score: 5000, flowers: 4 });
   });
 
   it('이름은 영문 대문자 5자, 점수 상한은 판 수 × 1000', () => {

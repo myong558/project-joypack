@@ -1,8 +1,9 @@
 // 조이필드 게임 공통 화면 조각(Vite 로 묶는 게임이 import '@joyfield/shared/ui' 로 씀, 기준서 1.6·5.1).
 //   html()          : 문자열 → 요소
 //   openModal()     : 화면 안 대화상자(Esc·바깥 누르기·닫기 단추·휴대폰 뒤로 가기로 닫힘)
-//   rankEntryForm() : 랭킹 이름 등록 카드(영문 대문자 5자, 금지어 거름, 등록 전·중·후 높이 그대로)
-//   openRanking()   : 랭킹 창(탭·등록 대기 카드·TOP 10 목록·온라인/오프라인 안내)
+//   rankEntryForm() : 랭킹 이름 등록 카드(영문 대문자 5자, 금지어 거름, 등록 전·중·후·오프라인 높이 그대로)
+//   leaveRankEntry(): 결과 화면을 떠날 때 아직 올리지 않은 등록 카드가 있으면 "등록하지 않고 나갈까요?" 확인
+//   openRanking()   : 랭킹 창(탭·TOP 10 목록·온라인/오프라인 안내)
 // 모양(css)은 게임마다 자기 styles.css 에 둔다(같은 클래스 이름: .modal-backdrop .modal .rank-entry .ranking .rank-list …).
 // 문구·아이콘은 게임이 configureUi 로 한 번 넘긴다(게임 i18n 의 같은 키, 글꼴 서브셋 검사가 게임 문구에서 글자를 모으므로).
 import './joyfield.js';
@@ -20,7 +21,13 @@ export type UiTextKey =
   | 'ranking.nameLabel'
   | 'ranking.badName'
   | 'ranking.submit'
-  | 'ranking.done';
+  | 'ranking.done'
+  | 'ranking.offlineEntry'
+  | 'ranking.leaveTitle'
+  | 'ranking.leaveText'
+  | 'ranking.leaveFailed'
+  | 'ranking.leaveStay'
+  | 'ranking.leaveGo';
 
 export interface UiConfig {
   /** 게임 i18n 의 t. 위 키를 모두 가져야 한다('ranking.done' 은 {n}) */
@@ -151,8 +158,24 @@ export interface RankEntryOptions {
 }
 
 /**
+ * 등록 카드 상태(.rank-entry 의 data-state). ready 이름 받는 중 · sending 올리는 중 · failed 연결 실패(다시 누를 수 있음)
+ * · done 끝(등록했거나 그사이 밀려남) · offline 기기가 오프라인이라 올릴 수 없음(연결되면 ready 로 돌아감)
+ */
+export type RankEntryState = 'ready' | 'sending' | 'failed' | 'done' | 'offline';
+
+/** 아직 올리지 않았고, 나가면 다시 올릴 길이 없는 상태(나갈 때 묻는다) */
+const UNSENT: readonly RankEntryState[] = ['ready', 'failed'];
+
+/** 기기가 확실히 오프라인인지(navigator.onLine 이 false). true 여도 꼭 연결된 것은 아니어서, 그때 실패는 올릴 때 알린다 */
+export function isOffline(): boolean {
+  return typeof navigator !== 'undefined' && navigator.onLine === false;
+}
+
+/**
  * 이름 입력 카드. 영문 대문자 5자까지만 받고, 지난번 이름을 미리 채운다. 입력 칸과 완료 칸을 처음부터 같은 자리에 겹쳐 두어
- * 등록 전·중·후에 카드 높이가 바뀌지 않게 한다(css: .rank-entry-form · .rank-entry-done 을 grid-area 1/1 에 겹침)
+ * 등록 전·중·후에 카드 높이가 바뀌지 않게 한다(css: .rank-entry-form · .rank-entry-done 을 grid-area 1/1 에 겹침).
+ * 오프라인이면 완료 칸 자리에 "오프라인이라 올릴 수 없어요"를 보이고(.offline), 연결되면 입력 칸으로 돌아간다.
+ * 등록 대기는 없다: 이 카드에서 올리지 않은 기록은 화면을 떠나면 사라지므로 떠날 때 leaveRankEntry 로 묻는다(기준서 1.6)
  */
 export function rankEntryForm(opts: RankEntryOptions): HTMLElement {
   const { t, icons } = cfg();
@@ -174,22 +197,61 @@ export function rankEntryForm(opts: RankEntryOptions): HTMLElement {
   const input = el.querySelector('input')!;
   const submit = el.querySelector<HTMLButtonElement>('[type="submit"]')!;
   const hint = el.querySelector<HTMLElement>('.rank-entry-hint')!;
+  const form = el.querySelector<HTMLElement>('.rank-entry-form')!;
+  const done = el.querySelector<HTMLElement>('.rank-entry-done')!;
+  const doneText = done.querySelector('span')!;
+  const view = done.querySelector<HTMLButtonElement>('[data-view]');
   const hintText = hint.innerHTML;
-  let sending = false;
+  const state = () => el.dataset.state as RankEntryState;
+  const setState = (next: RankEntryState) => (el.dataset.state = next);
+  setState('ready');
   // 금지어(욕설 등)는 등록 단추를 끄고 안내 줄에 알린다(조이필드 공통 Joyfield.isAllowedName, 기준서 10.3)
   const sync = (clean = cleanName(input.value)) => {
     const blocked = isValidName(clean) && !Joyfield.isAllowedName(clean);
     submit.disabled = !isValidName(clean) || blocked;
-    if (!sending) hint.innerHTML = blocked ? `<span class="rank-error">${t('ranking.badName')}</span>` : hintText;
+    if (state() !== 'sending') hint.innerHTML = blocked ? `<span class="rank-error">${t('ranking.badName')}</span>` : hintText;
+  };
+  // 입력 칸 ↔ 완료 칸(등록 결과·오프라인 안내). 두 칸은 같은 자리에 겹쳐 있어 카드 높이는 그대로다
+  const showDone = (on: boolean, text?: string) => {
+    if (text !== undefined) doneText.innerHTML = text;
+    form.toggleAttribute('aria-hidden', on);
+    form.inert = on;
+    done.toggleAttribute('aria-hidden', !on);
+    el.classList.toggle('done', on);
   };
   // 영문 대문자 5자까지, 휴대폰은 영문 자판·대문자로 연다(한글 조합 중에는 끝난 뒤 거름)
   Joyfield.initialsInput(input, sync);
   sync();
+  // 오프라인이면 올릴 수 없음을 먼저 알리고, 연결되면 입력 칸으로 돌아간다. 카드가 화면에서 빠진 뒤 신호가 오면 듣기를 그만둔다
+  let mounted = false;
+  const net = () => {
+    if (mounted && !el.isConnected) {
+      window.removeEventListener('online', net);
+      window.removeEventListener('offline', net);
+      return;
+    }
+    if (isOffline() && UNSENT.includes(state())) {
+      setState('offline');
+      el.classList.add('offline');
+      if (view) view.hidden = true;
+      showDone(true, t('ranking.offlineEntry'));
+    } else if (!isOffline() && state() === 'offline') {
+      setState('ready');
+      el.classList.remove('offline');
+      if (view) view.hidden = false;
+      showDone(false);
+      sync();
+    }
+  };
+  window.addEventListener('online', net);
+  window.addEventListener('offline', net);
+  net();
+  setTimeout(() => (mounted = true));
   el.addEventListener('submit', async (e) => {
     e.preventDefault();
     sync();
-    if (submit.disabled || sending) return;
-    sending = true;
+    if (submit.disabled || !UNSENT.includes(state())) return;
+    setState('sending');
     const label = submit.textContent!;
     submit.style.minWidth = `${submit.offsetWidth}px`;
     submit.disabled = input.disabled = true;
@@ -199,28 +261,60 @@ export function rankEntryForm(opts: RankEntryOptions): HTMLElement {
     try {
       place = await opts.onSubmit(cleanName(input.value));
     } catch {
-      // 연결이 안 되면 기록은 등록 대기로 남아 있으니 다시 누르거나 나중에 올리면 된다
-      sending = false;
+      // 연결이 안 되면 이 화면에서 다시 누르게 한다(나가려 하면 leaveRankEntry 가 기록이 사라진다고 알림)
+      setState('failed');
       input.disabled = false;
       submit.textContent = label;
       submit.style.minWidth = '';
       sync();
       hint.innerHTML = `<span class="rank-error">${t('ranking.failed')}</span>${hintText ? `<br>${hintText}` : ''}`;
+      net();
       return;
     }
-    const form = el.querySelector<HTMLElement>('.rank-entry-form')!;
-    const done = el.querySelector<HTMLElement>('.rank-entry-done')!;
-    done.querySelector('span')!.innerHTML = place < 0 ? t('ranking.missed') : t('ranking.done', { n: place + 1 });
-    form.setAttribute('aria-hidden', 'true');
-    form.inert = true;
-    done.removeAttribute('aria-hidden');
-    el.classList.add('done');
-    const view = done.querySelector<HTMLButtonElement>('[data-view]');
+    setState('done');
+    showDone(true, place < 0 ? t('ranking.missed') : t('ranking.done', { n: place + 1 }));
     view?.removeAttribute('tabindex');
     view?.addEventListener('click', () => opts.onView!(place < 0 ? null : place));
     view?.focus();
   });
   return el;
+}
+
+/**
+ * 결과 화면을 떠날 때(다시 하기·처음 화면으로·조이필드로·뒤로 가기·Esc) 부른다. host 안의 등록 카드가 아직 올리지 않은 상태(ready·failed)면
+ * "등록하지 않고 나갈까요?"를 묻고 [나가기]면 go, [등록하기]·Esc·바깥 누르기·뒤로 가기면 창만 닫고 이름 칸으로 돌아간다.
+ * 카드가 없거나 등록이 끝났거나 오프라인·올리는 중이면 바로 go. 이미 묻는 중이면 아무것도 하지 않는다
+ */
+export function leaveRankEntry(host: ParentNode, go: () => void): void {
+  if (document.querySelector('.rank-leave')) return;
+  const entry = host.querySelector<HTMLElement>('.rank-entry');
+  const state = entry?.dataset.state as RankEntryState | undefined;
+  if (!entry || !state || !UNSENT.includes(state)) return go();
+  const { t } = cfg();
+  const box = html(`
+    <div class="rank-leave">
+      <h2>${t('ranking.leaveTitle')}</h2>
+      <p class="note">${t(state === 'failed' ? 'ranking.leaveFailed' : 'ranking.leaveText')}</p>
+      <div class="rank-leave-actions">
+        <button type="button" class="btn primary" data-stay>${t('ranking.leaveStay')}</button>
+        <button type="button" class="btn" data-go>${t('ranking.leaveGo')}</button>
+      </div>
+    </div>`);
+  let leaving = false;
+  const close = openModal(entry, box, t('ranking.leaveTitle'), {
+    kind: 'rank-leave-modal',
+    onClose: () => {
+      if (leaving) return go();
+      // 이름 칸으로: 휴대폰 자판이 저절로 뜨지 않게 등록 단추에 초점(이름이 비었으면 입력 칸)
+      const submit = entry.querySelector<HTMLButtonElement>('[type="submit"]');
+      (submit && !submit.disabled ? submit : entry.querySelector<HTMLElement>('input'))?.focus();
+    },
+  });
+  box.querySelector('[data-stay]')!.addEventListener('click', () => close());
+  box.querySelector('[data-go]')!.addEventListener('click', () => {
+    leaving = true;
+    close();
+  });
 }
 
 export interface FlipOptions {
@@ -326,8 +420,6 @@ export interface RankTab {
   note: () => string;
   /** 지금 알고 있는 순위표(기기 사본 포함), 1위부터 */
   rows: () => RankRow[];
-  /** 아직 올리지 않았고 지금도 10위 안에 드는 기록이 있으면 등록 카드 제목·올리기 */
-  pending: () => { title: string; submit: (name: string) => Promise<number> } | null;
   /** 온라인 순위표를 받아 기기에 남긴다. 실패(오프라인 등)하면 false */
   refresh: () => Promise<boolean>;
 }
@@ -339,10 +431,6 @@ export interface RankingOptions {
   start?: string;
   /** 처음 탭에서 강조할 줄(0부터, 방금 올린 순위) */
   mark?: number | null;
-  /** 등록 카드에 미리 채울 이름 */
-  name: () => string;
-  /** 올린 뒤(랭킹 단추 표시 갱신 등) */
-  onChange?: () => void;
   /**
    * 창 높이: 'measure' 면 모든 탭을 한 번씩 그려 가장 큰 높이로 고정(창 크기를 바꾸면 다시 잼), 그 밖의 문자열은 .modal 에 더할
    * 클래스로 보고 css 가 높이를 정한다(탭·등록 칸이 바뀌어도 탭 단추가 움직이지 않게)
@@ -352,7 +440,7 @@ export interface RankingOptions {
 }
 
 /**
- * 랭킹 창. 탭마다 순위표를 받아 오고(받는 동안·오프라인이면 기기 사본), 등록 대기 기록이 있으면 맨 위에서 올린다.
+ * 랭킹 창. 탭마다 순위표를 받아 오고(받는 동안·오프라인이면 기기 사본) 보여 준다. 등록은 결과 화면에서만 한다(등록 대기 없음).
  * 탭을 고르면 조이필드 공통 최근 탭(Joyfield.setRankBoard)으로 남긴다
  */
 export function openRanking(host: HTMLElement, opts: RankingOptions): () => void {
@@ -371,11 +459,11 @@ export function openRanking(host: HTMLElement, opts: RankingOptions): () => void
           : ''
       }
       <p class="note rank-note"></p>
-      <div class="rank-pending"></div>
+      <div class="rank-slot"></div>
       <ol class="rank-list"></ol>
     </div>`);
   const list = box.querySelector<HTMLElement>('.rank-list')!;
-  const slot = box.querySelector<HTMLElement>('.rank-pending')!;
+  const slot = box.querySelector<HTMLElement>('.rank-slot')!;
   const note = box.querySelector<HTMLElement>('.rank-note')!;
   const status: Record<string, 'loading' | 'online' | 'offline'> = Object.fromEntries(ids.map((id) => [id, 'loading']));
 
@@ -401,30 +489,8 @@ export function openRanking(host: HTMLElement, opts: RankingOptions): () => void
   const render = () => {
     box.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.tab === current)));
     renderNote();
-    const tab = tabOf(current);
-    const pend = tab.pending();
-    const board = current;
-    slot.replaceChildren(
-      ...(pend
-        ? [
-            rankEntryForm({
-              title: pend.title,
-              name: opts.name(),
-              onSubmit: async (name) => {
-                const place = await pend.submit(name);
-                if (current === board) highlight = place < 0 ? null : place;
-                opts.onChange?.();
-                // 올린 결과는 순위표 강조로 보여 주므로, 밀려났을 때만 카드의 안내를 남긴다
-                if (place >= 0 && current === board) render();
-                else renderList();
-                return place;
-              },
-            }),
-          ]
-        : !tab.rows().length
-          ? [html(`<p class="note rank-empty">${t('ranking.empty')}</p>`)]
-          : []),
-    );
+    // 아직 아무 기록이 없으면 첫 1위 안내
+    slot.replaceChildren(...(!tabOf(current).rows().length ? [html(`<p class="note rank-empty">${t('ranking.empty')}</p>`)] : []));
     renderList();
   };
   const load = (id: string) => {
@@ -434,11 +500,7 @@ export function openRanking(host: HTMLElement, opts: RankingOptions): () => void
       .then((ok) => {
         status[id] = ok ? 'online' : 'offline';
         if (current !== id || !box.isConnected) return;
-        // 등록 카드에 이름을 치는 중이면 카드는 그대로 두고 순위표만 바꾼다
-        if (slot.contains(document.activeElement)) {
-          renderNote();
-          renderList();
-        } else render();
+        render();
       });
   };
   box.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach((b) =>
@@ -460,7 +522,7 @@ export function openRanking(host: HTMLElement, opts: RankingOptions): () => void
     fitFont: opts.fitFont,
     onClose: () => window.removeEventListener('resize', lockHeight),
   });
-  // 탭마다 안내 문구 줄 수·빈 순위 안내·등록 카드가 달라 창 높이가 출렁이므로, 모든 탭을 한 번씩 그려 가장 큰 높이로 고정한다(em)
+  // 탭마다 안내 문구 줄 수·빈 순위 안내가 달라 창 높이가 출렁이므로, 모든 탭을 한 번씩 그려 가장 큰 높이로 고정한다(em)
   function lockHeight() {
     if (!box.isConnected) return;
     const keep = current;

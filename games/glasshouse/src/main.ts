@@ -15,13 +15,13 @@ import { fetchBoard, fetchDaily, submitDaily, submitEntry } from './online';
 import { BOARD, dailyAhead, placeOf, placeOfDaily, type DailyEntry, type RankEntry } from './ranking';
 import { shareResult } from './share';
 import { ICONS } from './ui/icons';
-import { configureUi } from '@joyfield/shared/ui';
+import { configureUi, leaveRankEntry } from '@joyfield/shared/ui';
 import { emptyRecords, flowerCount, gardenScore, loadSave, writeSave } from './storage';
 import { applySkin, applyTheme, resolveSkin, todaySkin } from './theme';
 import { BoardView, IDLE_KINDS, type IdleKind } from './ui/board';
 import { Effects } from './ui/effects';
 import { mountScene } from './ui/scene';
-import { ALL_OPEN, dailyPendingRecord, dailyResultScreen, gameScreen, resultScreen, setPageSound, startScreen, todayDaily, unlocked, type ClearResult, type DailyResult, type RankingView } from './ui/screens';
+import { ALL_OPEN, dailyResultScreen, gameScreen, resultScreen, setPageSound, startScreen, todayDaily, unlocked, type ClearResult, type DailyResult, type RankingView } from './ui/screens';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 const save = loadSave();
@@ -47,49 +47,31 @@ function vibrate(pattern: VibrationName): void {
 
 const today = () => dateKey(new Date());
 
-/** 랭킹 탭 공통 기준(Joyfield.rankTab)에 쓸 등록 대기 탭. 오늘의 정원 대기 기록은 그날만 유효 */
-function publishPending(): void {
-  const items: (string | { board: string; day: string })[] = [];
-  if (save.pending && placeOf(save.rankings, save.pending.score) >= 0) items.push(BOARD);
-  if (dailyPendingRecord(ranking)) items.push({ board: 'daily', day: today() });
-  Joyfield.setRankPending('glasshouse', items);
-}
-
 const ranking: RankingView = {
   save,
   async refresh() {
     try {
       save.rankings = await fetchBoard();
-      // 새 순위표에서 10위 밖으로 밀린 대기 기록은 버린다
-      if (save.pending && placeOf(save.rankings, save.pending.score) < 0) save.pending = null;
       writeSave(save);
-      publishPending();
       return true;
     } catch {
       return false;
     }
   },
-  consider(score, flowers) {
+  // 판을 깰 때마다: 최근 탭으로 남기고(조이필드 공통 기준) TOP 10 에 들 자리를 돌려준다. 등록은 결과 화면에서만(등록 대기 없음, 기준서 1.6)
+  consider(score) {
     Joyfield.setRankBoard('glasshouse', BOARD);
-    // 이미 순위표에 같은 이름으로 이 점수 이상이 올라가 있으면 대기로 두지 않는다
+    // 이미 순위표에 같은 이름으로 이 점수 이상이 올라가 있으면 받지 않는다
     const mine = save.rankings.find((e) => e.name === save.playerName);
     if (mine && mine.score >= score) return -1;
-    const place = placeOf(save.rankings.filter((e) => e !== mine), score);
-    if (place >= 0 && (!save.pending || save.pending.score < score)) {
-      save.pending = { score, flowers };
-      writeSave(save);
-    }
-    publishPending();
-    return place;
+    return placeOf(save.rankings.filter((e) => e !== mine), score);
   },
   async register(name, score, flowers) {
     save.playerName = name;
     const entry: RankEntry = { name, score, flowers, date: today(), dev: Joyfield.playDevice() };
     const { place, entries } = await submitEntry(entry);
     save.rankings = entries;
-    if (save.pending && save.pending.score <= score) save.pending = null;
     writeSave(save);
-    publishPending();
     return place;
   },
   today,
@@ -97,10 +79,7 @@ const ranking: RankingView = {
     const date = today();
     try {
       save.dailyRankings = { date, entries: await fetchDaily(date) };
-      const p = save.dailyPending;
-      if (p && (p.date !== date || placeOfDaily(save.dailyRankings.entries, p) < 0)) save.dailyPending = null;
       writeSave(save);
-      publishPending();
       return true;
     } catch {
       return false;
@@ -108,34 +87,22 @@ const ranking: RankingView = {
   },
   considerDaily(rec) {
     Joyfield.setRankBoard('glasshouse', 'daily');
-    const date = today();
     const entries = todayDaily(ranking);
     const mine = entries.find((e) => e.name === save.playerName);
     if (mine && !dailyAhead(rec, mine)) return -1;
-    const place = placeOfDaily(entries.filter((e) => e !== mine), rec);
-    const p = save.dailyPending;
-    if (place >= 0 && (!p || p.date !== date || dailyAhead(rec, p))) {
-      save.dailyPending = { ...rec, date };
-      writeSave(save);
-    }
-    publishPending();
-    return place;
+    return placeOfDaily(entries.filter((e) => e !== mine), rec);
   },
   async registerDaily(name, rec) {
     save.playerName = name;
     const entry: DailyEntry = { name, moves: rec.moves, time: rec.time, date: today(), dev: Joyfield.playDevice() };
     const { place, entries } = await submitDaily(entry);
     save.dailyRankings = { date: entry.date, entries };
-    const p = save.dailyPending;
-    if (p && (p.date !== entry.date || !dailyAhead(p, rec))) save.dailyPending = null;
     writeSave(save);
-    publishPending();
     return place;
   },
 };
 function showStart(settings?: 'open' | 'reset', settingsFocus?: string, opening = false): void {
   const now = new Date();
-  publishPending();
   // 뒤로 가기: 시작 화면에서는 조이필드로(기준서 1.3)
   Joyfield.back.screen(0);
   applySkin(resolveSkin(save.skin, now));
@@ -683,19 +650,22 @@ function accentOf(id: string): string {
   return c[id] ?? '#e9c46a';
 }
 
+/** 결과 화면을 떠날 때: 올리지 않은 랭킹 등록 카드가 있으면 먼저 묻는다(조이필드 공통, 기준서 1.6) */
+const leave = (go: () => void) => leaveRankEntry(app, go);
+
 function showDailyResult(result: DailyResult): void {
-  mount(dailyResultScreen({ result, onRetry: () => play('daily'), onHome: () => showStart(), onShare: shareResult, ranking }));
+  mount(dailyResultScreen({ result, onRetry: () => leave(() => play('daily')), onHome: () => leave(() => showStart()), onShare: shareResult, ranking }));
   if (result.better) {
     sound.play('record');
     vibrate('big');
   }
   // 뒤로 가기: 결과 → 시작 화면
-  Joyfield.back.screen(1, () => showStart());
+  Joyfield.back.screen(1, () => leave(() => showStart()));
   const onKey = (e: KeyboardEvent) => {
     if ((e.target as Element | null)?.closest?.('input, .rank-entry, .modal')) return;
     if (document.querySelector('.screen.result.locked')) return;
-    if (e.key === 'r' || e.key === 'R') play('daily');
-    else if (e.key === 'Escape') showStart();
+    if (e.key === 'r' || e.key === 'R') leave(() => play('daily'));
+    else if (e.key === 'Escape') leave(() => showStart());
   };
   window.addEventListener('keydown', onKey);
   teardown = () => window.removeEventListener('keydown', onKey);
@@ -703,17 +673,17 @@ function showDailyResult(result: DailyResult): void {
 
 function showResult(result: ClearResult, test: boolean): void {
   // 뒤로 가기: 결과 → 시작 화면
-  Joyfield.back.screen(1, () => showStart());
+  Joyfield.back.screen(1, () => leave(() => showStart()));
   const { level } = result;
   const next = level + 1 < LEVELS.length ? level + 1 : -1;
   mount(
     resultScreen({
       result,
       test,
-      onNext: next >= 0 ? () => play(next) : null,
-      onRetry: () => play(level),
-      onHome: () => showStart(),
-      onPick: () => showStart(),
+      onNext: next >= 0 ? () => leave(() => play(next)) : null,
+      onRetry: () => leave(() => play(level)),
+      onHome: () => leave(() => showStart()),
+      onPick: () => leave(() => showStart()),
       onShare: shareResult,
       ranking,
     }),
@@ -729,9 +699,9 @@ function showResult(result: ClearResult, test: boolean): void {
     if (e.key === 'Enter' || e.key === ' ') {
       if ((e.target as Element | null)?.closest?.('button')) return;
       e.preventDefault();
-      if (next >= 0) play(next);
-    } else if (e.key === 'r' || e.key === 'R') play(level);
-    else if (e.key === 'Escape') showStart();
+      if (next >= 0) leave(() => play(next));
+    } else if (e.key === 'r' || e.key === 'R') leave(() => play(level));
+    else if (e.key === 'Escape') leave(() => showStart());
   };
   window.addEventListener('keydown', onKey);
   teardown = () => window.removeEventListener('keydown', onKey);

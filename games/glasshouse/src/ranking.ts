@@ -23,12 +23,6 @@ export interface RankEntry {
   dev?: Device;
 }
 
-/** 결과 화면에서 등록하지 않고 넘어간 기록. 나중에 랭킹 창에서 등록할 수 있다 */
-export interface PendingRecord {
-  score: number;
-  flowers: number;
-}
-
 /** 입력한 글자를 대문자로 바꾸고 A–Z가 아닌 글자는 버린다 */
 /** 이 점수가 들어갈 자리(0부터). 같은 점수면 먼저 올린 기록이 앞서므로 그 뒤에 선다. 10위 밖이면 -1 */
 export function placeOf(entries: readonly RankEntry[], score: number): number {
@@ -51,12 +45,6 @@ export function insertEntry(entries: RankEntry[], entry: RankEntry): number {
   return at;
 }
 
-/** 아직 등록하지 않았고 지금도 10위 안에 드는 기록. 없으면 null */
-export function pendingRecord(entries: readonly RankEntry[], pending: PendingRecord | null): PendingRecord | null {
-  if (!pending || placeOf(entries, pending.score) === -1) return null;
-  return { ...pending };
-}
-
 const validEntry = (e: unknown): e is RankEntry => {
   const r = e as RankEntry | null;
   return !!r && isValidName(r.name) && Number.isInteger(r.score) && r.score <= SCORE_MAX && Number.isInteger(r.flowers) && typeof r.date === 'string';
@@ -69,11 +57,6 @@ export function sanitizeEntries(raw: unknown): RankEntry[] {
     .map(({ name, score, flowers, date, dev }) => (isDevice(dev) ? { name, score, flowers, date, dev } : { name, score, flowers, date }))
     .sort((a, b) => b.score - a.score)
     .slice(0, RANK_SIZE);
-}
-
-export function sanitizePending(raw: unknown): PendingRecord | null {
-  const p = raw as PendingRecord | null;
-  return p && Number.isInteger(p.score) && p.score > 0 && Number.isInteger(p.flowers) ? { score: p.score, flowers: p.flowers } : null;
 }
 
 /* ---------- 오늘의 정원(날마다 새 판, 순위표도 날마다 새 문서 daily-YYYY-MM-DD) ---------- */

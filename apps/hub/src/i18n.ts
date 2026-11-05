@@ -34,6 +34,7 @@ const ko = {
   'best.glasshouse': '총점 {score}점 · 꽃 {n}/24',
 
   'ranking.open': '전체 랭킹',
+  'ranking.offlineBadge': '오프라인 · 랭킹 등록 안 됨',
   'ranking.title': '전체 랭킹',
   'ranking.sub': '게임별 1위',
   'ranking.loading': '불러오는 중…',
@@ -143,6 +144,7 @@ const en: Record<keyof typeof ko, string> = {
   'best.glasshouse': 'Total {score} · {n}/24 flowers',
 
   'ranking.open': 'Rankings',
+  'ranking.offlineBadge': 'Offline · No ranking',
   'ranking.title': 'Rankings',
   'ranking.sub': 'No. 1 of each game',
   'ranking.loading': 'Loading…',

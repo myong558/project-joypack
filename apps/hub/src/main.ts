@@ -494,7 +494,10 @@ function renderHome(force = true): void {
     renderHome();
     app.querySelector<HTMLButtonElement>('[data-lang]')!.focus();
   });
-  app.querySelector('[data-open="ranking"]')!.addEventListener('click', openRanking);
+  const rankBtn = app.querySelector('[data-open="ranking"]')!;
+  rankBtn.addEventListener('click', openRanking);
+  // 오프라인이면 랭킹 버튼 아래에 "오프라인 · 랭킹 등록 안 됨"(모든 게임 시작 화면과 같음, 기준서 1.6)
+  Joyfield.offlineMark(rankBtn, t('ranking.offlineBadge'));
   app.querySelector('[data-open="settings"]')!.addEventListener('click', openSettings);
   bindInstallCard(app);
   fitScreen();
@@ -663,7 +666,7 @@ function openDialog(className: string, body: string, title: string, sub?: string
 // ---------- 전체 랭킹 ----------
 
 /**
- * 게임마다 처음 보일 순위표 탭: 조이필드 공통 기준(Joyfield.rankTab) — 등록 대기 → 최근 탭(그 게임에서 방금 한 판·어디서든 마지막으로 본 탭) → games.json 의 default.
+ * 게임마다 처음 보일 순위표 탭: 조이필드 공통 기준(Joyfield.rankTab) — 최근 탭(그 게임에서 방금 한 판·어디서든 마지막으로 본 탭) → games.json 의 default.
  * 각 게임 랭킹 창과 같은 값을 읽고 써서, 여기서 고른 탭이 게임 랭킹 창에도 이어진다
  */
 function rankBoardOf(game: GameMeta): string {

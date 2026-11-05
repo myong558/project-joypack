@@ -88,10 +88,10 @@ export interface JoyfieldApi {
   inviteBar(options?: { root?: string }): void;
   /** 랭킹 탭 공통 기준: 판을 끝냈을 때·랭킹 창에서 탭을 골랐을 때 그 탭을 최근 탭으로 남긴다 */
   setRankBoard(gameId: string, board: string | number): void;
-  /** 등록 대기 기록이 있는 탭 목록(바뀔 때마다 통째로). day(YYYY-MM-DD)를 주면 그날만 유효 */
-  setRankPending(gameId: string, items: (string | number | { board: string | number; day?: string })[]): void;
-  /** 랭킹 창을 열 때 처음 고를 탭: 등록 대기 → 최근 탭(방금 한 판·마지막으로 본 탭) → fallback */
+  /** 랭킹 창을 열 때 처음 고를 탭: 최근 탭(방금 한 판·마지막으로 본 탭) → fallback */
   rankTab(gameId: string, boards: (string | number)[], fallback: string | number): string;
+  /** 위 메뉴 랭킹 버튼 아래 오프라인 안내(오프라인일 때만 보임, 연결되면 사라짐). text 는 앱 i18n 의 "오프라인 · 랭킹 등록 안 됨" */
+  offlineMark(button: Element | null, text: string): void;
   /** 진동 세기표(sounds/catalog.json "vibrations" 와 같은 값, ms) */
   VIBRATIONS: Record<VibrationName, number | number[]>;
   /** 이 기기가 진동을 할 수 있는지(아이폰 등은 false → 설정의 진동 칩을 숨김) */

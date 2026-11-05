@@ -520,7 +520,7 @@ button:focus-visible {
 }
 
 /* 위 메뉴는 조이필드 공통(../../shared/topbar.css, .jp-topbar·.jp-top-btn): 조이필드·다른 게임과 같은 자리·크기로 화면 맨 위에 고정.
-   여기서는 대표색만 정한다. 랭킹 등록이 남았을 때의 강조(.is-on)도 공통 규칙을 쓴다. */
+   여기서는 대표색(마우스 올림·초점 색)만 정한다. 오프라인 안내(.jp-top-offline)도 공통 규칙을 쓴다. */
 .topbar {
   --jp-top-accent: var(--action);
 }
@@ -2205,7 +2205,7 @@ button:focus-visible {
   text-align: center;
 }
 
-.rank-pending:empty {
+.rank-slot:empty {
   display: none;
 }
 

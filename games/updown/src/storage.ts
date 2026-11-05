@@ -3,24 +3,23 @@
 //   updown.custom   직접 정하기에서 마지막으로 고른 끝 숫자
 //   updown.skin     스킨(auto · spring · summer · autumn · winter)
 //   updown.luck     결과 운 문구를 꺼낸 순서(단계마다)
-//   updown.pending2 등록 대기 기록 { [끝 숫자]: { score, tries, time, thermo } }
 //   updown.boards   마지막으로 받은 순위표 사본 { [끝 숫자]: RankEntry[] } (오프라인일 때 보여 주고 TOP 10 판단에 씀)
 //   공통 설정(theme·lang·sound·vibrate·initials)은 Joyfield.get/set — 예전 키(updown.theme 등)에도 같이 쓴다(이사 전 저장 호환)
 import '@joyfield/shared';
 import { PRESETS, type Preset } from './game/rules';
-import { cleanName, sanitizeEntries, sanitizePending, type Pending, type RankEntry } from './ranking';
+import { cleanName, sanitizeEntries, type RankEntry } from './ranking';
 
 const BEST_KEY = 'updown.scores';
 const CUSTOM_KEY = 'updown.custom';
 const SKIN_KEY = 'updown.skin';
 export const LUCK_KEY = 'updown.luck';
-const PENDING_KEY = 'updown.pending2';
 const BOARDS_KEY = 'updown.boards';
 /** 공통 설정의 예전 키(첫 화면 깜빡임 방지 스크립트도 updown.theme 를 읽음) */
 export const LEGACY = { theme: 'updown.theme', sound: 'updown.sound', vibrate: 'updown.vibrate', initials: 'updown.initials' } as const;
 
-// 하트·난이도가 있던 예전 버전의 기록, 기록 1건 = 문서 1개 방식이던 때(~v1.20)의 순위표 사본은 지금 방식과 비교할 수 없어 지운다
-for (const key of ['updown.best', 'updown.pending', 'updown.rankings', 'updown.rankings2']) {
+// 하트·난이도가 있던 예전 버전의 기록, 기록 1건 = 문서 1개 방식이던 때(~v1.20)의 순위표 사본은 지금 방식과 비교할 수 없어 지운다.
+// updown.pending2(등록 대기 기록)는 2026-11-05 등록 대기를 없애며 버린다(출시 전이라 옮기지 않음)
+for (const key of ['updown.best', 'updown.pending', 'updown.pending2', 'updown.rankings', 'updown.rankings2']) {
   try {
     localStorage.removeItem(key);
   } catch {
@@ -92,14 +91,6 @@ export function loadLuck(): Record<string, { order: number[]; next: number }> {
 
 export function saveLuck(data: object): void {
   write(LUCK_KEY, JSON.stringify(data));
-}
-
-export function loadPending(): Pending {
-  return sanitizePending(readJson(PENDING_KEY));
-}
-
-export function savePending(pending: Pending): void {
-  write(PENDING_KEY, Object.keys(pending).length ? JSON.stringify(pending) : null);
 }
 
 export function loadBoards(): Partial<Record<Preset, RankEntry[]>> {

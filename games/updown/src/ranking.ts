@@ -3,7 +3,7 @@
 // 순위: 점수가 높을수록 → 같으면 먼저 등록한 기록이 위. thermo 는 온도계를 쓴 판(목록에 🌡️, 순위에는 영향 없음, 점수에 이미 차감)
 import { insertBy, placeBy } from '@joyfield/shared/rank';
 import { RANK_SIZE, isValidName } from '@joyfield/shared/ui';
-import { PRESETS, type Preset } from './game/rules';
+import type { Preset } from './game/rules';
 
 export { NAME_MAX, RANK_SIZE, cleanName, isValidName } from '@joyfield/shared/ui';
 
@@ -23,14 +23,13 @@ export interface RankEntry {
   dev?: Device;
 }
 
-/** 등록 대기 기록(결과 화면에서 올리지 않고 넘어간 TOP 10 기록). 범위마다 가장 좋은 하나 */
-export interface PendingRecord {
+/** 방금 맞힌 판의 기록(결과 화면 등록 카드로 올린다) */
+export interface PlayRecord {
   score: number;
   tries: number;
   time: number;
   thermo: boolean;
 }
-export type Pending = Partial<Record<Preset, PendingRecord>>;
 
 /** 순위표 문서 ID(games/updown/rankings/<끝 숫자>) */
 export const boardId = (board: Preset) => String(board);
@@ -84,31 +83,3 @@ export function sanitizeEntries(raw: unknown): RankEntry[] {
     .slice(0, RANK_SIZE);
 }
 
-/** 점수·시도 횟수·걸린 시간이 정상인 대기 기록만 남긴다 */
-export function sanitizePending(raw: unknown): Pending {
-  const result: Pending = {};
-  const src = (raw ?? {}) as Record<string, Partial<PendingRecord>>;
-  for (const key of PRESETS) {
-    const e = src[key];
-    if (e && isInt(e.score) && e.score >= 0 && isInt(e.tries) && e.tries > 0 && Number.isFinite(e.time) && (e.time as number) >= 0) {
-      result[key] = { score: e.score, tries: e.tries, time: e.time as number, thermo: e.thermo === true };
-    }
-  }
-  return result;
-}
-
-/** 대기 기록 남기기: 범위마다 하나, 더 높은 점수가 오면 바꾼다 */
-export function keepPending(pending: Pending, board: Preset, rec: PendingRecord): void {
-  const old = pending[board];
-  if (!old || rec.score > old.score) pending[board] = { ...rec };
-}
-
-export function sameRecord(a: PendingRecord | undefined | null, b: PendingRecord | undefined | null): boolean {
-  return !!a && !!b && a.score === b.score && a.tries === b.tries && a.time === b.time && !!a.thermo === !!b.thermo;
-}
-
-/** 아직 올리지 않았고 지금 알고 있는 순위표에서도 10위 안에 드는 대기 기록. 없으면 null */
-export function pendingRecord(entries: readonly RankEntry[], pending: Pending, board: Preset): PendingRecord | null {
-  const rec = pending[board];
-  return rec && placeOf(entries, rec.score) >= 0 ? rec : null;
-}

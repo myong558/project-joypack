@@ -47,7 +47,7 @@
 - 오른쪽 위 **설정**: 내 기록 지우기(전체·범위별, 이 기기의 최고 점수만 지우고 온라인 랭킹은 그대로), 컬러 모드, 스킨 설정, 언어, 효과음·진동 켜기/끄기. 맨 아래에 지금 쓰는 버전이 보입니다
 - 계절 스킨(봄·여름·가을·겨울): 화면 뒤에 벚꽃잎·물방울·낙엽·눈송이가 천천히 움직이고 배경·카드·팝업·버튼·다이얼 색도 계절 톤으로 바뀝니다(범위 버튼·UP/DOWN 색은 그대로). 기본값인 **자동**은 날마다 네 스킨 중 하나를 무작위로 골라 쓰고, 계절을 직접 고르면 그 스킨으로 고정됩니다(`src/skins.ts`).
 
-설정과 기록은 브라우저 `localStorage`에 저장됩니다(`updown.scores` 범위별 최고 점수, `updown.pending2` 등록 대기, `updown.boards` 마지막 순위표(v1.21.0~, 예전 `updown.rankings2` 는 지움), `updown.custom`, `updown.theme`, `updown.skin`, `updown.lang`). v1.11.0 은 처음 열 때 예전 하트 방식 기록(`updown.best`, `updown.pending`, `updown.rankings`)을 지웁니다.
+설정과 기록은 브라우저 `localStorage`에 저장됩니다(`updown.scores` 범위별 최고 점수, `updown.boards` 마지막 순위표(v1.21.0~, 예전 `updown.rankings2` 는 지움), `updown.custom`, `updown.theme`, `updown.skin`, `updown.lang`). v1.11.0 은 처음 열 때 예전 하트 방식 기록(`updown.best`, `updown.pending`, `updown.rankings`)을, v1.22.0 은 등록 대기 기록(`updown.pending2`, 등록 대기를 없앰)을 지웁니다.
 
 ## 실행
 
@@ -84,7 +84,7 @@ games/updown/
 │   ├── game/rules.ts       게임 규칙·점수·온도계·운 문구 단계 (DOM 을 쓰지 않는 순수 로직)
 │   ├── i18n.ts             화면 문구(한국어·영어)와 언어 설정
 │   ├── storage.ts          기기 저장(키 이름은 예전 그대로 updown.*)
-│   ├── ranking.ts          순위표 항목·정리·등록 대기(자리·끼우기는 공통 placeBy·insertBy)
+│   ├── ranking.ts          순위표 항목·정리(자리·끼우기는 공통 placeBy·insertBy)
 │   ├── online.ts           순위표 읽기·등록(공통 rankStore)
 │   ├── share.ts            결과 공유 이미지(공통 captureResult) + Joyfield.shareResult
 │   ├── audio.ts            효과음 recipe(공통 playRecipe)·진동(Joyfield.vibrate), 켜기/끄기

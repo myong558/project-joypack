@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { insertEntry, keepPending, pendingRecord, placeOf, sanitizeEntries, sanitizePending, type Pending, type RankEntry } from '../src/ranking';
+import { insertEntry, placeOf, sanitizeEntries, type RankEntry } from '../src/ranking';
 
 const entry = (name: string, score: number, extra: Partial<RankEntry> = {}): RankEntry => ({ name, score, tries: 5, time: 10_000, date: '2026-11-05', ...extra });
 
@@ -28,15 +28,4 @@ describe('업다운 순위표(공통 순위표 문서 방식)', () => {
     expect(clean[1]).toMatchObject({ thermo: true, dev: 'm' });
   });
 
-  it('등록 대기: 범위마다 가장 좋은 하나, 10위 밖이면 보이지 않음(예전 updown.pending2 형식 그대로)', () => {
-    const pending: Pending = sanitizePending({ 100: { score: 700, tries: 6, time: 20000, thermo: false }, 999: { score: 1 } });
-    expect(Object.keys(pending)).toEqual(['100']);
-    keepPending(pending, 100, { score: 600, tries: 7, time: 1, thermo: false });
-    expect(pending[100]!.score).toBe(700);
-    keepPending(pending, 100, { score: 800, tries: 4, time: 1, thermo: true });
-    expect(pending[100]!.score).toBe(800);
-    const full = Array.from({ length: 10 }, () => entry('A', 900));
-    expect(pendingRecord(full, pending, 100)).toBeNull();
-    expect(pendingRecord([], pending, 100)).toMatchObject({ score: 800 });
-  });
 });

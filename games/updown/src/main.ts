@@ -4,7 +4,7 @@
 import '@joyfield/shared';
 import '@joyfield/shared/topbar.css';
 import './styles.css';
-import { configureUi, openModal, openRanking as openSharedRanking, pauseLayer, rankEntryForm, type RankTab } from '@joyfield/shared/ui';
+import { configureUi, leaveRankEntry, openModal, openRanking as openSharedRanking, pauseLayer, rankEntryForm, type RankTab } from '@joyfield/shared/ui';
 import { play as fx, isOn as fxOn, setOn as setFx } from './audio';
 import {
   LUCK_TONE,
@@ -27,7 +27,7 @@ import {
 } from './game/rules';
 import { LANGS, getLang, luckLines, setLang, t, type Lang, type MessageKey } from './i18n';
 import { fetchBoard, submitEntry } from './online';
-import { keepPending, pendingRecord, placeOf, sameRecord, type PendingRecord, type RankEntry } from './ranking';
+import { placeOf, type PlayRecord, type RankEntry } from './ranking';
 import { captureResult, shareResult } from './share';
 import { apply as applySkinBg, screenScale, SKINS, type SkinSetting } from './skins';
 import {
@@ -37,14 +37,12 @@ import {
   loadCustom,
   loadInitials,
   loadLuck,
-  loadPending,
   loadSkin,
   saveBest,
   saveBoards,
   saveCustom,
   saveInitials,
   saveLuck,
-  savePending,
   saveSkin,
 } from './storage';
 import { icon, SPRITE } from './ui/icons';
@@ -473,29 +471,26 @@ async function share(): Promise<void> {
 }
 
 // ── 랭킹(조이필드 공통 순위표 문서 방식, 범위마다 1~10위) ──
-// 정답을 맞힌 판이 TOP 10 에 들면 결과 화면 버튼 위에 이름 등록 카드를 띄우고, 그 기록을 범위별 "등록 대기"로 기기에 남긴다.
-// 등록하지 않고 넘어가거나 새로 고쳐도 대기 기록은 남아, 나중에 랭킹 창에서 올릴 수 있다(모든 게임 같은 방식, 기준서 1.6).
+// 정답을 맞힌 판이 TOP 10 에 들면 결과 화면 버튼 위에 이름 등록 카드를 띄운다. 등록 대기는 없어서, 올리지 않고 결과 화면을 떠나려 하면
+// leaveRankEntry 가 "등록하지 않고 나갈까요?"를 묻는다(모든 게임 같은 방식, 기준서 1.6).
 // 순위표는 마지막으로 받은 것을 기기에 두어 오프라인이어도 보여 주고 TOP 10 판단에 쓴다.
 const boards = loadBoards();
-const pending = loadPending();
 const entries = (board: Preset) => boards[board] ?? [];
 const today = () => {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
 
-/** 대기 기록이 있는 범위를 조이필드 공통 랭킹 탭 기준(Joyfield.rankTab)에 알리고, 랭킹 버튼을 대표색으로 채운다(이름도 "랭킹 등록") */
+/** 위 메뉴 랭킹 버튼 이름(언어를 바꾸면 다시)과 오프라인 안내(조이필드 공통 Joyfield.offlineMark, 기준서 1.6) */
 function renderRankingButton(): void {
-  const waiting = PRESETS.filter((b) => !!pendingRecord(entries(b), pending, b));
-  Joyfield.setRankPending('updown', waiting);
   const button = $('ranking-open');
-  const label = t(waiting.length ? 'ranking.register' : 'ranking.open');
-  button.classList.toggle('is-on', waiting.length > 0);
+  const label = t('ranking.open');
   button.setAttribute('aria-label', label);
   button.title = label;
+  Joyfield.offlineMark(button, t('ranking.offlineBadge'));
 }
 
-/** 온라인 순위표를 받아 기기에 남긴다. 10위 밖으로 밀린 대기 기록은 지운다. 실패하면 false */
+/** 온라인 순위표를 받아 기기에 남긴다. 실패하면 false */
 async function refresh(board: Preset): Promise<boolean> {
   try {
     boards[board] = await fetchBoard(board);
@@ -503,38 +498,21 @@ async function refresh(board: Preset): Promise<boolean> {
     return false;
   }
   saveBoards(boards);
-  if (pending[board] && !pendingRecord(entries(board), pending, board)) {
-    delete pending[board];
-    savePending(pending);
-  }
-  renderRankingButton();
   return true;
 }
 
-/** 지금 아는 순위표에서 이 기록의 자리(0부터, 밖이면 -1). 안에 들면 등록 대기로 남긴다 */
-function consider(board: Preset, rec: PendingRecord): number {
-  const place = placeOf(entries(board), rec.score);
-  if (place >= 0) {
-    keepPending(pending, board, rec);
-    savePending(pending);
-  }
-  renderRankingButton();
-  return place;
+/** 지금 아는 순위표에서 이 기록의 자리(0부터, 밖이면 -1) */
+function consider(board: Preset, rec: PlayRecord): number {
+  return placeOf(entries(board), rec.score);
 }
 
-/** 온라인 순위표에 올리고 순위(0부터)를 돌려준다. 그사이 밀려났으면 -1, 연결 실패면 예외(대기 기록은 남음) */
-async function register(board: Preset, name: string, rec: PendingRecord): Promise<number> {
+/** 온라인 순위표에 올리고 순위(0부터)를 돌려준다. 그사이 밀려났으면 -1, 연결 실패면 예외(등록 카드가 다시 누르게 함) */
+async function register(board: Preset, name: string, rec: PlayRecord): Promise<number> {
   saveInitials(name);
   const entry: RankEntry = { name, score: rec.score, tries: rec.tries, time: rec.time, date: today(), dev: Joyfield.playDevice(), ...(rec.thermo ? { thermo: true } : {}) };
   const { place, entries: next } = await submitEntry(board, entry);
   boards[board] = next;
   saveBoards(boards);
-  // 그사이 밀려 10위 밖이 됐어도 더 올릴 수 없으므로 대기에서 지운다
-  if (sameRecord(pending[board], rec)) {
-    delete pending[board];
-    savePending(pending);
-  }
-  renderRankingButton();
   return place;
 }
 
@@ -556,11 +534,6 @@ function openRanking(mark: number | null = null, start?: Preset): void {
           }</small>`,
         ],
       })),
-    pending: () => {
-      const rec = pendingRecord(entries(board), pending, board);
-      if (!rec) return null;
-      return { title: t('ranking.pending', { score: fmt(rec.score), n: placeOf(entries(board), rec.score) + 1 }), submit: (name: string) => register(board, name, rec) };
-    },
     refresh: () => refresh(board),
   }));
   openSharedRanking(document.body.querySelector<HTMLElement>('#app')!, {
@@ -568,14 +541,12 @@ function openRanking(mark: number | null = null, start?: Preset): void {
     tabs,
     start: start === undefined ? undefined : String(start),
     mark,
-    name: loadInitials,
-    onChange: renderRankingButton,
   });
 }
 
 // 결과 화면 등록 카드: 먼저 기기에 남은 순위표로 판단해 바로 보여 주고, 온라인 순위표를 받으면 자리를 다시 맞춘다
 let entryCard: HTMLElement | null = null;
-function showEntry(board: Preset, rec: PendingRecord, place: number): void {
+function showEntry(board: Preset, rec: PlayRecord, place: number): void {
   // 이미 등록했거나 이름을 치는 중이면 건드리지 않는다
   if (entryCard && (entryCard.classList.contains('done') || (entryCard.contains(document.activeElement) && document.activeElement?.tagName === 'INPUT'))) return;
   const typed = entryCard?.querySelector('input')?.value;
@@ -771,15 +742,19 @@ function finishGame(time: number): void {
   confetti(newBest);
   fx('won');
   if (board) {
-    const rec: PendingRecord = { score, tries, time, thermo: !!game.thermo };
+    const rec: PlayRecord = { score, tries, time, thermo: !!game.thermo };
     const forGame = game;
     showEntry(board, rec, consider(board, rec));
     void refresh(board).then((ok) => ok && game === forGame && screen === 'result' && showEntry(board, rec, consider(board, rec)));
   }
-  renderRankingButton();
   // 공유 창은 누른 직후에만 열 수 있어 축하 연출이 끝나면 미리 찍어 둔다
   const forGame = game;
   setTimeout(() => game === forGame && screen === 'result' && prepareShot(), 1200);
+}
+
+/** 결과 화면을 떠날 때: 올리지 않은 랭킹 등록 카드가 있으면 먼저 묻는다(조이필드 공통, 기준서 1.6) */
+function leaveResult(go: () => void): void {
+  leaveRankEntry(screens.result, go);
 }
 
 function goToStart(): void {
@@ -799,7 +774,7 @@ function goToStart(): void {
 // 앱을 내렸을 때(화면이 가려짐)도 일시정지해 그동안 시간이 흐르지 않는다(점수 공정)
 function syncBack(): void {
   if (screen === 'start') Joyfield.back.screen(0);
-  else if (screen === 'result') Joyfield.back.screen(1, goToStart);
+  else if (screen === 'result') Joyfield.back.screen(1, () => leaveResult(goToStart));
   else
     Joyfield.back.screen(paused ? 1 : 2, () => {
       if (paused || game.status !== 'playing') goToStart();
@@ -962,8 +937,8 @@ $('pick-down').addEventListener('click', () => setPick((pick ?? game.low) - 1));
 $('pick-up').addEventListener('click', () => setPick((pick ?? game.low) + 1));
 $('history').addEventListener('scroll', updateHistoryFade, { passive: true });
 $('home').addEventListener('click', goToStart);
-$('retry').addEventListener('click', () => startGame(game.max, !game.ranked));
-$('go-home').addEventListener('click', goToStart);
+$('retry').addEventListener('click', () => leaveResult(() => startGame(game.max, !game.ranked)));
+$('go-home').addEventListener('click', () => leaveResult(goToStart));
 $('share').addEventListener('click', () => void share());
 $('lang-toggle').addEventListener('click', () => changeLang(LANGS[(LANGS.indexOf(getLang()) + 1) % LANGS.length]));
 $('settings-open').addEventListener('click', () => openSettings());

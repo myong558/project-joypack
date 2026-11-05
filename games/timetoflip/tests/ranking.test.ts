@@ -3,14 +3,8 @@ import { Game } from '../src/game/engine';
 import { mulberry32 } from '../src/game/rng';
 import {
   RANK_SIZE,
-  clearPending,
-  emptyPending,
-  emptyRankings,
   insertEntry,
-  keepPending,
-  pendingRecord,
   placeOf,
-  sanitizePending,
   sanitizeRankings,
   type RankEntry,
 } from '../src/ranking';
@@ -33,22 +27,9 @@ describe('순위표', () => {
     expect(list[RANK_SIZE - 1].score).toBe(920);
   });
 
-  it('등록 대기는 모드마다 가장 높은 기록 하나, 오늘의 챌린지는 그날만', () => {
-    const pending = emptyPending();
-    const rankings = emptyRankings();
-    keepPending(pending, 'classic', '2026-10-24', { score: 300, stage: 3 });
-    keepPending(pending, 'classic', '2026-10-24', { score: 200, stage: 2 });
-    expect(pendingRecord(rankings, pending, 'classic', '2026-10-24')).toEqual({ score: 300, stage: 3 });
-    keepPending(pending, 'daily', '2026-10-24', { score: 100, stage: 1 });
-    expect(pendingRecord(rankings, pending, 'daily', '2026-10-25')).toBeNull();
-    clearPending(pending, 'classic', 300);
-    expect(pending.classic).toBeNull();
-  });
-
   it('깨진 저장 값은 쓸 수 있는 모양으로 고친다', () => {
     const r = sanitizeRankings({ classic: [entry(10), { name: 'bad', score: 5 }, entry(30, 'BBB')] });
     expect(r.classic.map((e) => e.score)).toEqual([30, 10]);
-    expect(sanitizePending({ classic: { score: 'x' } })).toEqual({ classic: null, daily: null });
   });
 });
 

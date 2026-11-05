@@ -3,12 +3,9 @@ import {
   RANK_SIZE,
   boardEntries,
   cleanName,
-  emptyPending,
   emptyRankings,
   insertEntry,
   isValidName,
-  keepPending,
-  pendingScore,
   placeOf,
   register,
   sanitizeRankings,
@@ -78,27 +75,6 @@ describe('오늘의 챌린지 순위', () => {
     const r = emptyRankings();
     register(r, 'classic', '2026-10-20', entry('A', 500, '2026-10-20'));
     expect(boardEntries(r, 'classic', '2026-12-31')).toHaveLength(1);
-  });
-});
-
-describe('등록 대기', () => {
-  it('더 높은 점수만 남기고, 날짜가 지난 오늘의 챌린지 기록은 버린다', () => {
-    const r = emptyRankings();
-    const p = emptyPending();
-    keepPending(p, 'classic', '2026-10-21', 500);
-    keepPending(p, 'classic', '2026-10-21', 300);
-    expect(pendingScore(r, p, 'classic', '2026-10-21')).toBe(500);
-    keepPending(p, 'daily', '2026-10-20', 700);
-    expect(pendingScore(r, p, 'daily', '2026-10-20')).toBe(700);
-    expect(pendingScore(r, p, 'daily', '2026-10-21')).toBe(0);
-  });
-
-  it('그사이 순위표가 차서 10위 안에 못 들면 보이지 않는다', () => {
-    const r = emptyRankings();
-    r.classic = full();
-    const p = emptyPending();
-    keepPending(p, 'classic', '2026-10-21', 100);
-    expect(pendingScore(r, p, 'classic', '2026-10-21')).toBe(0);
   });
 });
 

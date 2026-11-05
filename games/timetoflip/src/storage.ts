@@ -2,7 +2,7 @@ import '@joyfield/shared';
 import type { SharedSetting } from '@joyfield/shared';
 import { ALL_FACES, ITEMS, RENAMED_FACES, type FaceId, type ItemId } from './game/faces';
 import { LANGS, detectLang, type Lang } from './i18n';
-import { cleanName, emptyPending, emptyRankings, sanitizePending, sanitizeRankings, type PendingRanks, type Rankings } from './ranking';
+import { cleanName, emptyRankings, sanitizeRankings, type Rankings } from './ranking';
 import { SKIN_SETTINGS, THEMES, type SkinSetting, type Theme } from './theme';
 
 const KEY = 'timetoflip:v1';
@@ -20,7 +20,6 @@ export interface SaveData {
   pairs: number;
   /** 이 기기의 순위표 사본(클래식·오늘의 챌린지) */
   rankings: Rankings;
-  pending: PendingRanks;
   /** 지난번 순위표에 쓴 이름. 다음 등록 때 미리 채운다 */
   playerName: string;
   sound: boolean;
@@ -35,7 +34,6 @@ function defaults(): SaveData {
   return {
     ...emptyRecords(),
     rankings: emptyRankings(),
-    pending: emptyPending(),
     sound: true,
     vibrate: true,
     lang: detectLang(),
@@ -47,7 +45,7 @@ function defaults(): SaveData {
 
 /**
  * "내 기록 지우기"로 지워지는 부분: 이 기기의 최고 기록·도감·맞힌 짝 수.
- * 온라인 순위표 사본(rankings)과 아직 올리지 않은 등록 대기 기록(pending)은 남긴다(조이필드 허브의 "내 기록 지우기"도 같은 범위)
+ * 온라인 순위표 사본(rankings)은 남긴다(조이필드 허브의 "내 기록 지우기"도 같은 범위)
  */
 export function emptyRecords(): Pick<SaveData, 'best' | 'bestStage' | 'daily' | 'dex' | 'items' | 'pairs'> {
   return { best: 0, bestStage: 0, daily: null, dex: [], items: [], pairs: 0 };
@@ -70,7 +68,8 @@ export function loadSave(): SaveData {
     delete (data as { gold?: unknown }).gold;
     for (const k of ['best', 'bestStage', 'pairs'] as const) if (!Number.isFinite(data[k])) data[k] = 0;
     data.rankings = sanitizeRankings(data.rankings);
-    data.pending = sanitizePending(data.pending);
+    // 예전 등록 대기 기록(2026-11-05 등록 대기를 없앰, 출시 전이라 옮기지 않고 버림). 다음 저장 때 사라진다
+    delete (data as { pending?: unknown }).pending;
     data.playerName = cleanName(String(data.playerName ?? ''));
     if (!LANGS.includes(data.lang)) data.lang = base.lang;
     if (!THEMES.includes(data.theme)) data.theme = base.theme;

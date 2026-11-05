@@ -579,15 +579,10 @@
   /* dailyPick: end */
 
   // ── 랭킹 탭 공통 기준(조이필드 전체 랭킹·모든 게임 랭킹 창, 기준서 1.6) ──
-  // 랭킹 창을 열 때 처음 고를 탭: ① 등록 대기 기록이 있는 탭(여럿이면 최근 탭, 아니면 첫 번째) → ② 최근 탭(방금 한 판 또는 마지막으로 본 탭 중 나중)
-  // → ③ 기본 탭. 한 기기 안에서 조이필드와 모든 게임이 같은 값을 읽고 써서, 어디서 열어도 이어진다.
-  // joyfield.rankBoard = { [게임 ID]: { last: 탭 ID, pending: [{ board, day? }] } }. day(YYYY-MM-DD, 기기 날짜)가 있으면 그날만 유효(오늘의 챌린지 등)
+  // 랭킹 창을 열 때 처음 고를 탭: 최근 탭(방금 한 판 또는 마지막으로 본 탭 중 나중) → 기본 탭.
+  // 한 기기 안에서 조이필드와 모든 게임이 같은 값을 읽고 써서, 어디서 열어도 이어진다.
+  // joyfield.rankBoard = { [게임 ID]: { last: 탭 ID } }. 예전 등록 대기 목록(pending)은 2026-11-05 등록 대기를 없애며 쓰지 않는다(다음에 쓸 때 지워짐)
   const RANK_KEY = 'joyfield.rankBoard';
-
-  function localDay(d) {
-    d = d || new Date();
-    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-  }
 
   function readRank() {
     try {
@@ -598,34 +593,52 @@
     }
   }
 
-  function writeRank(gameId, patch) {
-    const data = readRank();
-    data[gameId] = Object.assign({}, data[gameId], patch);
-    write(RANK_KEY, JSON.stringify(data));
-  }
-
   // 판을 끝냈을 때, 랭킹 창에서 탭을 골랐을 때 부른다
   function setRankBoard(gameId, board) {
-    writeRank(gameId, { last: String(board) });
-  }
-
-  // 등록 대기 기록이 있는 탭 목록을 알린다(바뀔 때마다 통째로). 항목은 탭 ID 문자열 또는 { board, day }
-  function setRankPending(gameId, items) {
-    const list = (items || []).map((item) => (typeof item === 'object' ? { board: String(item.board), day: item.day } : { board: String(item) }));
-    writeRank(gameId, { pending: list });
+    const data = readRank();
+    data[gameId] = { last: String(board) };
+    write(RANK_KEY, JSON.stringify(data));
   }
 
   // 위 기준으로 고른 탭 ID. boards 는 그 게임의 탭 ID 목록(화면 순서), fallback 은 기본 탭
   function rankTab(gameId, boards, fallback) {
     const ids = boards.map(String);
-    const entry = readRank()[gameId] || {};
-    const today = localDay();
-    const pending = (Array.isArray(entry.pending) ? entry.pending : [])
-      .filter((p) => p && ids.indexOf(String(p.board)) >= 0 && (!p.day || p.day === today))
-      .map((p) => String(p.board));
-    const last = ids.indexOf(String(entry.last)) >= 0 ? String(entry.last) : null;
-    if (pending.length) return last && pending.indexOf(last) >= 0 ? last : ids.find((id) => pending.indexOf(id) >= 0);
-    return last || String(fallback);
+    const last = String((readRank()[gameId] || {}).last);
+    return ids.indexOf(last) >= 0 ? last : String(fallback);
+  }
+
+  // ── 오프라인 안내(위 메뉴 랭킹 버튼, 기준서 1.6) ──
+  // 기기가 오프라인(navigator.onLine false)이면 랭킹 버튼 바로 아래에 옅은 "오프라인 · 랭킹 등록 안 됨"을 띄운다.
+  // 판을 시작하기 전에 알아야 "깼는데 못 올렸다"는 실망이 없다. 깜박이지 않고, 연결되면 사라진다. 버튼 안에 두어 버튼을 숨기면 함께 숨고
+  // 버튼 자리는 그대로다(모양은 topbar.css .jp-top-offline). 같은 버튼에 다시 불러도 하나만 둔다
+  const offlineMarks = [];
+  let offlineWatch = false;
+  function syncOffline() {
+    const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
+    for (let i = offlineMarks.length - 1; i >= 0; i--) {
+      const mark = offlineMarks[i];
+      if (!mark.isConnected) offlineMarks.splice(i, 1);
+      else mark.hidden = !offline;
+    }
+  }
+  function offlineMark(button, text) {
+    if (!button) return;
+    let mark = button.querySelector('.jp-top-offline');
+    if (!mark) {
+      mark = document.createElement('span');
+      mark.className = 'jp-top-offline';
+      mark.id = 'jp-offline-' + Math.random().toString(36).slice(2, 8);
+      button.append(mark);
+      button.setAttribute('aria-describedby', mark.id);
+    }
+    if (offlineMarks.indexOf(mark) < 0) offlineMarks.push(mark);
+    mark.textContent = text;
+    if (!offlineWatch) {
+      offlineWatch = true;
+      window.addEventListener('online', syncOffline);
+      window.addEventListener('offline', syncOffline);
+    }
+    syncOffline();
   }
 
   // ── 진동(모든 게임 공통, 기준서 1.7 세기표 = sounds/catalog.json "vibrations") ──
@@ -880,8 +893,8 @@
     readInvite: readInvite,
     inviteBar: inviteBar,
     setRankBoard: setRankBoard,
-    setRankPending: setRankPending,
     rankTab: rankTab,
+    offlineMark: offlineMark,
     VIBRATIONS: VIBRATIONS,
     canVibrate: canVibrate,
     vibrate: vibrate,

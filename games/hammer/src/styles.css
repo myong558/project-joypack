@@ -4488,7 +4488,7 @@ body {
   min-height: 2lh;
 }
 
-.rank-pending:empty {
+.rank-slot:empty {
   display: none;
 }
 

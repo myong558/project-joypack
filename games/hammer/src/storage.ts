@@ -4,7 +4,7 @@ import { emptyStats } from './game/engine';
 import { MOLE_ORDER } from './game/moles';
 import type { MoleKind } from './game/types';
 import { LANGS, detectLang, type Lang } from './i18n';
-import { emptyPending, emptyRankings, sanitizePending, sanitizeRankings, cleanName, type PendingRanks, type Rankings } from './ranking';
+import { emptyRankings, sanitizeRankings, cleanName, type Rankings } from './ranking';
 import { SKIN_SETTINGS, THEMES, type SkinSetting, type Theme } from './theme';
 
 const KEY = 'project-hammer:v1';
@@ -17,7 +17,6 @@ export interface SaveData {
   kills: Record<MoleKind, number>;
   /** 이 기기의 순위표(클래식·오늘의 챌린지) */
   rankings: Rankings;
-  pending: PendingRanks;
   /** 지난번 순위표에 쓴 이름. 다음 등록 때 미리 채운다 */
   playerName: string;
   sound: boolean;
@@ -41,14 +40,13 @@ function defaults(): SaveData {
 }
 
 /** 처음 상태(기록 없음) */
-export function emptyProgress(): Pick<SaveData, 'best' | 'daily' | 'dex' | 'kills' | 'rankings' | 'pending'> {
-  return { ...emptyRecords(), rankings: emptyRankings(), pending: emptyPending() };
+export function emptyProgress(): Pick<SaveData, 'best' | 'daily' | 'dex' | 'kills' | 'rankings'> {
+  return { ...emptyRecords(), rankings: emptyRankings() };
 }
 
 /**
  * "내 기록 지우기"로 지워지는 부분: 이 기기의 최고 기록·도감·잡은 수.
- * 온라인 순위표 사본(rankings)과 아직 올리지 않은 등록 대기 기록(pending)은 남긴다. 지워도 온라인 랭킹은 그대로라
- * 등록 대기까지 지우면 10위 안에 든 기록을 올릴 기회만 잃는다. 조이필드 허브의 "내 기록 지우기"도 같은 범위를 지운다
+ * 온라인 순위표 사본(rankings)은 남긴다(지워도 온라인 랭킹은 그대로). 조이필드 허브의 "내 기록 지우기"도 같은 범위를 지운다
  */
 export function emptyRecords(): Pick<SaveData, 'best' | 'daily' | 'dex' | 'kills'> {
   return { best: 0, daily: null, dex: [], kills: emptyStats().kills };
@@ -59,15 +57,16 @@ export function loadSave(): SaveData {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return base;
-    const parsed = JSON.parse(raw) as Partial<SaveData> & { shake?: boolean };
+    const parsed = JSON.parse(raw) as Partial<SaveData> & { shake?: boolean; pending?: unknown };
     // 예전 "흔들림"(진동 + 화면 흔들림) 설정은 진동 설정으로 옮긴다
     if (parsed.vibrate === undefined && typeof parsed.shake === 'boolean') parsed.vibrate = parsed.shake;
     delete parsed.shake;
+    // 예전 등록 대기 기록(2026-11-05 등록 대기를 없앰, 출시 전이라 옮기지 않고 버림). 다음 저장 때 사라진다
+    delete parsed.pending;
     const data = { ...base, ...parsed } as SaveData;
     data.dex = data.dex.filter((k) => MOLE_ORDER.includes(k));
     data.kills = { ...base.kills, ...data.kills };
     data.rankings = sanitizeRankings(data.rankings);
-    data.pending = sanitizePending(data.pending);
     data.playerName = cleanName(String(data.playerName ?? ''));
     if (!LANGS.includes(data.lang)) data.lang = base.lang;
     if (!THEMES.includes(data.theme)) data.theme = base.theme;

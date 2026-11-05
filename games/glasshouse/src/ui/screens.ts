@@ -3,7 +3,7 @@ import { LEVELS, levelName } from '../game/levels';
 import { LANGS, getLang, iga, t, type Lang } from '../i18n';
 import { cardFlipper, closeButton, html, openModal as openSharedModal, openRanking as openSharedRanking, pauseLayer, rankEntryForm } from '@joyfield/shared/ui';
 import { shortDate } from '@joyfield/shared/rank';
-import { clock, pendingRecord, placeOf, placeOfDaily, type DailyEntry, type DailyRecord } from '../ranking';
+import { clock, type DailyEntry, type DailyRecord } from '../ranking';
 import { captureResult, type ShareOutcome } from '../share';
 import { flowerCount, gardenScore, nextLevel, petalCount, type SaveData } from '../storage';
 import { SKIN_SETTINGS, THEMES, type Skin, type SkinSetting, type Theme } from '../theme';
@@ -93,7 +93,6 @@ export function startScreen(opts: StartOptions): HTMLElement {
   const lang = getLang();
   const otherLang = LANGS.find((l) => l !== lang)!;
   const next = nextLevel(save);
-  const pending = () => !!pendingRecord(save.rankings, save.pending) || !!dailyPendingRecord(opts.ranking);
   const today = opts.ranking.today();
   const best = save.daily?.date === today ? save.daily : null;
   const newPages = save.levels.filter((r, i) => r && !save.seen.includes(i)).length;
@@ -105,8 +104,8 @@ export function startScreen(opts: StartOptions): HTMLElement {
           <button class="jp-top-btn jp-top-pill top-lang" data-lang="${otherLang}" aria-label="${t('lang.label')}: ${LANG_LABEL[lang]} → ${LANG_LABEL[otherLang]}">${Joyfield.topIcon('globe')}<span lang="${otherLang}">${LANG_LABEL[otherLang]}</span></button>
         </div>
         <div class="jp-topbar-group">
-          <button class="jp-top-btn rank-btn" data-ranking aria-label="${t('ranking.open')}">${Joyfield.topIcon('trophy')}${pending() ? `<i class="jp-top-dot" role="img" aria-label="${t('ranking.newBadge')}"></i>` : ''}</button>
-          <button class="jp-top-btn settings-btn" aria-label="${t('settings.open')}">${Joyfield.topIcon('gear')}</button>
+          <button class="jp-top-btn rank-btn" data-ranking aria-label="${t('ranking.open')}" title="${t('ranking.open')}">${Joyfield.topIcon('trophy')}</button>
+          <button class="jp-top-btn settings-btn" aria-label="${t('settings.open')}" title="${t('settings.open')}">${Joyfield.topIcon('gear')}</button>
         </div>
       </nav>
       <div class="col main-col">
@@ -144,11 +143,10 @@ export function startScreen(opts: StartOptions): HTMLElement {
     el.querySelector('.dex-btn em')?.remove();
     openDex(el, save, null, opts.onDexSeen);
   });
-  el.querySelector('[data-ranking]')!.addEventListener('click', () =>
-    openRanking(el, opts.ranking, null, () => {
-      if (!pending()) el.querySelector('.jp-top-dot')?.remove();
-    }),
-  );
+  const rankBtn = el.querySelector('[data-ranking]')!;
+  rankBtn.addEventListener('click', () => openRanking(el, opts.ranking, null));
+  // 오프라인이면 판을 시작하기 전에 랭킹에 올릴 수 없음을 알린다(조이필드 공통, 기준서 1.6)
+  Joyfield.offlineMark(rankBtn, t('ranking.offlineBadge'));
   const showSettings = (reopen?: string) => openModal(el, settingsPanel(opts), t('settings.title'), reopen);
   el.querySelector('.settings-btn')!.addEventListener('click', () => showSettings());
   if (opts.settings) queueMicrotask(() => showSettings(opts.settingsFocus ?? (opts.settings === 'reset' ? '[data-reset]' : '[aria-pressed="true"]')));
@@ -409,13 +407,13 @@ export interface RankingView {
   save: SaveData;
   /** 온라인 순위표를 받아 save.rankings에 남긴다. 실패(오프라인 등)하면 false */
   refresh: () => Promise<boolean>;
-  /** 지금 알고 있는 순위표에서 이 점수의 자리(0부터, 밖이면 -1). 안에 들면 등록 대기로 남긴다 */
+  /** 지금 알고 있는 순위표에서 이 점수의 자리(0부터, 밖이면 -1) */
   consider: (score: number, flowers: number) => number;
   /** 온라인 순위표에 이름을 올리고 순위(0부터)를 돌려준다. 그사이 밀려났으면 -1, 연결 실패면 예외 */
   register: (name: string, score: number, flowers: number) => Promise<number>;
   /** 오늘 날짜(YYYY-MM-DD, 기기 현지 날짜) */
   today: () => string;
-  /** 오늘의 정원 순위표: 받아서 save.dailyRankings 에 남김 · 자리 보기(안에 들면 등록 대기) · 올리기 */
+  /** 오늘의 정원 순위표: 받아서 save.dailyRankings 에 남김 · 자리 보기 · 올리기 */
   refreshDaily: () => Promise<boolean>;
   considerDaily: (rec: DailyRecord) => number;
   registerDaily: (name: string, rec: DailyRecord) => Promise<number>;
@@ -426,13 +424,6 @@ export type RankTab = 'garden' | 'daily';
 /** 오늘의 정원 순위표(날짜가 지난 사본은 빈 표) */
 export const todayDaily = (view: RankingView): DailyEntry[] => (view.save.dailyRankings.date === view.today() ? view.save.dailyRankings.entries : []);
 
-/** 오늘 등록 대기 중이고 아직 10위 안에 드는 오늘의 정원 기록 */
-export function dailyPendingRecord(view: RankingView): DailyRecord | null {
-  const p = view.save.dailyPending;
-  if (!p || p.date !== view.today() || placeOfDaily(todayDaily(view), p) < 0) return null;
-  return { moves: p.moves, time: p.time };
-}
-
 /** 10월 25일 · Oct 25 */
 export function longDate(key: string): string {
   const [y, m, d] = key.split('-').map(Number);
@@ -442,18 +433,16 @@ export function longDate(key: string): string {
 /* ---------- 게임 화면 ---------- */
 
 /**
- * 랭킹 창(공통 모양 @joyfield/shared/ui). 정원 점수·오늘의 정원 두 순위표를 탭으로 바꿔 보고, 등록 대기 기록이 있으면 맨 위에서 올린다.
+ * 랭킹 창(공통 모양 @joyfield/shared/ui). 정원 점수·오늘의 정원 두 순위표를 탭으로 바꿔 본다(등록은 결과 화면에서만).
  * mark 는 방금 올린 순위(0부터). 창 높이는 css(.rank-modal)로 고정해 탭이 바뀌어도 탭 단추가 움직이지 않게 한다
  */
-export function openRanking(host: HTMLElement, view: RankingView, mark: number | null, onChange?: () => void, tab?: RankTab): void {
+export function openRanking(host: HTMLElement, view: RankingView, mark: number | null, tab?: RankTab): void {
   const { save } = view;
   const columns = [{ cls: 'stage' }, { cls: 'score', empty: '-' }, { cls: 'date' }];
   openSharedRanking(host, {
     gameId: 'glasshouse',
     start: tab,
     mark,
-    name: () => save.playerName,
-    onChange,
     height: 'rank-modal',
     tabs: [
       {
@@ -462,14 +451,6 @@ export function openRanking(host: HTMLElement, view: RankingView, mark: number |
         columns,
         note: () => t('ranking.note'),
         rows: () => save.rankings.map((e) => ({ name: e.name, dev: e.dev, cells: [t('ranking.flowers', { n: e.flowers }), e.score.toLocaleString(), shortDate(e.date)] })),
-        pending: () => {
-          const rec = pendingRecord(save.rankings, save.pending);
-          if (!rec) return null;
-          return {
-            title: t('ranking.pending', { score: rec.score, n: placeOf(save.rankings, rec.score) + 1 }),
-            submit: (name: string) => view.register(name, rec.score, rec.flowers),
-          };
-        },
         refresh: () => view.refresh(),
       },
       {
@@ -478,14 +459,6 @@ export function openRanking(host: HTMLElement, view: RankingView, mark: number |
         columns,
         note: () => t('ranking.dailyNote', { date: longDate(view.today()) }),
         rows: () => todayDaily(view).map((e) => ({ name: e.name, dev: e.dev, cells: ['', t('ranking.moves', { n: e.moves }), clock(e.time)] })),
-        pending: () => {
-          const rec = dailyPendingRecord(view);
-          if (!rec) return null;
-          return {
-            title: t('ranking.dailyPending', { moves: rec.moves, n: placeOfDaily(todayDaily(view), rec) + 1 }),
-            submit: (name: string) => view.registerDaily(name, rec),
-          };
-        },
         refresh: () => view.refreshDaily(),
       },
     ],
@@ -681,7 +654,7 @@ export function resultScreen(opts: {
   requestAnimationFrame(() => bloomThenFlourish(q('.bloom-card .fl'), 120, 1800));
   countUp(q('.level-score'), r.score);
 
-  // 정원 점수가 10위 안에 들면 결과 화면에서 바로 이름을 받는다. 그냥 넘어가도 등록 대기로 남는다
+  // 정원 점수가 10위 안에 들면 결과 화면에서 바로 이름을 받는다. 등록 대기는 없어서, 올리지 않고 나가려 하면 main.ts 가 leaveRankEntry 로 묻는다
   let entryForm: HTMLElement | null = null;
   const showEntry = (place: number) => {
     if (entryForm && (entryForm.classList.contains('done') || (entryForm.contains(document.activeElement) && document.activeElement?.tagName === 'INPUT'))) return;
@@ -748,7 +721,7 @@ export interface DailyResult {
 
 /**
  * 오늘의 정원을 깬 화면. 다음 판이 없는 하루 한 판이라 가장 큰 단추는 "한 번 더 하기"(기준서 1.3 기본).
- * 오늘 순위표 10위 안에 들면 바로 이름을 받고, 넘어가도 오늘 안에는 등록 대기로 남는다
+ * 오늘 순위표 10위 안에 들면 바로 이름을 받는다(등록 대기 없음, 나가려 하면 main.ts 가 leaveRankEntry 로 묻는다)
  */
 export function dailyResultScreen(opts: { result: DailyResult; onRetry: () => void; onHome: () => void; onShare: (image: Blob | null) => Promise<ShareOutcome>; ranking: RankingView }): HTMLElement {
   const r = opts.result;
@@ -809,7 +782,7 @@ export function dailyResultScreen(opts: { result: DailyResult; onRetry: () => vo
             name: typed ?? opts.ranking.save.playerName,
             compact: true,
             onSubmit: (name) => opts.ranking.registerDaily(name, r.best),
-            onView: (at) => openRanking(el, opts.ranking, at, undefined, 'daily'),
+            onView: (at) => openRanking(el, opts.ranking, at, 'daily'),
           })
         : null;
     if (entryForm) q('.numbers').after(entryForm);
@@ -823,7 +796,7 @@ export function dailyResultScreen(opts: { result: DailyResult; onRetry: () => vo
 
   q('[data-act="retry"]').addEventListener('click', opts.onRetry);
   q('[data-act="home"]').addEventListener('click', opts.onHome);
-  q('[data-act="ranking"]').addEventListener('click', () => openRanking(el, opts.ranking, null, undefined, 'daily'));
+  q('[data-act="ranking"]').addEventListener('click', () => openRanking(el, opts.ranking, null, 'daily'));
   let image: Promise<Blob | null> | null = null;
   const capture = () => (image ??= captureResult(el));
   setTimeout(() => el.isConnected && capture(), 2200);

@@ -13,12 +13,12 @@ import type { GameEvent, GameResult, MoleKind } from './game/types';
 import { setLang, t } from './i18n';
 import { shareResult } from './share';
 import { fetchBoard, submitEntry } from './online';
-import { boardEntries, clearPending, keepPending, pendingScore, placeOf, type RankEntry } from './ranking';
+import { boardEntries, placeOf, type RankEntry } from './ranking';
 import { emptyRecords, loadSave, writeSave } from './storage';
 import { applySkin, applyTheme, resolveSkin } from './theme';
 import { Board } from './ui/board';
 import { MORE_ICONS } from './ui/icons';
-import { configureUi } from '@joyfield/shared/ui';
+import { configureUi, leaveRankEntry } from '@joyfield/shared/ui';
 import { Effects, Hammer } from './ui/effects';
 import { Hud } from './ui/hud';
 import { gameScreen, resultScreen, startScreen, type Mode, type RankingView } from './ui/screens';
@@ -57,16 +57,6 @@ function cacheBoard(mode: Mode, today: string, entries: RankEntry[]): void {
   if (mode === 'classic') save.rankings.classic = entries;
   else save.rankings.daily = { date: today, entries };
   writeSave(save);
-  publishPending(today);
-}
-
-/**
- * 랭킹 탭 공통 기준(Joyfield.rankTab)에 쓸 등록 대기 탭 목록을 알린다. 조이필드 전체 랭킹도 같은 값을 읽는다.
- * 오늘의 챌린지 대기 기록은 그날만 유효하다. 순위표·대기 기록이 바뀔 때마다 부른다
- */
-function publishPending(today: string): void {
-  const modes = (['classic', 'daily'] as Mode[]).filter((m) => pendingScore(save.rankings, save.pending, m, today) > 0);
-  Joyfield.setRankPending('hammer', modes.map((m) => (m === 'daily' ? { board: m, day: today } : m)));
 }
 
 /** 순위표 보기·등록. day는 그 판을 시작한 날로, 오늘의 챌린지 순위표가 어느 날 것인지 정한다 */
@@ -85,25 +75,16 @@ function rankingView(day: Date): RankingView {
         return false;
       }
     },
-    // 판이 끝날 때마다 불린다: 방금 한 모드를 랭킹 창의 최근 탭으로 남기고(조이필드 공통 기준), TOP 10 에 들면 등록 대기로 둔다
+    // 판이 끝날 때마다 불린다: 방금 한 모드를 랭킹 창의 최근 탭으로 남기고(조이필드 공통 기준), TOP 10 에 들 자리(0부터, 못 들면 -1)를 돌려준다.
+    // 등록은 결과 화면에서만 한다(등록 대기 없음, 기준서 1.6)
     consider(mode, score) {
       Joyfield.setRankBoard('hammer', mode);
-      const place = placeOf(boardEntries(save.rankings, mode, today), score);
-      if (place >= 0) {
-        keepPending(save.pending, mode, today, score);
-        writeSave(save);
-      }
-      publishPending(today);
-      return place;
+      return placeOf(boardEntries(save.rankings, mode, today), score);
     },
     async register(mode, name, score) {
       save.playerName = name;
       const { place, entries } = await submitEntry(mode, today, { name, score, date: today, dev: Joyfield.playDevice() });
       cacheBoard(mode, today, entries);
-      // 그사이 다른 사람들에게 밀려 10위 밖이 됐어도 더 올릴 수 없으므로 대기에서 지운다
-      clearPending(save.pending, mode, score);
-      writeSave(save);
-      publishPending(today);
       return place;
     },
   };
@@ -111,7 +92,6 @@ function rankingView(day: Date): RankingView {
 
 function showStart(settings?: 'open' | 'reset', settingsFocus?: string, opening = false): void {
   const today = new Date();
-  publishPending(dateKey(today));
   // 뒤로 가기: 시작 화면에서는 조이필드로(기준서 1.3)
   Joyfield.back.screen(0);
   const todaySkin = resolveSkin('auto', today);
@@ -434,15 +414,15 @@ function showResult(result: GameResult, missionId: MissionId, mode: Mode, date: 
       newDex,
       goal: nextGoal(result.score, prevBest, dex),
       missionId,
-      onRetry: () => play(mode),
-      onHome: () => showStart(),
+      onRetry: () => leaveRankEntry(app, () => play(mode)),
+      onHome: () => leaveRankEntry(app, () => showStart()),
       onShare: shareResult,
       ranking: rankingView(date),
     }),
   );
   if (isRecord) sound.play('record');
-  // 뒤로 가기: 결과 → 시작 화면
-  Joyfield.back.screen(1, () => showStart());
+  // 뒤로 가기: 결과 → 시작 화면(올리지 않은 랭킹 등록 카드가 있으면 먼저 묻는다)
+  Joyfield.back.screen(1, () => leaveRankEntry(app, () => showStart()));
 
   const onKey = (e: KeyboardEvent) => {
     // 이름을 치는 중이거나 랭킹 창·등록 카드 안에서 누른 키는 그쪽에 맡긴다
@@ -451,9 +431,9 @@ function showResult(result: GameResult, missionId: MissionId, mode: Mode, date: 
     if (document.querySelector('.screen.result.locked')) return;
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      play(mode);
+      leaveRankEntry(app, () => play(mode));
     } else if (e.key === 'Escape') {
-      showStart();
+      leaveRankEntry(app, () => showStart());
     }
   };
   window.addEventListener('keydown', onKey);

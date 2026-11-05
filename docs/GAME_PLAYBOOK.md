@@ -4,7 +4,7 @@
 
 이 문서는 게임이 하나 늘 때마다 고칩니다. 새 게임까지 포함한 모든 게임을 다시 보고, 공통 요소는 1·2장과 8장에, 정체성(게임에 맞게 고르는 톤·색·캐릭터 등)은 3장 등록부에 반영합니다(9장 "문서 키우기").
 
-- 문서 버전: **1.77** (2026-11-05, 업다운 v1.21.3 · 두더지잡기 v1.2.2 · 타임 투 플립 v1.7.2 · 온실정원 v0.16.2 · 허브 v1.41.1 기준)
+- 문서 버전: **1.78** (2026-11-05, 업다운 v1.22.0 · 두더지잡기 v1.3.0 · 타임 투 플립 v1.8.0 · 온실정원 v0.17.0 · 허브 v1.42.0 기준)
 - **조이필드와 모든 게임은 상업적으로 씁니다(광고, 구글 플레이·앱스토어).** 10장 "상업 배포·마켓 기준"은 모든 단계에서 지키는 필수 기준입니다.
 - 저장소 구조·배포·서비스 워커 같은 플랫폼 설명은 루트 [README.md](../README.md)에 있습니다. 이 문서는 "게임 하나를 어떻게 만드는가"만 다룹니다.
 
@@ -87,10 +87,11 @@
 
 | 가져오기 | 하는 일 |
 | --- | --- |
-| `@joyfield/shared/ui` `configureUi({ t, icons: { trophy, close } })` | 시작할 때 한 번: 공통 조각이 쓸 게임 문구(i18n 키 `common.close`·`ranking.title`·`ranking.open`·`ranking.loading`·`ranking.offline`·`ranking.sending`·`ranking.failed`·`ranking.missed`·`ranking.empty`·`ranking.nameLabel`·`ranking.badName`·`ranking.submit`·`ranking.done`{n})와 아이콘 |
+| `@joyfield/shared/ui` `configureUi({ t, icons: { trophy, close } })` | 시작할 때 한 번: 공통 조각이 쓸 게임 문구(i18n 키 `common.close`·`ranking.title`·`ranking.open`·`ranking.loading`·`ranking.offline`·`ranking.sending`·`ranking.failed`·`ranking.missed`·`ranking.empty`·`ranking.nameLabel`·`ranking.badName`·`ranking.submit`·`ranking.done`{n}·`ranking.offlineEntry`·`ranking.leaveTitle`·`ranking.leaveText`·`ranking.leaveFailed`·`ranking.leaveStay`·`ranking.leaveGo`)와 아이콘. 위 메뉴 오프라인 안내용 `ranking.offlineBadge` 도 게임 i18n 에 둔다 |
 | `openModal(host, 내용, 이름, { reopen, kind, fitFont, onClose })` | 대화상자(`.modal-backdrop > .modal`). Esc·바깥 누르기·`[data-close]`·휴대폰 뒤로 가기로 닫힘, host 가 화면에서 빠지면 함께 닫힘 |
-| `rankEntryForm({ title, name, compact, onSubmit, onView })` | 랭킹 이름 등록 카드(`.rank-entry`, 입력 칸·완료 칸을 겹쳐 높이 그대로, 금지어 거름) |
-| `openRanking(host, { gameId, tabs, start, mark, name, onChange, height })` | 랭킹 창(`.ranking`: 탭 `.rank-tabs`·안내 `.rank-note`·등록 대기 `.rank-pending`·10줄 `ol.rank-list`). 탭마다 `columns`(칸 클래스)·`rows()`·`pending()`·`refresh()`·`note()` 만 넘긴다. 처음 탭은 `Joyfield.rankTab` |
+| `rankEntryForm({ title, name, compact, onSubmit, onView })` | 랭킹 이름 등록 카드(`.rank-entry`, 입력 칸·완료 칸을 겹쳐 높이 그대로, 금지어 거름). 상태 `data-state` = `ready`·`sending`·`failed`·`done`·`offline`(오프라인이면 완료 칸 자리에 "오프라인이라 올릴 수 없어요", 연결되면 입력 칸으로) |
+| `leaveRankEntry(화면, 이동)` | 결과 화면을 떠나는 모든 길(다시 하기·다음 판·처음 화면으로·Esc·휴대폰 뒤로 가기)을 이것으로 감싼다. 올리지 않은 카드(`ready`·`failed`)가 있으면 "랭킹에 등록하지 않고 나갈까요?" [등록하기][나가기] 창(`.rank-leave`), 아니면 바로 이동. 배치는 공통 `topbar.css`(`:where`, 우선순위 0), 창 틀·글자·버튼은 게임의 `.modal`·`.btn` 을 따른다(게임 스타일 그대로) |
+| `openRanking(host, { gameId, tabs, start, mark, height })` | 랭킹 창(`.ranking`: 탭 `.rank-tabs`·안내 `.rank-note`·빈 순위 안내 `.rank-slot`·10줄 `ol.rank-list`). 탭마다 `columns`(칸 클래스)·`rows()`·`refresh()`·`note()` 만 넘긴다. 처음 탭은 `Joyfield.rankTab`. 등록은 하지 않는다(결과 화면에서만) |
 | `cardFlipper(flip, { reduced, onShown, flatClass })` | 도감 큰 카드 뒤집기(앞면끼리 90° 세워 갈아 끼우기) |
 | `pauseLayer(.pause-menu)` → `show(true/false)` | 일시정지 레이어(1.3): 대화상자 역할·첫 단추 초점·Tab 가두기. 화면 전체 불투명 덮기·배경 모양은 게임 css |
 | `@joyfield/shared/rank` `rankStore(id, 불러오기)` · `placeBy` · `insertBy` · `shortDate` | 순위표 문서 읽기·트랜잭션 등록·8초 제한(1.6). Firebase 는 게임이 `() => Promise.all([import('firebase/app'), import('firebase/firestore/lite')])` 로 넘김 |
@@ -109,7 +110,7 @@
 | 플레이 | 홈(시작 화면으로) 또는 일시 정지. 점수·남은 시간/기회 같은 현재 상태 |
 | 결과 | 결과(점수·등급·횟수 등), 신기록 연출, **랭킹 등록 카드**(TOP 10 안이면 결과 화면 안에서 바로), **다시 하기**(가장 큰 버튼, Enter/스페이스), **기록 공유하기**(글자 있는 버튼), 홈 |
 
-- **위 메뉴는 조이필드 공통 모양·자리**를 씁니다(1.8, 자리는 1.9부터). 버튼은 `<nav class="jp-topbar">` 안 왼쪽 `.jp-topbar-group`(조이필드·언어), 오른쪽 `.jp-topbar-group`(랭킹·설정)에 넣습니다. 메뉴 줄은 화면 맨 위에 고정(상태 표시줄 아래 16px, 좌우 16px, PC는 24px·단추 60px)이라 조이필드 → 게임으로 넘어가도 버튼이 움직이지 않습니다. 내용은 `--jp-top-space`(메뉴 아래 끝) 아래에서 시작하고, 화면을 통째로 확대(zoom)하는 게임은 `--jp-top-unzoom` 에 그 배수를 넣어 메뉴만 확대에서 뺍니다. 자리·모양만 맞추고 버튼 구성은 앱마다 필요한 것만 둡니다(조이필드 첫 화면에는 조이필드 가기 버튼이 없어 언어 버튼이 맨 왼쪽, 업다운 게임 중에는 홈 버튼 등). 모양·크기·톤은 `packages/shared/topbar.css`(`.jp-top-btn`, 글자 있는 언어·홈 버튼은 `.jp-top-pill`), 아이콘은 `Joyfield.topIcon('apps' | 'globe' | 'trophy' | 'gear' | 'home')`. 랭킹·설정은 아이콘만 두고 이름은 `aria-label`로. 등록 대기는 `.is-on`(대표색 채움) 또는 `.jp-top-dot`(모서리 점). 글꼴도 공통(Jua 18px, 앱은 `Jua` 글꼴을 준비)이고, 언어 버튼 글자에는 그 언어를 `lang` 으로 답니다(한글 위치 보정). 게임은 자리와 `--jp-top-accent`(대표색)만 정하고, 화면 비율로 통째로 커지는 게임은 휴대폰(폭 390)에서 단추 50px·아이콘 26px·글자 18px이 되게 `--jp-top-size/icon/font` 를 맞추되 PC에서 64px를 넘지 않게 합니다. 불러오기: `import '@joyfield/shared/topbar.css'`(모든 게임 Vite).
+- **위 메뉴는 조이필드 공통 모양·자리**를 씁니다(1.8, 자리는 1.9부터). 버튼은 `<nav class="jp-topbar">` 안 왼쪽 `.jp-topbar-group`(조이필드·언어), 오른쪽 `.jp-topbar-group`(랭킹·설정)에 넣습니다. 메뉴 줄은 화면 맨 위에 고정(상태 표시줄 아래 16px, 좌우 16px, PC는 24px·단추 60px)이라 조이필드 → 게임으로 넘어가도 버튼이 움직이지 않습니다. 내용은 `--jp-top-space`(메뉴 아래 끝) 아래에서 시작하고, 화면을 통째로 확대(zoom)하는 게임은 `--jp-top-unzoom` 에 그 배수를 넣어 메뉴만 확대에서 뺍니다. 자리·모양만 맞추고 버튼 구성은 앱마다 필요한 것만 둡니다(조이필드 첫 화면에는 조이필드 가기 버튼이 없어 언어 버튼이 맨 왼쪽, 업다운 게임 중에는 홈 버튼 등). 모양·크기·톤은 `packages/shared/topbar.css`(`.jp-top-btn`, 글자 있는 언어·홈 버튼은 `.jp-top-pill`), 아이콘은 `Joyfield.topIcon('apps' | 'globe' | 'trophy' | 'gear' | 'home')`. 랭킹·설정은 아이콘만 두고 이름은 `aria-label`·`title`(마우스 올림 이름)로, 조이필드 버튼도 `title` 을 단다. **위 메뉴 버튼은 늘 같은 모양**(강조 채움·알림 점 없음, 2026-11-05). 랭킹 버튼에는 `Joyfield.offlineMark(버튼, t('ranking.offlineBadge'))` 를 불러, 오프라인이면 버튼 바로 아래에 옅은 "오프라인 · 랭킹 등록 안 됨"(`.jp-top-offline`, 깜박임 없음, 연결되면 사라짐)을 띄운다. 글꼴도 공통(Jua 18px, 앱은 `Jua` 글꼴을 준비)이고, 언어 버튼 글자에는 그 언어를 `lang` 으로 답니다(한글 위치 보정). 게임은 자리와 `--jp-top-accent`(대표색)만 정하고, 화면 비율로 통째로 커지는 게임은 휴대폰(폭 390)에서 단추 50px·아이콘 26px·글자 18px이 되게 `--jp-top-size/icon/font` 를 맞추되 PC에서 64px를 넘지 않게 합니다. 불러오기: `import '@joyfield/shared/topbar.css'`(모든 게임 Vite).
 - 글자를 스크립트로 채우는 게임은, 다 채우기 전에는 내용을 숨겨(`visibility: hidden`) 늦게 채워지며 화면이 덜컥 밀리지 않게 합니다(업다운 `.booting`).
 - 화면 높이에 비례하는 크기(`dvh` 등)는 설치 앱에서 1~2초 뒤 높이가 조금 바뀌면 다시 계산돼 화면이 덜컥 움직입니다. 휴대폰에서는 처음 연 높이로 정해 두고 폭이 바뀔 때만 다시 잽니다(업다운 `--vh-px`, 시작 화면 여백 고정). 화면에 다 안 들어가면 줄이거나(두더지잡기 `--fit`) 안쪽 스크롤로 맞춥니다. 화면 높이를 꽉 채워 맞추는 게임은 `Joyfield.trackViewport()` 를 부르고 html·body·게임 영역 높이를 `var(--jp-vh, 100dvh)` 로 둡니다(설치 앱에서 조이필드 → 게임으로 넘어올 때 css 화면 높이가 실제보다 크게 잡혀 아래가 잘리던 문제, 두더지잡기 v0.11.3에서 확인). 또 화면 맨 아래에 꼭 보여야 할 것이 있는 게임은 `Joyfield.guardBottom()` 을 부르고 아래 여백을 `max(env(safe-area-inset-bottom), var(--jp-bottom-guard, 0px))` 로 둡니다(설치 앱이 내비게이션 바 높이를 0으로 알려 줄 때 대비).
 - 첫 실행 인트로 연출(1~1.5초, 누르면 건너뜀, 동작 줄이기면 생략)을 둡니다.
@@ -128,7 +129,7 @@
 | 2 | 언어 | 한국어 / English. 저장값 없으면 **기기(휴대폰·PC) 설정 언어**: 한국어면 한국어, 그 밖의 언어는 모두 영어. `Joyfield.deviceLang()` 을 씀(조이필드·모든 게임 같은 규칙) |
 | 3 | 스킨 | **게임마다 고유한 스킨 묶음**(3장). 기본은 "자동": 공용 `Joyfield.dailyPick(<게임 id>, 스킨 수, 날짜)` 로 고른다(날마다 무작위, 같은 날은 모두 같은 스킨, **이틀 연속 같은 스킨 없음**, 스킨 수만큼의 날 안에 모든 스킨이 한 번씩). 조이필드 오늘의 톤도 같은 규칙(`hub`). 첫 화면 깜빡임 방지 스크립트에 복사본이 있으면 `/* dailyPick: begin … end */` 를 글자 그대로 두고 `packages/shared/tests` 가 같은지 검사한다 |
 | 4 | 소리·진동 | 효과음 켜기/끄기, 진동 켜기/끄기. **진동을 지원하지 않는 기기(아이폰 등)에는 진동 항목을 숨김.** 화면 흔들림은 설정 항목이 아님(1.7) |
-| 5 | 내 기록 지우기 | 이 기기의 최고 기록·수집 기록만. **온라인 랭킹·설정·등록 대기 기록은 남김.** 확인 문구에 "온라인 랭킹은 그대로" 명시 |
+| 5 | 내 기록 지우기 | 이 기기의 최고 기록·수집 기록만. **온라인 랭킹·순위표 사본·설정은 남김.** 확인 문구에 "온라인 랭킹은 그대로" 명시 |
 | 6 | 버전 | 맨 아래 `버전 vX.Y.Z`(`package.json` version). Vite 게임은 `define` 의 `__APP_VERSION__`, 빌드 없는 게임은 코드에 `'__APP_VERSION__'` 을 두면 `scripts/build.mjs` 가 채움. 캐시 이름 등 다른 값으로 버전을 짐작하지 않음. 바로 밑에 작은 글씨로 **저작권 표기 `Joyfield.COPYRIGHT`**(© 2026 Myong Bum Soo. All rights reserved.)를 그대로 넣음(문구를 게임에 직접 쓰지 않음). **모양은 조이필드·모든 게임 같게(색만 앱 것)**: 클래스 `.app-version`·`.app-copyright`, 글꼴 Jua(`'Jua', system-ui, sans-serif`, Jua 에 없는 ©는 시스템 글꼴), 굵기 400, 줄 높이 1.4, 가운데 정렬, 버전 13px·저작권 11px, 마지막 칸 아래 → 버전 **20px**, 버전 → 저작권 **4px**(설정 창이 flex·grid `gap` 을 쓰면 그만큼 빼서 실제 간격을 맞춤). Jua 를 몇 글자만 넣는 게임은 "버전" 글자도 서브셋에 |
 
 **단추·설정 이름표(모든 게임 같은 말, 2026-11-05 사용자 결정)** — 같은 일을 하는 단추·칸은 게임마다 다른 말을 쓰지 않습니다. 새 게임도 이 말 그대로.
@@ -164,18 +165,19 @@
 
 - Firebase 프로젝트 `joyfield-41b5a`(운영)·`joyfield-dev`(개발, 내 PC·사설 주소에서 자동), 경로는 `games/<id>/` 아래만. 설정은 직접 쓰지 않고 `Joyfield.FIREBASE` 를 쓴다(SDK 는 `initializeApp(Joyfield.FIREBASE, '<id>')`, REST 는 `Joyfield.FIREBASE.projectId`·`apiKey`). 규칙은 두 프로젝트에 똑같이 게시(README 4.4).
 - 이름: 영문 대문자 A–Z 1~5자(`joyfield.initials` 로 미리 채움). 입력 칸은 모두 `Joyfield.initialsInput` 으로 만든다(웹은 키보드 언어를 직접 못 고르므로 한국어 키보드도 영문 자판으로 바뀌는 이메일 입력 종류로 열고, 소문자는 바로 대문자로 바꾼다).
-- TOP 10 안에 들 때만 결과 화면에서 이름을 받고, 등록하지 않고 넘어가면 **등록 대기**로 기기에 저장합니다(새 판·새로고침에도 남음). 모드·난이도마다 가장 좋은 기록 하나만 두고, 랭킹 창에서 나중에 올립니다. 대기 기록이 있으면 랭킹 버튼을 "랭킹 등록"으로 강조합니다.
-- 새 순위표를 받았을 때 10위 밖으로 밀린 대기 기록은 버립니다. 등록에 실패하면 대기에 그대로 둡니다.
+- TOP 10 안에 들 때만 **결과 화면에서만** 이름을 받습니다(`rankEntryForm`). **등록 대기는 없습니다**(2026-11-05): 기한 없이 남은 기록이 초기화 뒤 테스트 점수 부활·등록일 어긋남·오래된 순위 판단·공용 기기에서 남의 점수 등록 같은 오해를 불러서 없앴습니다. 대신
+  - 결과 화면을 떠나는 모든 길을 `leaveRankEntry` 로 감싸, 올리지 않은 기록이 있으면 "랭킹에 등록하지 않고 나갈까요? 나가면 이 기록은 다시 등록할 수 없어요" [등록하기][나가기]를 묻습니다. 창이 떠 있을 때 뒤로 가기·Esc·바깥 누르기는 창만 닫고 이름 칸으로 돌아갑니다.
+  - 등록에 실패하면(연결 끊김·8초 초과) 카드가 "다시 눌러 보세요"를 보이고 그 자리에서 다시 시도합니다. 실패한 뒤 나가려 하면 "아직 등록되지 않았어요. 나가면 이 기록은 사라져요".
+  - **오프라인 안내 두 곳**: 시작 화면 위 메뉴 랭킹 버튼 아래 "오프라인 · 랭킹 등록 안 됨"(`Joyfield.offlineMark`, 판을 시작하기 전에 알게), 결과 화면 등록 카드 자리 "오프라인이라 랭킹에 올릴 수 없어요"(이때는 나갈 때 묻지 않음). 오프라인 판단은 `navigator.onLine === false` 만 씁니다(true 여도 연결이 안 될 수 있으니 그때는 올릴 때 실패로 알림).
 - 받은 순위표는 기기에 사본으로 두고, 오프라인이거나 실패하면 그 사본을 "연결이 안 돼요 · 마지막으로 불러온 순위예요"와 함께 보여 주고 TOP 10 판단에도 씁니다.
 - 서버 요청은 **8초** 안에 답이 없으면 포기합니다(느린 망에서 멈춘 것처럼 보이지 않게).
 - 열 때만 읽습니다(허브 첫 화면을 여는 것만으로는 읽지 않음).
-- 내 기록 지우기는 순위표 사본·등록 대기를 지우지 않습니다(1.4).
+- 내 기록 지우기는 순위표 사본을 지우지 않습니다(1.4).
 - **랭킹 탭(모드·난이도·범위) 고르는 기준은 조이필드 공통**입니다. 게임 랭킹 창과 조이필드 전체 랭킹이 같은 기기 저장값(`joyfield.rankBoard`)을 읽고 써서, 어디서 열어도 같은 탭으로 이어집니다. 랭킹 창을 열 때 처음 탭은 `Joyfield.rankTab(게임ID, 탭 목록, 기본 탭)` 으로 고릅니다.
-  1. **등록 대기 기록이 있는 탭**(여럿이면 그중 최근 탭, 아니면 화면 순서로 첫 번째)
-  2. **최근 탭**: 방금 한 판의 탭 또는 어디서든 마지막으로 본 탭 중 나중 것
-  3. **기본 탭**: `games.json` 의 `ranking.default`
-  - 게임이 할 일 세 가지: ① 판이 끝나면 `Joyfield.setRankBoard(id, 그 판의 탭)`(연습 판처럼 랭킹 없는 판은 빼기) ② 랭킹 창에서 탭을 누르면 `Joyfield.setRankBoard(id, 탭)` ③ 등록 대기가 바뀔 때마다(생김·등록·10위 밖으로 밀림·순위표 새로 받음, 시작할 때 한 번) `Joyfield.setRankPending(id, [대기 탭…])`. 날짜마다 바뀌는 순위표(오늘의 챌린지)는 `{ board, day: 'YYYY-MM-DD' }` 로 그날만 유효하게.
-  - 결과 화면의 "랭킹 보기"처럼 방금 한 판을 보여 주는 곳은 그 판의 탭으로 바로 엽니다(위 1·2와 결과가 같음).
+  1. **최근 탭**: 방금 한 판의 탭 또는 어디서든 마지막으로 본 탭 중 나중 것
+  2. **기본 탭**: `games.json` 의 `ranking.default`
+  - 게임이 할 일 두 가지: ① 판이 끝나면 `Joyfield.setRankBoard(id, 그 판의 탭)`(연습 판처럼 랭킹 없는 판은 빼기) ② 랭킹 창에서 탭을 누르면 `Joyfield.setRankBoard(id, 탭)`(공통 `openRanking` 이 함). 예전 `setRankPending`(등록 대기 탭 우선)은 2026-11-05 등록 대기와 함께 없앴습니다.
+  - 결과 화면의 "랭킹 보기"처럼 방금 한 판을 보여 주는 곳은 그 판의 탭으로 바로 엽니다(위 1과 결과가 같음).
   - 이니셜 등록 뒤 나오는 "랭킹 보기" 버튼은 가로를 꽉 채우지 않고 **최대 220px, 가운데**(`width: min(100%, 220px)`)로 둡니다. 모든 게임 같은 크기 느낌.
 - **저장 방식: 순위표 1개 = 문서 1개**(`games/<id>/rankings/<board>` = `{ entries: [...] }`, 10개 이하, 트랜잭션으로 등록). 모든 게임 같은 방식(업다운도 v1.21.0부터, 예전 "기록 1건 = 문서 1개" 경로는 규칙까지 지움). 읽기 1번으로 TOP 10 이 오고 복합 색인이 필요 없습니다. **코드는 공통**: 읽기·등록은 `@joyfield/shared/rank` 의 `rankStore`, 순서·자리는 `placeBy`·`insertBy`(앞서는 기준 함수만 게임이 정함), 랭킹 창·등록 카드는 `@joyfield/shared/ui` 의 `openRanking`·`rankEntryForm`(1.2). 게임은 `ranking.ts`(항목 모양·정리·등록 대기)와 `online.ts`(10줄 안팎)만 둡니다.
 - 순위표 이름(board)은 모드·난이도별(`classic`, `daily-YYYY-MM-DD` …). 랭킹 탭 ID는 `games.json` 의 `ranking.boards[].id` 와 같게 둡니다(조이필드 전체 랭킹과 탭 기준을 같이 쓰므로).
@@ -393,7 +395,7 @@ games/<id>/
 │   ├── audio.ts           효과음 recipe 목록 + 공통 playRecipe(1.7)
 │   ├── share.ts           공통 captureResult + Joyfield.shareResult
 │   ├── online.ts          공통 rankStore 로 랭킹 읽기·등록(있으면)
-│   ├── ranking.ts         항목 모양·정리·등록 대기(자리·끼우기는 공통 placeBy·insertBy)
+│   ├── ranking.ts         항목 모양·정리(자리·끼우기는 공통 placeBy·insertBy)
 │   ├── game/              규칙·상태(DOM 없음)
 │   ├── ui/                화면·연출(effects.ts: 팝업·파티클·흔들림)
 │   ├── fonts/             woff2 (라이선스 파일은 public/fonts/ 에 두어 배포본에 함께)
@@ -408,9 +410,9 @@ games/<id>/
 | 만들 것 | 볼 파일 | 볼 부분 |
 | --- | --- | --- |
 | Vite 설정·버전 | `games/hammer/vite.config.ts`, `package.json` | `base: './'`, `define: { __APP_VERSION__ }`, `@joyfield/shared` 의존 |
-| 시작 흐름·화면 전환 | `games/hammer/src/main.ts` | `mount`·`showStart`·`play`·결과 연결, `configureUi`, 뒤로 가기 단계(`Joyfield.back.screen`: 시작 0 · 플레이 2 · 일시정지·결과 1), `registerSW`·`inviteBar`·`trackViewport`·`guardBottom` 부르는 곳 |
-| 화면(시작·게임·결과·대화 상자) | `games/hammer/src/ui/screens.ts`, 공통 `packages/shared/ui.ts` | `startScreen`(위 메뉴 `.jp-topbar`), `fitStart`(화면에 맞춰 줄이기), `gameScreen`(일시정지 창), `resultScreen`(0.6초 누름 막기), 공통 `openModal`·`rankEntryForm`·`openRanking`(게임은 탭 설정만 넘기는 `openRanking` 몇 줄) |
-| 랭킹 | `games/hammer/src/online.ts`, `ranking.ts`, 공통 `packages/shared/rank.ts` | `rankStore`(순위표 문서 1개·트랜잭션 등록·8초 제한), `placeBy`·`insertBy`(TOP 10·동점), 게임 쪽은 등록 대기·사본. 점수 말고 이동·시간으로 겨루면 온실정원 `ranking.ts` `dailyAhead` |
+| 시작 흐름·화면 전환 | `games/hammer/src/main.ts` | `mount`·`showStart`·`play`·결과 연결(결과 화면을 떠나는 길은 모두 `leaveRankEntry`), `configureUi`, 뒤로 가기 단계(`Joyfield.back.screen`: 시작 0 · 플레이 2 · 일시정지·결과 1), `registerSW`·`inviteBar`·`trackViewport`·`guardBottom` 부르는 곳 |
+| 화면(시작·게임·결과·대화 상자) | `games/hammer/src/ui/screens.ts`, 공통 `packages/shared/ui.ts` | `startScreen`(위 메뉴 `.jp-topbar`, 랭킹 버튼 `Joyfield.offlineMark`), `fitStart`(화면에 맞춰 줄이기), `gameScreen`(일시정지 창), `resultScreen`(0.6초 누름 막기), 공통 `openModal`·`rankEntryForm`·`leaveRankEntry`·`openRanking`(게임은 탭 설정만 넘기는 `openRanking` 몇 줄) |
+| 랭킹 | `games/hammer/src/online.ts`, `ranking.ts`, 공통 `packages/shared/rank.ts` | `rankStore`(순위표 문서 1개·트랜잭션 등록·8초 제한), `placeBy`·`insertBy`(TOP 10·동점), 게임 쪽은 순위표 사본. 점수 말고 이동·시간으로 겨루면 온실정원 `ranking.ts` `dailyAhead` |
 | 저장·설정 | `games/hammer/src/storage.ts`, `theme.ts` | `<id>:v1` 한 키, 공통 설정은 `Joyfield.get/set`, 스킨 "자동"(`Joyfield.dailyPick`) |
 | 결과 공유 이미지 | `games/hammer/src/share.ts`, 공통 `packages/shared/capture.ts` | `captureResult(결과 화면, { load, title, remove })` → `Joyfield.shareResult` |
 | 소리·연출 | `games/hammer/src/audio.ts`, `ui/effects.ts` | 소리마다 recipe + 공통 `playRecipe`(음높이 배수), 팝업·파티클·흔들림·히트 스톱 |
@@ -444,7 +446,7 @@ games/<id>/
 | 7 | 버전 | 게임 `package.json` version(처음 `0.1.0`, 공개 때 `1.0.0`). 허브를 고쳤으면 루트 `package.json` |
 | 8 | 문서 | 이 문서 3.1 등록부·8장 현황표, 루트 README 1장 표 |
 | 9 | 저작권·라이선스 | 게임 `package.json` 에 `"author": "Myong Bum Soo"`, `"license": "UNLICENSED"`. 설정 맨 아래 `Joyfield.COPYRIGHT`(1.4 6번). 새 글꼴·소리·그림 등 **남의 저작물**을 썼으면 README 8.1 표에 한 줄, 루트 `LICENSE` 의 제3자 목록에 한 줄, 그 라이선스 파일이 `dist/games/<id>/` 에 들어갔는지 확인 |
-| 10 | 랭킹 탭 기준 | 1.6 "랭킹 탭 고르는 기준": 게임 코드에서 `Joyfield.rankTab`(랭킹 창 처음 탭) · `setRankBoard`(판 끝·탭 누름) · `setRankPending`(등록 대기 바뀔 때). 허브는 따로 고칠 것 없음(`games.json` 탭 ID만 맞추면 자동) |
+| 10 | 랭킹 탭·등록 | 1.6: 게임 코드에서 `Joyfield.rankTab`(랭킹 창 처음 탭) · `setRankBoard`(판 끝). 결과 화면을 떠나는 길은 모두 `leaveRankEntry`, 시작 화면 랭킹 버튼에 `Joyfield.offlineMark`. 허브는 따로 고칠 것 없음(`games.json` 탭 ID만 맞추면 자동) |
 | 11 | 상업 기준 | 10장: 제3자 저작물 기록(README 8.1 · `LICENSE` · `dist` 라이선스 파일), 이름 상표 검색 결과를 README 기획에, 랭킹 이름 등록 전 `Joyfield.isAllowedName`, 서버 저장 항목 범위, 전체 이용가 |
 
 ---
@@ -458,7 +460,7 @@ games/<id>/
 - [ ] 화면 크기 점검(7.1) `pnpm check:screens <id>` 모두 ok, 또는 남은 줄이 의도한 스크롤임을 모음 그림으로 확인
 - [ ] 한 판을 끝까지: 진동 호출이 1.7 기준대로 나가는지(테스트에서 `navigator.vibrate` 를 가로채 기록)
 - [ ] 설정 6항목(1.4, 공유 버튼 없음), 결과 화면 기록 공유하기(캡처 이미지 + 조이필드 주소 `?from=share`, 결과 글 없음)
-- [ ] 랭킹: 읽기, TOP 10 등록, 등록 대기, 오프라인에서 마지막 순위, 탭 기준(조이필드 전체 랭킹에서 고른 탭으로 게임 랭킹이 열리고 그 반대도, 방금 한 판의 탭, 대기 탭 우선)
+- [ ] 랭킹: 읽기, TOP 10 등록, 등록하지 않고 나가면 확인 창(다시 하기·처음 화면으로·Esc·뒤로 가기 모두), 등록 실패 뒤 다시 시도, 오프라인에서 결과 카드 안내·위 메뉴 "오프라인 · 랭킹 등록 안 됨"·마지막 순위, 탭 기준(조이필드 전체 랭킹에서 고른 탭으로 게임 랭킹이 열리고 그 반대도, 방금 한 판의 탭)
 - [ ] 오프라인: 한 번 연 뒤 서버를 끄고 다시 열어 끝까지 플레이(글꼴·소리 포함)
 - [ ] 동작 줄이기 설정에서 흔들림·튀어 오름이 빠지는지, 배경이 멈춘 그림으로 남는지(화면 밖으로 사라지지 않는지)
 - [ ] 게임에 맞는 글꼴이 실제로 적용됐는지(`document.fonts`), 라이선스 파일이 `dist` 에 있는지, 배경이 층마다 다르게 움직이고 게임 중에는 흐려지는지(1.10)
@@ -586,8 +588,9 @@ games/<id>/
 | 기록 공유하기(결과 화면) | `Joyfield.shareResult` | `Joyfield.shareResult` | `Joyfield.shareResult` | `Joyfield.shareResult` | ✅ 공통 모듈(이미지 + 조이필드 주소 한 번에) |
 | 결과 이미지 | 캔버스로 직접 그림(1080²) | `html-to-image` 결과 화면 복제 | `html-to-image` 결과 화면 복제(두더지잡기 `share.ts` 와 거의 같음) | `html-to-image` 결과 화면 복제(세 번째 같은 코드) | 🟠 공통화 후보(두더지잡기·타임 투 플립 `captureResult` 가 거의 같음) |
 | 랭킹 저장 방식 | 순위표 = 문서 1개(v1.21.0, 범위마다 `rankings/50·100·200`, 줄에 `tries`·`time`·`thermo`) | 순위표 = 문서 1개 | 순위표 = 문서 1개, 줄에 `stage` | 순위표 = 문서 1개, `garden`·`daily-YYYY-MM-DD`(이동 수 → 시간 순, 이름마다 한 줄) | ✅ 모두 같은 방식, 읽기·등록은 공통 `rankStore`(`@joyfield/shared/rank`) |
-| 랭킹 등록 대기·순위표 사본·8초 제한 | `updown.pending2`·`updown.boards` | `project-hammer:v1` 의 `pending`·`rankings` | `timetoflip:v1` 의 `pending`(점수·판)·`rankings` | `glasshouse:v1` 의 `pending`·`dailyPending`(그날만)·`rankings` | 🟡 동작 통일(1.6), 8초 제한은 공통 `rankStore`, 대기·사본 저장은 게임마다(저장 키가 달라서) |
-| 랭킹 창·등록 카드 UI | 공통 `openRanking`·`rankEntryForm` | 공통 | 공통 | 공통 | ✅ 공통 모듈(`@joyfield/shared/ui`, 2026-11-05). 게임은 탭 설정(칸·줄·대기·새로 받기)만 넘기고 모양 css 는 게임 것 |
+| 랭킹 순위표 사본·8초 제한 | `updown.boards` | `project-hammer:v1` 의 `rankings` | `timetoflip:v1` 의 `rankings` | `glasshouse:v1` 의 `rankings`·`dailyRankings`(그날만) | 🟡 동작 통일(1.6), 8초 제한은 공통 `rankStore`, 사본 저장은 게임마다(저장 키가 달라서). 등록 대기는 2026-11-05 모두 없앰(예전 값은 읽을 때 버림) |
+| 결과 화면 나갈 때 확인·오프라인 안내 | 공통 `leaveRankEntry`·`Joyfield.offlineMark` | 공통 | 공통 | 공통 | ✅ 공통 모듈(2026-11-05). 확인 창 배치는 공통 `topbar.css`, 모양은 게임 `.modal`·`.btn` |
+| 랭킹 창·등록 카드 UI | 공통 `openRanking`·`rankEntryForm` | 공통 | 공통 | 공통 | ✅ 공통 모듈(`@joyfield/shared/ui`, 2026-11-05). 게임은 탭 설정(칸·줄·새로 받기)만 넘기고 모양 css 는 게임 것 |
 | 효과음 | 공통 `playRecipe`(목록 `updown/*` recipe 그대로) | 공통 `playRecipe`(소리마다 recipe, 피버 음높이) | 공통 `playRecipe`(마림바 mallet, 콤보 음계) | 공통 `playRecipe` | ✅ 재생기 공통(소리 결은 정체성, 게임 `audio.ts` 는 recipe 목록) |
 | 진동 | `Joyfield.vibrate` | `Joyfield.vibrate` | `Joyfield.vibrate` | `Joyfield.vibrate` | ✅ 공통 모듈(1.7 세기표 이름, 2026-11-05) |
 | 스킨 "자동"(날짜마다) | `Joyfield.dailyPick` 로 계절 | `Joyfield.dailyPick` 로 장소 | `Joyfield.dailyPick` 로 시간대 | `Joyfield.dailyPick` 날씨 톤, 시작 화면·정원 모두 같은 톤(v0.12.8, 예전엔 정원마다 다음 톤) | 🟢 공통(연속 같은 스킨 없음), 묶음은 정체성 |
@@ -609,7 +612,7 @@ games/<id>/
 
 2026-11-05 에 예전 목록(진동·랭킹 클라이언트·랭킹 창·결과 이미지·효과음 재생·도감 뒤집기·허브 메타, 업다운 구조)을 모두 공통 모듈로 옮겼습니다(위 표 ✅). 남은 것:
 
-1. 랭킹 등록 대기·순위표 사본 저장: 게임마다 저장 키(`<id>:v1` 안 `pending`·`rankings`, 업다운 `updown.pending2`·`updown.boards`)가 달라 코드가 따로다. 다섯 번째 게임에서 같은 모양이 또 나오면 `@joyfield/shared/rank` 에 "대기 기록 + 사본" 도우미(저장 읽기·쓰기 함수만 게임이 넘김)를 만든다. 기존 저장 키는 바꾸지 않는다(사용자 기록 보존).
+1. 랭킹 순위표 사본 저장: 게임마다 저장 키(`<id>:v1` 안 `rankings`, 업다운 `updown.boards`)가 달라 코드가 따로다. 다섯 번째 게임에서 같은 모양이 또 나오면 `@joyfield/shared/rank` 에 "사본" 도우미(저장 읽기·쓰기 함수만 게임이 넘김)를 만든다. 기존 저장 키는 바꾸지 않는다(사용자 기록 보존). 결과 화면 등록 카드를 순위표에 맞춰 다시 그리는 `showEntry`(기기 사본으로 먼저 → 온라인 순위표를 받으면 자리 다시, 치던 이름 유지)도 네 게임이 거의 같다 → 다섯 번째 게임 때 공통 `resultRankEntry` 로.
 2. 도감 짜임 전체(큰 카드 + 묶음별 작은 카드 + 설명 칸 높이 고정): 뒤집기만 공통(`cardFlipper`)이고 짜임·설명 채우기는 타임 투 플립·온실정원이 따로다. 도감이 있는 세 번째 게임이 생기면 `openDex` 틀을 공통으로.
 3. 설정 창 내용: 순서·이름은 같지만(1.4) 칩 모양이 게임마다 달라 각자 만든다. 항목 묶음(컬러 모드·언어·스킨·소리·진동·내 기록 지우기·버전)을 공통 함수로 만들지는 게임이 더 늘 때 판단.
 
@@ -632,6 +635,7 @@ games/<id>/
 
 | 문서 버전 | 날짜 | 내용 |
 | --- | --- | --- |
+| 1.78 | 2026-11-05 | 랭킹 등록 대기 없앰(1.6, 허브 v1.42.0 · 업다운 v1.22.0 · 두더지잡기 v1.3.0 · 타임 투 플립 v1.8.0 · 온실정원 v0.17.0): 결과 화면에서만 등록, 떠날 때 공통 `leaveRankEntry` 확인 창, 등록 실패는 그 자리에서 다시, 오프라인 안내 두 곳(위 메뉴 `Joyfield.offlineMark`·결과 카드 `offline` 상태). 위 메뉴 강조(`.is-on`·`.jp-top-dot`)·`setRankPending` 삭제, 위 메뉴 버튼 `title` 통일. 1.2 표·1.8·5.1·6장·7장·8장·대기 목록 갱신 |
 | 1.77 | 2026-11-05 | 1.3 일시정지 레이어: 공통 `pauseLayer`, 화면 전체 불투명(치팅 방지), 단추 순서·안내 한 줄, 배경은 게임 고유 모습, 3·2·1·끝나기 직전 막기는 하지 않음. 1.2 표 추가 |
 | 1.76 | 2026-11-05 | 1.4 단추·설정 이름표: 시작 화면으로 = "처음 화면으로"(Main menu), 일시정지 이어서 = "계속하기", 설정 칸 이름(언어 선택·스킨 선택·소리·진동), 라이트·다크, 허브 소리 칸 "소리". 네 게임·허브 문구 통일 |
 | 1.75 | 2026-11-05 | 게임 공통화: 휴대폰 뒤로 가기 단계(1.3 `Joyfield.back`, 일시정지 창 필수), 진동 `Joyfield.vibrate`(1.7), 공통 화면 조각 `@joyfield/shared/ui`(대화상자·등록 카드·랭킹 창·도감 뒤집기), 랭킹 저장 `@joyfield/shared/rank`, 결과 이미지 `@joyfield/shared/capture`, 허브 연결 메타 `joyfield.meta.ts`(6장, 허브 v1.41.0), 효과음은 모두 `playRecipe`. 업다운을 Vite + TS 로 옮기고(v1.21.0) 랭킹을 순위표 문서 방식으로, 앱을 내리면 시간 멈춤. 1.2·5장·5.1·6장·8장·대기 목록 갱신. 공통화는 틀·동작만, 색·소리·진동·특이점은 게임마다·안 쓰는 목록 항목 안 지움(1.2) |

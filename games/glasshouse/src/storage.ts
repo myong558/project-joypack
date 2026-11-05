@@ -2,7 +2,7 @@ import '@joyfield/shared';
 import type { SharedSetting } from '@joyfield/shared';
 import { LEVELS } from './game/levels';
 import { LANGS, detectLang, type Lang } from './i18n';
-import { cleanName, sanitizeDaily, sanitizeEntries, sanitizePending, type DailyEntry, type DailyRecord, type PendingRecord, type RankEntry } from './ranking';
+import { cleanName, sanitizeDaily, sanitizeEntries, type DailyEntry, type DailyRecord, type RankEntry } from './ranking';
 import { SKIN_SETTINGS, THEMES, type SkinSetting, type Theme } from './theme';
 
 const KEY = 'glasshouse:v1';
@@ -23,11 +23,9 @@ export interface SaveData {
   tips: number[];
   /** 이 기기의 순위표 사본 */
   rankings: RankEntry[];
-  pending: PendingRecord | null;
-  /** 오늘의 정원: 이 기기의 그날 가장 좋은 기록, 그날 순위표 사본, 등록하지 않고 넘어간 기록(모두 날짜가 바뀌면 안 씀) */
+  /** 오늘의 정원: 이 기기의 그날 가장 좋은 기록, 그날 순위표 사본(둘 다 날짜가 바뀌면 안 씀) */
   daily: (DailyRecord & { date: string }) | null;
   dailyRankings: { date: string; entries: DailyEntry[] };
-  dailyPending: (DailyRecord & { date: string }) | null;
   /** 지난번 순위표에 쓴 이름. 다음 등록 때 미리 채운다 */
   playerName: string;
   sound: boolean;
@@ -44,7 +42,7 @@ export function emptyRecords(): Pick<SaveData, 'levels' | 'seen' | 'daily'> {
 }
 
 function defaults(): SaveData {
-  return { ...emptyRecords(), tips: [], rankings: [], pending: null, dailyRankings: { date: '', entries: [] }, dailyPending: null, playerName: '', sound: true, vibrate: true, lang: detectLang(), theme: 'system', skin: 'auto' };
+  return { ...emptyRecords(), tips: [], rankings: [], dailyRankings: { date: '', entries: [] }, playerName: '', sound: true, vibrate: true, lang: detectLang(), theme: 'system', skin: 'auto' };
 }
 
 export const gardenScore = (save: SaveData) => save.levels.reduce((n, r) => n + (r?.score ?? 0), 0);
@@ -68,9 +66,10 @@ export function loadSave(): SaveData {
     data.levels = LEVELS.map((_, i) => (Array.isArray(data.levels) && ok(data.levels[i]) ? data.levels[i] : null));
     for (const k of ['seen', 'tips'] as const) data[k] = (Array.isArray(data[k]) ? data[k] : []).filter((i) => Number.isInteger(i));
     data.rankings = sanitizeEntries(data.rankings);
-    data.pending = sanitizePending(data.pending);
     data.daily = dailyRecord(data.daily);
-    data.dailyPending = dailyRecord(data.dailyPending);
+    // 예전 등록 대기 기록(2026-11-05 등록 대기를 없앰, 출시 전이라 옮기지 않고 버림). 다음 저장 때 사라진다
+    delete (data as { pending?: unknown }).pending;
+    delete (data as { dailyPending?: unknown }).dailyPending;
     const dr = data.dailyRankings as Partial<SaveData['dailyRankings']> | null;
     data.dailyRankings = { date: typeof dr?.date === 'string' ? dr.date : '', entries: sanitizeDaily(dr?.entries) };
     data.playerName = cleanName(String(data.playerName ?? ''));
