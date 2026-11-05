@@ -237,21 +237,36 @@
   }
 }
 
-/* 랭킹에 등록하지 않고 결과 화면을 떠날 때 묻는 창(@joyfield/shared/ui 의 leaveRankEntry, 모든 게임 공통 배치).
- * 창 틀·제목·글자·버튼 모양은 게임의 .modal · .modal h2 · .note · .btn 을 그대로 따른다. 여기서는 배치만: 가운데 글, [등록하기] [나가기] 두 칸.
- * :where 로 우선순위 0 → 게임이 따로 정하면 그것이 이긴다 */
-:where(.rank-leave) {
+/* 랭킹에 등록하지 않고 결과 화면을 떠날 때 묻는 창(@joyfield/shared/ui 의 leaveRankEntry, 모든 게임 공통 배치·간격).
+ * 창 바탕·모서리·글꼴·색·버튼 모양은 게임의 .modal · .modal h2 · .note · .btn 을 그대로 따른다(게임 스타일). 여기서는 배치와 간격만 정한다:
+ * 창 안쪽 여백 24·20·20px, 제목 → 안내 12px, 안내 → 버튼 22px, 두 버튼 사이 10px. 게임마다 .modal 안쪽 여백(업다운은 0)·.modal h2 여백
+ * (닫기 단추 자리)·정렬이 달라 같은 간격이 되도록 이 창(.modal.rank-leave-modal, 닫기 단추 없음)에서는 공통 값으로 덮는다 */
+.modal.rank-leave-modal {
+  padding: 24px 20px 20px;
+}
+.modal .rank-leave {
+  display: flex;
+  flex-direction: column;
   text-align: center;
   word-break: keep-all;
 }
-:where(.rank-leave .note) {
-  margin: 0.5em 0 1em;
+.modal .rank-leave h2 {
+  display: block;
+  margin: 0;
+  padding: 0;
+  line-height: 1.35;
+  text-align: center;
 }
-:where(.rank-leave-actions) {
+.modal .rank-leave .note {
+  margin: 12px 0 0;
+  line-height: 1.6;
+}
+.modal .rank-leave-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.5em;
+  gap: 10px;
+  margin-top: 22px;
 }
-:where(.rank-leave-actions .btn) {
+.modal .rank-leave-actions .btn {
   margin: 0;
 }

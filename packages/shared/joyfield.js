@@ -613,12 +613,17 @@
   // 버튼 자리는 그대로다(모양은 topbar.css .jp-top-offline). 같은 버튼에 다시 불러도 하나만 둔다
   const offlineMarks = [];
   let offlineWatch = false;
+  // 버튼을 화면에 붙이기 전에 불러도 되게, 한 번이라도 화면에 붙었다가 빠진 안내만 목록에서 뺀다
   function syncOffline() {
     const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
     for (let i = offlineMarks.length - 1; i >= 0; i--) {
       const mark = offlineMarks[i];
-      if (!mark.isConnected) offlineMarks.splice(i, 1);
-      else mark.hidden = !offline;
+      if (mark.isConnected) mark.jfShown = true;
+      else if (mark.jfShown) {
+        offlineMarks.splice(i, 1);
+        continue;
+      }
+      mark.hidden = !offline;
     }
   }
   function offlineMark(button, text) {

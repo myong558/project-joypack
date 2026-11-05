@@ -90,7 +90,7 @@
 | `@joyfield/shared/ui` `configureUi({ t, icons: { trophy, close } })` | 시작할 때 한 번: 공통 조각이 쓸 게임 문구(i18n 키 `common.close`·`ranking.title`·`ranking.open`·`ranking.loading`·`ranking.offline`·`ranking.sending`·`ranking.failed`·`ranking.missed`·`ranking.empty`·`ranking.nameLabel`·`ranking.badName`·`ranking.submit`·`ranking.done`{n}·`ranking.offlineEntry`·`ranking.leaveTitle`·`ranking.leaveText`·`ranking.leaveFailed`·`ranking.leaveStay`·`ranking.leaveGo`)와 아이콘. 위 메뉴 오프라인 안내용 `ranking.offlineBadge` 도 게임 i18n 에 둔다 |
 | `openModal(host, 내용, 이름, { reopen, kind, fitFont, onClose })` | 대화상자(`.modal-backdrop > .modal`). Esc·바깥 누르기·`[data-close]`·휴대폰 뒤로 가기로 닫힘, host 가 화면에서 빠지면 함께 닫힘 |
 | `rankEntryForm({ title, name, compact, onSubmit, onView })` | 랭킹 이름 등록 카드(`.rank-entry`, 입력 칸·완료 칸을 겹쳐 높이 그대로, 금지어 거름). 상태 `data-state` = `ready`·`sending`·`failed`·`done`·`offline`(오프라인이면 완료 칸 자리에 "오프라인이라 올릴 수 없어요", 연결되면 입력 칸으로) |
-| `leaveRankEntry(화면, 이동)` | 결과 화면을 떠나는 모든 길(다시 하기·다음 판·처음 화면으로·Esc·휴대폰 뒤로 가기)을 이것으로 감싼다. 올리지 않은 카드(`ready`·`failed`)가 있으면 "랭킹에 등록하지 않고 나갈까요?" [등록하기][나가기] 창(`.rank-leave`), 아니면 바로 이동. 배치는 공통 `topbar.css`(`:where`, 우선순위 0), 창 틀·글자·버튼은 게임의 `.modal`·`.btn` 을 따른다(게임 스타일 그대로) |
+| `leaveRankEntry(화면, 이동)` | 결과 화면을 떠나는 모든 길(다시 하기·다음 판·처음 화면으로·Esc·휴대폰 뒤로 가기)을 이것으로 감싼다. 올리지 않은 카드(`ready`·`failed`)가 있으면 "랭킹에 등록하지 않고 나갈까요?" [등록하기][나가기] 창(`.rank-leave`), 아니면 바로 이동. 배치·간격은 공통 `topbar.css`(창 안쪽 24·20·20px, 제목 → 안내 12px, 안내 → 버튼 22px, 두 버튼 사이 10px), 창 틀·글꼴·색·버튼은 게임의 `.modal`·`.btn` 을 따른다(게임 스타일 그대로) |
 | `openRanking(host, { gameId, tabs, start, mark, height })` | 랭킹 창(`.ranking`: 탭 `.rank-tabs`·안내 `.rank-note`·빈 순위 안내 `.rank-slot`·10줄 `ol.rank-list`). 탭마다 `columns`(칸 클래스)·`rows()`·`refresh()`·`note()` 만 넘긴다. 처음 탭은 `Joyfield.rankTab`. 등록은 하지 않는다(결과 화면에서만) |
 | `cardFlipper(flip, { reduced, onShown, flatClass })` | 도감 큰 카드 뒤집기(앞면끼리 90° 세워 갈아 끼우기) |
 | `pauseLayer(.pause-menu)` → `show(true/false)` | 일시정지 레이어(1.3): 대화상자 역할·첫 단추 초점·Tab 가두기. 화면 전체 불투명 덮기·배경 모양은 게임 css |
@@ -589,7 +589,7 @@ games/<id>/
 | 결과 이미지 | 캔버스로 직접 그림(1080²) | `html-to-image` 결과 화면 복제 | `html-to-image` 결과 화면 복제(두더지잡기 `share.ts` 와 거의 같음) | `html-to-image` 결과 화면 복제(세 번째 같은 코드) | 🟠 공통화 후보(두더지잡기·타임 투 플립 `captureResult` 가 거의 같음) |
 | 랭킹 저장 방식 | 순위표 = 문서 1개(v1.21.0, 범위마다 `rankings/50·100·200`, 줄에 `tries`·`time`·`thermo`) | 순위표 = 문서 1개 | 순위표 = 문서 1개, 줄에 `stage` | 순위표 = 문서 1개, `garden`·`daily-YYYY-MM-DD`(이동 수 → 시간 순, 이름마다 한 줄) | ✅ 모두 같은 방식, 읽기·등록은 공통 `rankStore`(`@joyfield/shared/rank`) |
 | 랭킹 순위표 사본·8초 제한 | `updown.boards` | `project-hammer:v1` 의 `rankings` | `timetoflip:v1` 의 `rankings` | `glasshouse:v1` 의 `rankings`·`dailyRankings`(그날만) | 🟡 동작 통일(1.6), 8초 제한은 공통 `rankStore`, 사본 저장은 게임마다(저장 키가 달라서). 등록 대기는 2026-11-05 모두 없앰(예전 값은 읽을 때 버림) |
-| 결과 화면 나갈 때 확인·오프라인 안내 | 공통 `leaveRankEntry`·`Joyfield.offlineMark` | 공통 | 공통 | 공통 | ✅ 공통 모듈(2026-11-05). 확인 창 배치는 공통 `topbar.css`, 모양은 게임 `.modal`·`.btn` |
+| 결과 화면 나갈 때 확인·오프라인 안내 | 공통 `leaveRankEntry`·`Joyfield.offlineMark` | 공통 | 공통 | 공통 | ✅ 공통 모듈(2026-11-05). 확인 창 배치·간격은 공통 `topbar.css`, 모양은 게임 `.modal`·`.btn` |
 | 랭킹 창·등록 카드 UI | 공통 `openRanking`·`rankEntryForm` | 공통 | 공통 | 공통 | ✅ 공통 모듈(`@joyfield/shared/ui`, 2026-11-05). 게임은 탭 설정(칸·줄·새로 받기)만 넘기고 모양 css 는 게임 것 |
 | 효과음 | 공통 `playRecipe`(목록 `updown/*` recipe 그대로) | 공통 `playRecipe`(소리마다 recipe, 피버 음높이) | 공통 `playRecipe`(마림바 mallet, 콤보 음계) | 공통 `playRecipe` | ✅ 재생기 공통(소리 결은 정체성, 게임 `audio.ts` 는 recipe 목록) |
 | 진동 | `Joyfield.vibrate` | `Joyfield.vibrate` | `Joyfield.vibrate` | `Joyfield.vibrate` | ✅ 공통 모듈(1.7 세기표 이름, 2026-11-05) |
