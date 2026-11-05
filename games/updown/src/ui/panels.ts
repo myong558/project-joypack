@@ -1,5 +1,6 @@
 // 업다운 대화상자 내용: 설정·직접 정하기·온도계. 열 때마다 새로 만들고, 틀은 조이필드 공통 openModal(@joyfield/shared/ui)에 넣는다.
 import '@joyfield/shared';
+import { bindSettings, choiceGroup, switchRow } from '@joyfield/shared/settings';
 import { closeButton, html } from '@joyfield/shared/ui';
 import { CUSTOM_MAX, CUSTOM_MIN, PRESETS } from '../game/rules';
 import { LANGS, NAMES, getLang, t, type Lang, type MessageKey } from '../i18n';
@@ -44,40 +45,33 @@ const SKINS: [string, string][] = [
 ];
 
 /**
- * 설정 창 내용. 항목 순서는 모든 게임 공통(기준서 1.4): 컬러 모드 · 언어 · 스킨 · 효과음·진동 · 내 기록 지우기 · 버전·저작권.
+ * 설정 창 내용. 항목 순서는 모든 게임 공통(기준서 1.4): 컬러 모드 · 언어 · 스킨 · 소리·진동 · 내 기록 지우기 · 버전·저작권.
+ * 하나 고르기·스위치는 조이필드 공통 조각(@joyfield/shared/settings), 모양은 이 게임의 칩.
  * 내 기록 지우기는 칩(전체·범위별)을 누르면 아래에 확인 상자가 열린다(같은 칩을 다시 누르면 닫힘)
  */
 export function settingsPanel(o: SettingsOptions): HTMLElement {
   const lang = getLang();
-  const fxChip = (kind: FxKind, on: boolean) =>
-    `<button type="button" class="chip" data-fx="${kind}" ${pressed(on)} aria-label="${t(`settings.${kind}`, { on })}" title="${t(`settings.${kind}`, { on })}">${icon(kind)}</button>`;
   const el = html(`
     <div class="settings">
       <div class="settings-body">
         ${header(t('settings.title'))}
         <section class="settings-group">
           <h3>${t('settings.theme')}</h3>
-          <div class="chip-row theme-row">
-            ${THEMES.map(([v, ic, key]) => `<button type="button" class="chip" data-theme-option="${v}" ${pressed(o.theme === v)}>${icon(ic)}<span>${t(key)}</span></button>`).join('')}
-          </div>
+          ${choiceGroup('theme', THEMES.map(([v, ic, key]) => ({ value: v, label: t(key), icon: icon(ic) })), o.theme, { cls: 'chip-row theme-row', itemCls: 'chip', label: t('settings.theme') })}
         </section>
         <section class="settings-group">
           <h3>${t('settings.language')}</h3>
-          <div class="chip-row">
-            ${LANGS.map((l) => `<button type="button" class="chip" lang="${l}" data-lang="${l}" ${pressed(l === lang)}>${NAMES[l]}</button>`).join('')}
-          </div>
+          ${choiceGroup('lang', LANGS.map((l) => ({ value: l, label: NAMES[l], lang: l })), lang, { cls: 'chip-row', itemCls: 'chip', label: t('settings.language') })}
         </section>
         <section class="settings-group">
           <h3>${t('settings.skin')}</h3>
-          <div class="chip-row theme-row skin-row">
-            ${SKINS.map(([v, ic]) => `<button type="button" class="chip" data-skin-option="${v}" ${pressed(o.skin === v)}>${icon(ic)}<span>${t(`skin.${v}` as MessageKey)}</span></button>`).join('')}
-          </div>
+          ${choiceGroup('skin', SKINS.map(([v, ic]) => ({ value: v, label: t(`skin.${v}` as MessageKey), icon: icon(ic) })), o.skin, { cls: 'chip-row theme-row skin-row', itemCls: 'chip', label: t('settings.skin') })}
         </section>
         <section class="settings-group">
           <h3>${t('settings.fx')}</h3>
-          <div class="chip-row fx-row">
-            ${fxChip('sound', o.sound)}
-            ${Joyfield.canVibrate() ? fxChip('vibrate', o.vibrate) : '' /* 진동을 못 하는 기기(아이폰 등)에는 숨긴다 */}
+          <div class="switches">
+            ${switchRow('sound', o.sound, t('settings.sound'), [icon('sound'), icon('sound')])}
+            ${Joyfield.canVibrate() ? switchRow('vibrate', o.vibrate, t('settings.vibrate'), [icon('vibrate'), icon('vibrate')]) : '' /* 진동을 못 하는 기기(아이폰 등)에는 숨긴다 */}
           </div>
         </section>
         <section class="settings-group">
@@ -99,29 +93,14 @@ export function settingsPanel(o: SettingsOptions): HTMLElement {
       </div>
     </div>`);
   const all = <T extends HTMLElement = HTMLElement>(s: string) => [...el.querySelectorAll<T>(s)];
-  const select = (attr: string, value: string) => all(`[data-${attr}]`).forEach((b) => b.setAttribute('aria-pressed', String(b.getAttribute(`data-${attr}`) === value)));
-  all('[data-theme-option]').forEach((b) =>
-    b.addEventListener('click', () => {
-      select('theme-option', b.dataset.themeOption!);
-      o.onTheme(b.dataset.themeOption as Theme);
-    }),
-  );
-  all('[data-skin-option]').forEach((b) =>
-    b.addEventListener('click', () => {
-      select('skin-option', b.dataset.skinOption!);
-      o.onSkin(b.dataset.skinOption!);
-    }),
-  );
-  all('[data-lang]').forEach((b) => b.addEventListener('click', () => b.dataset.lang !== lang && o.onLang(b.dataset.lang as Lang)));
-  all('[data-fx]').forEach((b) =>
-    b.addEventListener('click', () => {
-      const kind = b.dataset.fx as FxKind;
-      const on = o.onToggle(kind);
-      b.setAttribute('aria-pressed', String(on));
-      b.setAttribute('aria-label', t(`settings.${kind}`, { on }));
-      b.title = t(`settings.${kind}`, { on });
-    }),
-  );
+  bindSettings(el, {
+    onChoice(name, value) {
+      if (name === 'theme') o.onTheme(value as Theme);
+      else if (name === 'skin') o.onSkin(value);
+      else if (value !== lang) o.onLang(value as Lang);
+    },
+    onSwitch: (name) => o.onToggle(name as FxKind),
+  });
   // 내 기록 지우기: 칩은 탭처럼 고른 범위가 바뀌고(문구에 범위를 적어 무엇을 지우는지 늘 보임), 같은 칩을 다시 누르면 닫힌다
   const box = el.querySelector<HTMLElement>('.reset-confirm')!;
   const message = box.querySelector<HTMLElement>('.reset-confirm-message')!;

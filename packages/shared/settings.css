@@ -1,0 +1,90 @@
+/* 조이필드 설정 창 공통: 켜기/끄기 스위치 줄(settings.ts switchRow, 기준서 1.4). 허브·모든 게임이 같은 짜임·크기.
+   앱은 색만 변수로 맞춘다: --jp-switch-on(켜짐 바탕) · --jp-switch-off(꺼짐 바탕) · --jp-switch-knob(동그라미) · --jp-switch-focus(초점 테두리).
+   크기는 글자 크기(em)를 따라간다(16px 에서 48×28px). 이름 줄 글자·아이콘 모양은 앱 css(.jp-switch-name · .jp-switch-icon) */
+.jp-switch {
+  --jp-sw-on: var(--jp-switch-on, var(--jp-top-accent, #3f8f64));
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  padding: 4px 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.jp-switch-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.jp-switch-icon {
+  display: inline-flex;
+}
+
+:where(.jp-switch-icon) svg {
+  width: 1.4em;
+  height: 1.4em;
+}
+
+.jp-switch[data-state='on'] .jp-switch-icon[data-off],
+.jp-switch[data-state='off'] .jp-switch-icon[data-on] {
+  display: none;
+}
+
+.jp-switch[data-state='off'] .jp-switch-name {
+  opacity: 0.72;
+}
+
+.jp-switch input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.jp-switch i {
+  position: relative;
+  flex: none;
+  width: 3em;
+  height: 1.75em;
+  border-radius: 999px;
+  background: var(--jp-switch-off, rgb(128 128 128 / 0.38));
+  transition: background 160ms ease;
+}
+
+.jp-switch i::after {
+  content: '';
+  position: absolute;
+  top: 0.1875em;
+  left: 0.1875em;
+  width: 1.375em;
+  height: 1.375em;
+  border-radius: 50%;
+  background: var(--jp-switch-knob, #fff);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.25);
+  transition: transform 160ms ease;
+}
+
+.jp-switch input:checked + i {
+  background: var(--jp-sw-on);
+}
+
+.jp-switch input:checked + i::after {
+  transform: translateX(1.25em);
+}
+
+.jp-switch input:focus-visible + i {
+  outline: 3px solid var(--jp-switch-focus, var(--jp-sw-on));
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jp-switch i,
+  .jp-switch i::after {
+    transition: none;
+  }
+}

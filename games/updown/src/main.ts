@@ -3,6 +3,7 @@
 // 공통 모듈을 맨 먼저 불러 공통 설정·뒤로 가기·진동을 쓸 수 있게 한다
 import '@joyfield/shared';
 import '@joyfield/shared/topbar.css';
+import '@joyfield/shared/settings.css';
 import './styles.css';
 import { configureUi, leaveRankEntry, openModal, openRanking as openSharedRanking, pauseLayer, rankEntryForm, type RankTab } from '@joyfield/shared/ui';
 import { play as fx, isOn as fxOn, setOn as setFx } from './audio';
@@ -852,7 +853,7 @@ function openSettings(reopen?: string): void {
         changeLang(lang);
         // 글자가 모두 바뀌므로 설정 창을 그 자리에서 다시 그린다(등장 연출 없이, 고른 언어에 초점)
         close();
-        openSettings(`[data-lang="${lang}"]`);
+        openSettings(`[data-choice="lang"] [data-value="${lang}"]`);
       },
       onToggle: (kind) => {
         setFx(kind, !fxOn(kind));

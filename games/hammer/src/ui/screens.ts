@@ -1,3 +1,4 @@
+import { bindSettings, choiceGroup, devSection, switchRow } from '@joyfield/shared/settings';
 import { MOLES, MOLE_ORDER } from '../game/moles';
 import type { Goal } from '../game/scoring';
 import { SEGMENTS } from '../game/spawner';
@@ -38,10 +39,6 @@ function fillThumbs(root: HTMLElement): void {
     mole.classList.add('up');
     t.querySelector('.slot')!.append(mole);
   });
-}
-
-function pressed(on: boolean): string {
-  return `aria-pressed="${on}"`;
 }
 
 /* ---------- 시작 화면 ---------- */
@@ -201,7 +198,7 @@ export function startScreen(opts: StartOptions): HTMLElement {
 
   const showSettings = (reopen?: string) => openModal(el, settingsPanel(opts), t('settings.title'), reopen);
   el.querySelector('.settings-btn')!.addEventListener('click', () => showSettings());
-  if (opts.settings) queueMicrotask(() => showSettings(opts.settingsFocus ?? (opts.settings === 'reset' ? '[data-reset]' : '[aria-pressed="true"]')));
+  if (opts.settings) queueMicrotask(() => showSettings(opts.settingsFocus ?? (opts.settings === 'reset' ? '[data-reset]' : '[aria-checked="true"]')));
   return el;
 }
 
@@ -334,14 +331,6 @@ const TOGGLE_ICONS: Record<Toggle, [on: string, off: string]> = {
   vibrate: [ICONS.vibrateOn, ICONS.vibrateOff],
 };
 
-function toggleInner(key: Toggle, on: boolean): string {
-  return `${TOGGLE_ICONS[key][on ? 0 : 1]}<span class="label">${t(`${key}.${on ? 'on' : 'off'}`)}</span>`;
-}
-
-function toggleChip(key: Toggle, on: boolean): string {
-  return `<button class="chip" data-toggle="${key}" ${pressed(on)}>${toggleInner(key, on)}</button>`;
-}
-
 function settingsPanel(opts: StartOptions): HTMLElement {
   const { save } = opts;
   const lang = getLang();
@@ -352,34 +341,31 @@ function settingsPanel(opts: StartOptions): HTMLElement {
       ${
         // 개발자 모드: 확인 도구(도감 모두 열기)와 출시 화면 단추. 테스트할 때 바로 누르도록 설정 창 맨 위에 둔다(기준서 11.5)
         !__JOYFIELD_PROD__ && Joyfield.devMode()
-          ? `<section class="dev-section"><h3>TEST</h3>${Joyfield.devJump() ? `<p class="dev-note">${t('test.dexAll')}</p>` : ''}<button type="button" class="dev-toggle" data-release aria-pressed="${Joyfield.releaseView()}">${Joyfield.releaseView() ? t('test.devView') : t('test.releaseView')}</button></section>`
+          ? devSection({
+              note: Joyfield.devJump() ? t('test.dexAll') : undefined,
+              release: { on: Joyfield.releaseView(), label: Joyfield.releaseView() ? t('test.devView') : t('test.releaseView') },
+            })
           : ''
       }
       <div class="settings-grid">
         <section>
           <h3>${t('theme.label')}</h3>
-          <div class="seg" role="group">
-            ${THEMES.map((th) => `<button data-theme="${th}" ${pressed(save.theme === th)} title="${t(`theme.${th}`)}">${THEME_ICONS[th]}<span class="label">${t(`theme.${th}`)}</span></button>`).join('')}
-          </div>
+          ${choiceGroup('theme', THEMES.map((th) => ({ value: th, label: t(`theme.${th}`), icon: THEME_ICONS[th] })), save.theme, { label: t('theme.label') })}
         </section>
         <section>
           <h3>${t('lang.label')}</h3>
-          <div class="seg" role="group">
-            ${LANGS.map((l) => `<button data-lang="${l}" ${pressed(l === lang)}>${LANG_LABEL[l]}</button>`).join('')}
-          </div>
+          ${choiceGroup('lang', LANGS.map((l) => ({ value: l, label: LANG_LABEL[l], lang: l })), lang, { label: t('lang.label') })}
         </section>
         <section class="skin-section">
           <h3>${t('skin.label')}</h3>
-          <div class="skins" role="group">
-            ${SKIN_SETTINGS.map((s) => `<button data-skin="${s}" ${pressed(save.skin === s)} title="${t(`skin.${s}`)}" aria-label="${t(`skin.${s}`)}">${SKIN_ICONS[s]}<span class="label">${t(`skin.${s}`)}</span></button>`).join('')}
-          </div>
+          ${choiceGroup('skin', SKIN_SETTINGS.map((s) => ({ value: s, label: t(`skin.${s}`), icon: SKIN_ICONS[s], title: t(`skin.${s}`) })), save.skin, { cls: 'skins', label: t('skin.label') })}
           <p class="note">${t('skin.autoHint', { skin: t(`skin.${opts.todaySkin}`) })}</p>
         </section>
         <section class="toggle-section">
           <h3>${t('settings.feedback')}</h3>
-          <div class="toggles">
-            ${toggleChip('sound', save.sound)}
-            ${Joyfield.canVibrate() ? toggleChip('vibrate', save.vibrate) : '' /* 진동을 못 하는 기기(아이폰 등)에는 숨긴다 */}
+          <div class="switches">
+            ${switchRow('sound', save.sound, t('sound.label'), TOGGLE_ICONS.sound)}
+            ${Joyfield.canVibrate() ? switchRow('vibrate', save.vibrate, t('vibrate.label'), TOGGLE_ICONS.vibrate) : '' /* 진동을 못 하는 기기(아이폰 등)에는 숨긴다 */}
           </div>
         </section>
         <section class="reset-section">
@@ -398,36 +384,15 @@ function settingsPanel(opts: StartOptions): HTMLElement {
       <p class="app-version">${t('settings.version')} v${__APP_VERSION__}</p>
       <p class="app-copyright">${Joyfield.COPYRIGHT}</p>    </div>`);
 
-  const select = (attr: string, value: string) =>
-    el.querySelectorAll<HTMLButtonElement>(`[data-${attr}]`).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset[attr] === value)));
-
-  el.querySelectorAll<HTMLButtonElement>('[data-theme]').forEach((b) =>
-    b.addEventListener('click', () => {
-      select('theme', b.dataset.theme!);
-      opts.onTheme(b.dataset.theme as Theme);
-    }),
-  );
-  el.querySelectorAll<HTMLButtonElement>('[data-skin]').forEach((b) =>
-    b.addEventListener('click', () => {
-      select('skin', b.dataset.skin!);
-      opts.onSkin(b.dataset.skin as SkinSetting);
-    }),
-  );
-  el.querySelectorAll<HTMLButtonElement>('[data-lang]').forEach((b) =>
-    b.addEventListener('click', () => {
-      if (b.dataset.lang !== lang) opts.onLang(b.dataset.lang as Lang);
-    }),
-  );
-  // 소리·진동은 화면을 다시 그리지 않고 버튼만 바꾼다
-  el.querySelectorAll<HTMLButtonElement>('[data-toggle]').forEach((b) =>
-    b.addEventListener('click', () => {
-      const key = b.dataset.toggle as Toggle;
-      opts.onToggle(key);
-      b.setAttribute('aria-pressed', String(save[key]));
-      b.innerHTML = toggleInner(key, save[key]);
-    }),
-  );
-
+  // 하나 고르기·스위치(공통 @joyfield/shared/settings): 고른 표시·스위치 아이콘은 공통 조각이 바꾸고 저장·적용은 main 이 한다
+  bindSettings(el, {
+    onChoice(name, value) {
+      if (name === 'theme') opts.onTheme(value as Theme);
+      else if (name === 'skin') opts.onSkin(value as SkinSetting);
+      else opts.onLang(value as Lang);
+    },
+    onSwitch: (name) => opts.onToggle(name as Toggle),
+  });
   const resetBtn = el.querySelector<HTMLButtonElement>('[data-reset]')!;
   const confirm = el.querySelector<HTMLElement>('.confirm')!;
   resetBtn.addEventListener('click', () => {

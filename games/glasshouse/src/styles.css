@@ -930,14 +930,12 @@ h2 .icon-pic {
 
 /* 설정 */
 .seg,
-.skins,
-.toggles {
+.skins {
   display: flex;
   gap: 8px;
 }
 .seg > button,
-.skins > button,
-.chip {
+.skins > button {
   flex: 1;
   display: inline-flex;
   flex-direction: column;
@@ -952,17 +950,27 @@ h2 .icon-pic {
   font-size: 13px;
   cursor: pointer;
 }
-.seg > button[aria-pressed='true'],
-.skins > button[aria-pressed='true'],
-.chip[aria-pressed='true'] {
+.seg > button:is([aria-pressed='true'], [aria-checked='true']),
+.skins > button[aria-checked='true'] {
   border-color: var(--leaf);
   background: color-mix(in srgb, var(--leaf) 14%, transparent);
   color: var(--leaf-ink);
   font-weight: 700;
 }
-.chip {
-  flex-direction: row;
-  gap: 6px;
+/* 소리·진동: 공통 스위치 줄(@joyfield/shared/settings.css), 색·테두리만 이 게임 것 */
+.switches {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  --jp-switch-on: var(--leaf);
+  --jp-switch-off: var(--line);
+  --jp-switch-focus: var(--leaf-ink);
+}
+.switches .jp-switch {
+  padding: 4px 8px 4px 12px;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  font-size: 15px;
 }
 .skin-dot {
   width: 22px;

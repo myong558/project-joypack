@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "author": "Myong Bum Soo",
   "license": "UNLICENSED",
-  "description": "조이필드 공통 모듈: 공통 설정, 랭킹 이름 규칙, 서비스 워커 등록, 게임 캐시 확인, 진동, 뒤로 가기 단계, 공통 상단 메뉴(topbar.css), 효과음 목록 재생기(sfx.js), 게임 공통 화면 조각(ui.ts: 대화상자·랭킹 창·등록 카드), 랭킹 저장(rank.ts), 결과 이미지(capture.ts), 허브 연결 메타(meta.ts)",
+  "description": "조이필드 공통 모듈: 공통 설정, 랭킹 이름 규칙, 서비스 워커 등록, 게임 캐시 확인, 진동, 뒤로 가기 단계, 공통 상단 메뉴(topbar.css), 효과음 목록 재생기(sfx.js), 설정 창 조각(settings.ts·settings.css: 하나 고르기·스위치·TEST 칸), 게임 공통 화면 조각(ui.ts: 대화상자·랭킹 창·등록 카드), 랭킹 저장(rank.ts), 결과 이미지(capture.ts), 허브 연결 메타(meta.ts)",
   "main": "joyfield.js",
   "types": "joyfield.d.ts",
   "exports": {
@@ -20,7 +20,9 @@
     "./ui": "./ui.ts",
     "./rank": "./rank.ts",
     "./capture": "./capture.ts",
-    "./meta": "./meta.ts"
+    "./meta": "./meta.ts",
+    "./settings": "./settings.ts",
+    "./settings.css": "./settings.css"
   },
   "scripts": {
     "test": "node --test tests/*.test.mjs"

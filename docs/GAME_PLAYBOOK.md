@@ -4,7 +4,7 @@
 
 이 문서는 게임이 하나 늘 때마다 고칩니다. 새 게임까지 포함한 모든 게임을 다시 보고, 공통 요소는 1·2장과 8장에, 정체성(게임에 맞게 고르는 톤·색·캐릭터 등)은 3장 등록부에 반영합니다(9장 "문서 키우기").
 
-- 문서 버전: **1.79** (2026-11-05, 업다운 v1.22.2 · 두더지잡기 v1.3.2 · 타임 투 플립 v1.8.2 · 온실정원 v0.17.2 · 허브 v1.42.2 기준)
+- 문서 버전: **1.80** (2026-11-05, 업다운 v1.23.0 · 두더지잡기 v1.4.0 · 타임 투 플립 v1.9.0 · 온실정원 v0.18.0 · 허브 v1.43.0 기준)
 - **조이필드와 모든 게임은 상업적으로 씁니다(광고, 구글 플레이·앱스토어).** 10장 "상업 배포·마켓 기준"은 모든 단계에서 지키는 필수 기준입니다.
 - 저장소 구조·배포·서비스 워커 같은 플랫폼 설명은 루트 [README.md](../README.md)에 있습니다. 이 문서는 "게임 하나를 어떻게 만드는가"만 다룹니다.
 
@@ -57,7 +57,7 @@
 | 경로 | 모두 **상대 경로**. `/` 로 시작하는 절대 경로 금지(하위 경로 배포에서 깨짐) |
 | 배포 주소 | `https://pocketgamelab.com/joyfield/games/<id>/` (개발 사이트 `https://dev.pocketgamelab.com/joyfield/games/<id>/`) |
 | 서비스 워커·manifest | 게임이 만들지 않음. `<link rel="manifest" href="../../manifest.webmanifest">` 와 `Joyfield.registerSW({ root: '../../', game: '<id>' })` |
-| 공통 모듈 | 모든 게임이 Vite + TypeScript(업다운도 v1.21.0부터). `import '@joyfield/shared'`(전역 `Joyfield`)를 맨 먼저, 화면 조각·랭킹·결과 이미지·허브 메타는 `@joyfield/shared/ui`·`/rank`·`/capture`·`/meta`(1.2) |
+| 공통 모듈 | 모든 게임이 Vite + TypeScript(업다운도 v1.21.0부터). `import '@joyfield/shared'`(전역 `Joyfield`)를 맨 먼저, 화면 조각·설정 창 조각·랭킹·결과 이미지·허브 메타는 `@joyfield/shared/ui`·`/settings`(+ `settings.css`)·`/rank`·`/capture`·`/meta`(1.2·1.4) |
 | og 태그 | `og:url`·`og:image` 는 위 배포 주소 기준 절대 주소, 링크 미리보기 이미지 1200×630 `og-image.png`(캐시 제외) |
 | `apple-mobile-web-app-title` | `조이필드` (설치하면 조이필드 앱 하나) |
 
@@ -128,9 +128,19 @@
 | 1 | 컬러 모드 | 기기 설정 / 라이트 / 다크. 기본은 기기 설정 |
 | 2 | 언어 | 한국어 / English. 저장값 없으면 **기기(휴대폰·PC) 설정 언어**: 한국어면 한국어, 그 밖의 언어는 모두 영어. `Joyfield.deviceLang()` 을 씀(조이필드·모든 게임 같은 규칙) |
 | 3 | 스킨 | **게임마다 고유한 스킨 묶음**(3장). 기본은 "자동": 공용 `Joyfield.dailyPick(<게임 id>, 스킨 수, 날짜)` 로 고른다(날마다 무작위, 같은 날은 모두 같은 스킨, **이틀 연속 같은 스킨 없음**, 스킨 수만큼의 날 안에 모든 스킨이 한 번씩). 조이필드 오늘의 톤도 같은 규칙(`hub`). 첫 화면 깜빡임 방지 스크립트에 복사본이 있으면 `/* dailyPick: begin … end */` 를 글자 그대로 두고 `packages/shared/tests` 가 같은지 검사한다 |
-| 4 | 소리·진동 | 효과음 켜기/끄기, 진동 켜기/끄기. **진동을 지원하지 않는 기기(아이폰 등)에는 진동 항목을 숨김.** 화면 흔들림은 설정 항목이 아님(1.7) |
+| 4 | 소리·진동 | 소리 켜기/끄기, 진동 켜기/끄기(이름 줄 + 스위치, 아래 "단추 짜임"). **진동을 지원하지 않는 기기(아이폰 등)에는 진동 항목을 숨김.** 화면 흔들림은 설정 항목이 아님(1.7) |
 | 5 | 내 기록 지우기 | 이 기기의 최고 기록·수집 기록만. **온라인 랭킹·순위표 사본·설정은 남김.** 확인 문구에 "온라인 랭킹은 그대로" 명시 |
 | 6 | 버전 | 맨 아래 `버전 vX.Y.Z`(`package.json` version). Vite 게임은 `define` 의 `__APP_VERSION__`, 빌드 없는 게임은 코드에 `'__APP_VERSION__'` 을 두면 `scripts/build.mjs` 가 채움. 캐시 이름 등 다른 값으로 버전을 짐작하지 않음. 바로 밑에 작은 글씨로 **저작권 표기 `Joyfield.COPYRIGHT`**(© 2026 Myong Bum Soo. All rights reserved.)를 그대로 넣음(문구를 게임에 직접 쓰지 않음). **모양은 조이필드·모든 게임 같게(색만 앱 것)**: 클래스 `.app-version`·`.app-copyright`, 글꼴 Jua(`'Jua', system-ui, sans-serif`, Jua 에 없는 ©는 기호 글꼴(`=+jua`) 또는 `font-family` 다음 칸의 게임 글꼴로 채움, 시스템 글꼴로 빠지면 `pnpm check:fonts` 가 실패), 굵기 400, 줄 높이 1.4, 가운데 정렬, 버전 13px·저작권 11px, 마지막 칸 아래 → 버전 **20px**, 버전 → 저작권 **4px**(설정 창이 flex·grid `gap` 을 쓰면 그만큼 빼서 실제 간격을 맞춤). Jua 를 몇 글자만 넣는 게임은 "버전" 글자도 서브셋에 |
+
+**단추 짜임(조이필드·모든 게임 같게, 2026-11-05 사용자 결정, 문서 1.80)** — 모양(색·테두리·배치)은 게임 것이어도 **단추 종류·짜임은 같게** 해 어느 게임에서나 설정을 한눈에 알아보게 합니다. 공통 조각 `@joyfield/shared/settings` 로 만들고 게임 안에 다시 만들지 않습니다(1.2). 불러오기: `import '@joyfield/shared/settings.css'`(topbar.css 다음, 게임 styles.css 앞).
+
+| 칸 | 단추 종류 | 공통 조각 | 게임이 정하는 것 |
+| --- | --- | --- | --- |
+| 컬러 모드·언어·스킨 (하나 고르기) | `role="radiogroup"` 안 `<button role="radio" aria-checked>`. 고른 표시는 `[aria-checked='true']` 한 가지 | `choiceGroup(이름, 고를 것들, 지금 값, { cls, itemCls, label })` | 묶음 모양(`seg` 세그먼트 · `skins` 아이콘 격자 · `chip-row` 칩), 아이콘 |
+| 소리·진동 (켜기/끄기) | **이름 줄 + 스위치**(`<label class="jp-switch">` 안 `<input type="checkbox" role="switch">`). 줄 어디를 눌러도 바뀜. 이름은 "소리"·"진동"(상태 글자 "켜짐/꺼짐" 을 이름에 붙이지 않음, 상태는 스위치가 보임) | `switchRow(이름, 켜짐, 이름표, [켜짐 아이콘, 꺼짐 아이콘])` | 줄 테두리·바탕, 스위치 색 변수 `--jp-switch-on`·`--jp-switch-off`·`--jp-switch-focus` |
+| 개발자 모드 TEST | 맨 위 칸, 제목 `TEST` → 안내 한 줄(`.note.dev-note`) → 게임 도구 → "출시 화면" 단추(`.dev-toggle`). 안내·도구·단추가 하나도 없으면 칸을 만들지 않음(빈 칸 금지, 업다운) | `devSection({ note, tools, release, cls })`, 꼭 `!__JOYFIELD_PROD__ && Joyfield.devMode() ? … : ''` 로 감쌈(11.5) | 도구(판 바로가기 숫자·도감 모두 열기 안내·허브 톤 미리보기) |
+
+동작은 `bindSettings(창, { onChoice(이름, 값), onSwitch(이름, 켜짐) })` 하나로 붙입니다(고른 표시·스위치 아이콘은 공통 조각이 바꾸고, 저장·적용은 게임). 언어를 바꿔 창을 다시 그릴 때 초점은 `[data-choice="lang"] [data-value="<언어>"]`. **예외(게임 특성·단추 수)**: 업다운 "내 기록 지우기" 범위 칩(전체·1~N), 허브 "게임 데이터" 목록·설치·공유 칸, 두더지잡기 두 칸 배치는 그대로 두되 안의 단추 종류는 위 표를 따릅니다.
 
 **단추·설정 이름표(모든 게임 같은 말, 2026-11-05 사용자 결정)** — 같은 일을 하는 단추·칸은 게임마다 다른 말을 쓰지 않습니다. 새 게임도 이 말 그대로.
 
@@ -590,7 +600,7 @@ games/<id>/
 | 서비스 워커·오프라인 | `Joyfield.registerSW` | `Joyfield.registerSW` | `Joyfield.registerSW` | `Joyfield.registerSW` | ✅ 공통 모듈 |
 | 공유 링크·설치 안내 띠 | `shareUrl`·`inviteBar` | `shareUrl`·`inviteBar` | `shareUrl`·`inviteBar` | `shareUrl`·`inviteBar` | ✅ 공통 모듈 |
 | 위 메뉴(조이필드 목록·언어·랭킹·설정, 자리 포함) | `.jp-top-btn` + `Joyfield.topIcon`(아이콘은 `data-top-icon` 으로 시작할 때 넣음) | `.jp-top-btn` + `Joyfield.topIcon`(크기는 `--u` 에 묶음) | `.jp-top-btn` + `Joyfield.topIcon`(크기는 공통 기본값) | `.jp-top-btn` + `Joyfield.topIcon`(시작 화면, 게임 중은 자체 HUD) | ✅ 공통 모듈(`topbar.css`, 허브도 같이 씀, 1.8) |
-| 설정 창 | `panels.ts` 모달, 항목마다 한 줄(v1.21.0) | `screens.ts` 모달, 항목마다 한 줄 | `screens.ts` 모달, 항목마다 한 줄 | `screens.ts` 모달, 항목마다 한 줄 | 🟡 게임마다(순서·이름은 1.4로 통일, 내 기록 지우기는 맨 아래). 창 틀은 ✅ 공통 `openModal` |
+| 설정 창 | `panels.ts` 모달, 칩 모양 | `screens.ts` 모달, 세그먼트·두 칸 배치 | `screens.ts` 모달, 세그먼트 | `screens.ts` 모달, 세그먼트 | ✅ 단추 짜임 공통(`@joyfield/shared/settings`: 하나 고르기·스위치·TEST 칸, 1.4, 허브도), 창 틀 공통 `openModal`. 모양 css·내 기록 지우기는 게임마다 |
 | 설정 맨 아래 버전 | Vite `define` `__APP_VERSION__` | Vite `define` `__APP_VERSION__` | Vite `define` `__APP_VERSION__` | Vite `define` `__APP_VERSION__` | ✅ 같은 자리 표시 이름(1.4) |
 | 결과 화면 0.6초 누름 막기 | `#screen-result.locked` | `.result.locked` + 키 무시 | `.result.locked` + 키 무시 | `.result.locked` + 키 무시 | ✅ 동작 통일(1.3) |
 | 기록 공유하기(결과 화면) | `Joyfield.shareResult` | `Joyfield.shareResult` | `Joyfield.shareResult` | `Joyfield.shareResult` | ✅ 공통 모듈(이미지 + 조이필드 주소 한 번에) |
@@ -622,7 +632,7 @@ games/<id>/
 
 1. 랭킹 순위표 사본 저장: 게임마다 저장 키(`<id>:v1` 안 `rankings`, 업다운 `updown.boards`)가 달라 코드가 따로다. 다섯 번째 게임에서 같은 모양이 또 나오면 `@joyfield/shared/rank` 에 "사본" 도우미(저장 읽기·쓰기 함수만 게임이 넘김)를 만든다. 기존 저장 키는 바꾸지 않는다(사용자 기록 보존). 결과 화면 등록 카드를 순위표에 맞춰 다시 그리는 `showEntry`(기기 사본으로 먼저 → 온라인 순위표를 받으면 자리 다시, 치던 이름 유지)도 네 게임이 거의 같다 → 다섯 번째 게임 때 공통 `resultRankEntry` 로.
 2. 도감 짜임 전체(큰 카드 + 묶음별 작은 카드 + 설명 칸 높이 고정): 뒤집기만 공통(`cardFlipper`)이고 짜임·설명 채우기는 타임 투 플립·온실정원이 따로다. 도감이 있는 세 번째 게임이 생기면 `openDex` 틀을 공통으로.
-3. 설정 창 내용: 순서·이름은 같지만(1.4) 칩 모양이 게임마다 달라 각자 만든다. 항목 묶음(컬러 모드·언어·스킨·소리·진동·내 기록 지우기·버전)을 공통 함수로 만들지는 게임이 더 늘 때 판단.
+3. 설정 창 내용: 단추 짜임은 공통 조각으로 맞췄다(1.4, 문서 1.80). 칸 묶음 전체(제목·순서·내 기록 지우기·버전)를 한 함수로 만들지는 게임이 더 늘 때 판단(내 기록 지우기가 게임마다 달라서).
 
 ---
 
@@ -643,6 +653,7 @@ games/<id>/
 
 | 문서 버전 | 날짜 | 내용 |
 | --- | --- | --- |
+| 1.80 | 2026-11-05 | 설정 창 단추 짜임 통일(1.4 "단추 짜임", 공통 `@joyfield/shared/settings` + `settings.css`): 하나 고르기는 `radiogroup`·`aria-checked`, 소리·진동은 이름 줄 + 스위치(칩·아이콘만 칩 없앰), 개발자 TEST 칸은 `devSection`(제목 → 안내 → 도구 → 출시 화면). 허브 v1.43.0 · 업다운 v1.23.0 · 두더지잡기 v1.4.0 · 타임 투 플립 v1.9.0 · 온실정원 v0.18.0 |
 | 1.79 | 2026-11-05 | 나갈 때 확인 창 간격·버튼 두께 공통(1.2 표, 창 안쪽 24·20·20px·버튼 48px), 웹 글꼴 실제 적용 점검 `pnpm check:fonts`(7.1.1, 7장 검사 목록): 위 메뉴 오프라인 안내 가운뎃점은 css 점, 타임 투 플립 위 메뉴 Jua 서브셋에 안내 글자, 타임 투 플립·온실정원 © 를 게임 글꼴로(1.4 6번) |
 | 1.78 | 2026-11-05 | 랭킹 등록 대기 없앰(1.6, 허브 v1.42.0 · 업다운 v1.22.0 · 두더지잡기 v1.3.0 · 타임 투 플립 v1.8.0 · 온실정원 v0.17.0): 결과 화면에서만 등록, 떠날 때 공통 `leaveRankEntry` 확인 창, 등록 실패는 그 자리에서 다시, 오프라인 안내 두 곳(위 메뉴 `Joyfield.offlineMark`·결과 카드 `offline` 상태). 위 메뉴 강조(`.is-on`·`.jp-top-dot`)·`setRankPending` 삭제, 위 메뉴 버튼 `title` 통일. 1.2 표·1.8·5.1·6장·7장·8장·대기 목록 갱신 |
 | 1.77 | 2026-11-05 | 1.3 일시정지 레이어: 공통 `pauseLayer`, 화면 전체 불투명(치팅 방지), 단추 순서·안내 한 줄, 배경은 게임 고유 모습, 3·2·1·끝나기 직전 막기는 하지 않음. 1.2 표 추가 |
@@ -877,7 +888,7 @@ games/<id>/
 - 도감·수집 전부 열기 등 나머지 확인 기능은 `devTools()`(미리보기 배포일 때만, 정식 공개하면 사라짐). 단, 이미 정식 공개한 게임에 나중에 확인 도구를 더할 때는 `devJump()` 로 둡니다(예: 두더지잡기 도감 모두 열기, v1.0.5).
 
 - **"TEST 판 바로 시작"**(판·단계 골라 바로 시작) 또는 **모든 판 열기**(판·단계가 있는 게임), 도감·수집 **전부 열기**, **출시 화면** 보기 단추(확인 도구를 숨겨 실제 화면 확인)
-- **자리: 설정 창 맨 위 "TEST" 칸**(제목 바로 아래, 테마보다 위). 판 바로가기 단추와 출시 화면 단추를 이 칸에 함께 둔다. 시작 화면 로고 위에 띄우면 작은 화면에서 위 메뉴·로고와 겹치고, 설정 맨 아래에 두면 테스트할 때마다 스크롤해야 한다(본보기: 타임 투 플립·온실정원 `settingsPanel`)
+- **자리: 설정 창 맨 위 "TEST" 칸**(제목 바로 아래, 테마보다 위). 판 바로가기 단추와 출시 화면 단추를 이 칸에 함께 둔다. 시작 화면 로고 위에 띄우면 작은 화면에서 위 메뉴·로고와 겹치고, 설정 맨 아래에 두면 테스트할 때마다 스크롤해야 한다(본보기: 타임 투 플립·온실정원 `settingsPanel`). 짜임은 공통 `devSection`(1.4 "단추 짜임")
 - **운영 빌드에서는 통째로 빠지게(필수, 2026-11-05):** 모든 개발 전용 판단 앞에 빌드 값 `!__JOYFIELD_PROD__ && …` 를 붙입니다(예: `const STAGE_JUMP = () => !__JOYFIELD_PROD__ && Joyfield.devJump();`, TEST 칸 `${!__JOYFIELD_PROD__ && Joyfield.devMode() ? … : ''}`, 단추 연결 `if (!__JOYFIELD_PROD__) …`). 운영 빌드(`main`)에서 빌드 도구가 그 부분을 지워 마켓 앱에 개발 기능 코드가 들어가지 않습니다(숨은 기능 심사 대비). 개발 전용 문구는 `'test.jump': __JOYFIELD_PROD__ ? '' : '…'`, 개발 전용 큰 데이터·워커는 개발 빌드에서만 동적으로 불러옵니다(본보기: 온실정원 풀이 보기 `solve-start.ts`). 선언은 각 게임 `src/env.d.ts`, 값은 `vite.config` `define`. `scripts/build.mjs` 가 운영 빌드에 개발 전용 표시(`dev-section`·`dev-toggle`·`stage-jump`·개발 문구)가 남으면 실패시키므로 TEST 칸은 이 이름을 그대로 씁니다.
 
 ### 11.6 첫 버전 자체 검수 (보여 주기 전에 모두 "예")

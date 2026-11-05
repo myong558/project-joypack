@@ -1,12 +1,14 @@
 // 공통 모듈을 맨 먼저 불러, 이름 바꾸기 전 저장 키를 다른 코드가 읽기 전에 옮긴다
 import '@joyfield/shared';
 import '@joyfield/shared/topbar.css';
+import '@joyfield/shared/settings.css';
 import './styles.css';
 import { GAMES, byNewest, iconUrl, isNew, isPublic, isScheduled, patternOf, type GameMeta } from './games';
 import { LANG_LABEL, LANGS, formatNumber, getLang, t, type MessageKey } from './i18n';
 import { FULL, TOP, cachedBoard, hasRanking, loadBoard, type Row } from './rankings';
 import { externalOpenUrl, installState, isIos, manualGuide, onInstallChange, playStoreUrl, promptInstall } from './install';
 import { previewOn } from './preview';
+import { bindSettings, choiceGroup, devSection, switchRow } from '@joyfield/shared/settings';
 import { bestRecord, canClearRecords, clearRecords } from './records';
 import { THEMES, applySettings, applyTheme, canVibrate, loadSettings, migrateLegacy, saveSetting, watchSystemTheme } from './settings';
 import { SKINS, previewSkin, setPreviewSkin, todaySkin, type Skin } from './skins';
@@ -771,14 +773,9 @@ async function showBoard(section: HTMLElement, game: GameMeta, board: string): P
 
 // ---------- 설정 ----------
 
+// 하나 고르기·스위치·TEST 칸은 조이필드 공통 조각(@joyfield/shared/settings, 네 게임과 같은 짜임). 모양은 styles.css .seg · .jp-switch
 function seg<T extends string>(name: string, options: T[], current: T, label: (v: T) => string): string {
-  return `<div class="seg" role="radiogroup" data-seg="${name}">${options
-    .map((v) => `<button role="radio" data-value="${v}" aria-checked="${v === current}">${lbl(esc(label(v)))}</button>`)
-    .join('')}</div>`;
-}
-
-function toggle(name: string, on: boolean, label: string): string {
-  return `<label class="switch"><span>${label}</span><input type="checkbox" role="switch" data-toggle="${name}" ${on ? 'checked' : ''} /><i aria-hidden="true"></i></label>`;
+  return choiceGroup(name, options.map((v) => ({ value: v, label: lbl(esc(label(v))) })), current);
 }
 
 // 설정 "게임 데이터"(내 기록·오프라인 저장): 게임이 늘면 길어지고 자주 쓰지 않으므로 접어 두고 접힌 줄에 이 요약을 보인다.
@@ -791,11 +788,11 @@ async function openSettings(): Promise<void> {
     ${
       // 톤 미리보기는 개발자 모드에서만. 평소에는 날마다 정해진 톤(index.html)이 자동으로 고정된다
       (!__JOYFIELD_PROD__ && previewOn())
-        ? `<section class="set-group dev">
-      <h3>${t('settings.skinDev')}</h3>
-      ${seg<Skin | 'auto'>('skin', ['auto', ...SKINS], previewSkin(), (v) => (v === 'auto' ? t('skin.auto') : skinName(v)))}
-      <p class="hint">${t('settings.skinDevHint', { name: skinName(todaySkin()) })}</p>
-    </section>`
+        ? devSection({
+            cls: 'set-group',
+            note: t('settings.skinDevHint', { name: skinName(todaySkin()) }),
+            tools: seg<Skin | 'auto'>('skin', ['auto', ...SKINS], previewSkin(), (v) => (v === 'auto' ? t('skin.auto') : skinName(v))),
+          })
         : ''
     }
     <section class="set-group install" data-install-section></section>
@@ -817,8 +814,8 @@ async function openSettings(): Promise<void> {
     </section>
     <section class="set-group">
       <h3>${t('settings.feedback')}</h3>
-      ${toggle('sound', settings.sound, t('settings.sound'))}
-      ${canVibrate ? toggle('vibrate', settings.vibrate, t('settings.vibrate')) : ''}
+      ${switchRow('sound', settings.sound, t('settings.sound'))}
+      ${canVibrate ? switchRow('vibrate', settings.vibrate, t('settings.vibrate')) : ''}
     </section>
     <section class="set-group">
       <h3><label for="initials">${t('settings.initials')}</label></h3>
@@ -854,30 +851,24 @@ async function openSettings(): Promise<void> {
     if (!(await shareJoyfield())) dialog.querySelector<HTMLElement>('[data-share-done]')!.hidden = false;
   });
 
-  dialog.querySelectorAll<HTMLElement>('[data-seg]').forEach((group) =>
-    group.querySelectorAll<HTMLButtonElement>('button').forEach((b) =>
-      b.addEventListener('click', () => {
-        const value = b.dataset.value!;
-        group.querySelectorAll('button').forEach((x) => x.setAttribute('aria-checked', String(x === b)));
-        if (group.dataset.seg === 'theme') {
-          saveSetting(settings, 'theme', value as typeof settings.theme);
-          applyTheme(settings.theme);
-        } else if (!__JOYFIELD_PROD__ && group.dataset.seg === 'skin') {
-          // 개발용 임시: 톤 미리보기(설정 창 뒤 화면에 바로 보인다)
-          setPreviewSkin(value as Skin | 'auto', settings.theme);
-        } else {
-          // 언어는 화면 문구가 모두 바뀌므로 설정 창을 새 언어로 다시 연다
-          saveSetting(settings, 'lang', value as typeof settings.lang);
-          applySettings(settings);
-          dialog.close();
-          void openSettings();
-        }
-      }),
-    ),
-  );
-  dialog.querySelectorAll<HTMLInputElement>('[data-toggle]').forEach((input) =>
-    input.addEventListener('change', () => saveSetting(settings, input.dataset.toggle as 'sound' | 'vibrate', input.checked)),
-  );
+  bindSettings(dialog, {
+    onChoice(name, value) {
+      if (name === 'theme') {
+        saveSetting(settings, 'theme', value as typeof settings.theme);
+        applyTheme(settings.theme);
+      } else if (!__JOYFIELD_PROD__ && name === 'skin') {
+        // 개발용 임시: 톤 미리보기(설정 창 뒤 화면에 바로 보인다)
+        setPreviewSkin(value as Skin | 'auto', settings.theme);
+      } else {
+        // 언어는 화면 문구가 모두 바뀌므로 설정 창을 새 언어로 다시 연다
+        saveSetting(settings, 'lang', value as typeof settings.lang);
+        applySettings(settings);
+        dialog.close();
+        void openSettings();
+      }
+    },
+    onSwitch: (name, on) => saveSetting(settings, name as 'sound' | 'vibrate', on),
+  });
   const initials = dialog.querySelector<HTMLInputElement>('#initials')!;
   // 영문 대문자 5자까지, 휴대폰은 영문 자판으로(조이필드 공통). 바뀔 때마다 바로 저장
   Joyfield.initialsInput(initials, (clean) => {

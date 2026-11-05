@@ -1424,54 +1424,11 @@ a.card:active .card-play {
   box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
 }
 
-.switch {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 0;
-  cursor: pointer;
-}
-
-.switch input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.switch i {
-  position: relative;
-  width: 48px;
-  height: 28px;
-  border-radius: 999px;
-  background: var(--line);
-  transition: background 160ms ease;
-}
-
-.switch i::after {
-  content: '';
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 0.25);
-  transition: transform 160ms ease;
-}
-
-.switch input:checked + i {
-  background: var(--brand);
-}
-
-.switch input:checked + i::after {
-  transform: translateX(20px);
-}
-
-.switch input:focus-visible + i {
-  outline: 3px solid var(--brand);
-  outline-offset: 2px;
+/* 소리·진동: 공통 스위치 줄(@joyfield/shared/settings.css), 색만 조이필드 것 */
+.set-group .jp-switch {
+  --jp-switch-on: var(--brand);
+  --jp-switch-off: var(--line);
+  --jp-switch-focus: var(--brand);
 }
 
 .initials {
@@ -1492,6 +1449,13 @@ a.card:active .card-play {
 
 .hint {
   margin: 8px 2px 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* 개발자 모드 TEST 칸(공통 devSection): 안내 → 도구 순서라 안내 아래에 여백 */
+.dev-section .dev-note {
+  margin: 0 2px 10px;
   color: var(--muted);
   font-size: 13px;
 }

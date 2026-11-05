@@ -281,7 +281,6 @@ p {
 }
 
 .btn,
-.chip,
 .pause-btn {
   font: inherit;
   color: inherit;
@@ -424,7 +423,6 @@ p {
 }
 
 .btn:focus-visible,
-.chip:focus-visible,
 .pause-btn:focus-visible,
 .hole:focus-visible {
   outline: 3px solid var(--accent);
@@ -667,23 +665,6 @@ button.dex-item:focus-visible {
 
 .dex-item.locked {
   opacity: 0.55;
-}
-
-.toggles {
-  display: flex;
-  gap: 0.5em;
-  justify-content: center;
-}
-
-.chip {
-  padding: 0.45em 0.8em;
-  font-size: max(18px, 0.85em);
-  border-radius: 999px;
-  white-space: nowrap;
-}
-
-.chip[aria-pressed='false'] {
-  color: var(--muted);
 }
 
 .hint {
@@ -2293,7 +2274,7 @@ button.dex-item:focus-visible {
   cursor: pointer;
 }
 
-.seg button[aria-pressed='true'] {
+.seg button:is([aria-pressed='true'], [aria-checked='true']) {
   background: var(--accent);
   color: var(--accent-fg);
   font-weight: 700;
@@ -2515,7 +2496,7 @@ button.dex-item:focus-visible {
   outline-offset: -3px;
 }
 
-.seg button[aria-pressed='true']:focus-visible {
+.seg button:is([aria-pressed='true'], [aria-checked='true']):focus-visible {
   outline-color: var(--accent-fg);
 }
 
@@ -2588,7 +2569,7 @@ button.dex-item:focus-visible {
   height: 1.6em;
 }
 
-.skins button[aria-pressed='true'] {
+.skins button[aria-checked='true'] {
   border-color: var(--accent);
   background: color-mix(in srgb, var(--accent) 16%, var(--bg));
   font-weight: 700;
@@ -2948,20 +2929,6 @@ button.dex-item:focus-visible {
   opacity: 0.18;
 }
 
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4em;
-}
-
-.chip .icon {
-  color: var(--accent);
-}
-
-.chip[aria-pressed='false'] .icon {
-  color: var(--muted);
-}
-
 .icon-btn .icon {
   width: 1.3em;
   height: 1.3em;
@@ -3119,11 +3086,6 @@ small {
   gap: 0.3em;
 }
 
-.settings .toggles {
-  justify-content: flex-start;
-  flex-wrap: wrap;
-}
-
 .goal,
 .mission-result,
 .detail-desc,
@@ -3175,14 +3137,6 @@ small {
 
   .modal {
     padding: 0.8em;
-  }
-
-  .settings .toggles {
-    flex-wrap: nowrap;
-  }
-
-  .settings .chip {
-    padding: 0.4em 0.6em;
   }
 
   /* NEW 표시는 빨간 점으로 줄인다(글자는 읽어 주기로 남김) */
@@ -3322,30 +3276,40 @@ small {
   display: none;
 }
 
-/* ---------- 설정: 소리·진동 버튼은 줄을 꽉 채운다 ---------- */
-.settings .toggles {
+/* ---------- 설정: 소리·진동 = 공통 스위치 줄(@joyfield/shared/settings.css), 두 줄을 나란히 꽉 채운다 ---------- */
+.settings .switches {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* 두 줄이 들어가면 나란히, 좁으면(작은 휴대폰) 위아래로 */
+  grid-template-columns: repeat(auto-fit, minmax(max(150px, 7.5em), 1fr));
   gap: 0.5em;
+  --jp-switch-on: var(--accent);
+  --jp-switch-off: var(--border);
+  --jp-switch-focus: var(--accent);
 }
 
-.settings .chip {
-  width: 100%;
-  justify-content: center;
-  padding: 0.55em 0.6em;
+.settings .jp-switch {
+  min-width: 0;
+  padding: 0.3em 0.45em 0.3em 0.7em;
+  border: 2px solid var(--border);
   border-radius: 0.8em;
+  background: var(--surface);
   box-shadow: 0 0.2em 0 var(--border);
+  font-size: max(18px, 0.85em);
+  gap: 0.4em;
 }
 
-.settings .chip .icon {
-  width: 1.3em;
-  height: 1.3em;
+.settings .jp-switch-icon {
+  color: var(--accent);
 }
 
-.settings .chip[aria-pressed='true'] {
-  border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 14%, var(--bg));
-  color: var(--fg);
+.settings .jp-switch .jp-switch-icon .icon {
+  width: 1.2em;
+  height: 1.2em;
+}
+
+/* 좁은 칸에서는 스위치를 글자 크기와 상관없이 휴대폰 손가락 크기로 */
+.settings .jp-switch i {
+  font-size: 16px;
 }
 
 @media (orientation: landscape) and (max-height: 404px),
@@ -3367,10 +3331,6 @@ small {
   .settings-grid > .toggle-section {
     grid-column: 1 / -1;
     order: 1;
-  }
-
-  .settings .chip {
-    padding: 0.35em 0.5em;
   }
 
   .modal h2 {
@@ -3575,13 +3535,9 @@ body {
   min-width: 0;
 }
 
-/* 소리·진동은 언제나 한 줄에 둘 */
-.settings .toggles {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.settings .chip {
-  min-width: 0;
+/* 소리·진동: 들어가면 한 줄에 둘, 좁으면 위아래로 */
+.settings .switches {
+  grid-template-columns: repeat(auto-fit, minmax(max(150px, 7.5em), 1fr));
 }
 
 @media (orientation: landscape) {

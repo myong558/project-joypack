@@ -2,6 +2,7 @@
 import '@joyfield/shared';
 import type { VibrationName } from '@joyfield/shared';
 import '@joyfield/shared/topbar.css';
+import '@joyfield/shared/settings.css';
 import './styles.css';
 import { Sound } from './audio';
 import { FLOWER } from './flora';
@@ -127,7 +128,7 @@ function showStart(settings?: 'open' | 'reset', settingsFocus?: string, opening 
         setLang(lang);
         writeSave(save);
         const inSettings = !!document.querySelector('.modal .settings');
-        showStart(inSettings ? 'open' : undefined, inSettings ? `[data-lang="${lang}"]` : undefined);
+        showStart(inSettings ? 'open' : undefined, inSettings ? `[data-choice="lang"] [data-value="${lang}"]` : undefined);
       },
       onTheme(theme) {
         save.theme = theme;

@@ -2,6 +2,7 @@
 import '@joyfield/shared';
 import type { VibrationName } from '@joyfield/shared';
 import '@joyfield/shared/topbar.css';
+import '@joyfield/shared/settings.css';
 import './styles.css';
 import { Sound, type SoundName } from './audio';
 import { Game } from './game/engine';
@@ -119,7 +120,7 @@ function showStart(settings?: 'open' | 'reset', settingsFocus?: string, opening 
         writeSave(save);
         // 글자가 모두 바뀌므로 다시 그리되, 설정 창은 깜빡임 없이 그 자리에 둔다
         const inSettings = !!document.querySelector('.modal .settings');
-        showStart(inSettings ? 'open' : undefined, inSettings ? `[data-lang="${lang}"]` : undefined);
+        showStart(inSettings ? 'open' : undefined, inSettings ? `[data-choice="lang"] [data-value="${lang}"]` : undefined);
       },
       onTheme(theme) {
         save.theme = theme;

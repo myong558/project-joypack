@@ -140,7 +140,7 @@ export function openModal(host: HTMLElement, content: HTMLElement, label: string
     fit();
   }
   document.body.append(backdrop);
-  (content.querySelector<HTMLElement>(opts.reopen || '[aria-pressed="true"]') ?? content.querySelector('button'))?.focus();
+  (content.querySelector<HTMLElement>(opts.reopen || '[aria-pressed="true"], [aria-checked="true"]') ?? content.querySelector('button'))?.focus();
   return close;
 }
 

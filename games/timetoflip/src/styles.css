@@ -213,7 +213,6 @@ button {
 }
 .btn:focus-visible,
 .icon-btn:focus-visible,
-.chip:focus-visible,
 .seg button:focus-visible,
 .skins button:focus-visible {
   outline: 3px solid var(--accent-ink);
@@ -1948,14 +1947,12 @@ h1 .word:nth-child(2) .tc-in {
   border-style: solid;
 }
 .seg,
-.skins,
-.toggles {
+.skins {
   display: flex;
   gap: 6px;
 }
 .seg button,
-.skins button,
-.chip {
+.skins button {
   flex: 1;
   min-height: 44px;
   display: inline-flex;
@@ -1970,16 +1967,26 @@ h1 .word:nth-child(2) .tc-in {
   font-size: 15px;
   cursor: pointer;
 }
-.chip {
-  flex-direction: row;
-  gap: 6px;
-}
-.seg button[aria-pressed='true'],
-.skins button[aria-pressed='true'],
-.chip[aria-pressed='true'] {
+.seg button:is([aria-pressed='true'], [aria-checked='true']),
+.skins button[aria-checked='true'] {
   border-color: var(--accent);
   background: color-mix(in srgb, var(--accent) 14%, transparent);
   color: var(--accent-ink);
+}
+/* 소리·진동: 공통 스위치 줄(@joyfield/shared/settings.css), 색·테두리만 이 게임 것 */
+.switches {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  --jp-switch-on: var(--accent);
+  --jp-switch-off: var(--line);
+  --jp-switch-focus: var(--accent-ink);
+}
+.switches .jp-switch {
+  padding: 4px 8px 4px 12px;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  font-size: 15px;
 }
 .skin-dot {
   display: block;
