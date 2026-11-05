@@ -430,7 +430,11 @@ function renderHome(force = true): void {
     </nav>
     <main class="stage">
       <section class="hero">
-        <div class="hero-mark">${BURST}${HERO_LOGO}</div>
+        <div class="hero-mark">${BURST}${HERO_LOGO}${
+          // 개발자 모드(숨김 미리보기)가 켜진 기기만: 게임 카드 버전처럼 로고 오른쪽 위에 허브 버전(스크롤 없이 확인, 운영 빌드에서는 코드째 빠짐).
+          // 평소 버전은 설정 창 맨 아래(네 게임과 같음, 2026-11-05 맨 아래 꼬리말 지움)
+          (!__JOYFIELD_PROD__ && previewOn()) ? `<span class="hero-ver" aria-hidden="true">v${__APP_VERSION__}</span>` : ''
+        }</div>
         <h1 aria-label="${esc(t('app.title'))}"><span class="hero-title" aria-hidden="true">${title}</span></h1>
         <p class="tagline">${t('app.tagline')}</p>
       </section>
@@ -442,13 +446,7 @@ function renderHome(force = true): void {
         </section>
         ${nextStrip()}
       </div>
-    </main>
-    <footer class="foot">
-      <span>${smallLogo(14)}${
-        // 개발자 모드(숨김 미리보기)가 켜진 기기는 "조이필드" 자리에 "개발자"(글자 수가 같아 배치는 그대로)
-        (!__JOYFIELD_PROD__ && previewOn()) ? t('preview.foot') : t('app.title')
-      } v${__APP_VERSION__}</span>
-    </footer>`;
+    </main>`;
   if (!force && markup === lastMarkup) return;
   lastMarkup = markup;
   app.innerHTML = markup;

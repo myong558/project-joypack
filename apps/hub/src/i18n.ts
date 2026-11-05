@@ -26,7 +26,6 @@ const ko = {
   'teaser.opens': '{when} 공개',
   'teaser.date': '{date}',
   'teaser.time': '{time} 공개',
-  'preview.foot': __JOYFIELD_PROD__ ? '' : '개발자',
   'offline.banner': '오프라인이에요. 한 번 열어 본 게임만 플레이할 수 있어요.',
 
   'best.updown': '최고 {board} {score}점',
@@ -135,7 +134,6 @@ const en: Record<keyof typeof ko, string> = {
   'teaser.opens': 'Opens {when}',
   'teaser.date': 'Opens {date}',
   'teaser.time': '{time}',
-  'preview.foot': __JOYFIELD_PROD__ ? '' : 'Developer',
   'offline.banner': "You're offline. Only games you've opened before can be played.",
 
   'best.updown': 'Best {board} {score}',

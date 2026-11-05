@@ -1060,20 +1060,21 @@ a.card:active .card-play {
   animation-delay: -1.2s;
 }
 
-.foot {
-  margin-top: 28px;
-  color: var(--muted);
-  font-size: 13px;
-  text-align: center;
-}
-
-/* 맨 아래 버전 앞 작은 로고(글자 높이 안이라 줄 높이는 그대로) */
-.foot .mini-logo {
-  width: 14px;
-  height: 14px;
-  margin-right: 5px;
-  vertical-align: -2px;
-  stroke: none;
+/* 개발자 모드에서만: 로고 오른쪽 위 허브 버전(게임 카드 .card-ver 와 같은 모양) */
+.hero-ver {
+  position: absolute;
+  top: -4px;
+  right: -14px;
+  z-index: 2;
+  padding: 2px 7px 1px;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.32);
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 /* ---------- 대화 상자(랭킹·설정). 휴대폰은 아래에서 올라오는 시트, 넓은 화면은 가운데 ---------- */
@@ -1930,10 +1931,6 @@ a.primary-btn {
     grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
   }
 
-  .foot {
-    margin-top: 16px;
-  }
-
   /* 대화 상자도 같은 배로 키우되, 화면 높이를 넘지 않게 키우기 전 크기로 줄여 둔다 */
   .sheet {
     zoom: var(--z, 1);
@@ -1995,10 +1992,6 @@ a.primary-btn {
     font-size: 32px;
   }
 
-  .foot {
-    margin-top: 8px;
-  }
-
   /* 설치 안내는 한 줄로: 로고·글 | 다운로드 | 나중에 */
   .install-card {
     display: grid;
@@ -2056,10 +2049,6 @@ a.primary-btn {
   .next-strip {
     margin-top: 12px;
     padding-block: 8px;
-  }
-
-  .foot {
-    margin-top: 14px;
   }
 
   h1 {
