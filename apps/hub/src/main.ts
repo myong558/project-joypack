@@ -43,6 +43,9 @@ live = shownGames();
 const teaserGames = () =>
   (!__JOYFIELD_PROD__ && previewOn()) ? [] : GAMES.filter((g) => isScheduled(g)).sort((a, b) => Date.parse(a.open!) - Date.parse(b.open!));
 
+// 로고의 새싹(그림자 + 줄기·두 잎). 로고와 "다음 게임" 띠 아이콘이 같은 그림을 쓴다
+const SPROUT = '<g transform="translate(0 12)"><path d="M256 152 Q272 123 258 104" stroke="#d98f00" stroke-width="14" fill="none" stroke-linecap="round"/><g transform="rotate(10 258 106)"><path transform="translate(258 106) scale(-0.84 0.84) rotate(14)" d="M0 0C18-46 64-60 96-44 76-6 34 10 0 0Z" fill="#d98f00"/><path transform="translate(258 106) scale(0.98) rotate(8)" d="M0 0C18-46 64-60 96-44 76-6 34 10 0 0Z" fill="#d98f00"/></g></g><path d="M256 152 Q272 123 258 104" stroke="#4e9e34" stroke-width="14" fill="none" stroke-linecap="round"/><g transform="rotate(10 258 106)"><path transform="translate(258 106) scale(-0.84 0.84) rotate(14)" d="M0 0C18-46 64-60 96-44 76-6 34 10 0 0Z" fill="#6cc24a"/><path transform="translate(258 106) scale(0.98) rotate(8)" d="M0 0C18-46 64-60 96-44 76-6 34 10 0 0Z" fill="#9ee07a"/></g>';
+
 const ICON = {
   // 게임기: 설정에서 "모든 게임에 함께 적용" 묶음 표시
   games: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 7.5h9a4.5 4.5 0 0 1 4.4 5.4l-.7 3.4a2.4 2.4 0 0 1-4.1 1.1L14 15.5h-4l-2.1 1.9a2.4 2.4 0 0 1-4.1-1.1l-.7-3.4a4.5 4.5 0 0 1 4.4-5.4z"/><path d="M8 10.5v3M6.5 12h3"/><circle cx="15.5" cy="11" r=".6"/><circle cx="17" cy="13" r=".6"/></svg>',
@@ -59,7 +62,8 @@ const ICON = {
     '<svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="lock-body" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".45" stop-color="#c9ced8"/><stop offset="1" stop-color="#7c8496"/></linearGradient><linearGradient id="lock-shackle" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#e8ebf0"/><stop offset="1" stop-color="#8d94a3"/></linearGradient></defs>' +
     '<path d="M8.2 11V8.2a3.8 3.8 0 0 1 7.6 0V11" fill="none" stroke="url(#lock-shackle)" stroke-width="2.8" stroke-linecap="round"/><rect x="5.2" y="10.4" width="13.6" height="10.4" rx="2.6" fill="url(#lock-body)"/>' +
     '<circle cx="12" cy="15.4" r="1.6" fill="#1d1a2e"/><path d="M11.2 16.2h1.6l.5 2.6h-2.6z" fill="#1d1a2e"/></svg>',
-  sparkle: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5c.6 4.2 2.3 6 6.5 6.5-4.2.6-5.9 2.3-6.5 6.5-.6-4.2-2.3-5.9-6.5-6.5 4.2-.5 5.9-2.3 6.5-6.5z"/><path d="M18.5 15.5c.3 1.8 1 2.6 2.5 3-1.5.3-2.2 1.1-2.5 3-.3-1.9-1-2.7-2.5-3 1.5-.4 2.2-1.2 2.5-3z"/></svg>',
+  // "다음 게임" 띠: 로고 속 새싹(앞으로 자라날 게임). 새싹 부분만 잘라 보이는 viewBox, 밑동 기준으로 살랑인다
+  sprout: `<svg class="sprout" viewBox="170 58 196 120" aria-hidden="true"><g>${SPROUT}</g></svg>`,
 };
 
 // 조이필드 로고(public/logo.svg 와 같은 그림): 레몬 상자에 게임기 부품으로 만든 웃는 얼굴 + 두 눈 사이 위로 기운 새싹.
@@ -71,7 +75,7 @@ const HERO_LOGO = `
     <g class="logo-tile" style="--i:0"><g transform="translate(0 16)"><rect x="120" y="198" width="116" height="40" rx="14" fill="#d98f00"/><rect x="158" y="160" width="40" height="116" rx="14" fill="#d98f00"/></g><rect x="120" y="198" width="116" height="40" rx="14" fill="#3d2a00"/><rect x="158" y="160" width="40" height="116" rx="14" fill="#3d2a00"/></g>
     <g class="logo-tile" style="--i:1"><g transform="translate(0 16)"><circle cx="336" cy="218" r="44" fill="#d98f00"/></g><circle cx="336" cy="218" r="44" fill="#3d2a00"/></g>
     <g class="logo-tile" style="--i:2"><g transform="translate(0 16)"><path d="M152 318 Q256 428 360 318" fill="none" stroke="#d98f00" stroke-width="40" stroke-linecap="round"/></g><path d="M152 318 Q256 428 360 318" fill="none" stroke="#3d2a00" stroke-width="40" stroke-linecap="round"/></g>
-    <g class="logo-tile logo-sprout" style="--i:4"><g transform="translate(0 12)"><path d="M256 152 Q272 123 258 104" stroke="#d98f00" stroke-width="14" fill="none" stroke-linecap="round"/><g transform="rotate(10 258 106)"><path transform="translate(258 106) scale(-0.84 0.84) rotate(14)" d="M0 0C18-46 64-60 96-44 76-6 34 10 0 0Z" fill="#d98f00"/><path transform="translate(258 106) scale(0.98) rotate(8)" d="M0 0C18-46 64-60 96-44 76-6 34 10 0 0Z" fill="#d98f00"/></g></g><path d="M256 152 Q272 123 258 104" stroke="#4e9e34" stroke-width="14" fill="none" stroke-linecap="round"/><g transform="rotate(10 258 106)"><path transform="translate(258 106) scale(-0.84 0.84) rotate(14)" d="M0 0C18-46 64-60 96-44 76-6 34 10 0 0Z" fill="#6cc24a"/><path transform="translate(258 106) scale(0.98) rotate(8)" d="M0 0C18-46 64-60 96-44 76-6 34 10 0 0Z" fill="#9ee07a"/></g></g>
+    <g class="logo-tile logo-sprout" style="--i:4">${SPROUT}</g>
     <g class="logo-tile" style="--i:3"><circle cx="122" cy="300" r="26" fill="#ff7a3d" opacity="0.9"/><circle cx="390" cy="300" r="26" fill="#ff7a3d" opacity="0.9"/></g>
   </svg>`;
 
@@ -412,7 +416,7 @@ function nextStrip(): string {
   const text = soon.length
     ? t('game.nextNamed', { name: soon.map((g) => g.name[getLang()]).join(', ') })
     : t('game.nextDesc');
-  return `<p class="next-strip">${ICON.sparkle}<span>${esc(text)}</span></p>`;
+  return `<p class="next-strip">${ICON.sprout}<span>${esc(text)}</span></p>`;
 }
 
 const skinName = (skin: Skin) => t(`skin.${skin}`);

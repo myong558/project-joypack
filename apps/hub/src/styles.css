@@ -1043,21 +1043,18 @@ a.card:active .card-play {
   }
 }
 
+/* 로고 속 새싹(앞으로 자라날 게임): 밑동을 축으로 천천히 살랑인다(깜박이지 않음) */
 .next-strip svg {
   flex: none;
-  width: 22px;
-  height: 22px;
-  fill: var(--gold);
+  width: 34px;
+  height: 21px;
+  overflow: visible;
 }
 
-.next-strip svg path {
+.next-strip svg > g {
   transform-box: fill-box;
-  transform-origin: center;
-  animation: twinkle 2.4s ease-in-out infinite;
-}
-
-.next-strip svg path + path {
-  animation-delay: -1.2s;
+  transform-origin: 50% 100%;
+  animation: sprout-sway 3.2s ease-in-out infinite;
 }
 
 /* 개발자 모드에서만: 로고 오른쪽 위 허브 버전(게임 카드 .card-ver 와 같은 모양) */
@@ -2236,6 +2233,16 @@ a.primary-btn {
   }
   50% {
     transform: scale(1.08);
+  }
+}
+
+@keyframes sprout-sway {
+  0%,
+  100% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(4deg);
   }
 }
 
