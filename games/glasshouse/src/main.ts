@@ -207,7 +207,7 @@ function play(level: number | 'daily'): void {
     },
     onQuit: () => showStart(),
     solve:
-      !daily && ALL_OPEN()
+      !daily && !__JOYFIELD_PROD__ && ALL_OPEN()
         ? { onPrev: () => solPrev(), onNext: () => solNext(), onAuto: () => solAutoToggle() }
         : undefined,
   });
@@ -544,7 +544,9 @@ function play(level: number | 'daily'): void {
   /** 처음 상태(판 시작·처음부터)면 미리 적은 풀이를 걸어 둔다 */
   const solInit = () => {
     if (!view.sol || game.moves !== 0) return;
-    solStart([...SOLUTIONS[level as number]].map((c) => 'URDL'.indexOf(c) as Dir));
+    // 운영 빌드에서는 미리 적은 풀이 데이터를 빼려고 빈 글자로(풀이 보기 줄 자체가 없어 여기까지 오지 않음)
+    const path = __JOYFIELD_PROD__ ? '' : SOLUTIONS[level as number];
+    solStart([...path].map((c) => 'URDL'.indexOf(c) as Dir));
   };
   const solAutoOff = () => {
     solAuto = false;
@@ -567,15 +569,20 @@ function play(level: number | 'daily'): void {
     view.sol?.set(t('sol.finding'), false, false);
     solFinding = true;
     const asked = game.state;
-    worker ??= new Worker(new URL('./game/solve.worker.ts', import.meta.url), { type: 'module' });
-    worker.onmessage = (e: MessageEvent<Dir[] | null>) => {
-      if (!solFinding || game.state !== asked) return;
-      solFinding = false;
-      if (!e.data) return view.sol?.set(t('sol.none'), false, false);
-      solStart(e.data);
-      then();
+    const ask = (w: Worker) => {
+      worker = w;
+      w.onmessage = (e: MessageEvent<Dir[] | null>) => {
+        if (!solFinding || game.state !== asked) return;
+        solFinding = false;
+        if (!e.data) return view.sol?.set(t('sol.none'), false, false);
+        solStart(e.data);
+        then();
+      };
+      w.postMessage({ rows: def.rows, state: asked });
     };
-    worker.postMessage({ rows: def.rows, state: game.state });
+    // 워커는 개발 빌드에서만 동적으로 불러온다(운영 빌드에는 워커 파일이 없음)
+    if (worker) ask(worker);
+    else if (!__JOYFIELD_PROD__) void import('./game/solve-start').then((m) => ask(m.startSolveWorker()));
   };
   /** 밀기 하나(걸어가서 한 번 밂)를 걸음마다 보여 준다. 중간에 멈췄던 밀기는 그 밀기 처음 자리부터 */
   const playSeg = (then?: () => void) => {

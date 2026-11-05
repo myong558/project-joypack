@@ -28,11 +28,11 @@ markScrolled();
 // 첫 화면에 카드로 보일 게임. 최근에 추가한 게임부터(카드·랭킹 탭·설정 목록 모두 같은 순서).
 // 공개(live)·공개 예약 시각이 지난 게임은 모두에게, 개발자 모드를 켠 기기는 미리보기 게임도 함께(켜고 끄면·예약 시각이 되면 다시 계산)
 let live: GameMeta[] = [];
-const shownGames = () => byNewest(GAMES.filter((g) => isPublic(g) || (g.status === 'preview' && previewOn())));
+const shownGames = () => byNewest(GAMES.filter((g) => isPublic(g) || (g.status === 'preview' && (!__JOYFIELD_PROD__ && previewOn()))));
 live = shownGames();
 /** 공개 예약을 기다리는 게임: 누를 수 없는 COMING SOON 카드로(개발자 모드에서는 실제 카드가 TEST 로 보이므로 없음) */
 const teaserGames = () =>
-  previewOn() ? [] : GAMES.filter((g) => isScheduled(g)).sort((a, b) => Date.parse(a.open!) - Date.parse(b.open!));
+  (!__JOYFIELD_PROD__ && previewOn()) ? [] : GAMES.filter((g) => isScheduled(g)).sort((a, b) => Date.parse(a.open!) - Date.parse(b.open!));
 
 const ICON = {
   // 게임기: 설정에서 "모든 게임에 함께 적용" 묶음 표시
@@ -307,7 +307,7 @@ function gameCard(game: GameMeta): string {
   const best = bestRecord(game);
   const ready = cached.get(game.id) ?? false;
   const blocked = !navigator.onLine && !ready;
-  const test = !isPublic(game);
+  const test = !__JOYFIELD_PROD__ && !isPublic(game);
   const fresh = !test && isNew(game);
   // 게임 카드 = 장난감 버튼: 위는 게임 색 그림판(아이콘이 둥실), 아래는 이름·설명, 맨 아래 한 줄은 최고 기록(없으면 "첫 기록에 도전!")이 폭을 다 쓰고,
   // 작은 ▶ 는 그림판 오른쪽 아래 경계에 걸쳐 띄운다(기록이 잘리지 않게).
@@ -317,7 +317,7 @@ function gameCard(game: GameMeta): string {
   return `
     <a class="card${blocked ? ' blocked' : ''}" href="${game.path}" style="--c:${game.color}" data-game="${game.id}"
        ${blocked ? 'aria-disabled="true"' : ''} aria-label="${test ? `${t('game.testLabel')} · ` : fresh ? `${t('game.newLabel')} · ` : ''}${esc(name)} — ${t('game.play')}">
-      <span class="card-art" data-pat="${patternOf(game)}">${test ? `<span class="card-new test" aria-hidden="true">${t('game.test')}</span>` : fresh ? `<span class="card-new" aria-hidden="true">${t('game.new')}</span>` : ''}<img class="card-icon" src="${iconUrl(game)}" alt="" width="72" height="72" />${previewOn() && __GAME_VERSIONS__[game.id] ? `<span class="card-ver" aria-hidden="true">v${__GAME_VERSIONS__[game.id]}</span>` : ''}</span>
+      <span class="card-art" data-pat="${patternOf(game)}">${test ? `<span class="card-new test" aria-hidden="true">${t('game.test')}</span>` : fresh ? `<span class="card-new" aria-hidden="true">${t('game.new')}</span>` : ''}<img class="card-icon" src="${iconUrl(game)}" alt="" width="72" height="72" />${(!__JOYFIELD_PROD__ && previewOn()) && __GAME_VERSIONS__[game.id] ? `<span class="card-ver" aria-hidden="true">v${__GAME_VERSIONS__[game.id]}</span>` : ''}</span>
       <span class="card-body">
         <span class="card-play" aria-hidden="true">${ICON.play}</span>
         <strong class="card-name">${esc(name)}</strong>
@@ -438,7 +438,7 @@ function renderHome(force = true): void {
     <footer class="foot">
       <span>${smallLogo(14)}${
         // 개발자 모드(숨김 미리보기)가 켜진 기기는 "조이필드" 자리에 "개발자"(글자 수가 같아 배치는 그대로)
-        previewOn() ? t('preview.foot') : t('app.title')
+        (!__JOYFIELD_PROD__ && previewOn()) ? t('preview.foot') : t('app.title')
       } v${__APP_VERSION__}</span>
     </footer>`;
   if (!force && markup === lastMarkup) return;
@@ -766,7 +766,7 @@ async function openSettings(): Promise<void> {
   const body = `
     ${
       // 톤 미리보기는 개발자 모드에서만. 평소에는 날마다 정해진 톤(index.html)이 자동으로 고정된다
-      previewOn()
+      (!__JOYFIELD_PROD__ && previewOn())
         ? `<section class="set-group dev">
       <h3>${t('settings.skinDev')}</h3>
       ${seg<Skin | 'auto'>('skin', ['auto', ...SKINS], previewSkin(), (v) => (v === 'auto' ? t('skin.auto') : skinName(v)))}

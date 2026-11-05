@@ -131,7 +131,7 @@ export interface StartOptions {
 export function startScreen(opts: StartOptions): HTMLElement {
   const { save } = opts;
   // 개발자 모드(출시 화면 보기 꺼짐)면 도감을 모두 열어 보인다. 저장된 기록(save.dex)은 그대로 둔다
-  const dex = new Set<MoleKind>(Joyfield.devJump() ? MOLE_ORDER : save.dex);
+  const dex = new Set<MoleKind>(!__JOYFIELD_PROD__ && Joyfield.devJump() ? MOLE_ORDER : save.dex);
   const dailyBest = save.daily?.date === opts.today ? save.daily.best : 0;
   const lang = getLang();
   const otherLang = LANGS.find((l) => l !== lang)!;
@@ -414,7 +414,7 @@ function settingsPanel(opts: StartOptions): HTMLElement {
       <h2>${ICONS.gear} ${t('settings.title')}</h2>
       ${
         // 개발자 모드: 확인 도구(도감 모두 열기)와 출시 화면 단추. 테스트할 때 바로 누르도록 설정 창 맨 위에 둔다(기준서 11.5)
-        Joyfield.devMode()
+        !__JOYFIELD_PROD__ && Joyfield.devMode()
           ? `<section class="dev-section"><h3>TEST</h3>${Joyfield.devJump() ? `<p class="dev-note">${t('test.dexAll')}</p>` : ''}<button type="button" class="dev-toggle" data-release aria-pressed="${Joyfield.releaseView()}">${Joyfield.releaseView() ? t('test.devView') : t('test.releaseView')}</button></section>`
           : ''
       }
@@ -505,10 +505,11 @@ function settingsPanel(opts: StartOptions): HTMLElement {
   });
   confirm.querySelector('[data-confirm]')!.addEventListener('click', opts.onReset);
   // 개발자 모드: 출시 화면 보기 ↔ 개발 보기(도감 모두 열기를 숨기거나 다시 보임)
-  el.querySelector('[data-release]')?.addEventListener('click', () => {
-    Joyfield.setReleaseView(!Joyfield.releaseView());
-    opts.onRefresh();
-  });
+  if (!__JOYFIELD_PROD__)
+    el.querySelector('[data-release]')?.addEventListener('click', () => {
+      Joyfield.setReleaseView(!Joyfield.releaseView());
+      opts.onRefresh();
+    });
   return el;
 }
 

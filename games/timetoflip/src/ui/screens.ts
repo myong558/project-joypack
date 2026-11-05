@@ -134,7 +134,7 @@ function heroDemo(): string {
 /**
  * 판 바로가기(Joyfield.devJump: 개발자 모드이고 "출시 화면" 보기가 꺼져 있을 때, 정식 공개 뒤에도 보임): 설정 창 맨 위 TEST 칸의 "N판부터 바로 시작" 단추(클래식, 기록·랭킹에 안 남음)
  */
-const STAGE_JUMP = () => Joyfield.devJump();
+const STAGE_JUMP = () => !__JOYFIELD_PROD__ && Joyfield.devJump();
 
 export function startScreen(opts: StartOptions): HTMLElement {
   const { save } = opts;
@@ -212,7 +212,7 @@ export function startScreen(opts: StartOptions): HTMLElement {
 /**
  * 출시 전 확인용: 개발자 모드 + 미리보기 배포일 때만(정식 공개하면 사라짐) 도감 48장을 모두 연 것처럼 보여 준다(저장된 기록은 그대로)
  */
-const DEX_ALL_OPEN = () => Joyfield.devTools();
+const DEX_ALL_OPEN = () => !__JOYFIELD_PROD__ && Joyfield.devTools();
 
 function openDex(host: HTMLElement, save: SaveData): void {
   const found = new Set<FaceId>(DEX_ALL_OPEN() ? ALL_FACES : save.dex);
@@ -335,7 +335,7 @@ function settingsPanel(opts: StartOptions): HTMLElement {
       <h2>${ICONS.gear} ${t('settings.title')}</h2>
       ${
         // 개발자 모드: 판 바로가기(정식 공개 뒤에도)·출시 화면 단추. 테스트할 때 바로 누르도록 설정 창 맨 위에 둔다
-        Joyfield.devMode()
+        !__JOYFIELD_PROD__ && Joyfield.devMode()
           ? `<section class="dev-section"><h3>TEST</h3>${STAGE_JUMP() ? `<p class="note">${t('test.jump')}</p><div class="stage-jump" role="group" aria-label="${t('test.jump')}">${[2, 3, 4, 5, 6, 7, 8].map((n) => `<button type="button" data-from="${n}">${n}</button>`).join('')}</div>` : ''}<button type="button" class="dev-toggle" data-release aria-pressed="${Joyfield.releaseView()}">${Joyfield.releaseView() ? t('test.devView') : t('test.releaseView')}</button></section>`
           : ''
       }
@@ -423,11 +423,13 @@ function settingsPanel(opts: StartOptions): HTMLElement {
   });
   confirm.querySelector('[data-confirm]')!.addEventListener('click', opts.onReset);
   // 개발자 모드: 출시 모드 보기 ↔ 개발 기능 보기(판별 바로 시작·도감 전부 열기를 숨기거나 다시 보임)
-  el.querySelector('[data-release]')?.addEventListener('click', () => {
-    Joyfield.setReleaseView(!Joyfield.releaseView());
-    opts.onRefresh();
-  });
-  el.querySelectorAll<HTMLButtonElement>('[data-from]').forEach((b) => b.addEventListener('click', () => opts.onPlay('classic', Number(b.dataset.from))));
+  if (!__JOYFIELD_PROD__)
+    el.querySelector('[data-release]')?.addEventListener('click', () => {
+      Joyfield.setReleaseView(!Joyfield.releaseView());
+      opts.onRefresh();
+    });
+  if (!__JOYFIELD_PROD__)
+    el.querySelectorAll<HTMLButtonElement>('[data-from]').forEach((b) => b.addEventListener('click', () => opts.onPlay('classic', Number(b.dataset.from))));
   return el;
 }
 

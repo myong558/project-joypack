@@ -138,7 +138,17 @@ if (PROD) {
   writeFileSync(hubIndex, html.replaceAll('__JOYFIELD_SITE__', 'prod'));
   const left = walk(DIST).filter((f) => /.(js|html)$/.test(f) && /__JOYFIELD_(PROD|SITE)__/.test(readFileSync(f, 'utf8')));
   if (left.length) throw new Error(`운영 빌드 표시가 남은 파일: ${left.map(sitePath).join(', ')}`);
-  console.log('운영 빌드: 개발자 모드 끔·운영 DB 고정');
+  // 개발 전용 화면이 운영 배포본에 남지 않았는지: 개발 전용 코드는 `!__JOYFIELD_PROD__ && …` 로 감싸 빌드 때 빠져야 한다(기준서 7.3).
+  // 새 개발 전용 화면을 만들면 아래 표시(설정 TEST 칸 dev-section·dev-toggle, 개발 문구)를 그대로 쓰거나 여기에 더한다
+  const DEV_ONLY = ['dev-section', 'dev-toggle', 'stage-jump', 'card-new test', 'Release view', 'Pre-release check', 'Tone preview'];
+  const devLeft = walk(DIST)
+    .filter((f) => /.(js|html)$/.test(f) && !f.endsWith(join('shared', 'joyfield.js')))
+    .flatMap((f) => {
+      const text = readFileSync(f, 'utf8');
+      return DEV_ONLY.filter((m) => text.includes(m)).map((m) => `${sitePath(f)}: ${m}`);
+    });
+  if (devLeft.length) throw new Error(`운영 빌드에 개발 전용 코드가 남았습니다(!__JOYFIELD_PROD__ 로 감싸기):\n- ${devLeft.join('\n- ')}`);
+  console.log('운영 빌드: 개발자 모드 끔·운영 DB 고정·개발 전용 코드 없음');
 }
 
 // 3-2. 개발 사이트(dev 브랜치 배포, JOYFIELD_SITE=dev)는 홈 화면 앱 이름을 "조이필드 개발"로 바꿔 운영 앱과 구분한다.
