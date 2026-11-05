@@ -6,3 +6,4 @@
 - [마켓 등록 때 랭킹 초기화](ranking-reset-at-store-launch.md) — 플레이 스토어 최초 공개 직전에 모든 랭킹 초기화 요청 + 개인정보처리방침·최상위 페이지 제작 알림
 - [다른 PC 폴더 이름 바꾸기](other-pc-folder-rename.md) — 저장소를 project-joypack → project-joyfield 로 바꿈(2026-11-04), 다른 PC에서 "이름 바뀐 것 반영해줘" 하면 git pull 뒤 pnpm setup:rename
 - [스튜디오 도메인 Pocket Game Lab](studio-domain-pocketgamelab.md) — pocketgamelab.com/.kr/.co.kr 구매·주소 이전 경위(2026-11-05 끝남, 최상위 사이트만 미룸)
+- [앱 등록 주 할 일](store-launch-prep.md) — 2026-11-09 주 앱 등록 때 개발 사이트 잠그기·플레이 등록 자료·출시 전 점검(어느 PC 든)
