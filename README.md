@@ -175,6 +175,7 @@ dist/                       → https://pocketgamelab.com/joyfield/ (배포 묶�
 ### 4.4 랭킹 (Firebase)
 
 - Firebase 프로젝트 `joyfield-41b5a`(운영) 하나를 모든 게임이 같이 쓰고, 게임 ID 는 **그대로**입니다.
+- 조이팩 시절 옛 프로젝트 `joypack-c6bd2` 는 2026-11-04 이름을 바꿀 때 `joyfield-41b5a` 로 옮기며 쓰지 않게 됐고(기록은 새로 시작), 2026-11-05 콘솔에서 삭제했습니다(사용자 결정). 코드에서 다시 쓰지 않습니다.
 - **개발용 DB `joyfield-dev`**(2026-11-04, 무료 Spark): 내 PC·같은 와이파이 주소(`localhost`, `127.0.0.1`, `192.168.x` 등 사설 주소 — `pnpm dev`·`pnpm preview`)와 개발 사이트(`dev.pocketgamelab.com`, Pages 브랜치·미리보기 주소)에서 열면 개발 DB, 운영 사이트(`pocketgamelab.com`)에서 열면 운영 DB 에 씁니다. 개발 중 테스트 점수가 실제 랭킹에 섞이지 않습니다. 설정은 `packages/shared/joyfield.js` 의 `FIREBASE` 한 곳(허브·모든 게임이 `Joyfield.FIREBASE` 를 씀). 로컬에서 운영 DB 를 봐야 하면 개발자 도구에서 `localStorage.setItem('joyfield.db', 'prod')`(되돌리기 `removeItem`).
 - **규칙은 두 프로젝트에 똑같이 게시**합니다(`firestore.rules` 를 운영·개발 콘솔 각각에 붙여 넣기). 한쪽만 게시하면 그쪽만 새 규칙으로 동작합니다.
 - 각 게임의 랭킹 코드는 처음에는 손대지 않습니다(업다운 REST, 두더지잡기 SDK). 두 방식 모두 잘 돌고 있고, 억지로 합치면 위험만 커집니다.
