@@ -637,7 +637,22 @@
       button.setAttribute('aria-describedby', mark.id);
     }
     if (offlineMarks.indexOf(mark) < 0) offlineMarks.push(mark);
-    mark.textContent = text;
+    // 가운뎃점(·)은 글꼴마다 있거나 없어(위 메뉴 Jua 에는 없음) 글자 대신 css 로 그린 점(.jp-top-sep)으로 나눈다. 글은 앱 i18n 의 "A · B"
+    mark.replaceChildren();
+    String(text)
+      .split(/\s*·\s*/)
+      .forEach(function (part, i) {
+        if (i) {
+          const sep = document.createElement('i');
+          sep.className = 'jp-top-sep';
+          sep.setAttribute('aria-hidden', 'true');
+          mark.append(sep);
+        }
+        const span = document.createElement('span');
+        span.textContent = part;
+        mark.append(span);
+      });
+    mark.setAttribute('aria-label', text);
     if (!offlineWatch) {
       offlineWatch = true;
       window.addEventListener('online', syncOffline);

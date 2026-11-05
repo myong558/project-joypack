@@ -211,6 +211,9 @@
 /* 오프라인 안내(Joyfield.offlineMark): 랭킹 버튼 바로 아래 오른쪽 끝에 맞춘 옅은 알약. 버튼 안에 있어 자리를 차지하지 않고(absolute)
  * 버튼을 숨기면 함께 숨는다. 깜박이지 않는다. 누르면 버튼을 누른 것과 같다(랭킹 창 → 마지막으로 불러온 순위) */
 .jp-top-offline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
   position: absolute;
   top: calc(100% + 6px);
   right: 0;
@@ -231,6 +234,15 @@
   display: none;
 }
 
+/* 안내 글 사이 가운뎃점: 글꼴에 · 가 없어도 같게 보이도록 css 로 그린다 */
+.jp-top-sep {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.7;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .jp-top-btn {
     transition: none;
@@ -239,7 +251,7 @@
 
 /* 랭킹에 등록하지 않고 결과 화면을 떠날 때 묻는 창(@joyfield/shared/ui 의 leaveRankEntry, 모든 게임 공통 배치·간격).
  * 창 바탕·모서리·글꼴·색·버튼 모양은 게임의 .modal · .modal h2 · .note · .btn 을 그대로 따른다(게임 스타일). 여기서는 배치와 간격만 정한다:
- * 창 안쪽 여백 24·20·20px, 제목 → 안내 12px, 안내 → 버튼 22px, 두 버튼 사이 10px. 게임마다 .modal 안쪽 여백(업다운은 0)·.modal h2 여백
+ * 창 안쪽 여백 24·20·20px, 제목 → 안내 12px, 안내 → 버튼 22px, 두 버튼 사이 10px, 버튼 두께 48px(안쪽 10·14px). 게임마다 .modal 안쪽 여백(업다운은 0)·.modal h2 여백
  * (닫기 단추 자리)·정렬이 달라 같은 간격이 되도록 이 창(.modal.rank-leave-modal, 닫기 단추 없음)에서는 공통 값으로 덮는다 */
 .modal.rank-leave-modal {
   padding: 24px 20px 20px;
@@ -267,6 +279,14 @@
   gap: 10px;
   margin-top: 22px;
 }
+/* 버튼 두께도 모든 게임 같게(48px, 글자 크기·색·모서리·그림자는 게임 .btn 그대로) */
 .modal .rank-leave-actions .btn {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
   margin: 0;
+  padding: 10px 14px;
+  line-height: 1.2;
 }

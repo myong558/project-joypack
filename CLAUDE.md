@@ -65,6 +65,7 @@
 - 답변 끝에 **확인 버전**(바뀐 대상 → 새 버전, 확인 위치: 게임 설정 창 맨 아래 / 조이필드 설정 창 맨 아래)을 적는다.
 - 확인: `pnpm test`, `pnpm build`, `pnpm preview`(http://localhost:4170/joyfield/)로 실제 화면. 배포는 `main` → 운영 `pocketgamelab.com/joyfield/`, `dev` → 개발 `dev.pocketgamelab.com/joyfield/`(README 8장).
 - 화면 배치(CSS 배치·글자 크기·화면 맞춤 코드)를 바꿨으면 `pnpm check:screens <hub | 게임 id> quick`(대표 4크기, 약 2분)으로 점검한다. 15크기 전체(`all`)는 새 게임 첫 배치와 정식 공개 직전에만 돌린다. 점검은 백그라운드로 돌리고 기다리는 동안 다른 일을 한다. 언제 어디까지 돌릴지는 기준서 7.1 "언제 돌리나"를 따르고, 묻지 않고 진행한다. 색·문구·규칙만 바꿨으면 돌리지 않는다.
+- 새 게임 첫 버전, 글꼴·서브셋(`package.json` "font")·화면 문구를 바꿨거나 공통 화면 조각에 글을 더했으면 `pnpm check:fonts <hub | 게임 id>`(실제로 그린 글꼴 점검, 시스템 글꼴로 빠진 글이 있으면 실패, 기준서 7.1.1)를 돌린다.
 - Firestore 규칙(`firestore.rules`)을 바꾸면 콘솔 게시는 사람이 해야 하므로 답변에 알린다. **운영(`joyfield-41b5a`)·개발(`joyfield-dev`) 두 프로젝트 모두** 게시해야 한다(README 4.4). 로컬(`pnpm dev`·`preview`)과 개발 사이트(`dev.pocketgamelab.com`)의 랭킹은 개발 DB 에 쌓인다.
 
 ## 마켓 등록 순서 (2026-11-05 사용자 결정)
