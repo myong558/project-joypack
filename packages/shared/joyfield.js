@@ -16,22 +16,6 @@
 
   const GAME_CACHE_PREFIX = 'joyfield-game-';
 
-  // 이름을 바꾸기 전(2026-11-04)에 쓰던 저장 키 접두어. 기기에 남은 설정·기록을 새 키(joyfield.)로 한 번 옮기고 지운다.
-  // 새 키가 이미 있으면 새 값을 둔다. 옛 키가 남은 기기가 없어질 때쯤(2027년 이후) 이 묶음을 지운다.
-  const OLD_KEY_PREFIX = 'joypack.';
-  try {
-    for (let i = localStorage.length - 1; i >= 0; i--) {
-      const key = localStorage.key(i);
-      if (!key || !key.startsWith(OLD_KEY_PREFIX)) continue;
-      const next = 'joyfield.' + key.slice(OLD_KEY_PREFIX.length);
-      if (localStorage.getItem(next) === null) localStorage.setItem(next, localStorage.getItem(key));
-      localStorage.removeItem(key);
-    }
-  } catch (e) {
-    // 저장소를 못 쓰면 옮기지 않는다(시크릿 창 등)
-  }
-
-
   function read(key) {
     try {
       return localStorage.getItem(key);

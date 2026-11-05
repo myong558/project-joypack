@@ -42,9 +42,8 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     (async () => {
       // 지난 허브 캐시만 지운다. 게임 캐시와 다른 앱(예전 업다운 등)의 캐시는 건드리지 않는다.
-      // 이름을 바꾸기 전(2026-11-04) 접두어 joypack- 의 허브·게임 캐시도 지운다(2027년 이후 이 조건은 지워도 됨)
       for (const key of await caches.keys()) {
-        if (key.startsWith('joypack-') || (key.startsWith('joyfield-hub-') && key !== HUB_CACHE)) await caches.delete(key);
+        if (key.startsWith('joyfield-hub-') && key !== HUB_CACHE) await caches.delete(key);
       }
       await self.clients.claim();
     })(),
