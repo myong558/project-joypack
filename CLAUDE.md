@@ -93,15 +93,16 @@
 
 **지금 상태(2026-11-05 회사 PC 마지막 정리, "다른 PC 이어하기" 때 이 순서로 알린다):**
 - **주소 지도(목표):** `pocketgamelab.com/` = 최상위 회사 페이지 자리(제작은 앱 등록 직전, 지금은 `/joyfield/` 로 302) · `pocketgamelab.com/joyfield/` = 운영, **유일하게 누구나 여는 주소**(TWA) · `dev.pocketgamelab.com/joyfield/` = 개발, **Access 로 잠금(본인·테스터)** · 그 밖의 주소는 잠그거나 `pocketgamelab.com` 으로 301.
-- **끝남:** `.kr`·`.co.kr`·`www` → `pocketgamelab.com` 301, 옛 github.io 끔, 도메인 잠금, `contact@pocketgamelab.com` 받기(아래 "스튜디오 최상위 사이트").
-- **집 PC 에서 할 일(아래 1번):** Zero Trust 결제 수단 등록 → Access 로 `dev.pocketgamelab.com`·`*.pocketgamelab.pages.dev` 잠금 → `pocketgamelab.pages.dev` → `https://pocketgamelab.com` 301 → 휴대폰에서 세 주소 막힘·운영만 열림 확인.
+- **끝남:** `.kr`·`.co.kr`·`www` → `pocketgamelab.com` 301, 옛 github.io 끔, 도메인 잠금, `contact@pocketgamelab.com` 받기(아래 "스튜디오 최상위 사이트"), **개발 사이트 잠그기(2026-11-06 집 PC, 아래 "개발 사이트 잠금 기록")**.
 - **앱 등록 주(어느 PC 든):** 아래 2·3번 → 등록 직전 개인정보처리방침·최상위 페이지(아래 "스튜디오 최상위 사이트") → 공개 직전 모든 랭킹 초기화(메모리 `ranking-reset-at-store-launch`).
 - **그 사이 어느 PC 에서나:** 온실정원(`games/glasshouse`, preview, 공개 예약 없음) 판 점검 → 정식 공개(메모리 `glasshouse-level-review`). 앱 등록 전에 공개해 첫 앱에 넣을지는 아직 안 정함 → 물어본다.
 
-1. **개발 사이트 잠그기(먼저 할 일, 방법 A 로 결정 · 집 PC 에서만, 2026-11-05 사용자 결정):** 회사 PC = 컴퓨터 이름 `DESKTOP-B51J711`(`hostname`). 다른 이름의 PC 에서 세션을 시작하면 집 PC 로 보고 첫 답변에서 "A 로 개발 사이트 잠그기"를 먼저 알리고 진행한다. 회사 PC 에서는 진행하지 않는다(카드 등록 불가). 같은 결정 — 운영 `pocketgamelab.com/joyfield/` 은 지금처럼 열어 둔다(아직 아무도 주소를 모름, 앱 등록 뒤 테스터에게 처음 알림). 개발은 앱 등록 뒤 주소가 알려져도 괜찮게 잠근다. 막을 주소: `dev.pocketgamelab.com`, `dev.pocketgamelab.pages.dev`(Pages 가 `dev` 브랜치에 자동으로 주는 같은 개발 사이트)·일회용 `<해시>.pocketgamelab.pages.dev`, 그리고 `pocketgamelab.pages.dev`(운영과 같은 내용, 사용자가 이것도 막자고 함). 운영 잠금은 하지 않는다(TWA 가 운영 주소를 그대로 열어야 함). 배포는 GitHub Actions → wrangler API 직접 업로드라 잠금과 무관.
-   - **방법 A: Cloudflare Access(Zero Trust Free)** — 결제 수단 등록이 필요한데 회사 PC 에서 카드번호를 몰라 막힘(청구 주소 영문은 안내함). 집 PC 에서 카드·PayPal 로 등록되면: Zero Trust → Access → 애플리케이션 → 자체 호스팅, 도메인 `dev.pocketgamelab.com`·`*.pocketgamelab.pages.dev`·`pocketgamelab.pages.dev`, 정책 허용 = 본인 이메일(테스터는 나중에 추가), 로그인 일회용 PIN, 세션 1개월. Pages `pocketgamelab` → 설정 → 미리보기 배포 액세스 정책 사용.
-   - **방법 B(쓰지 않음, A 가 끝내 안 될 때만 임시로):** 운영과 같은 Pages 프로젝트라 운영 요청도 모두 이 코드를 지나 Workers 무료 한도(하루 10만 건)에 잡히고, 버그 하나가 운영(TWA)을 깨뜨릴 수 있어 버림. 내용: `site/_worker.js`(Pages 고급 모드, `scripts/site.mjs` 가 만듦)가 주소를 보고 `pocketgamelab.pages.dev` → `https://pocketgamelab.com` 301, 개발 주소들은 Basic 인증(아이디·비밀번호는 Pages 비밀 변수, 코드·저장소에 넣지 않음), 나머지는 `env.ASSETS.fetch`. 아이폰 홈 화면 설치 앱은 인증 창이 잘 안 뜰 수 있음.
-   - 집 PC 첫 답변에서 결제 수단(카드·PayPal) 등록부터 화면 순서대로 안내하고 진행. `pocketgamelab.pages.dev` 는 막는 대신 대시보드 규칙(대량 리디렉션 등)으로 `https://pocketgamelab.com` 301 을 권한다. 끝나면 휴대폰에서 세 주소는 막히고 `pocketgamelab.com/joyfield/` 만 열리는지 사용자에게 확인을 부탁한다(회사 PC 에서는 이 주소들에 연결이 안 됨).
+**개발 사이트 잠금 기록(2026-11-06 집 PC 에서 끝남, Cloudflare Access · Zero Trust Free, 팀 `plain-surf-bda7`):** 운영 `pocketgamelab.com/joyfield/` 만 누구나 열고(TWA), 나머지는 잠금 또는 301. 배포(GitHub Actions → wrangler 직접 업로드)와는 무관.
+- Access 앱 `joyfield dev`(자체 호스팅·공개 DNS): `dev.pocketgamelab.com`, 정책 `본인만`(허용, 이메일 = 본인 Gmail), 세션 1 month. 테스터는 이 정책 이메일에 더한다.
+- Access 앱 `pocketgamelab - Cloudflare Pages`(Pages → 설정 → 일반 "프리뷰 액세스"로 자동 생성): `*.pocketgamelab.pages.dev`(`dev.`·해시 미리보기), 정책 `Allow Members`(레거시, 계정 사용자). **이 앱에 `dev.pocketgamelab.com` 을 더하면 저장은 되는데 적용이 안 됐다** → 따로 앱을 만들어야 함(같은 주소를 두 앱에 넣으면 `destination belongs to another application` 오류).
+- 대량 리디렉션(계정 → 제공 및 성능 → 대량 리디렉션): 목록 `pages_dev_to_prod`(`pocketgamelab.pages.dev/` → `https://pocketgamelab.com/` 301, 쿼리·하위 경로·경로 접미사 유지, **하위 도메인 포함 끔**) + 규칙 `pages.dev to prod`.
+- 확인: `curl` 로 `dev.` 두 주소 302 → `plain-surf-bda7.cloudflareaccess.com`, `pocketgamelab.pages.dev/*` 301, 운영 200. 막힌 주소는 Cloudflare 대시보드에 로그인한 브라우저에서는 "Cloudflare" 버튼으로 바로 통과된다.
+
 2. **구글 플레이 등록 준비(코드·자료):** 스토어 그래픽(아이콘 512×512, 대표 그래픽 1024×500, 휴대폰 스크린샷), 스토어 설명문(짧은·자세한), 데이터 보안 양식 답변 초안(저장: 이니셜·점수·시각·입력 종류), 콘텐츠 등급 설문 답변 초안, TWA `/.well-known/assetlinks.json` 자리(서명 키 지문은 Play Console 앱 생성 뒤). 개발자 계정(25달러)·본인 인증·앱 만들기는 사용자가 한다(화면 순서대로 안내).
 3. **출시 전 점검:** 공개 게임 전체 `pnpm check:screens <id> all`, 서비스 워커 "옛 버전 설치 → 새 버전 업데이트" 확인, 오프라인 동작 확인.
 
