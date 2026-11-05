@@ -54,7 +54,7 @@ const ko = {
 
   'pause.title': '일시정지',
   'pause.resume': '계속하기',
-  'pause.quit': '홈으로',
+  'pause.quit': '처음 화면으로',
 
   'result.bloomed': '{flower} 피었어요',
   'result.moves': '이동',
@@ -203,7 +203,7 @@ const en: Record<MessageKey, string> = {
 
   'pause.title': 'Paused',
   'pause.resume': 'Resume',
-  'pause.quit': 'Home',
+  'pause.quit': 'Main menu',
 
   'result.bloomed': 'The {flower} is in bloom',
   'result.moves': 'Moves',
@@ -215,7 +215,7 @@ const en: Record<MessageKey, string> = {
   'result.last': 'Pick a flower',
   'result.retry': 'Play again',
   'result.share': 'Share result',
-  'result.home': 'Main screen',
+  'result.home': 'Main menu',
   'result.dex': 'Open in the book',
   'result.newPage': 'New page',
   'result.dailyTitle': 'Garden of {date}',

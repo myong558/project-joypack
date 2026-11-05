@@ -70,7 +70,7 @@ const ko = {
   'pause.title': '일시정지',
   'pause.resume': '계속하기',
   'pause.restart': '다시 시작',
-  'pause.quit': '메인으로',
+  'pause.quit': '처음 화면으로',
 
   'segment.main': '폭탄 주의!',
   'segment.melee': '혼전',
@@ -115,7 +115,7 @@ const ko = {
   'ranking.submit': '등록',
   'ranking.done': '<b>{n}위</b> 등록 완료!',
   'ranking.newBadge': '등록 대기 기록 있음',
-  'result.home': '메인으로',
+  'result.home': '처음 화면으로',
   'toast.preparing': '결과 이미지를 만드는 중…',
   'toast.failed': '공유하지 못했어요',
 

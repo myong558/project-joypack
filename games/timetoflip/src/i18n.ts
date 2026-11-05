@@ -69,7 +69,7 @@ const ko = {
 
   'pause.title': '일시정지',
   'pause.resume': '계속하기',
-  'pause.quit': '홈으로',
+  'pause.quit': '처음 화면으로',
 
   'ready.time': '제한 시간 {s}초',
   'ready.note': '짝이 되는 카드 위치를 기억하세요',
@@ -99,7 +99,7 @@ const ko = {
   'result.newCards': '새로 모은 카드',
   'result.retry': '다시 하기',
   'result.share': '기록 공유하기',
-  'result.home': '메인으로',
+  'result.home': '처음 화면으로',
   'goal.first': '첫 기록! 이제 이 점수를 넘어 보세요',
   'goal.record': '신기록! 이전보다 {n}점 높아요',
   'goal.gap': '최고 기록까지 {n}점!',
@@ -208,7 +208,7 @@ const en: Record<MessageKey, string> = {
 
   'pause.title': 'Paused',
   'pause.resume': 'Resume',
-  'pause.quit': 'Home',
+  'pause.quit': 'Main menu',
 
   'ready.time': 'Time limit {s}s',
   'ready.note': 'Remember where the matching pairs are',

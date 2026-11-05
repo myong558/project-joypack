@@ -57,7 +57,7 @@ const ko = {
   'theme.dark': '다크',
   'settings.lang': '언어',
   'settings.feedback': '소리·진동',
-  'settings.sound': '효과음',
+  'settings.sound': '소리',
   'settings.vibrate': '진동',
   'settings.initials': '랭킹 이름',
   'settings.initialsHint': '영문 대문자 5자까지. 게임에서 랭킹에 올릴 때 미리 채워져요.',
