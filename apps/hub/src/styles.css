@@ -2069,7 +2069,7 @@ a.primary-btn {
 
 /* ---------- 움직임 ---------- */
 
-/* 첫 진입 연출(#app.intro, 약 1.9초): 로고 상자 → 얼굴 부품(십자·동그란 버튼·입·볼)이 하나씩 쿵 → 반짝이 터짐 → 제목 글자 → 소개 → 카드가 차례로 튀어 오름 */
+/* 첫 진입 연출(#app.intro, 약 1.4초, 게임 수와 상관없이 같음): 로고 상자 → 얼굴 부품(십자·동그란 버튼·입·볼)이 하나씩 쿵 → 반짝이 터짐 → 제목 글자 → 소개 → 카드가 차례로 튀어 오름 */
 .intro .logo-box {
   animation: box-pop 520ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
 }
@@ -2109,16 +2109,17 @@ a.primary-btn {
 }
 
 .intro .games > .card {
-  animation: card-in 620ms cubic-bezier(0.2, 1.3, 0.4, 1) calc(900ms + var(--n, 0) * 110ms) both;
+  /* 제목 글자가 떨어지는 동안 바로 이어서(520ms~). --cd = 카드 차례 지연(main.ts, 모두 합쳐 300ms 안) → 마지막 카드도 약 1.44초에 끝 */
+  animation: card-in 620ms cubic-bezier(0.2, 1.3, 0.4, 1) calc(520ms + var(--cd, 0ms)) both;
 }
 
-/* 다음 게임 띠: 마지막 카드가 튀어 오른 뒤(--n = 카드 수) 살짝 떠오른다 */
+/* 다음 게임 띠: 마지막 카드가 튀어 오른 뒤(--cd = 마지막 카드 지연) 살짝 떠오른다 */
 .intro .next-strip {
-  animation: fade-up 500ms ease-out calc(1200ms + var(--n, 0) * 110ms) both;
+  animation: fade-up 500ms ease-out calc(820ms + var(--cd, 0ms)) both;
 }
 
 .intro .games > .card .card-art::after {
-  animation: shine 600ms ease-out calc(1000ms + var(--n, 0) * 110ms);
+  animation: shine 600ms ease-out calc(620ms + var(--cd, 0ms));
 }
 
 /* 복귀 연출(#app.intro-back, 약 1초): 뒤로 가기·게임 위 조이필드 버튼으로 돌아올 때.
@@ -2133,11 +2134,11 @@ a.primary-btn {
 }
 
 .intro-back .games > .card {
-  animation: card-back 440ms cubic-bezier(0.2, 1.3, 0.4, 1) calc(60ms + var(--n, 0) * 40ms) both;
+  animation: card-back 440ms cubic-bezier(0.2, 1.3, 0.4, 1) calc(60ms + var(--bd, 0ms)) both;
 }
 
 .intro-back .next-strip {
-  animation: fade-up 380ms ease-out calc(160ms + var(--n, 0) * 40ms) both;
+  animation: fade-up 380ms ease-out calc(200ms + var(--bd, 0ms)) both;
 }
 
 @keyframes card-back {

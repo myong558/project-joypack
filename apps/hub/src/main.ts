@@ -11,6 +11,13 @@ import { bestRecord, canClearRecords, clearRecords } from './records';
 import { THEMES, applySettings, applyTheme, canVibrate, loadSettings, migrateLegacy, saveSetting, watchSystemTheme } from './settings';
 import { SKINS, previewSkin, setPreviewSkin, todaySkin, type Skin } from './skins';
 
+/** 첫 진입 카드 연출: 카드 한 장 간격(최대)과 첫 카드 ~ 마지막 카드 시작 간격 전체(최대). 게임이 늘어도 끝나는 시각이 같게 */
+const CARD_STEP = 90;
+const CARD_SPREAD = 300;
+/** 돌아올 때(#app.intro-back) 카드 연출: 한 장 간격(최대)·전체 간격(최대) */
+const BACK_STEP = 40;
+const BACK_SPREAD = 120;
+
 migrateLegacy();
 const settings = loadSettings();
 applySettings(settings);
@@ -446,9 +453,20 @@ function renderHome(force = true): void {
   lastMarkup = markup;
   app.innerHTML = markup;
 
-  app.querySelectorAll<HTMLElement>('.games > .card').forEach((card, i) => card.style.setProperty('--n', String(i)));
+  // 첫 진입 카드 차례(styles.css .intro .games > .card): 카드가 몇 장이든 첫 카드 ~ 마지막 카드 시작 간격을 CARD_SPREAD 안에 나눠
+  // 연출이 끝나는 시각이 늘 같다(게임이 늘어도 늦어지지 않음). 카드가 적으면 한 장 간격은 CARD_STEP 까지만
+  const cards = app.querySelectorAll<HTMLElement>('.games > .card');
+  const step = cards.length > 1 ? Math.min(CARD_STEP, CARD_SPREAD / (cards.length - 1)) : 0;
+  const backStep = cards.length > 1 ? Math.min(BACK_STEP, BACK_SPREAD / (cards.length - 1)) : 0;
+  cards.forEach((card, i) => {
+    card.style.setProperty('--n', String(i)); // 카드마다 둥실 흔들림 엇갈림(styles.css .card bob)
+    card.style.setProperty('--cd', `${Math.round(i * step)}ms`);
+    card.style.setProperty('--bd', `${Math.round(i * backStep)}ms`); // 돌아올 때 연출(.intro-back)도 끝나는 시각 고정
+  });
   // "다음 게임" 띠는 마지막 카드 다음 차례로 올라온다(styles.css .intro .next-strip)
-  app.querySelector<HTMLElement>('.next-strip')?.style.setProperty('--n', String(app.querySelectorAll('.games > .card').length));
+  const strip = app.querySelector<HTMLElement>('.next-strip');
+  strip?.style.setProperty('--cd', `${Math.round(Math.max(0, cards.length - 1) * step)}ms`);
+  strip?.style.setProperty('--bd', `${Math.round(Math.max(0, cards.length - 1) * backStep)}ms`);
   app.querySelectorAll<HTMLAnchorElement>('.card.blocked').forEach((a) => a.addEventListener('click', (e) => e.preventDefault()));
   // 게임 카드를 누르면 짧게 톡(진동 설정을 따른다)
   app.querySelectorAll<HTMLAnchorElement>('a.card:not(.blocked)').forEach((a) =>
