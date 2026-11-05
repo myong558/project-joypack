@@ -335,7 +335,7 @@ pnpm --filter hub icons  # 로고(apps/hub/public/logo.svg)를 바꾼 뒤 앱 �
 4. **지원 연락처**: `contact@pocketgamelab.com`(2026-11-05 결정, 2026-11-05 Cloudflare 이메일 라우팅으로 개인 Gmail 에 전달하도록 연결함, 받기 전용). 개인정보 보호책임자는 실명(명범수) + Pocket Game Lab. 마켓 등록 정보·개인정보 처리방침에 넣고, 랭킹 이름 신고 등을 받습니다.
 5. **마켓 포장**: 구글 플레이는 TWA(Bubblewrap) + `assetlinks.json`, 애플은 Capacitor 로 감싸고 앱다운 기능을 함께(웹 감싸기만은 심사 지침 4.2 거절 위험).
 6. **광고를 붙일 때**: 광고 자리(기준서 10.7, PC 는 옆 여백), 동의 창(UMP)·iOS 추적 허가(ATT), 데이터 보안 양식·개인정보 라벨 갱신.
-7. **플레이 스토어 최초 공개 직전 랭킹 초기화**(2026-11-04 결정): 테스트 점수를 지우고 새로 시작합니다(기기 아이콘 `dev` 가 없는 예전 기록도 함께 정리). 규칙상 앱에서는 못 지우므로 Firebase 콘솔에서 사람이 지웁니다: `games/updown/rankings/*`(v1.21.0~)와 옛 `games/updown/scores-50`·`scores-100`·`scores-200` 의 문서 전부, `games/hammer/rankings/*`, `games/timetoflip/rankings/*`, `games/glasshouse/rankings/*`(그 뒤 생긴 게임은 `firestore.rules` 목차로 확인). Claude 는 출시 작업 때 이 일을 먼저 요청합니다(메모리 `ranking-reset-at-store-launch`).
+7. **플레이 스토어 최초 공개 직전 랭킹 초기화**(2026-11-04 결정): 테스트 점수를 지우고 새로 시작합니다(기기 아이콘 `dev` 가 없는 예전 기록도 함께 정리). 규칙상 앱에서는 못 지우므로 Firebase 콘솔에서 사람이 지웁니다: `games/updown/rankings/*`(v1.21.0~, 옛 `scores-50`·`100`·`200` 은 규칙을 지워 막혔고 남은 문서는 함께 지움), `games/hammer/rankings/*`, `games/timetoflip/rankings/*`, `games/glasshouse/rankings/*`(그 뒤 생긴 게임은 `firestore.rules` 목차로 확인). Claude 는 출시 작업 때 이 일을 먼저 요청합니다(메모리 `ranking-reset-at-store-launch`).
 
 ---
 

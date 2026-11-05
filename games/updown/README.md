@@ -66,8 +66,8 @@
 
 GitHub Pages 는 파일만 내주는 서버라 기록을 받을 수 없어서, 랭킹만 Firebase Firestore(무료 Spark 플랜)에 저장합니다. 여러 게임이 Firebase 프로젝트 하나(`joyfield-41b5a`)를 같이 쓰고, 이 게임은 v1.21.0부터 다른 게임과 같은 **순위표 1개 = 문서 1개** 방식입니다: 범위마다 `games/updown/rankings/50` · `100` · `200` 문서에 `{ entries: [{ name, score, tries, time, thermo?, date, dev? }, ...] }`(점수 높은 순 1~10위, 같은 점수는 먼저 올린 기록이 위)를 트랜잭션으로 씁니다(`src/online.ts` → 조이필드 공통 `@joyfield/shared/rank`, Firestore lite SDK 를 처음 필요할 때 불러옴, 공통 설정 `Joyfield.FIREBASE` — 내 PC·개발 사이트는 개발 DB `joyfield-dev`, 운영 사이트는 운영 DB). 웹 앱 설정 값(apiKey)은 원래 공개되는 값이고, 저장소는 보안 규칙이 지킵니다.
 
-1. **보안 규칙**: 루트 `firestore.rules` 의 업다운 두 블록(`rankings` 새 방식, `scores-*` 옛 방식)을 Firebase 콘솔 → Firestore Database → 규칙 에 붙여 넣고 게시합니다(운영·개발 두 프로젝트). 새 방식은 "기존 순위표에 새 기록 1개를 끼운 것"만 받고, 점수는 시도 횟수·걸린 시간으로 낸 점수를 넘지 못하게 검사합니다.
-2. **옛 방식**: v1.20 까지의 기록 1건 = 문서 1개(`games/updown/scores-50`·`100`·`200`)는 더 읽지 않습니다. 설치 앱·오프라인 캐시에 남은 옛 버전 화면이 한동안 올릴 수 있게 규칙만 남겨 둡니다(플레이 스토어 공개 직전 랭킹 초기화 때 함께 지움).
+1. **보안 규칙**: 루트 `firestore.rules` 의 업다운 블록(`games/updown/rankings`)을 Firebase 콘솔 → Firestore Database → 규칙 에 붙여 넣고 게시합니다(운영·개발 두 프로젝트). 새 방식은 "기존 순위표에 새 기록 1개를 끼운 것"만 받고, 점수는 시도 횟수·걸린 시간으로 낸 점수를 넘지 못하게 검사합니다.
+2. **옛 방식**: v1.20 까지의 기록 1건 = 문서 1개(`games/updown/scores-50`·`100`·`200`)는 더 읽지 않고, 규칙도 2026-11-05 지웠습니다(쓰는 사람 없음). 남은 문서는 콘솔에서 지워도 됩니다.
 3. **예전 기록**: v1.10 까지의 하트·난이도 기록(`games/updown/scores`)은 더 읽지 않습니다. 콘솔 → Firestore Database → 데이터 → `games` → `updown` → `scores` 를 지우면 정리됩니다(지우지 않아도 동작에는 영향 없음). 예전 복합 색인(`scores`: difficulty·tries·time·createdAt)도 지워도 됩니다.
 
 무료 한도는 하루 읽기 5만·쓰기 2만 번이고(프로젝트를 같이 쓰는 게임이 나눠 씀), 랭킹 한 번 열 때 읽기 최대 10번입니다. 한도를 넘으면 그날만 랭킹이 멈춥니다. 서버 없이 받는 기록이라 형식·점수 상한 검사는 하지만 마음먹고 조작하는 것까지 막지는 못합니다.
