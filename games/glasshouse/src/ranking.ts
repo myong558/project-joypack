@@ -90,11 +90,11 @@ export function placeOfDaily(entries: readonly DailyEntry[], rec: DailyRecord): 
   return placeBy(entries as readonly DailyRecord[], rec, dailyAhead);
 }
 
-/** 기록을 끼워 넣는다. 같은 날 여러 번 해도 이름마다 가장 좋은 한 줄만 남긴다. 들어가지 못하면 -1 */
+/**
+ * 기록을 끼워 넣는다. 같은 이름도 줄을 따로 둔다(이니셜이 같은 다른 사람의 줄을 지우지 않게).
+ * 한 사람이 순위표를 채우지 않게 올리기는 기기에 남긴 오늘 최고보다 나을 때만(결과 화면). 들어가지 못하면 -1
+ */
 export function insertDaily(entries: DailyEntry[], entry: DailyEntry): number {
-  const mine = entries.findIndex((e) => e.name === entry.name);
-  if (mine >= 0 && !dailyAhead(entry, entries[mine])) return -1;
-  if (mine >= 0) entries.splice(mine, 1);
   const at = placeOfDaily(entries, entry);
   if (at === -1) return -1;
   entries.splice(at, 0, entry);

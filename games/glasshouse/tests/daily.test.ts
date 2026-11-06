@@ -77,13 +77,12 @@ describe('오늘의 정원 순위표', () => {
     expect(dailyAhead({ moves: 18, time: 1 }, { moves: 18, time: 1 })).toBe(false);
   });
 
-  it('같은 이름은 가장 좋은 한 줄만', () => {
+  it('같은 이름도 줄을 따로 둔다(이니셜이 같은 다른 사람의 줄을 지우지 않음)', () => {
     const list = [e('AAA', 18, 40_000), e('BBB', 20, 30_000)];
     expect(insertDaily(list, e('BBB', 19, 90_000))).toBe(1);
-    expect(list.map((x) => x.name)).toEqual(['AAA', 'BBB']);
-    expect(insertDaily(list, e('BBB', 19, 95_000))).toBe(-1);
-    expect(insertDaily(list, e('BBB', 17, 95_000))).toBe(0);
-    expect(list).toHaveLength(2);
+    expect(list.map((x) => x.name)).toEqual(['AAA', 'BBB', 'BBB']);
+    expect(insertDaily(list, e('BBB', 25, 95_000))).toBe(3);
+    expect(list).toHaveLength(4);
   });
 
   it('10위까지, 깨진 값은 버림', () => {

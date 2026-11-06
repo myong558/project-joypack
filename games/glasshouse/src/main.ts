@@ -88,10 +88,8 @@ const ranking: RankingView = {
   },
   considerDaily(rec) {
     Joyfield.setRankBoard('glasshouse', 'daily');
-    const entries = todayDaily(ranking);
-    const mine = entries.find((e) => e.name === save.playerName);
-    if (mine && !dailyAhead(rec, mine)) return -1;
-    return placeOfDaily(entries.filter((e) => e !== mine), rec);
+    // 같은 이름도 줄을 따로 둔다(오늘 내 최고보다 나을 때만 여기까지 온다)
+    return placeOfDaily(todayDaily(ranking), rec);
   },
   async registerDaily(name, rec) {
     save.playerName = name;

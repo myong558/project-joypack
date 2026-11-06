@@ -620,7 +620,7 @@ games/<id>/
 | 결과 화면 0.6초 누름 막기 | `#screen-result.locked` | `.result.locked` + 키 무시 | `.result.locked` + 키 무시 | `.result.locked` + 키 무시 | ✅ 동작 통일(1.3) |
 | 기록 공유하기(결과 화면) | `Joyfield.shareResult` | `Joyfield.shareResult` | `Joyfield.shareResult` | `Joyfield.shareResult` | ✅ 공통 모듈(이미지 + 조이필드 주소 한 번에) |
 | 결과 이미지 | 캔버스로 직접 그림(1080²) | `html-to-image` 결과 화면 복제 | `html-to-image` 결과 화면 복제(두더지잡기 `share.ts` 와 거의 같음) | `html-to-image` 결과 화면 복제(세 번째 같은 코드) | 🟠 공통화 후보(두더지잡기·타임 투 플립 `captureResult` 가 거의 같음) |
-| 랭킹 저장 방식 | 순위표 = 문서 1개(v1.21.0, 범위마다 `rankings/50·100·200`, 줄에 `tries`·`time`·`thermo`) | 순위표 = 문서 1개 | 순위표 = 문서 1개, 줄에 `stage` | 순위표 = 문서 1개, `garden`·`daily-YYYY-MM-DD`(이동 수 → 시간 순, 이름마다 한 줄) | ✅ 모두 같은 방식, 읽기·등록은 공통 `rankStore`(`@joyfield/shared/rank`) |
+| 랭킹 저장 방식 | 순위표 = 문서 1개(v1.21.0, 범위마다 `rankings/50·100·200`, 줄에 `tries`·`time`·`thermo`) | 순위표 = 문서 1개 | 순위표 = 문서 1개, 줄에 `stage` | 순위표 = 문서 1개, `garden`(이름마다 한 줄)·`daily-YYYY-MM-DD`(이동 수 → 시간 순, 같은 이름도 따로 줄, 2026-11-07) | ✅ 모두 같은 방식, 읽기·등록은 공통 `rankStore`(`@joyfield/shared/rank`) |
 | 랭킹 순위표 사본·8초 제한 | `updown.boards` | `project-hammer:v1` 의 `rankings` | `timetoflip:v1` 의 `rankings` | `glasshouse:v1` 의 `rankings`·`dailyRankings`(그날만) | 🟡 동작 통일(1.6), 8초 제한은 공통 `rankStore`, 사본 저장은 게임마다(저장 키가 달라서). 등록 대기는 2026-11-05 모두 없앰(예전 값은 읽을 때 버림) |
 | 결과 화면 나갈 때 확인·오프라인 안내 | 공통 `leaveRankEntry`·`Joyfield.offlineMark` | 공통 | 공통 | 공통 | ✅ 공통 모듈(2026-11-05). 확인 창 배치·간격은 공통 `topbar.css`, 모양은 게임 `.modal`·`.btn` |
 | 랭킹 창·등록 카드 UI | 공통 `openRanking`·`rankEntryForm` | 공통 | 공통 | 공통 | ✅ 공통 모듈(`@joyfield/shared/ui`, 2026-11-05). 게임은 탭 설정(칸·줄·새로 받기)만 넘기고 모양 css 는 게임 것 |
@@ -668,6 +668,7 @@ games/<id>/
 
 | 문서 버전 | 날짜 | 내용 |
 | --- | --- | --- |
+| 1.83 | 2026-11-07 | 온실정원 오늘의 정원 순위표: 이름이 같으면 한 줄로 합치던 것을 없애 같은 이름도 줄을 따로 둠(이니셜이 같은 다른 사람의 줄을 지우거나 등록을 막던 문제). 한 사람이 채우지 않게 올리기는 기기에 남긴 오늘 최고보다 나을 때만(이미 그랬음). 규칙 `ghDailyInsert` 는 새 줄 1개 끼우기만. 정원 점수 순위표는 그대로(누적 점수라 이름마다 한 줄). 8장 현황표 갱신. 온실정원 v0.20.2 |
 | 1.82 | 2026-11-06 | 좋아요(1.13 새 절): 게임 시작 화면 위 메뉴 언어 버튼 자리에 좋아요(공통 `likeButton`, 언어는 설정 창·조이필드 첫 화면), 조이필드 카드 그림판 왼쪽 아래 하트·수(999 → 1.2K → 1.2M), 익명 인증 + `games/<id>/likes/<uid>`·`stats/likes`(규칙이 ±1 을 함께만 받음). 1.2 표·1.3·10.4·8장 갱신. 허브 v1.44.0 · 업다운 v1.24.0 · 두더지잡기 v1.5.0 · 타임 투 플립 v1.10.0 · 온실정원 v0.19.0 |
 | 1.81 | 2026-11-05 | 소리·진동 배치 통일(1.4 "단추 짜임"): 두더지잡기·업다운은 넓으면 나란히, 허브·타임 투 플립·온실정원은 위아래로 달랐던 것 → 공통 `.jp-switches`(settings.css)로 모두 늘 위아래 한 줄씩. 새 게임도 이 묶음을 그대로 씀. 허브 v1.43.1 · 업다운 v1.23.1 · 두더지잡기 v1.4.1 · 타임 투 플립 v1.9.1 · 온실정원 v0.18.1 |
 | 1.80 | 2026-11-05 | 설정 창 단추 짜임 통일(1.4 "단추 짜임", 공통 `@joyfield/shared/settings` + `settings.css`): 하나 고르기는 `radiogroup`·`aria-checked`, 소리·진동은 이름 줄 + 스위치(칩·아이콘만 칩 없앰), 개발자 TEST 칸은 `devSection`(제목 → 안내 → 도구 → 출시 화면). 허브 v1.43.0 · 업다운 v1.23.0 · 두더지잡기 v1.4.0 · 타임 투 플립 v1.9.0 · 온실정원 v0.18.0 |
