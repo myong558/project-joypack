@@ -153,7 +153,11 @@ async function signIn(): Promise<{ id: string; uid: string }> {
   return token;
 }
 
-/** 한 게임의 내 좋아요를 서버와 맞춘다(트랜잭션: 내 문서 만들기·지우기 + 합계 ±1 을 함께). 바뀐 합계를 돌려준다 */
+/**
+ * 한 게임의 내 좋아요를 서버와 맞춘다: 내 문서 만들기·지우기 + 합계 ±1 을 한 커밋에. 바뀐 합계를 돌려준다.
+ * 익명 사용자는 서버 잠금 트랜잭션(beginTransaction)을 쓸 수 없어, 웹 SDK 처럼 읽은 때의 수정 시각을 조건으로 걸고 커밋한다.
+ * 그 사이 다른 사람이 합계를 바꿨으면 조건이 어긋나 거절되므로(400 FAILED_PRECONDITION·409) 다시 읽어 몇 번 더 한다
+ */
 async function push(gameId: string, want: boolean): Promise<number> {
   const { id, uid } = await signIn();
   const auth = { Authorization: `Bearer ${id}`, 'Content-Type': 'application/json' };
@@ -162,18 +166,20 @@ async function push(gameId: string, want: boolean): Promise<number> {
   const countsName = `${DOCS()}/stats/likes`;
   const mineName = `${DOCS()}/games/${gameId}/likes/${uid}`;
   for (let attempt = 0; ; attempt++) {
-    const { transaction } = await post<{ transaction: string }>('documents:beginTransaction', {});
-    const got = await post<{ found?: { name: string; fields?: Fields }; missing?: string }[]>('documents:batchGet', {
+    const got = await post<{ found?: { name: string; fields?: Fields; updateTime: string }; missing?: string }[]>('batchGet', {
       documents: [countsName, mineName],
-      transaction,
     });
-    const counts = countsOf(got.find((g) => g.found?.name === countsName)?.found?.fields);
+    const tally = got.find((g) => g.found?.name === countsName)?.found;
     const has = got.some((g) => g.found?.name === mineName);
-    const now = counts[gameId] || 0;
+    const now = countsOf(tally?.fields)[gameId] || 0;
     if (has === want) return now;
     const next = Math.max(0, now + (want ? 1 : -1));
     const writes = [
-      { update: { name: countsName, fields: { [gameId]: { integerValue: String(next) } } }, updateMask: { fieldPaths: [gameId] } },
+      {
+        update: { name: countsName, fields: { [gameId]: { integerValue: String(next) } } },
+        updateMask: { fieldPaths: [gameId] },
+        currentDocument: tally ? { updateTime: tally.updateTime } : { exists: false },
+      },
       want
         ? {
             update: { name: mineName, fields: {} },
@@ -183,11 +189,11 @@ async function push(gameId: string, want: boolean): Promise<number> {
         : { delete: mineName, currentDocument: { exists: true } },
     ];
     try {
-      await post('documents:commit', { writes, transaction });
+      await post('commit', { writes });
       return next;
     } catch (e) {
-      // 다른 사람과 동시에 고쳐 트랜잭션이 밀렸으면(409 ABORTED) 몇 번 다시
-      if ((e as { status?: number }).status !== 409 || attempt >= 3) throw e;
+      const status = (e as { status?: number }).status;
+      if ((status !== 400 && status !== 409) || attempt >= 4) throw e;
     }
   }
 }

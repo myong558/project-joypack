@@ -299,7 +299,7 @@ service cloud.firestore {
     //   권한   합계는 누구나 읽기. 내 문서는 로그인(익명)한 본인만 읽기·만들기·지우기
     //          만들기·지우기는 같은 커밋에서 합계를 정확히 +1·−1 할 때만, 합계 바꾸기는 그 게임의 내 문서가 함께 생기거나 없어질 때만 받는다
     //          → 한 계정이 한 게임에 여러 번 올리거나 합계만 부풀릴 수 없다. 앱 데이터를 지우면 새 계정이라 다시 누를 수 있다(받아들인 빈틈)
-    //   게임   likeGame() 목록에 있는 게임만. 새 게임을 추가하면 목록에 더한다
+    //   게임   likeGame() 목록에 있는 게임만. 새 게임을 추가하면 likeGame() 과 likeTallyOk() 두 곳에 더한다
     // -------------------------------------------------------------------------------------------------
     function likeGame(g) {
       return g in ['updown', 'hammer', 'timetoflip', 'glasshouse'];
@@ -317,10 +317,17 @@ service cloud.firestore {
     function likeAfter(g) {
       return existsAfter(likeTallyPath()) ? getAfter(likeTallyPath()).data.get(g, 0) : 0;
     }
-    // 합계 문서 고치기: 게임 하나의 수만 ±1, 그 게임의 내 문서가 같은 커밋에서 생기거나(+1) 없어짐(−1)
+    // 합계 문서 고치기: 게임 하나의 수만 ±1, 그 게임의 내 문서가 같은 커밋에서 생기거나(+1) 없어짐(−1).
+    // 규칙의 Set 에는 원소를 꺼내는 함수가 없어 바뀐 칸이 어느 게임인지 게임마다 물어본다(likeGame 목록과 같게 유지)
     function likeTallyOk(before, after) {
       return after.diff(before).affectedKeys().size() == 1
-        && likeTallyKey(before, after, after.diff(before).affectedKeys().toList()[0]);
+        && (likeTallyIf(before, after, 'updown')
+          || likeTallyIf(before, after, 'hammer')
+          || likeTallyIf(before, after, 'timetoflip')
+          || likeTallyIf(before, after, 'glasshouse'));
+    }
+    function likeTallyIf(before, after, g) {
+      return after.diff(before).affectedKeys().hasAny([g]) && likeTallyKey(before, after, g);
     }
     function likeTallyKey(before, after, g) {
       return likeGame(g)
