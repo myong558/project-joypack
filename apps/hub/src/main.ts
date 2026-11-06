@@ -275,8 +275,8 @@ function installCard(): string {
   const guide = installGuide();
   return `
     <section class="install-card" aria-label="${t('install.title')}">
+      <!-- 바로 위 간판에 큰 로고가 있어 작은 로고는 두지 않는다(글줄을 넓혀 박스를 낮춤) -->
       <div class="install-row">
-        ${smallLogo(48)}
         <div>
           <strong>${invited ? t('invite.title') : t('install.title')}</strong>
           <p>${t('invite.desc')}</p>
