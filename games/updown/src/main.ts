@@ -473,7 +473,7 @@ async function share(): Promise<void> {
 
 // ── 랭킹(조이필드 공통 순위표 문서 방식, 범위마다 1~10위) ──
 // 정답을 맞힌 판이 TOP 10 에 들면 결과 화면 버튼 위에 이름 등록 카드를 띄운다. 등록 대기는 없어서, 올리지 않고 결과 화면을 떠나려 하면
-// leaveRankEntry 가 "등록하지 않고 나갈까요?"를 묻는다(모든 게임 같은 방식, 기준서 1.6).
+// leaveRankEntry 가 "등록하지 않고 넘어갈까요?"를 묻는다(모든 게임 같은 방식, 기준서 1.6).
 // 순위표는 마지막으로 받은 것을 기기에 두어 오프라인이어도 보여 주고 TOP 10 판단에 쓴다.
 const boards = loadBoards();
 const entries = (board: Preset) => boards[board] ?? [];

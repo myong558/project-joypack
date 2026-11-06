@@ -2,7 +2,7 @@
 //   html()          : 문자열 → 요소
 //   openModal()     : 화면 안 대화상자(Esc·바깥 누르기·닫기 단추·휴대폰 뒤로 가기로 닫힘)
 //   rankEntryForm() : 랭킹 이름 등록 카드(영문 대문자 5자, 금지어 거름, 등록 전·중·후·오프라인 높이 그대로)
-//   leaveRankEntry(): 결과 화면을 떠날 때 아직 올리지 않은 등록 카드가 있으면 "등록하지 않고 나갈까요?" 확인
+//   leaveRankEntry(): 결과 화면을 떠날 때 아직 올리지 않은 등록 카드가 있으면 "등록하지 않고 넘어갈까요?" 확인
 //   openRanking()   : 랭킹 창(탭·TOP 10 목록·온라인/오프라인 안내)
 // 모양(css)은 게임마다 자기 styles.css 에 둔다(같은 클래스 이름: .modal-backdrop .modal .rank-entry .ranking .rank-list …).
 // 문구·아이콘은 게임이 configureUi 로 한 번 넘긴다(게임 i18n 의 같은 키, 글꼴 서브셋 검사가 게임 문구에서 글자를 모으므로).
@@ -261,7 +261,7 @@ export function rankEntryForm(opts: RankEntryOptions): HTMLElement {
     try {
       place = await opts.onSubmit(cleanName(input.value));
     } catch {
-      // 연결이 안 되면 이 화면에서 다시 누르게 한다(나가려 하면 leaveRankEntry 가 기록이 사라진다고 알림)
+      // 연결이 안 되면 이 화면에서 다시 누르게 한다(넘어가려 하면 leaveRankEntry 가 기록이 사라진다고 알림)
       setState('failed');
       input.disabled = false;
       submit.textContent = label;
@@ -282,7 +282,7 @@ export function rankEntryForm(opts: RankEntryOptions): HTMLElement {
 
 /**
  * 결과 화면을 떠날 때(다시 하기·처음 화면으로·조이필드로·뒤로 가기·Esc) 부른다. host 안의 등록 카드가 아직 올리지 않은 상태(ready·failed)면
- * "등록하지 않고 나갈까요?"를 묻고 [나가기]면 go, [등록하기]·Esc·바깥 누르기·뒤로 가기면 창만 닫고 이름 칸으로 돌아간다.
+ * "등록하지 않고 넘어갈까요?"를 묻고 [넘어가기]면 go, [등록하기]·Esc·바깥 누르기·뒤로 가기면 창만 닫고 이름 칸으로 돌아간다.
  * 카드가 없거나 등록이 끝났거나 오프라인·올리는 중이면 바로 go. 이미 묻는 중이면 아무것도 하지 않는다
  */
 export function leaveRankEntry(host: ParentNode, go: () => void): void {
