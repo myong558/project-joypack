@@ -1,7 +1,7 @@
 {
   "name": "updown",
   "private": true,
-  "version": "1.24.0",
+  "version": "1.24.1",
   "author": "Myong Bum Soo",
   "license": "UNLICENSED",
   "type": "module",
