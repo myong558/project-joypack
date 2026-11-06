@@ -536,6 +536,23 @@ function renderHome(force = true): void {
   app.querySelector('[data-open="settings"]')!.addEventListener('click', openSettings);
   bindInstallCard(app);
   fitScreen();
+  // 설치 안내가 그린 뒤에 새로 나타났으면(브라우저의 "설치 가능" 신호는 첫 화면 뒤에 옴) 높이 0에서 부드럽게 펼친다:
+  // 휴대폰 세로는 아래 게임 카드가 천천히 내려가고, 두 단 화면은 왼쪽 간판(세로 가운데 정렬)이 천천히 올라간다
+  const install = app.querySelector<HTMLElement>('.install-card');
+  if (install && installWasShown === false && !REDUCED_MOTION) growIn(install);
+  installWasShown = !!install;
+}
+
+/** 첫 화면에 설치 안내가 있었는지(null = 아직 안 그림). 없다가 생길 때만 펼침 연출 */
+let installWasShown: boolean | null = null;
+
+/** 요소를 높이·바깥 여백·안쪽 여백 0에서 지금 크기로 펼친다(펼치는 동안만 넘친 부분을 가림) */
+function growIn(el: HTMLElement): void {
+  const cs = getComputedStyle(el);
+  const to = { height: `${el.offsetHeight}px`, marginTop: cs.marginTop, marginBottom: cs.marginBottom, paddingTop: cs.paddingTop, paddingBottom: cs.paddingBottom };
+  const from = { height: '0px', marginTop: '0px', marginBottom: '0px', paddingTop: '0px', paddingBottom: '0px' };
+  el.style.overflow = 'hidden';
+  el.animate([from, to], { duration: 520, easing: 'cubic-bezier(0.25, 0.8, 0.3, 1)' }).onfinish = () => (el.style.overflow = '');
 }
 
 // ---------- 화면 크기에 맞추기 ----------
