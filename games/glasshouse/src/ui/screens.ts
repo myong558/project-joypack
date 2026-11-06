@@ -369,6 +369,12 @@ function settingsPanel(opts: StartOptions): HTMLElement {
     resetBtn.focus();
   });
   confirm.querySelector('[data-confirm]')!.addEventListener('click', opts.onReset);
+  // 개발자 모드: 출시 화면 보기 ↔ 개발 보기(판 바로가기·풀이 보기를 숨기거나 다시 보임). 바꾼 뒤 설정 창을 다시 연다
+  if (!__JOYFIELD_PROD__)
+    el.querySelector('[data-release]')?.addEventListener('click', () => {
+      Joyfield.setReleaseView(!Joyfield.releaseView());
+      opts.onRefresh(true);
+    });
   return el;
 }
 
