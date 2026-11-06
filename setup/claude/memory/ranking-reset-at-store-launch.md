@@ -1,6 +1,6 @@
 ---
 name: ranking-reset-at-store-launch
-description: 안드로이드 마켓(플레이 스토어) 최초 등록 직전에 모든 게임 랭킹 초기화를 사용자에게 먼저 요청·안내할 것
+description: 안드로이드 마켓(플레이 스토어) 최초 등록 직전에 운영 Firestore(모든 랭킹·좋아요) 초기화를 사용자에게 먼저 요청·안내할 것
 metadata:
   node_type: memory
   type: project
@@ -15,7 +15,7 @@ metadata:
 **How to apply:**
 - 출시 준비·마켓 등록·TWA(Bubblewrap)·`assetlinks.json` 이야기가 나오면 이 할 일을 먼저 꺼낸다. 어느 PC 세션이든 같음(이 메모리는 `setup/claude/memory` 로 저장소에 있음).
 - 시점은 공개 직전(그 전에 지우면 테스트 기록이 다시 쌓임).
-- 규칙이 `delete: if false` 라 앱에서는 못 지운다. 콘솔에서 사람이 지울 것: `games/updown/rankings/*`(업다운 v1.21.0~, 옛 `scores-50`·`100`·`200` 컬렉션은 2026-11-05 규칙을 지워 막혔으니 남은 문서도 함께 지움), `games/hammer/rankings/*`, `games/timetoflip/rankings/*`, `games/glasshouse/rankings/*`(그 사이 새 게임이 생겼으면 `firestore.rules` 목차로 다시 확인). **좋아요(2026-11-06~)도 함께 비울지 묻는다**: `stats/likes` 문서와 `games/*/likes/*`(둘을 같이 지워야 수가 맞음, 운영 DB 에 테스트로 누른 것).
+- 규칙이 `delete: if false` 라 앱에서는 못 지운다. 콘솔에서 사람이 지울 것: `games/updown/rankings/*`(업다운 v1.21.0~, 옛 `scores-50`·`100`·`200` 컬렉션은 2026-11-05 규칙을 지워 막혔으니 남은 문서도 함께 지움), `games/hammer/rankings/*`, `games/timetoflip/rankings/*`, `games/glasshouse/rankings/*`(그 사이 새 게임이 생겼으면 `firestore.rules` 목차로 다시 확인). **좋아요도 함께 지운다(2026-11-07 사용자 결정, 운영 Firestore 를 모두 비움)**: `stats/likes` 문서와 `games/*/likes/*`(둘을 같이 지워야 수가 맞음, 운영 DB 에 테스트로 누른 것). Authentication 의 익명 계정은 지우지 않는다(지우면 테스터 기기가 다음에 누를 때 예전 좋아요를 다시 보냄). 테스터 기기는 하트가 켜진 채로 보이지만 끄고 다시 누르면 정상으로 잡힌다(문제 없음).
 - 초기화 뒤 허브·게임의 기기 저장 순위 사본은 다음에 랭킹을 열 때 새로 받으므로 따로 할 일 없음.
 - **같은 시점에 함께 알릴 것(2026-11-05 사용자 지시):** 최상위 도메인 페이지와 개인정보처리방침은 앱 완성 뒤 만들기로 미룸 → 앱 등록 직전에 "처리방침 공개 주소가 필요하다"고 먼저 알린다. 초안 `docs/drafts/privacy-policy.html`(좋아요용 익명 계정 id 항목을 더해야 함, 2026-11-06), 할 일 순서는 CLAUDE.md "스튜디오 최상위 사이트" 절.
 - 관련: [[two-pc-setup]] [[studio-domain-pocketgamelab]]
