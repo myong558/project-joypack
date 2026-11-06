@@ -125,6 +125,10 @@ const DECO_SHAPES = [
   ['smile', 16, 30, 24, 0],
   ['square', 40, 94, 26, 1],
   ['pad', 56, 62, 20, 0],
+  // 로고 새싹(앞으로 자라날 게임): 층마다 하나씩, 밑동을 축으로 살랑인다
+  ['sprout', 30, 70, 46, 2],
+  ['sprout', 68, 40, 24, 0],
+  ['sprout', 3, 78, 32, 1],
 ] as const;
 
 function mountDeco(): void {
@@ -134,7 +138,7 @@ function mountDeco(): void {
   deco.setAttribute('aria-hidden', 'true');
   deco.innerHTML = DECO_SHAPES.map(
     ([part, x, y, size, depth], i) =>
-      `<i class="${part}" data-depth="${depth}" style="left:${x}%;top:${y}%;--i:${i};--s:${size}px"><svg viewBox="0 0 24 24">${DECO_PART[part]}</svg></i>`,
+      `<i class="${part}" data-depth="${depth}" style="left:${x}%;top:${y}%;--i:${i};--s:${size}px">${part === 'sprout' ? `<svg viewBox="160 40 200 130"><g>${SPROUT}</g></svg>` : `<svg viewBox="0 0 24 24">${DECO_PART[part]}</svg>`}</i>`,
   ).join('');
   document.body.prepend(deco);
   // 시차: 손가락·마우스 위치와 스크롤에 따라 층마다 다르게 밀린다(가까운 층일수록 많이). 움직임 줄이기면 하지 않는다

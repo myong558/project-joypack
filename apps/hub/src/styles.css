@@ -448,6 +448,16 @@ h1 {
   --piece-shade: #d9572a;
 }
 
+/* 로고 새싹: 자기 색(잎 초록·그림자 주황)을 그대로 쓰고, 밑동을 축으로 천천히 살랑인다(다음 게임 띠와 같은 움직임) */
+.bg-deco .sprout svg {
+  filter: none;
+}
+.bg-deco .sprout svg > g {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: sprout-sway calc(3.2s + var(--i) * 0.15s) ease-in-out calc(var(--i) * -0.6s) infinite;
+}
+
 .bg-deco .smile svg {
   fill: none;
   stroke: var(--piece);
@@ -1073,14 +1083,6 @@ a.card:active .card-play {
   text-align: center;
 }
 
-/* 넓은 화면은 바둑판에 빈 칸이 남으므로 띠를 끝까지 늘이지 않고 글자 길이만큼, 카드 왼쪽 끝에 맞춘다 */
-@media (min-width: 720px) {
-  .next-strip {
-    width: fit-content;
-    max-width: 100%;
-    padding-inline: 20px;
-  }
-}
 
 /* 로고 속 새싹(앞으로 자라날 게임): 밑동을 축으로 천천히 살랑인다(깜박이지 않음) */
 .next-strip svg {
