@@ -324,3 +324,53 @@
   padding: 10px 14px;
   line-height: 1.2;
 }
+
+/* 좋아요 첫 안내(likes.ts likeTip, 기기에서 한 번만). 위 메뉴 바로 아래 가운데, 위 메뉴 버튼과 같은 판 모양.
+ * 글꼴은 게임 본문 글꼴을 물려받는다(Jua 를 몇 글자만 넣은 게임이 있어서). 내려오며 나타났다가 흐려지며 사라진다(깜박임 없음) */
+.jp-toast {
+  position: fixed;
+  top: calc(var(--jp-top-space) + 12px);
+  left: 50%;
+  z-index: 1000;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: min(360px, calc(100vw - 32px));
+  margin: 0;
+  padding: 12px 18px;
+  border: 1px solid var(--jp-top-line);
+  border-radius: 16px;
+  background: var(--jp-top-bg);
+  box-shadow: var(--jp-top-shadow);
+  color: var(--jp-top-ink);
+  font-size: 16px;
+  line-height: 1.45;
+  text-align: center;
+  word-break: keep-all;
+  pointer-events: none;
+  transform: translateX(-50%);
+  animation: jp-toast-in 0.28s ease-out;
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s ease;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.jp-toast-out {
+  opacity: 0;
+  transform: translate(-50%, -6px);
+}
+@keyframes jp-toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -8px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jp-toast {
+    animation: none;
+    transition: opacity 0.4s ease;
+  }
+  .jp-toast-out {
+    transform: translateX(-50%);
+  }
+}

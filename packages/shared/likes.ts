@@ -9,11 +9,13 @@
 // 화면은 누르는 즉시 바뀌고, 서버에는 뒤에서 보낸다. 오프라인이면 기기에 남겨 두었다가 연결되거나 다음에 열 때 보낸다.
 import './joyfield.js';
 import { playRecipe } from './sfx.js';
+import { LIKE_TIP } from './likes-tip.js';
 
 const ENV = Joyfield.FIREBASE_ENV;
 const STATE_KEY = `joyfield.likes.${ENV}`; // { mine: 내가 좋아요한 게임 id[], sent: 서버에 반영된 게임 id[] }
 const COUNTS_KEY = `joyfield.likeCounts.${ENV}`; // { 게임 id: 수 } 마지막으로 받은 합계
 const AUTH_KEY = `joyfield.likeAuth.${ENV}`; // { uid, refresh } 익명 계정(기기 저장을 지우면 새 계정)
+const TIP_KEY = 'joyfield.likeTip'; // '1' = 좋아요 첫 안내를 이 기기에서 이미 보여 줌(모든 게임 함께, 개발·운영 구분 없음)
 
 const TIMEOUT_MS = 8000;
 
@@ -260,6 +262,27 @@ function pop() {
 }
 
 /**
+ * 좋아요 첫 안내: 이 기기에서 처음 좋아요를 켤 때 한 번만(어느 게임이든 처음 한 번, 그 뒤로는 어느 게임에서도 안 뜸).
+ * 위 메뉴 바로 아래 가운데에 잠깐 떴다가 사라진다(깜박임 없이 한 번 내려왔다 사라짐, topbar.css .jp-toast).
+ * 기기 저장을 못 쓰는 환경(시크릿 창 등)에서는 띄우지 않는다(누를 때마다 뜨는 것을 막으려고)
+ */
+function likeTip() {
+  try {
+    if (localStorage.getItem(TIP_KEY)) return;
+    localStorage.setItem(TIP_KEY, '1');
+  } catch {
+    return;
+  }
+  const el = document.createElement('p');
+  el.className = 'jp-toast';
+  el.setAttribute('role', 'status');
+  el.textContent = ko() ? LIKE_TIP.ko : LIKE_TIP.en;
+  document.body.append(el);
+  setTimeout(() => el.classList.add('jp-toast-out'), 3600);
+  setTimeout(() => el.remove(), 4000);
+}
+
+/**
  * 게임 시작 화면 위 메뉴 왼쪽(조이필드 버튼 옆)의 좋아요 버튼 "♡ 12". 누르면 켜고 끈다(게임을 안 해 봤어도 누를 수 있음).
  * 0개면 하트만 있는 동그란 버튼. 화면을 다시 그리면 새로 만들면 된다(지난 버튼은 화면에서 빠지면 저절로 멈춤)
  */
@@ -287,6 +310,7 @@ export function likeButton(gameId: string): HTMLButtonElement {
       btn.classList.remove('jp-like-pop');
       void btn.offsetWidth;
       btn.classList.add('jp-like-pop');
+      likeTip();
     }
   });
   btn.addEventListener('animationend', () => btn.classList.remove('jp-like-pop'));
