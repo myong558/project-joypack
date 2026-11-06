@@ -1024,11 +1024,19 @@ window.addEventListener('storage', (e) => {
 });
 
 // 서비스 워커: 허브는 설치 때 미리 캐시, 게임은 처음 열 때 캐시(README 4.1).
-// 새 버전이 화면을 넘겨받으면, 대화 상자가 열려 있지 않을 때 한 번 새로 고쳐 바로 보여 준다
+// 새 버전이 화면을 넘겨받으면, 대화 상자가 열려 있지 않을 때 한 번 새로 고쳐 바로 보여 준다.
+// 창이 열려 있어 미뤘으면(예: 버전을 보려고 설정을 연 사이 새 버전이 들어옴) 화면이 안 보일 때(앱을 내렸을 때) 새로 고친다.
+// 예전에는 미룬 뒤 다시 시도하지 않아 앱을 완전히 닫기 전까지 옛 버전에 머물렀다(허브 v1.43.3)
 if ('serviceWorker' in navigator) {
   const hadController = !!navigator.serviceWorker.controller;
+  let reloadPending = false;
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (hadController && !document.querySelector('dialog[open]')) location.reload();
+    if (!hadController) return;
+    if (document.visibilityState === 'hidden' || !document.querySelector('dialog[open]')) location.reload();
+    else reloadPending = true;
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (reloadPending && document.visibilityState === 'hidden') location.reload();
   });
   // 서비스 워커가 게임 캐시를 다 받으면 알려 준다 → "오프라인 가능" 표시 갱신
   navigator.serviceWorker.addEventListener('message', (e) => {
