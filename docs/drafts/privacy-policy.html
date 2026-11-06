@@ -97,7 +97,7 @@
   </header>
 
   <article id="ko" lang="ko">
-    <p class="summary">Pocket Game Lab(이하 "운영자")은 미니 게임 마당 <b>조이필드(Joyfield)</b>와 그 안의 게임(이하 "서비스")을 운영합니다. 서비스는 회원 가입·로그인이 없고, 이름·이메일·전화번호·위치·기기 식별자·광고 식별자를 받지 않습니다. 서버에 남는 것은 이용자가 직접 순위표(랭킹)에 등록한 <b>기록</b>뿐입니다.</p>
+    <p class="summary">Pocket Game Lab(이하 "운영자")은 미니 게임 마당 <b>조이필드(Joyfield)</b>와 그 안의 게임(이하 "서비스")을 운영합니다. 서비스는 회원 가입·로그인이 없고, 이름·이메일·전화번호·위치·기기 식별자·광고 식별자를 받지 않습니다. 서버에 남는 것은 이용자가 직접 순위표(랭킹)에 등록한 <b>기록</b>과, 게임에 누른 <b>좋아요</b>(무작위 익명 번호)뿐입니다.</p>
 
     <h2><span class="n">1.</span>처리하는 개인정보 항목</h2>
     <p>이용자가 게임을 마친 뒤 순위표에 기록을 등록할 때만 아래 항목이 서버에 저장됩니다. 등록하지 않으면 아무것도 서버로 보내지 않습니다.</p>
@@ -107,11 +107,17 @@
       <li>등록 시각</li>
       <li>플레이 입력 종류: "모바일(터치)" 또는 "PC(마우스)" 두 값 중 하나(기기를 구별할 수 없는 값입니다)</li>
     </ul>
+    <p>게임 시작 화면에서 <b>좋아요</b>를 누를 때만 아래 항목이 저장됩니다. 한 게임에 한 번만 누를 수 있게 하려는 것입니다.</p>
+    <ul>
+      <li>익명 계정 번호: 처음 좋아요를 누를 때 Google Firebase 가 만드는 무작위 값(이름·이메일·전화번호와 이어지지 않으며, 앱 데이터를 지우면 새 번호가 됩니다)</li>
+      <li>좋아요한 게임과 누른 시각</li>
+    </ul>
     <p>또한 웹사이트와 데이터베이스를 제공하는 업체(4번)는 서비스를 전달하는 과정에서 접속 IP 주소, 브라우저 종류 같은 기술 정보를 자체 보안·운영 목적으로 잠시 처리할 수 있습니다. 운영자는 이 정보를 따로 모으거나 보관하지 않습니다.</p>
 
     <h2><span class="n">2.</span>처리 목적</h2>
     <ul>
       <li>게임 순위표를 만들어 모든 이용자에게 보여 주기</li>
+      <li>게임별 좋아요 수를 세어 보여 주고, 한 게임에 한 번만 누르게 하기</li>
       <li>규칙에 맞지 않는 기록·부적절한 이름을 걸러 내기(금지어 검사, 점수 범위 검사)</li>
     </ul>
     <p>순위표는 공개되므로 등록한 랭킹 이름과 기록은 다른 이용자에게 보입니다. 랭킹 이름에는 실명이나 남이 알아볼 수 있는 정보를 쓰지 않기를 권합니다.</p>
@@ -171,7 +177,7 @@
   </article>
 
   <article id="en" lang="en">
-    <p class="summary">Pocket Game Lab ("we") operates <b>Joyfield</b>, a collection of mini games, and the games in it (the "Service"). The Service has no sign-up or login, and we do not collect names, email addresses, phone numbers, location, device identifiers or advertising identifiers. The only thing stored on our servers is a <b>score</b> that you choose to submit to a leaderboard.</p>
+    <p class="summary">Pocket Game Lab ("we") operates <b>Joyfield</b>, a collection of mini games, and the games in it (the "Service"). The Service has no sign-up or login, and we do not collect names, email addresses, phone numbers, location, device identifiers or advertising identifiers. The only things stored on our servers are a <b>score</b> that you choose to submit to a leaderboard and the <b>likes</b> you tap (with a random anonymous ID).</p>
 
     <h2><span class="n">1.</span>Information we process</h2>
     <p>The following is stored only when you submit a score to a leaderboard after a game. If you do not submit, nothing is sent to our servers.</p>
@@ -181,11 +187,17 @@
       <li>Time of submission</li>
       <li>Input type: either "mobile (touch)" or "PC (mouse)" — a two-value field that cannot identify a device</li>
     </ul>
+    <p>When you tap <b>Like</b> on a game's start screen, the following is stored so that each game can be liked only once:</p>
+    <ul>
+      <li>Anonymous account ID: a random value created by Google Firebase the first time you tap Like (not linked to any name, email or phone number; clearing app data creates a new one)</li>
+      <li>The game you liked and the time</li>
+    </ul>
     <p>Our hosting and database providers (Section 4) may briefly process technical data such as IP address and browser type to deliver and secure their services. We do not collect or keep this data ourselves.</p>
 
     <h2><span class="n">2.</span>Why we process it</h2>
     <ul>
       <li>To build game leaderboards and show them to all players</li>
+      <li>To count and show likes per game, and to allow one like per game</li>
       <li>To filter out invalid scores and inappropriate names (word filter, score range checks)</li>
     </ul>
     <p>Leaderboards are public, so your leaderboard name and score are visible to other players. Please do not use your real name or anything that identifies you.</p>

@@ -26,7 +26,7 @@ import {
   type Preset,
   type Temp,
 } from './game/rules';
-import { LANGS, getLang, luckLines, setLang, t, type Lang, type MessageKey } from './i18n';
+import { getLang, luckLines, setLang, t, type Lang, type MessageKey } from './i18n';
 import { fetchBoard, submitEntry } from './online';
 import { placeOf, type PlayRecord, type RankEntry } from './ranking';
 import { captureResult, shareResult } from './share';
@@ -49,6 +49,7 @@ import {
 import { icon, SPRITE } from './ui/icons';
 import { customPanel, settingsPanel, thermoPanel, type Theme } from './ui/panels';
 import { APP } from './ui/screens';
+import { likeButton, refreshLikes } from '@joyfield/shared/likes';
 
 // ── 화면 틀 ──
 document.body.insertAdjacentHTML('afterbegin', SPRITE);
@@ -58,6 +59,9 @@ app.innerHTML = APP;
 configureUi({ t, icons: { trophy: icon('trophy'), close: icon('close') } });
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
+// 위 메뉴 조이필드 버튼 옆 좋아요(조이필드 공통, 기준서 1.13). 언어는 기기 언어로 정해지고 설정 창에서 바꾼다
+const likeBtn = likeButton('updown');
+$('hub-link').after(likeBtn);
 type ScreenName = 'start' | 'play' | 'result';
 const screens: Record<ScreenName, HTMLElement> = { start: $('screen-start'), play: $('screen-play'), result: $('screen-result') };
 
@@ -81,9 +85,9 @@ let finish: Finish | null = null;
 function show(name: ScreenName): void {
   screen = name;
   (Object.keys(screens) as ScreenName[]).forEach((key) => (screens[key].hidden = key !== name));
-  // 왼쪽 위: 시작 화면은 조이필드 게임 목록·언어 전환, 게임 화면은 홈. 오른쪽 위 설정 버튼은 항상 보인다.
+  // 왼쪽 위: 시작 화면은 조이필드 게임 목록·좋아요, 게임 화면은 홈. 오른쪽 위 설정 버튼은 항상 보인다.
   $('hub-link').hidden = name !== 'start';
-  $('lang-toggle').hidden = name !== 'start';
+  likeBtn.hidden = name !== 'start';
   $('home').hidden = name !== 'play';
   $('ranking-open').hidden = name === 'play';
   if (name !== 'start') endIntro();
@@ -151,8 +155,8 @@ function renderStaticTexts(): void {
   document.documentElement.lang = getLang();
   document.title = t('app.title');
   document.querySelectorAll<HTMLElement>('[data-i18n]').forEach((el) => (el.textContent = t(el.dataset.i18n as MessageKey)));
-  // 언어 버튼 글자는 바꿀 언어로 쓰여 있으므로 그 언어를 단다(위 메뉴 공통 css 가 한글이면 조금 더 내린다)
-  $('lang-toggle').querySelector('span')!.lang = LANGS[(LANGS.indexOf(getLang()) + 1) % LANGS.length];
+  // 좋아요 버튼 읽어 주기 이름도 새 언어로
+  refreshLikes();
   document.querySelectorAll<HTMLElement>('[data-i18n-aria-label]').forEach((el) => el.setAttribute('aria-label', t(el.dataset.i18nAriaLabel as MessageKey)));
   document.querySelectorAll<HTMLInputElement>('[data-i18n-placeholder]').forEach((el) => (el.placeholder = t(el.dataset.i18nPlaceholder as MessageKey)));
 }
@@ -941,7 +945,6 @@ $('home').addEventListener('click', goToStart);
 $('retry').addEventListener('click', () => leaveResult(() => startGame(game.max, !game.ranked)));
 $('go-home').addEventListener('click', () => leaveResult(goToStart));
 $('share').addEventListener('click', () => void share());
-$('lang-toggle').addEventListener('click', () => changeLang(LANGS[(LANGS.indexOf(getLang()) + 1) % LANGS.length]));
 $('settings-open').addEventListener('click', () => openSettings());
 $('ranking-open').addEventListener('click', () => openRanking());
 $('thermo-open').addEventListener('click', openThermo);

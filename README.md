@@ -186,7 +186,8 @@ dist/                       → https://pocketgamelab.com/joyfield/ (배포 묶�
   - 불러온 순위는 기기(`joyfield.rankingCache`)에 남겨 두고 5분 안에 다시 열면 서버를 부르지 않습니다. 오프라인·실패 때는 마지막 순위를 보여 줍니다.
   - 허브는 SDK 없이 REST 로 읽기만 합니다(등록은 각 게임). 업다운 조회는 게임과 같은 정렬(범위별 컬렉션의 점수 내림차순)이라 복합 색인이 필요 없습니다.
 - 무료 한도(하루 읽기 5만·쓰기 2만)는 모든 게임이 나눠 씁니다. 게임이 늘면 한도 사용량을 콘솔에서 주기적으로 확인합니다.
-- API 키에 HTTP 리퍼러 제한을 걸어 두었다면 `pocketgamelab.com/*`·`dev.pocketgamelab.com/*` 를 추가합니다(Google Cloud 콘솔 → API 및 서비스 → 사용자 인증 정보). 로그인(Firebase Auth)을 쓰지 않아 Firebase 의 허용 도메인 설정은 필요 없습니다.
+- API 키에 HTTP 리퍼러 제한을 걸어 두었다면 `pocketgamelab.com/*`·`dev.pocketgamelab.com/*` 를 추가합니다(Google Cloud 콘솔 → API 및 서비스 → 사용자 인증 정보). API 제한을 걸었다면 Cloud Firestore API 와 함께 좋아요용 **Identity Toolkit API·Token Service API** 도 허용합니다.
+- **좋아요(기준서 1.13, 2026-11-06~)는 Firebase 익명 인증**을 씁니다(이름·이메일 없음, 기기마다 무작위 uid). 두 프로젝트 모두 콘솔 → Authentication → 시작하기 → Sign-in method → **익명(Anonymous) 사용 설정**이 필요합니다. 로그인 창을 띄우지 않고 REST 로만 부르므로 허용 도메인 설정은 필요 없습니다. 저장은 `games/<id>/likes/<uid>`·`stats/likes`(규칙 "■ 좋아요"), 허브는 `stats/likes` 문서 하나만 읽습니다.
 
 ### 4.5 게임 목록 메타 (`games.json`)
 

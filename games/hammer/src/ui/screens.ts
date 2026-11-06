@@ -8,6 +8,7 @@ import { LANGS, getLang, moleDesc, moleName, t, type Lang, type MessageKey } fro
 import type { SaveData } from '../storage';
 import { closeButton, html, openModal as openSharedModal, openRanking as openSharedRanking, pauseLayer, rankEntryForm } from '@joyfield/shared/ui';
 import { shortDate } from '@joyfield/shared/rank';
+import { likeButton } from '@joyfield/shared/likes';
 import { boardEntries } from '../ranking';
 import { SKIN_SETTINGS, THEMES, type Skin, type SkinSetting, type Theme } from '../theme';
 import { createMoleEl, holeInner } from './board';
@@ -70,14 +71,11 @@ export function startScreen(opts: StartOptions): HTMLElement {
   // 개발자 모드(출시 화면 보기 꺼짐)면 도감을 모두 열어 보인다. 저장된 기록(save.dex)은 그대로 둔다
   const dex = new Set<MoleKind>(!__JOYFIELD_PROD__ && Joyfield.devJump() ? MOLE_ORDER : save.dex);
   const dailyBest = save.daily?.date === opts.today ? save.daily.best : 0;
-  const lang = getLang();
-  const otherLang = LANGS.find((l) => l !== lang)!;
   const el = html(`
     <main class="screen start">
       <nav class="jp-topbar" aria-label="${t('app.title')}">
         <div class="jp-topbar-group">
           <a class="jp-top-btn hub-btn" href="../../" aria-label="${t('nav.hub')}" title="${t('nav.hub')}">${Joyfield.topIcon('apps')}</a>
-          <button class="jp-top-btn jp-top-pill top-lang" data-lang="${otherLang}" aria-label="${t('lang.label')}: ${LANG_LABEL[lang]} → ${LANG_LABEL[otherLang]}">${Joyfield.topIcon('globe')}<span lang="${otherLang}">${LANG_LABEL[otherLang]}</span></button>
         </div>
         <div class="jp-topbar-group">
           <button class="jp-top-btn rank-btn" data-ranking aria-label="${t('ranking.open')}" title="${t('ranking.open')}">${Joyfield.topIcon('trophy')}</button>
@@ -182,7 +180,8 @@ export function startScreen(opts: StartOptions): HTMLElement {
   el.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((b) =>
     b.addEventListener('click', () => opts.onPlay(b.dataset.mode as Mode)),
   );
-  el.querySelector('.top-lang')!.addEventListener('click', () => opts.onLang(otherLang));
+  // 위 메뉴 조이필드 버튼 옆 좋아요(조이필드 공통, 기준서 1.13). 언어는 기기 언어로 정해지고 설정 창에서 바꾼다
+  el.querySelector('.hub-btn')!.after(likeButton('hammer'));
   el.querySelectorAll<HTMLButtonElement>('.dex [data-kind]').forEach((b) =>
     b.addEventListener('click', () => {
       const found = MOLE_ORDER.filter((k) => dex.has(k));

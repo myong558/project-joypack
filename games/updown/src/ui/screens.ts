@@ -10,9 +10,6 @@ export const APP = `
     <button id="home" type="button" class="jp-top-btn jp-top-pill" data-top-icon="home" hidden>
       <span data-i18n="nav.home"></span>
     </button>
-    <button id="lang-toggle" type="button" class="jp-top-btn jp-top-pill" data-top-icon="globe" data-i18n-aria-label="lang.switchLabel">
-      <span data-i18n="lang.switch"></span>
-    </button>
   </div>
   <div class="jp-topbar-group">
     <button id="ranking-open" type="button" class="jp-top-btn" data-top-icon="trophy" aria-haspopup="dialog"></button>

@@ -8,6 +8,7 @@ import { LANG_LABEL, LANGS, formatNumber, getLang, t, type MessageKey } from './
 import { FULL, TOP, cachedBoard, hasRanking, loadBoard, type Row } from './rankings';
 import { externalOpenUrl, installState, isIos, manualGuide, onInstallChange, playStoreUrl, promptInstall } from './install';
 import { previewOn } from './preview';
+import { HEART_SVG, formatLikes, isLiked, likeCount, likeLabel, refreshLikeCounts } from '@joyfield/shared/likes';
 import { bindSettings, choiceGroup, devSection, switchRow } from '@joyfield/shared/settings';
 import { bestRecord, canClearRecords, clearRecords } from './records';
 import { THEMES, applySettings, applyTheme, canVibrate, loadSettings, migrateLegacy, saveSetting, watchSystemTheme } from './settings';
@@ -319,6 +320,29 @@ async function refreshCached(): Promise<void> {
   await Promise.all(live.map(async (g) => cached.set(g.id, await Joyfield.isGameCached(g.id))));
 }
 
+// 좋아요(기준서 1.13): 카드 그림판 왼쪽 아래(▶ 반대편)에 하트와 수. 누르는 버튼이 아니라 표시라 테두리·그림자 없이 납작하게.
+// 누르는 곳은 게임 시작 화면 위 메뉴(카드 전체가 링크라 하트를 눌러도 그 게임 시작 화면이 열림)
+function likeChip(id: string): string {
+  return `<span class="card-like${isLiked(id) ? ' on' : ''}" data-like="${id}" aria-hidden="true">${HEART_SVG}<b>${formatLikes(likeCount(id))}</b></span>`;
+}
+
+function cardLabel(game: GameMeta, test: boolean, fresh: boolean): string {
+  const tag = test ? `${t('game.testLabel')} · ` : fresh ? `${t('game.newLabel')} · ` : '';
+  return esc(`${tag}${game.name[getLang()]} — ${t('game.play')} · ${likeLabel(game.id)}`);
+}
+
+/** 받은 좋아요 수를 카드에 바로 반영한다(다시 그리면 진입 연출이 처음부터 돌아 그 자리만 고침) */
+function paintLikes(): void {
+  app.querySelectorAll<HTMLElement>('.card-like[data-like]').forEach((chip) => {
+    const id = chip.dataset.like!;
+    chip.classList.toggle('on', isLiked(id));
+    chip.querySelector('b')!.textContent = formatLikes(likeCount(id));
+    const card = chip.closest<HTMLElement>('.card');
+    card?.setAttribute('aria-label', card.getAttribute('aria-label')!.replace(/ · [^·]*$/, ` · ${likeLabel(id)}`));
+  });
+}
+const loadLikes = () => void refreshLikeCounts().then(paintLikes);
+
 function gameCard(game: GameMeta): string {
   const name = game.name[getLang()];
   const best = bestRecord(game);
@@ -333,8 +357,8 @@ function gameCard(game: GameMeta): string {
   // 게임이 계속 늘어나므로 휴대폰 두 칸, 넓은 화면은 칸 수가 늘어나는 바둑판으로 쌓는다(styles.css .games)
   return `
     <a class="card${blocked ? ' blocked' : ''}" href="${game.path}" style="--c:${game.color}" data-game="${game.id}"
-       ${blocked ? 'aria-disabled="true"' : ''} aria-label="${test ? `${t('game.testLabel')} · ` : fresh ? `${t('game.newLabel')} · ` : ''}${esc(name)} — ${t('game.play')}">
-      <span class="card-art" data-pat="${patternOf(game)}">${test ? `<span class="card-new test" aria-hidden="true">${t('game.test')}</span>` : fresh ? `<span class="card-new" aria-hidden="true">${t('game.new')}</span>` : ''}<img class="card-icon" src="${iconUrl(game)}" alt="" width="72" height="72" />${(!__JOYFIELD_PROD__ && previewOn()) && __GAME_VERSIONS__[game.id] ? `<span class="card-ver" aria-hidden="true">v${__GAME_VERSIONS__[game.id]}</span>` : ''}</span>
+       ${blocked ? 'aria-disabled="true"' : ''} aria-label="${cardLabel(game, test, fresh)}">
+      <span class="card-art" data-pat="${patternOf(game)}">${test ? `<span class="card-new test" aria-hidden="true">${t('game.test')}</span>` : fresh ? `<span class="card-new" aria-hidden="true">${t('game.new')}</span>` : ''}<img class="card-icon" src="${iconUrl(game)}" alt="" width="72" height="72" />${likeChip(game.id)}${(!__JOYFIELD_PROD__ && previewOn()) && __GAME_VERSIONS__[game.id] ? `<span class="card-ver" aria-hidden="true">v${__GAME_VERSIONS__[game.id]}</span>` : ''}</span>
       <span class="card-body">
         <span class="card-play" aria-hidden="true">${ICON.play}</span>
         <strong class="card-name">${esc(name)}</strong>
@@ -565,6 +589,7 @@ function startHome(): void {
   mountDeco();
   scheduleOpen();
   playIntro(cameFromGame());
+  loadLikes();
 }
 
 /**
@@ -1008,11 +1033,15 @@ window.addEventListener('pageshow', (e) => {
   live = shownGames();
   const before = cachedKey();
   playIntro(true);
+  loadLikes();
   void refreshCached().then(() => {
     if (cachedKey() !== before) requestRender();
   });
 });
-window.addEventListener('online', () => void refreshHome());
+window.addEventListener('online', () => {
+  void refreshHome();
+  loadLikes();
+});
 window.addEventListener('offline', () => void refreshHome());
 // 다른 탭(게임)에서 바꾼 설정·기록을 따라간다
 window.addEventListener('storage', (e) => {

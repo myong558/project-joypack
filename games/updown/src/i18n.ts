@@ -11,8 +11,6 @@ const tries = (n: string | number | boolean) => n + (n === 1 ? ' try' : ' tries'
 
 const MESSAGES = {
   ko: {
-    'lang.switch': 'English',
-    'lang.switchLabel': 'Switch to English',
     'app.title': '업다운 게임',
     'app.desc': 'UP · DOWN 힌트로 숨은 숫자 맞히기',
     'board.level': (p: P) => '1 ~ ' + p.max,
@@ -208,8 +206,6 @@ const MESSAGES = {
     'confirm.delete': '지우기',
   },
   en: {
-    'lang.switch': '한국어',
-    'lang.switchLabel': '한국어로 변경',
     'app.title': 'Up-Down Game',
     'app.desc': 'Find the hidden number with UP/DOWN hints',
     'board.level': (p: P) => '1 ~ ' + p.max,

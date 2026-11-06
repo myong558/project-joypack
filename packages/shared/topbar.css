@@ -171,6 +171,40 @@
   opacity: 0.18;
 }
 
+/* 좋아요 버튼(게임 시작 화면 위 메뉴, likes.ts likeButton). 0개면 동그란 하트, 1개부터 "♡ 12" 알약.
+ * 좋아요한 상태는 하트 속을 채우고 하트·글자를 다홍색으로. 누르면 하트만 한 번 통 튄다(깜박임 없음) */
+.jp-like {
+  --jp-like: #f0466a;
+}
+.jp-like > span {
+  font-variant-numeric: tabular-nums;
+}
+.jp-like[aria-pressed='true'] {
+  color: var(--jp-like);
+}
+.jp-like[aria-pressed='true'] svg .jp-heart {
+  fill: currentColor;
+}
+.jp-like-pop svg {
+  animation: jp-like-pop 0.36s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+@keyframes jp-like-pop {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.28);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jp-like-pop svg {
+    animation: none;
+  }
+}
+
 /* 랭킹 이름 옆 기기 아이콘(Joyfield.deviceIcon: 휴대폰 = 모바일, 모니터 = PC). 이름 글자 크기를 따라가고 옅게 */
 .jp-dev {
   display: inline-block;

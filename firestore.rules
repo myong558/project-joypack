@@ -11,6 +11,7 @@
 //   ■ 두더지잡기  games/hammer/rankings/{classic|daily-YYYY-MM-DD}   순위표 1개 = 문서 1개
 //   ■ 타임 투 플립 games/timetoflip/rankings/{classic|daily-YYYY-MM-DD}   순위표 1개 = 문서 1개
 //   ■ 온실정원   games/glasshouse/rankings/{garden|daily-YYYY-MM-DD}   순위표 1개 = 문서 1개(이름마다 한 줄)
+//   ■ 좋아요      games/{게임ID}/likes/{uid} · stats/likes   익명 계정 1개당 게임마다 1번(2026-11-06~)
 // =====================================================================================================
 rules_version = '2';
 service cloud.firestore {
@@ -290,6 +291,62 @@ service cloud.firestore {
         && ((board == 'garden' && ghInsert(resource.data.entries, request.resource.data.entries))
           || (ghDailyBoard() && ghDailyInsert(resource.data.entries, request.resource.data.entries)));
       allow delete: if false;
+    }
+    // -------------------------------------------------------------------------------------------------
+    // ■ 좋아요 (packages/shared/likes.ts, 기준서 1.13)
+    //   경로   games/{게임ID}/likes/{uid}   누른 기기 1개 = 문서 1개 { at: 서버 시각 }. uid 는 Firebase 익명 인증의 무작위 값(개인정보 아님)
+    //          stats/likes                  { 게임ID: 수, ... } 게임별 합계. 허브 카드·시작 화면이 문서 1개로 읽는다
+    //   권한   합계는 누구나 읽기. 내 문서는 로그인(익명)한 본인만 읽기·만들기·지우기
+    //          만들기·지우기는 같은 커밋에서 합계를 정확히 +1·−1 할 때만, 합계 바꾸기는 그 게임의 내 문서가 함께 생기거나 없어질 때만 받는다
+    //          → 한 계정이 한 게임에 여러 번 올리거나 합계만 부풀릴 수 없다. 앱 데이터를 지우면 새 계정이라 다시 누를 수 있다(받아들인 빈틈)
+    //   게임   likeGame() 목록에 있는 게임만. 새 게임을 추가하면 목록에 더한다
+    // -------------------------------------------------------------------------------------------------
+    function likeGame(g) {
+      return g in ['updown', 'hammer', 'timetoflip', 'glasshouse'];
+    }
+    function likeTallyPath() {
+      return /databases/$(db)/documents/stats/likes;
+    }
+    function likeMinePath(g, uid) {
+      return /databases/$(db)/documents/games/$(g)/likes/$(uid);
+    }
+    // 커밋 전·후 합계(문서가 아직 없으면 0)
+    function likeBefore(g) {
+      return exists(likeTallyPath()) ? get(likeTallyPath()).data.get(g, 0) : 0;
+    }
+    function likeAfter(g) {
+      return existsAfter(likeTallyPath()) ? getAfter(likeTallyPath()).data.get(g, 0) : 0;
+    }
+    // 합계 문서 고치기: 게임 하나의 수만 ±1, 그 게임의 내 문서가 같은 커밋에서 생기거나(+1) 없어짐(−1)
+    function likeTallyOk(before, after) {
+      return after.diff(before).affectedKeys().size() == 1
+        && likeTallyKey(before, after, after.diff(before).affectedKeys().toList()[0]);
+    }
+    function likeTallyKey(before, after, g) {
+      return likeGame(g)
+        && after.get(g, -1) is int
+        && ((after[g] == before.get(g, 0) + 1 && existsAfter(likeMinePath(g, request.auth.uid)) && !exists(likeMinePath(g, request.auth.uid)))
+          || (after[g] == before.get(g, 0) - 1 && after[g] >= 0 && !existsAfter(likeMinePath(g, request.auth.uid)) && exists(likeMinePath(g, request.auth.uid))));
+    }
+
+    match /stats/likes {
+      allow read: if true;
+      allow create: if request.auth != null && likeTallyOk({}, request.resource.data);
+      allow update: if request.auth != null && likeTallyOk(resource.data, request.resource.data);
+      allow delete: if false;
+    }
+
+    match /games/{g}/likes/{uid} {
+      allow get: if request.auth != null && request.auth.uid == uid;
+      allow list: if false;
+      allow create: if request.auth != null && request.auth.uid == uid
+        && likeGame(g)
+        && request.resource.data.keys().hasOnly(['at'])
+        && request.resource.data.at == request.time
+        && likeAfter(g) == likeBefore(g) + 1;
+      allow delete: if request.auth != null && request.auth.uid == uid
+        && likeAfter(g) == likeBefore(g) - 1;
+      allow update: if false;
     }
   }
 }
