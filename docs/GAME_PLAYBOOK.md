@@ -464,7 +464,8 @@ games/<id>/
 | 2 | `games/<id>/joyfield.meta.ts` | 허브 연결 메타(`@joyfield/shared/meta` 의 `HubMeta` 를 default 로): `best()`(허브 카드 "최고 …" 문구 값, 기록 없으면 null), `clear()`(허브 "내 기록 지우기", 게임 안 버튼과 같은 범위), `ranking`(순위표 문서 방식이면 `boardDoc('<id>')` 한 줄). 허브가 `import.meta.glob` 으로 저절로 모으므로 **허브 코드는 고치지 않음**. 게임 `tsconfig.json` 의 include 에 `joyfield.meta.ts` 를 넣어 타입 검사 |
 | 3 | (없음) | 예전에는 `apps/hub/src/records.ts`·`rankings.ts` 에 게임마다 적었다(허브 v1.41.0부터 2번 메타로 바뀜) |
 | 4 | `apps/hub/src/i18n.ts` | 허브 카드 최고 기록 문구(`best.<id>`) |
-| 5 | `firestore.rules` | `games/<id>/…` 블록 추가 → Firebase 콘솔에 게시(사람이 해야 함, 답변에 알림) |
+| 5 | `firestore.rules` | `games/<id>/…` 블록 추가 + "■ 좋아요"의 `likeGame()`·`likeTallyOk()` 두 곳에 id 추가(1.13) → Firebase 콘솔 운영·개발 두 곳에 게시(사람이 해야 함, 답변에 알림) |
+| 5-1 | 시작 화면 위 메뉴 | 조이필드 버튼(`.hub-btn`) 뒤에 `likeButton('<id>')`(`@joyfield/shared/likes`). 언어 버튼은 두지 않음(1.3·1.13) |
 | 6 | 허브 글꼴 | 게임 이름·설명이 허브에 새 글자를 쓰면 `pnpm --filter hub font` |
 | 7 | 버전 | 게임 `package.json` version(처음 `0.1.0`, 공개 때 `1.0.0`). 허브를 고쳤으면 루트 `package.json` |
 | 8 | 문서 | 이 문서 3.1 등록부·8장 현황표, 루트 README 1장 표 |
