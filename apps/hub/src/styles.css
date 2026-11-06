@@ -1915,6 +1915,12 @@ a.primary-btn {
     margin: 0;
   }
 
+  /* 두 단에서는 설치 안내를 간판 아래에(main.ts wideQuery, 카드 단 높이가 바뀌어 배율이 덜컥거리지 않게) */
+  .hero .install-card {
+    margin: 22px 0 0;
+    text-align: left;
+  }
+
   .hero-mark {
     width: 148px;
     height: 148px;

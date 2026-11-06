@@ -475,10 +475,11 @@ function renderHome(force = true): void {
         }</div>
         <h1 aria-label="${esc(t('app.title'))}"><span class="hero-title" aria-hidden="true">${title}</span></h1>
         <p class="tagline">${t('app.tagline')}</p>
+        ${wideQuery.matches ? installCard() : ''}
       </section>
       <div class="side">
         ${navigator.onLine ? '' : `<p class="banner" role="status">${t('offline.banner')}</p>`}
-        ${installCard()}
+        ${wideQuery.matches ? '' : installCard()}
         <section class="games" aria-label="${t('games.label')}">
           ${teaserGames().map(teaserCard).join('')}${live.map(gameCard).join('')}
         </section>
@@ -543,6 +544,10 @@ function renderHome(force = true): void {
 // 게임 안의 PC 화면 확대(업다운 --pc-zoom)와 같은 방식이다. 휴대폰·태블릿 세로는 키우지 않고 칸 수로 맞춘다.
 // 게임이 많아져 0.75배로도 다 안 들어가면 스크롤한다. css 의 @media 조건과 같아야 한다.
 const wideQuery = matchMedia('(min-width: 900px), (orientation: landscape) and (min-width: 560px)');
+// 설치 안내는 브라우저가 "설치 가능"을 알려 준 뒤(첫 화면을 그린 뒤) 나타난다. 넓은 두 단 화면에서 카드 위에 끼우면 내용 높이가 늘어
+// 화면 배율(--z)이 다시 계산돼 카드가 작아지며 덜컥거렸다 → 두 단일 때는 왼쪽 간판 아래에 둔다(카드 단 높이는 그대로).
+// 휴대폰 ↔ 두 단이 바뀌면 자리를 옮기려고 다시 그린다
+wideQuery.addEventListener('change', () => requestRender());
 
 function fitScreen(): void {
   const root = document.documentElement;
