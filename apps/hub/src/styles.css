@@ -2354,3 +2354,85 @@ a.primary-btn {
     transition: none !important;
   }
 }
+
+/* 위 메뉴 언어 목록(언어가 셋 이상일 때만, main.ts toggleLangMenu). 언어 버튼 바로 아래로 펼쳐지고, 위 메뉴 버튼과 같은 판 모양.
+ * 순서는 설정 창 언어 버튼과 같다(Joyfield.langOrder). 지금 언어에는 체크 표시 */
+.lang-group {
+  position: relative;
+}
+
+.lang-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  display: grid;
+  min-width: 100%;
+  padding: 6px;
+  border: 1px solid var(--jp-top-line);
+  border-radius: 18px;
+  background: var(--jp-top-bg);
+  box-shadow: var(--jp-top-shadow);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transform-origin: top left;
+  animation: lang-menu-in 160ms cubic-bezier(0.2, 0.9, 0.3, 1.1);
+}
+
+.lang-menu button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 44px;
+  padding: 0 12px 0 14px;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  color: var(--jp-top-ink);
+  font-family: 'Jua', system-ui, sans-serif;
+  font-size: var(--jp-top-font);
+  line-height: 1;
+  white-space: nowrap;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.lang-menu button:focus-visible {
+  outline: none;
+  background: color-mix(in srgb, var(--jp-top-accent) 12%, transparent);
+}
+@media (hover: hover) {
+  .lang-menu button:hover {
+    outline: none;
+    background: color-mix(in srgb, var(--jp-top-accent) 12%, transparent);
+  }
+}
+
+.lang-menu button[aria-checked='true'] {
+  color: var(--jp-top-accent);
+}
+
+.lang-menu svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@keyframes lang-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.96);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lang-menu {
+    animation: none;
+  }
+}

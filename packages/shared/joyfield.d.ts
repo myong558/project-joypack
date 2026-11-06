@@ -50,6 +50,8 @@ export interface JoyfieldApi {
   topIcon(name: TopIcon): string;
   /** 기본 언어: 기기 설정 언어가 한국어면 'ko', 그 밖은 모두 'en' */
   deviceLang(): 'ko' | 'en';
+  /** 설정 창 언어 버튼·언어 목록 순서: 기기 기본 언어가 맨 앞, 기본 언어가 한국어가 아니면 한국어는 맨 끝 */
+  langOrder<T extends string>(langs: readonly T[]): T[];
   /** 랭킹 기록의 기기: 마지막으로 누른 입력이 마우스면 'p'(PC), 터치·펜이면 'm'(모바일). 누른 적 없으면 기기 기본 입력으로 */
   playDevice(): Device;
   /** 순위표 이름 옆 기기 아이콘 HTML(.jp-dev). dev 가 없거나 이상하면 빈 문자열 */

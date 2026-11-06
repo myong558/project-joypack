@@ -417,6 +417,19 @@
     return String(first).toLowerCase().indexOf('ko') === 0 ? 'ko' : 'en';
   }
 
+  // 설정 창 언어 버튼·위 메뉴 언어 목록의 순서(2026-11-07 사용자 결정): 기기 기본 언어를 맨 앞에, 나머지는 받은 차례대로.
+  // 기본 언어가 한국어가 아니면 한국어는 늘 맨 오른쪽(끝). 받은 목록에 기기 언어가 없으면 영어(없으면 목록 첫 언어)를 기본으로 본다.
+  // ko·en 둘일 때는 deviceLang 과 같은 결과이고, 언어가 늘면 기기 언어 앞부분(ja-JP → ja)을 그대로 찾는다
+  function langOrder(langs) {
+    const nav = global.navigator || {};
+    const code = String((nav.languages && nav.languages[0]) || nav.language || '').toLowerCase().split('-')[0];
+    const first = langs.indexOf(code) >= 0 ? code : langs.indexOf('en') >= 0 ? 'en' : langs[0];
+    const rest = langs.filter(function (l) {
+      return l !== first && (first === 'ko' || l !== 'ko');
+    });
+    return [first].concat(rest, first !== 'ko' && langs.indexOf('ko') >= 0 ? ['ko'] : []);
+  }
+
   function topIcon(name) {
     return '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' + (TOP_ICONS[name] || '') + '</svg>';
   }
@@ -893,6 +906,7 @@
     dailyPick: dailyPick,
     topIcon: topIcon,
     deviceLang: deviceLang,
+    langOrder: langOrder,
     playDevice: playDevice,
     deviceIcon: deviceIcon,
     guardBottom: guardBottom,

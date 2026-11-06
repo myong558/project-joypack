@@ -61,7 +61,7 @@ export function settingsPanel(o: SettingsOptions): HTMLElement {
         </section>
         <section class="settings-group">
           <h3>${t('settings.language')}</h3>
-          ${choiceGroup('lang', LANGS.map((l) => ({ value: l, label: NAMES[l], lang: l })), lang, { cls: 'chip-row', itemCls: 'chip', label: t('settings.language') })}
+          ${choiceGroup('lang', Joyfield.langOrder(LANGS).map((l) => ({ value: l, label: NAMES[l], lang: l })), lang, { cls: 'chip-row', itemCls: 'chip', label: t('settings.language') })}
         </section>
         <section class="settings-group">
           <h3>${t('settings.skin')}</h3>

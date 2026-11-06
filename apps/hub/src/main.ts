@@ -4,7 +4,7 @@ import '@joyfield/shared/topbar.css';
 import '@joyfield/shared/settings.css';
 import './styles.css';
 import { GAMES, byNewest, iconUrl, isNew, isPublic, isScheduled, patternOf, type GameMeta } from './games';
-import { LANG_LABEL, LANGS, formatNumber, getLang, t, type MessageKey } from './i18n';
+import { LANG_LABEL, LANGS, formatNumber, getLang, t, type Lang, type MessageKey } from './i18n';
 import { FULL, TOP, cachedBoard, hasRanking, loadBoard, type Row } from './rankings';
 import { externalOpenUrl, installState, isIos, manualGuide, onInstallChange, playStoreUrl, promptInstall } from './install';
 import { previewOn } from './preview';
@@ -449,17 +449,97 @@ function nextStrip(): string {
 
 const skinName = (skin: Skin) => t(`skin.${skin}`);
 
+/**
+ * 위 메뉴 언어 버튼(2026-11-07). 언어가 둘이면 지금처럼 "바꿀 언어"를 보이고 누르면 바로 바뀐다(한 번에 끝나 더 빠름).
+ * 셋 이상이면 "지금 언어"를 보이고 누르면 버튼 아래로 언어 목록이 펼쳐진다(순서는 설정 창과 같은 Joyfield.langOrder)
+ */
+function langButton(): string {
+  const cur = getLang();
+  if (LANGS.length > 2) {
+    return `<button class="jp-top-btn jp-top-pill lang-btn" aria-haspopup="menu" aria-expanded="false" aria-label="${t('settings.lang')}: ${LANG_LABEL[cur]}">${Joyfield.topIcon('globe')}<span lang="${cur}">${LANG_LABEL[cur]}</span></button>`;
+  }
+  const other = LANGS.find((l) => l !== cur)!;
+  return `<button class="jp-top-btn jp-top-pill lang-btn" data-lang="${other}" aria-label="${t('settings.lang')}: ${LANG_LABEL[cur]} → ${LANG_LABEL[other]}">${Joyfield.topIcon('globe')}<span lang="${other}">${LANG_LABEL[other]}</span></button>`;
+}
+
+function changeLang(lang: Lang): void {
+  if (lang !== getLang()) {
+    saveSetting(settings, 'lang', lang);
+    applySettings(settings);
+  }
+  // 진입 연출 중이면 연출을 끝내고 바로 바뀐 언어로 그린다(연출이 처음부터 다시 돌지 않게)
+  introRunning = false;
+  app.classList.remove('intro');
+  renderHome();
+  app.querySelector<HTMLButtonElement>('.lang-btn')!.focus();
+}
+
+/** 언어 목록 닫기(열려 있을 때만 값이 있음) */
+let closeLangMenu: (() => void) | null = null;
+
+function toggleLangMenu(btn: HTMLButtonElement): void {
+  if (closeLangMenu) {
+    closeLangMenu();
+    return;
+  }
+  const cur = getLang();
+  const menu = document.createElement('div');
+  menu.className = 'lang-menu';
+  menu.setAttribute('role', 'menu');
+  menu.innerHTML = Joyfield.langOrder(LANGS)
+    .map(
+      (l) =>
+        `<button type="button" role="menuitemradio" aria-checked="${l === cur}" data-pick="${l}"><span lang="${l}">${LANG_LABEL[l]}</span>${l === cur ? '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>' : ''}</button>`,
+    )
+    .join('');
+  btn.after(menu);
+  btn.setAttribute('aria-expanded', 'true');
+  const items = [...menu.querySelectorAll<HTMLButtonElement>('[data-pick]')];
+  const onOutside = (e: PointerEvent) => {
+    if (!menu.contains(e.target as Node) && !btn.contains(e.target as Node)) close();
+  };
+  const onKey = (e: KeyboardEvent) => {
+    const i = items.indexOf(document.activeElement as HTMLButtonElement);
+    if (e.key === 'Escape') {
+      close();
+      btn.focus();
+    } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      items[(i + (e.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length].focus();
+    }
+  };
+  // 휴대폰 뒤로 가기는 목록만 닫는다(대화상자와 같은 "창 닫기" 단계)
+  const release = Joyfield.back.layer(() => close());
+  function close(): void {
+    closeLangMenu = null;
+    release();
+    document.removeEventListener('pointerdown', onOutside, true);
+    document.removeEventListener('keydown', onKey);
+    menu.remove();
+    btn.setAttribute('aria-expanded', 'false');
+  }
+  closeLangMenu = close;
+  document.addEventListener('pointerdown', onOutside, true);
+  document.addEventListener('keydown', onKey);
+  menu.addEventListener('click', (e) => {
+    const pick = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-pick]');
+    if (!pick) return;
+    close();
+    changeLang(pick.dataset.pick as Lang);
+  });
+  (items.find((b) => b.dataset.pick === cur) ?? items[0]).focus();
+}
+
 /** 지난번에 그린 첫 화면 글. 같은 내용을 다시 그리면 카드 아이콘·로고의 둥실 움직임이 처음부터 다시 시작돼 끊겨 보이므로 건너뛴다 */
 let lastMarkup = '';
 /** force 가 false 면(requestRender) 내용이 같을 때 다시 그리지 않는다. 진입·복귀 연출은 늘 새로 그린다 */
 function renderHome(force = true): void {
   document.title = t('app.title');
-  const otherLang = LANGS.find((l) => l !== getLang())!;
   const title = [...t('app.title')].map((ch, i) => `<span style="--i:${i}">${esc(ch)}</span>`).join('');
   const markup = `
     <nav class="top jp-topbar" aria-label="${esc(t('app.title'))}">
-      <div class="jp-topbar-group">
-        <button class="jp-top-btn jp-top-pill lang-btn" data-lang="${otherLang}" aria-label="${t('settings.lang')}: ${LANG_LABEL[getLang()]} → ${LANG_LABEL[otherLang]}">${Joyfield.topIcon('globe')}<span lang="${otherLang}">${LANG_LABEL[otherLang]}</span></button>
+      <div class="jp-topbar-group lang-group">
+        ${langButton()}
       </div>
       <div class="jp-topbar-group">
         <button class="jp-top-btn" data-open="ranking" aria-label="${t('ranking.open')}" title="${t('ranking.open')}">${Joyfield.topIcon('trophy')}</button>
@@ -488,6 +568,7 @@ function renderHome(force = true): void {
     </main>`;
   if (!force && markup === lastMarkup) return;
   lastMarkup = markup;
+  closeLangMenu?.(); // 다시 그리면 열린 언어 목록은 닫는다(버튼이 새로 생김)
   app.innerHTML = markup;
 
   // 첫 진입 카드 차례(styles.css .intro .games > .card): 카드가 몇 장이든 첫 카드 ~ 마지막 카드 시작 간격을 CARD_SPREAD 안에 나눠
@@ -519,15 +600,11 @@ function renderHome(force = true): void {
     mark.classList.add('bounce');
     if (canVibrate && settings.vibrate) navigator.vibrate(12);
   });
-  // 언어 전환(설정의 언어와 같은 값, 모든 게임에 적용)
-  app.querySelector<HTMLButtonElement>('[data-lang]')!.addEventListener('click', (e) => {
-    saveSetting(settings, 'lang', (e.currentTarget as HTMLButtonElement).dataset.lang as typeof settings.lang);
-    applySettings(settings);
-    // 진입 연출 중이면 연출을 끝내고 바로 바뀐 언어로 그린다(연출이 처음부터 다시 돌지 않게)
-    introRunning = false;
-    app.classList.remove('intro');
-    renderHome();
-    app.querySelector<HTMLButtonElement>('[data-lang]')!.focus();
+  // 언어 전환(설정의 언어와 같은 값, 모든 게임에 적용). 둘이면 바로 바뀌고, 셋 이상이면 아래로 목록이 펼쳐진다
+  const langBtn = app.querySelector<HTMLButtonElement>('.lang-btn')!;
+  langBtn.addEventListener('click', () => {
+    if (LANGS.length > 2) toggleLangMenu(langBtn);
+    else changeLang(langBtn.dataset.lang as Lang);
   });
   const rankBtn = app.querySelector('[data-open="ranking"]')!;
   rankBtn.addEventListener('click', openRanking);
@@ -865,7 +942,7 @@ async function openSettings(): Promise<void> {
     </section>
     <section class="set-group">
       <h3>${t('settings.lang')}</h3>
-      ${seg('lang', LANGS, settings.lang, (v) => LANG_LABEL[v])}
+      ${seg('lang', Joyfield.langOrder(LANGS), settings.lang, (v) => LANG_LABEL[v])}
     </section>
     <section class="set-group">
       <h3>${t('settings.feedback')}</h3>

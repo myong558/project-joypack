@@ -277,7 +277,7 @@ function settingsPanel(opts: StartOptions): HTMLElement {
       </section>
       <section>
         <h3>${t('lang.label')}</h3>
-        ${choiceGroup('lang', LANGS.map((l) => ({ value: l, label: LANG_LABEL[l], lang: l })), lang, { label: t('lang.label') })}
+        ${choiceGroup('lang', Joyfield.langOrder(LANGS).map((l) => ({ value: l, label: LANG_LABEL[l], lang: l })), lang, { label: t('lang.label') })}
       </section>
       <section>
         <h3>${t('skin.label')}</h3>
