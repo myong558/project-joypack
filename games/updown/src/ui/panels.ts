@@ -1,6 +1,7 @@
 // 업다운 대화상자 내용: 설정·직접 정하기·온도계. 열 때마다 새로 만들고, 틀은 조이필드 공통 openModal(@joyfield/shared/ui)에 넣는다.
 import '@joyfield/shared';
 import { bindSettings, choiceGroup, switchRow } from '@joyfield/shared/settings';
+import { likeSection } from '@joyfield/shared/likes';
 import { closeButton, html } from '@joyfield/shared/ui';
 import { CUSTOM_MAX, CUSTOM_MIN, PRESETS } from '../game/rules';
 import { LANGS, NAMES, getLang, t, type Lang, type MessageKey } from '../i18n';
@@ -92,6 +93,8 @@ export function settingsPanel(o: SettingsOptions): HTMLElement {
         <p class="app-copyright">${Joyfield.COPYRIGHT}</p>
       </div>
     </div>`);
+  // 좋아요 칸: 소리·진동 다음, 내 기록 지우기 앞(기준서 1.4)
+  el.querySelector('.reset-row')!.closest('section')!.before(likeSection('updown', 'settings-group'));
   const all = <T extends HTMLElement = HTMLElement>(s: string) => [...el.querySelectorAll<T>(s)];
   bindSettings(el, {
     onChoice(name, value) {

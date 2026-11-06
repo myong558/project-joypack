@@ -4,7 +4,7 @@ import { LEVELS, levelName } from '../game/levels';
 import { LANGS, getLang, iga, t, type Lang } from '../i18n';
 import { cardFlipper, closeButton, html, openModal as openSharedModal, openRanking as openSharedRanking, pauseLayer, rankEntryForm } from '@joyfield/shared/ui';
 import { shortDate } from '@joyfield/shared/rank';
-import { likeButton } from '@joyfield/shared/likes';
+import { likeButton, likeSection } from '@joyfield/shared/likes';
 import { clock, type DailyEntry, type DailyRecord } from '../ranking';
 import { captureResult, type ShareOutcome } from '../share';
 import { flowerCount, gardenScore, nextLevel, petalCount, type SaveData } from '../storage';
@@ -347,6 +347,7 @@ function settingsPanel(opts: StartOptions): HTMLElement {
     </div>`);
 
   // 하나 고르기·스위치(공통 @joyfield/shared/settings): 고른 표시·스위치 아이콘은 공통 조각이 바꾸고 저장·적용은 main 이 한다
+  el.querySelector('.reset-section')!.before(likeSection('glasshouse')); // 좋아요 칸: 소리·진동 다음, 내 기록 지우기 앞(기준서 1.4)
   bindSettings(el, {
     onChoice(name, value) {
       if (name === 'theme') opts.onTheme(value as Theme);

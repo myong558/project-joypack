@@ -830,6 +830,13 @@ button:focus-visible {
   font-size: 0.9rem;
 }
 
+/* 설정 창 좋아요 칸 설명(공통 likeSection, 기준서 1.4) */
+.jp-like-row .note {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
 /* 윗줄: 1 ~ [끝 숫자], 아랫줄: [−10] [−] [+] [+10] (좁은 화면에서도 한 줄이 넘치지 않게 두 줄로) */
 .custom-pick {
   display: flex;

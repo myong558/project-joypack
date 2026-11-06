@@ -4,7 +4,7 @@
 
 이 문서는 게임이 하나 늘 때마다 고칩니다. 새 게임까지 포함한 모든 게임을 다시 보고, 공통 요소는 1·2장과 8장에, 정체성(게임에 맞게 고르는 톤·색·캐릭터 등)은 3장 등록부에 반영합니다(9장 "문서 키우기").
 
-- 문서 버전: **1.82** (2026-11-06, 업다운 v1.24.0 · 두더지잡기 v1.5.0 · 타임 투 플립 v1.10.0 · 온실정원 v0.19.0 · 허브 v1.44.0 기준)
+- 문서 버전: **1.84** (2026-11-07, 업다운 v1.26.0 · 두더지잡기 v1.7.0 · 타임 투 플립 v1.12.0 · 온실정원 v0.21.0 · 허브 v1.45.0 기준)
 - **조이필드와 모든 게임은 상업적으로 씁니다(광고, 구글 플레이·앱스토어).** 10장 "상업 배포·마켓 기준"은 모든 단계에서 지키는 필수 기준입니다.
 - 저장소 구조·배포·서비스 워커 같은 플랫폼 설명은 루트 [README.md](../README.md)에 있습니다. 이 문서는 "게임 하나를 어떻게 만드는가"만 다룹니다.
 
@@ -95,7 +95,7 @@
 | `cardFlipper(flip, { reduced, onShown, flatClass })` | 도감 큰 카드 뒤집기(앞면끼리 90° 세워 갈아 끼우기) |
 | `pauseLayer(.pause-menu)` → `show(true/false)` | 일시정지 레이어(1.3): 대화상자 역할·첫 단추 초점·Tab 가두기. 화면 전체 불투명 덮기·배경 모양은 게임 css |
 | `@joyfield/shared/rank` `rankStore(id, 불러오기)` · `placeBy` · `insertBy` · `shortDate` | 순위표 문서 읽기·트랜잭션 등록·8초 제한(1.6). Firebase 는 게임이 `() => Promise.all([import('firebase/app'), import('firebase/firestore/lite')])` 로 넘김 |
-| `@joyfield/shared/likes` `likeButton(id)` · `refreshLikes` · `refreshLikeCounts` · `formatLikes` | 게임 좋아요(1.13): 시작 화면 위 메뉴 버튼, 허브 카드 수 표시 |
+| `@joyfield/shared/likes` `likeButton(id)` · `likeSection(id)` · `refreshLikes` · `refreshLikeCounts` · `formatLikes` | 게임 좋아요(1.13): 시작 화면 위 메뉴 버튼, 허브 카드 수 표시 |
 | `@joyfield/shared/capture` `captureResult(결과 화면, { load: () => import('html-to-image'), title, remove })` | 결과 공유 이미지(1.5) |
 | `@joyfield/shared/meta` `HubMeta`·`boardDoc` | 허브 연결 메타 `games/<id>/joyfield.meta.ts`(6장): 허브 카드 최고 기록·내 기록 지우기·전체 랭킹 읽기 |
 
@@ -130,8 +130,9 @@
 | 2 | 언어 | 한국어 / English. 저장값 없으면 **기기(휴대폰·PC) 설정 언어**: 한국어면 한국어, 그 밖의 언어는 모두 영어. `Joyfield.deviceLang()` 을 씀(조이필드·모든 게임 같은 규칙) |
 | 3 | 스킨 | **게임마다 고유한 스킨 묶음**(3장). 기본은 "자동": 공용 `Joyfield.dailyPick(<게임 id>, 스킨 수, 날짜)` 로 고른다(날마다 무작위, 같은 날은 모두 같은 스킨, **이틀 연속 같은 스킨 없음**, 스킨 수만큼의 날 안에 모든 스킨이 한 번씩). 조이필드 오늘의 톤도 같은 규칙(`hub`). 첫 화면 깜빡임 방지 스크립트에 복사본이 있으면 `/* dailyPick: begin … end */` 를 글자 그대로 두고 `packages/shared/tests` 가 같은지 검사한다 |
 | 4 | 소리·진동 | 소리 켜기/끄기, 진동 켜기/끄기(이름 줄 + 스위치, 아래 "단추 짜임"). **진동을 지원하지 않는 기기(아이폰 등)에는 진동 항목을 숨김.** 화면 흔들림은 설정 항목이 아님(1.7) |
-| 5 | 내 기록 지우기 | 이 기기의 최고 기록·수집 기록만. **온라인 랭킹·순위표 사본·설정은 남김.** 확인 문구에 "온라인 랭킹은 그대로" 명시 |
-| 6 | 버전 | 맨 아래 `버전 vX.Y.Z`(`package.json` version). Vite 게임은 `define` 의 `__APP_VERSION__`, 빌드 없는 게임은 코드에 `'__APP_VERSION__'` 을 두면 `scripts/build.mjs` 가 채움. 캐시 이름 등 다른 값으로 버전을 짐작하지 않음. 바로 밑에 작은 글씨로 **저작권 표기 `Joyfield.COPYRIGHT`**(© 2026 Myong Bum Soo. All rights reserved.)를 그대로 넣음(문구를 게임에 직접 쓰지 않음). **모양은 조이필드·모든 게임 같게(색만 앱 것)**: 클래스 `.app-version`·`.app-copyright`, 글꼴 Jua(`'Jua', system-ui, sans-serif`, Jua 에 없는 ©는 기호 글꼴(`=+jua`) 또는 `font-family` 다음 칸의 게임 글꼴로 채움, 시스템 글꼴로 빠지면 `pnpm check:fonts` 가 실패), 굵기 400, 줄 높이 1.4, 가운데 정렬, 버전 13px·저작권 11px, 마지막 칸 아래 → 버전 **20px**, 버전 → 저작권 **4px**(설정 창이 flex·grid `gap` 을 쓰면 그만큼 빼서 실제 간격을 맞춤). Jua 를 몇 글자만 넣는 게임은 "버전" 글자도 서브셋에 |
+| 5 | 좋아요 | **게임만**(허브 설정 창에는 없음, 누를 게임이 없어서). 공통 `likeSection(<게임 id>)`(`@joyfield/shared/likes`)을 내 기록 지우기 칸 앞에 붙이기만 한다: 제목 "좋아요" + 위 메뉴와 같은 상태의 [♡ 12] 단추 + 설명 한 줄("어떤 게임을 더 다듬고 키울지 정할 때 참고해요.", 1.13). 게임 중에 연 설정 창에서도 누를 수 있다 |
+| 6 | 내 기록 지우기 | 이 기기의 최고 기록·수집 기록만. **온라인 랭킹·순위표 사본·설정은 남김.** 확인 문구에 "온라인 랭킹은 그대로" 명시 |
+| 7 | 버전 | 맨 아래 `버전 vX.Y.Z`(`package.json` version). Vite 게임은 `define` 의 `__APP_VERSION__`, 빌드 없는 게임은 코드에 `'__APP_VERSION__'` 을 두면 `scripts/build.mjs` 가 채움. 캐시 이름 등 다른 값으로 버전을 짐작하지 않음. 바로 밑에 작은 글씨로 **저작권 표기 `Joyfield.COPYRIGHT`**(© 2026 Myong Bum Soo. All rights reserved.)를 그대로 넣음(문구를 게임에 직접 쓰지 않음). **모양은 조이필드·모든 게임 같게(색만 앱 것)**: 클래스 `.app-version`·`.app-copyright`, 글꼴 Jua(`'Jua', system-ui, sans-serif`, Jua 에 없는 ©는 기호 글꼴(`=+jua`) 또는 `font-family` 다음 칸의 게임 글꼴로 채움, 시스템 글꼴로 빠지면 `pnpm check:fonts` 가 실패), 굵기 400, 줄 높이 1.4, 가운데 정렬, 버전 13px·저작권 11px, 마지막 칸 아래 → 버전 **20px**, 버전 → 저작권 **4px**(설정 창이 flex·grid `gap` 을 쓰면 그만큼 빼서 실제 간격을 맞춤). Jua 를 몇 글자만 넣는 게임은 "버전" 글자도 서브셋에 |
 
 **단추 짜임(조이필드·모든 게임 같게, 2026-11-05 사용자 결정, 문서 1.80)** — 모양(색·테두리·배치)은 게임 것이어도 **단추 종류·짜임은 같게** 해 어느 게임에서나 설정을 한눈에 알아보게 합니다. 공통 조각 `@joyfield/shared/settings` 로 만들고 게임 안에 다시 만들지 않습니다(1.2). 불러오기: `import '@joyfield/shared/settings.css'`(topbar.css 다음, 게임 styles.css 앞).
 
@@ -311,7 +312,7 @@
 
 좋아요를 많이 받은 게임은 나중에 따로 키워 단독 출시할 후보로 봅니다. 그래서 **게임마다 한 사람 한 번**을 목표로 하되, 개인정보를 받지 않으려고 **기기(익명 계정) 하나당 한 번**으로 합니다(2026-11-06 사용자 결정).
 
-- **누르는 곳: 게임 시작 화면 위 메뉴, 조이필드 버튼 바로 옆**(언어 버튼 자리). 공통 `likeButton('<게임 id>')`(`@joyfield/shared/likes`)을 `.hub-btn` 뒤에 붙이기만 하면 된다. 게임을 안 해 봤어도 누를 수 있고, 다시 누르면 취소(확인 창 없음). 0개면 하트만 있는 동그란 버튼, 1개부터 "♡ 12" 알약. 좋아요하면 하트 속이 차고 다홍색, 누를 때 하트가 한 번 통 튀고(깜박임 없음) 효과음 `new/pop`·진동 `press`(공통 설정을 따름). **기기에서 처음 좋아요를 켤 때 한 번만** 위 메뉴 아래에 안내 토스트(`.jp-toast`, "고마워요! 좋아요는 어떤 게임을 더 다듬고 키울지 정할 때 참고해요.")가 4초 떴다 사라진다(기기 저장 `joyfield.likeTip`, 모든 게임 함께라 다른 게임에서는 다시 안 뜸, 기기 저장을 못 쓰면 안 띄움, 2026-11-07). 문구는 `packages/shared/likes-tip.js`(글꼴 서브셋이 공통 모듈의 .js·.css 글자만 모으므로 .ts 에 두지 않음). 보상(단독 출시 등)은 약속하지 않는다.
+- **누르는 곳: 게임 시작 화면 위 메뉴, 조이필드 버튼 바로 옆**(언어 버튼 자리). 공통 `likeButton('<게임 id>')`(`@joyfield/shared/likes`)을 `.hub-btn` 뒤에 붙이기만 하면 된다. 게임을 안 해 봤어도 누를 수 있고, 다시 누르면 취소(확인 창 없음). 0개면 하트만 있는 동그란 버튼, 1개부터 "♡ 12" 알약. 좋아요하면 하트 속이 차고 다홍색, 누를 때 하트가 한 번 통 튀고(깜박임 없음) 효과음 `new/pop`·진동 `press`(공통 설정을 따름). **기기에서 처음 좋아요를 켤 때 한 번만** 위 메뉴 아래에 안내 토스트(`.jp-toast`, "고마워요! 좋아요는 어떤 게임을 더 다듬고 키울지 정할 때 참고해요.")가 4초 떴다 사라진다(기기 저장 `joyfield.likeTip`, 모든 게임 함께라 다른 게임에서는 다시 안 뜸, 기기 저장을 못 쓰면 안 띄움, 2026-11-07). 토스트는 한 번뿐이라 **게임 설정 창에도 좋아요 칸**(`likeSection`, 1.4 순서 5)을 두어 같은 단추와 설명을 언제든 다시 보고 누를 수 있게 한다(설정 창 단추는 토스트를 띄우지 않음, 허브 설정 창에는 없음, 2026-11-07). 문구는 `packages/shared/likes-tip.js`(글꼴 서브셋이 공통 모듈의 .js·.css 글자만 모으므로 .ts 에 두지 않음). 보상(단독 출시 등)은 약속하지 않는다.
 - **보이는 곳: 조이필드 게임 카드 그림판 왼쪽 아래**(▶ 반대편). 누르는 버튼으로 보이지 않게 테두리·그림자 없는 납작한 꼬리표. 카드 전체가 링크라 하트를 눌러도 그 게임 시작 화면이 열린다.
 - **수 표기**(`formatLikes`): 0 = 숫자 없이 하트, 999 까지 그대로, 1.2K · 12K · 999K, 1.2M. 반올림하지 않고 버린다.
 - **저장**(`firestore.rules` "■ 좋아요"): `games/<id>/likes/<uid>`(누른 기기 1개 = 문서 1개) + `stats/likes`(게임별 합계 문서 1개). 규칙이 "내 문서 만들기·지우기 = 합계 ±1"을 같은 커밋에서만 받는다. uid 는 Firebase **익명 인증**의 무작위 값(이름·이메일 없음). SDK 대신 REST 로 불러 허브·게임 용량이 거의 늘지 않는다.
@@ -465,7 +466,7 @@ games/<id>/
 | 3 | (없음) | 예전에는 `apps/hub/src/records.ts`·`rankings.ts` 에 게임마다 적었다(허브 v1.41.0부터 2번 메타로 바뀜) |
 | 4 | `apps/hub/src/i18n.ts` | 허브 카드 최고 기록 문구(`best.<id>`) |
 | 5 | `firestore.rules` | `games/<id>/…` 블록 추가 + "■ 좋아요"의 `likeGame()`·`likeTallyOk()` 두 곳에 id 추가(1.13) → Firebase 콘솔 운영·개발 두 곳에 게시(사람이 해야 함, 답변에 알림) |
-| 5-1 | 시작 화면 위 메뉴 | 조이필드 버튼(`.hub-btn`) 뒤에 `likeButton('<id>')`(`@joyfield/shared/likes`). 언어 버튼은 두지 않음(1.3·1.13) |
+| 5-1 | 시작 화면 위 메뉴·설정 창 | 조이필드 버튼(`.hub-btn`) 뒤에 `likeButton('<id>')`(`@joyfield/shared/likes`), 설정 창 내 기록 지우기 칸 앞에 `likeSection('<id>')`. 언어 버튼은 두지 않음(1.3·1.13) |
 | 6 | 허브 글꼴 | 게임 이름·설명이 허브에 새 글자를 쓰면 `pnpm --filter hub font` |
 | 7 | 버전 | 게임 `package.json` version(처음 `0.1.0`, 공개 때 `1.0.0`). 허브를 고쳤으면 루트 `package.json` |
 | 8 | 문서 | 이 문서 3.1 등록부·8장 현황표, 루트 README 1장 표 |
@@ -613,7 +614,7 @@ games/<id>/
 | 공통 설정 읽기·쓰기 | `Joyfield.get/set`, 바꾼 항목만 씀. 예전 키(`updown.theme` 등)에도 같이 씀(이사 전 저장 호환. 첫 화면 깜빡임 방지 `<head>` 스크립트는 `joyfield.theme` 를 먼저 읽음) | `Joyfield.get/set`, 바꾼 항목만 씀. `project-hammer:v1` 에도 사본 | `Joyfield.get/set`, 바꾼 항목만 씀(예전 키 없음) | `Joyfield.get/set`, 바꾼 항목만 씀(예전 키 없음) | ✅ 공통 모듈. 새 게임은 예전 키 없음(1.8) |
 | 서비스 워커·오프라인 | `Joyfield.registerSW` | `Joyfield.registerSW` | `Joyfield.registerSW` | `Joyfield.registerSW` | ✅ 공통 모듈 |
 | 공유 링크·설치 안내 띠 | `shareUrl`·`inviteBar` | `shareUrl`·`inviteBar` | `shareUrl`·`inviteBar` | `shareUrl`·`inviteBar` | ✅ 공통 모듈 |
-| 좋아요(1.13) | `likeButton('updown')`(시작 화면에서만 보임) | `likeButton('hammer')` | `likeButton('timetoflip')` | `likeButton('glasshouse')` | ✅ 공통 모듈(`@joyfield/shared/likes`, 허브 카드 수 표시) |
+| 좋아요(1.13) | `likeButton('updown')`(시작 화면에서만 보임) + 설정 창 `likeSection` | `likeButton('hammer')` + `likeSection` | `likeButton('timetoflip')` + `likeSection` | `likeButton('glasshouse')` + `likeSection` | ✅ 공통 모듈(`@joyfield/shared/likes`, 허브 카드 수 표시) |
 | 위 메뉴(조이필드 목록·좋아요·랭킹·설정, 자리 포함) | `.jp-top-btn` + `Joyfield.topIcon`(아이콘은 `data-top-icon` 으로 시작할 때 넣음) | `.jp-top-btn` + `Joyfield.topIcon`(크기는 `--u` 에 묶음) | `.jp-top-btn` + `Joyfield.topIcon`(크기는 공통 기본값) | `.jp-top-btn` + `Joyfield.topIcon`(시작 화면, 게임 중은 자체 HUD) | ✅ 공통 모듈(`topbar.css`, 허브도 같이 씀, 1.8) |
 | 설정 창 | `panels.ts` 모달, 칩 모양 | `screens.ts` 모달, 세그먼트·두 칸 배치 | `screens.ts` 모달, 세그먼트 | `screens.ts` 모달, 세그먼트 | ✅ 단추 짜임 공통(`@joyfield/shared/settings`: 하나 고르기·스위치·TEST 칸, 1.4, 허브도), 창 틀 공통 `openModal`. 모양 css·내 기록 지우기는 게임마다 |
 | 설정 맨 아래 버전 | Vite `define` `__APP_VERSION__` | Vite `define` `__APP_VERSION__` | Vite `define` `__APP_VERSION__` | Vite `define` `__APP_VERSION__` | ✅ 같은 자리 표시 이름(1.4) |
@@ -668,6 +669,7 @@ games/<id>/
 
 | 문서 버전 | 날짜 | 내용 |
 | --- | --- | --- |
+| 1.84 | 2026-11-07 | 좋아요 설정 칸: 첫 안내 토스트가 한 번뿐이라 게임 설정 창 소리·진동 다음(1.4 순서 5, 내 기록 지우기·버전은 6·7로)에 공통 `likeSection` — 제목 "좋아요" + 위 메뉴와 같은 상태의 [♡ 12] 단추 + 설명 한 줄. 허브 설정 창에는 넣지 않음(누를 게임이 없음). 1.2 표·1.4·1.13·5-1·8장 갱신. 업다운 v1.26.0 · 두더지잡기 v1.7.0 · 타임 투 플립 v1.12.0 · 온실정원 v0.21.0 |
 | 1.83 | 2026-11-07 | 온실정원 오늘의 정원 순위표: 이름이 같으면 한 줄로 합치던 것을 없애 같은 이름도 줄을 따로 둠(이니셜이 같은 다른 사람의 줄을 지우거나 등록을 막던 문제). 한 사람이 채우지 않게 올리기는 기기에 남긴 오늘 최고보다 나을 때만(이미 그랬음). 규칙 `ghDailyInsert` 는 새 줄 1개 끼우기만. 정원 점수 순위표는 그대로(누적 점수라 이름마다 한 줄). 8장 현황표 갱신. 온실정원 v0.20.2 |
 | 1.82 | 2026-11-06 | 좋아요(1.13 새 절): 게임 시작 화면 위 메뉴 언어 버튼 자리에 좋아요(공통 `likeButton`, 언어는 설정 창·조이필드 첫 화면), 조이필드 카드 그림판 왼쪽 아래 하트·수(999 → 1.2K → 1.2M), 익명 인증 + `games/<id>/likes/<uid>`·`stats/likes`(규칙이 ±1 을 함께만 받음). 1.2 표·1.3·10.4·8장 갱신. 허브 v1.44.0 · 업다운 v1.24.0 · 두더지잡기 v1.5.0 · 타임 투 플립 v1.10.0 · 온실정원 v0.19.0 |
 | 1.81 | 2026-11-05 | 소리·진동 배치 통일(1.4 "단추 짜임"): 두더지잡기·업다운은 넓으면 나란히, 허브·타임 투 플립·온실정원은 위아래로 달랐던 것 → 공통 `.jp-switches`(settings.css)로 모두 늘 위아래 한 줄씩. 새 게임도 이 묶음을 그대로 씀. 허브 v1.43.1 · 업다운 v1.23.1 · 두더지잡기 v1.4.1 · 타임 투 플립 v1.9.1 · 온실정원 v0.18.1 |

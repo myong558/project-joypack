@@ -9,7 +9,7 @@
 // 화면은 누르는 즉시 바뀌고, 서버에는 뒤에서 보낸다. 오프라인이면 기기에 남겨 두었다가 연결되거나 다음에 열 때 보낸다.
 import './joyfield.js';
 import { playRecipe } from './sfx.js';
-import { LIKE_TIP } from './likes-tip.js';
+import { LIKE_TEXT, LIKE_TIP } from './likes-tip.js';
 
 const ENV = Joyfield.FIREBASE_ENV;
 const STATE_KEY = `joyfield.likes.${ENV}`; // { mine: 내가 좋아요한 게임 id[], sent: 서버에 반영된 게임 id[] }
@@ -283,21 +283,16 @@ function likeTip() {
 }
 
 /**
- * 게임 시작 화면 위 메뉴 왼쪽(조이필드 버튼 옆)의 좋아요 버튼 "♡ 12". 누르면 켜고 끈다(게임을 안 해 봤어도 누를 수 있음).
- * 0개면 하트만 있는 동그란 버튼. 화면을 다시 그리면 새로 만들면 된다(지난 버튼은 화면에서 빠지면 저절로 멈춤)
+ * 좋아요 단추에 그리기·누름을 붙인다(위 메뉴 likeButton·설정 창 likeSection 이 같이 씀 → 한쪽에서 누르면 다른 쪽도 바로 바뀜).
+ * 화면에서 빠진 단추는 다음 알림 때 저절로 멈춘다. tip = 처음 켤 때 첫 안내 토스트를 띄울지(설정 창은 설명이 바로 옆이라 안 띄움)
  */
-export function likeButton(gameId: string): HTMLButtonElement {
-  const btn = document.createElement('button');
-  btn.type = 'button';
-  btn.className = 'jp-top-btn jp-like';
+function wireLike(btn: HTMLButtonElement, gameId: string, tip: boolean, paint: (text: string) => void): void {
   const render = () => {
     if (!btn.isConnected && btn.dataset.ready) return void listeners.delete(render);
-    const text = formatLikes(likeCount(gameId));
-    btn.classList.toggle('jp-top-pill', !!text);
     btn.setAttribute('aria-pressed', String(isLiked(gameId)));
     btn.setAttribute('aria-label', likeLabel(gameId));
-    btn.title = ko() ? '좋아요' : 'Like';
-    btn.innerHTML = HEART_SVG + (text ? `<span>${text}</span>` : '');
+    btn.title = (ko() ? LIKE_TEXT.ko : LIKE_TEXT.en).title;
+    paint(formatLikes(likeCount(gameId)));
   };
   render();
   requestAnimationFrame(() => (btn.dataset.ready = '1'));
@@ -310,12 +305,41 @@ export function likeButton(gameId: string): HTMLButtonElement {
       btn.classList.remove('jp-like-pop');
       void btn.offsetWidth;
       btn.classList.add('jp-like-pop');
-      likeTip();
+      if (tip) likeTip();
     }
   });
   btn.addEventListener('animationend', () => btn.classList.remove('jp-like-pop'));
   // 열 때 최신 합계를 받고, 못 보낸 누름이 있으면 보낸다
   void refreshLikeCounts().then(notify);
   void flushLikes();
+}
+
+/**
+ * 게임 시작 화면 위 메뉴 왼쪽(조이필드 버튼 옆)의 좋아요 버튼 "♡ 12". 누르면 켜고 끈다(게임을 안 해 봤어도 누를 수 있음).
+ * 0개면 하트만 있는 동그란 버튼. 화면을 다시 그리면 새로 만들면 된다(지난 버튼은 화면에서 빠지면 저절로 멈춤)
+ */
+export function likeButton(gameId: string): HTMLButtonElement {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'jp-top-btn jp-like';
+  wireLike(btn, gameId, true, (text) => {
+    btn.classList.toggle('jp-top-pill', !!text);
+    btn.innerHTML = HEART_SVG + (text ? `<span>${text}</span>` : '');
+  });
   return btn;
+}
+
+/**
+ * 게임 설정 창의 좋아요 칸(기준서 1.4 순서 5: 소리·진동 다음, 내 기록 지우기 앞). 제목 "좋아요" + [♡ 12] 단추 + 설명 한 줄.
+ * 위 메뉴 버튼과 같은 상태라 게임 중에 연 설정 창에서도 누를 수 있다. 허브 설정 창에는 넣지 않는다(누를 게임이 없음).
+ * cls = 앱의 칸 클래스(업다운 'settings-group'). 칸 제목 모양은 앱 css(section h3), 단추·설명 모양은 settings.css .jp-like-row
+ */
+export function likeSection(gameId: string, cls = ''): HTMLElement {
+  const text = ko() ? LIKE_TEXT.ko : LIKE_TEXT.en;
+  const section = document.createElement('section');
+  section.className = cls ? `like-section ${cls}` : 'like-section';
+  section.innerHTML = `<h3>${text.title}</h3><div class="jp-like-row"><button type="button" class="jp-like jp-like-setting"></button><p class="note">${text.note}</p></div>`;
+  const btn = section.querySelector('button')!;
+  wireLike(btn, gameId, false, (n) => (btn.innerHTML = HEART_SVG + (n ? `<span>${n}</span>` : '')));
+  return section;
 }

@@ -8,7 +8,7 @@ import { LANGS, getLang, moleDesc, moleName, t, type Lang, type MessageKey } fro
 import type { SaveData } from '../storage';
 import { closeButton, html, openModal as openSharedModal, openRanking as openSharedRanking, pauseLayer, rankEntryForm } from '@joyfield/shared/ui';
 import { shortDate } from '@joyfield/shared/rank';
-import { likeButton } from '@joyfield/shared/likes';
+import { likeButton, likeSection } from '@joyfield/shared/likes';
 import { boardEntries } from '../ranking';
 import { SKIN_SETTINGS, THEMES, type Skin, type SkinSetting, type Theme } from '../theme';
 import { createMoleEl, holeInner } from './board';
@@ -384,6 +384,7 @@ function settingsPanel(opts: StartOptions): HTMLElement {
       <p class="app-copyright">${Joyfield.COPYRIGHT}</p>    </div>`);
 
   // 하나 고르기·스위치(공통 @joyfield/shared/settings): 고른 표시·스위치 아이콘은 공통 조각이 바꾸고 저장·적용은 main 이 한다
+  el.querySelector('.reset-section')!.before(likeSection('hammer')); // 좋아요 칸: 소리·진동 다음, 내 기록 지우기 앞(기준서 1.4)
   bindSettings(el, {
     onChoice(name, value) {
       if (name === 'theme') opts.onTheme(value as Theme);

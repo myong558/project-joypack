@@ -95,3 +95,61 @@
     transition: none;
   }
 }
+
+/* 게임 설정 창 좋아요 칸(likes.ts likeSection, 기준서 1.4 순서 5): [♡ 12] 단추 + 옆에 설명 한 줄. 허브 설정 창에는 없음.
+   좋아요한 색·하트 채움·누를 때 통 튀기는 topbar.css .jp-like 를 같이 쓴다. 앱은 테두리만 --jp-like-line 으로 맞출 수 있다 */
+.jp-like-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 설명 글자 모양은 앱의 안내 글(.note)을 따른다. 여기서는 줄 안 자리만 */
+.jp-like-row p {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  word-break: keep-all;
+}
+
+.jp-like-setting {
+  box-sizing: border-box;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35em;
+  min-width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0 0.85em;
+  border: 1.5px solid var(--jp-like-line, color-mix(in srgb, currentColor 28%, transparent));
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.jp-like-setting[aria-pressed='true'] {
+  border-color: color-mix(in srgb, var(--jp-like) 55%, transparent);
+}
+
+.jp-like-setting svg {
+  flex: none;
+  width: 1.4em;
+  height: 1.4em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.jp-like-setting:focus-visible {
+  outline: 3px solid var(--jp-switch-focus, var(--jp-like));
+  outline-offset: 2px;
+}
