@@ -71,7 +71,16 @@ function mutate(rows: string[]): string[] | null {
 
 // 출발점: 점수 높은 판 몇 개를 돌아가며 다듬는다(한 판에 갇히지 않게). 시드마다 출발 판을 2개씩 밀어 여러 프로세스가 다른 판을 다듬음
 const from = (Number(seed0) * 2) % Math.max(1, start.length - 5);
-const heads = start.slice(from, from + 6).map((c) => ({ ...c }));
+// 공짜 화분이 있는 방(rate 가 null)도 점수를 FREE_PENALTY 만큼 깎아 거쳐 가게 한다. 한 칸만 바꿔서는 공짜 화분이 안 없어지는 판이 있어서.
+// 결과 파일에는 공짜 화분이 없는 방만 적는다
+const FREE_PENALTY = 300;
+const score = (rows: string[]) => {
+  const c = rate(rows, limit, [8, 200]);
+  if (c) return { c, ok: true };
+  const loose = rate(rows, limit, [8, 200], true);
+  return loose ? { c: { ...loose, score: loose.score - FREE_PENALTY }, ok: false } : null;
+};
+const heads = start.slice(from, from + 6).map((c) => ({ ...c, score: score(c.rows)?.c.score ?? -1e9 }));
 let best = heads[0].score;
 let tried = 0;
 for (let t = 0; Date.now() < until; t++) {
@@ -79,11 +88,12 @@ for (let t = 0; Date.now() < until; t++) {
   const rows = mutate(head.rows);
   if (!rows) continue;
   tried++;
-  const c = rate(rows, limit, [8, 200]);
-  if (!c || c.score < head.score) continue;
+  const r = score(rows);
+  if (!r || r.c.score < head.score) continue;
+  const c = r.c;
   const up = c.score > head.score;
   Object.assign(head, c);
-  if (up) appendFileSync(out, JSON.stringify({ size: Number(size), ...c }) + '\n');
-  if (c.score > best) best = c.score;
+  if (up && r.ok) appendFileSync(out, JSON.stringify({ size: Number(size), ...c }) + '\n');
+  if (r.ok && c.score > best) best = c.score;
 }
 console.log(`단계 ${size} 화분 ${pots}: 바꿔 본 방 ${tried}개, 최고 점수 ${start[0].score} → ${best}`);

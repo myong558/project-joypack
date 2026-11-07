@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { FLOWER, FLOWERS } from '../src/flora';
 import { LEVELS, speciesFor } from '../src/game/levels';
+import { hasFreePot } from '../src/game/roomgen';
 import { lit, parse, solved, step } from '../src/game/rules';
 import { SOLUTIONS } from '../src/game/solutions';
 import { explore, solve } from '../src/game/solver';
@@ -25,9 +26,12 @@ describe('정원 24개', () => {
   LEVELS.forEach((lv, i) => {
     it(`${i + 1}. ${FLOWER[lv.flower].ko.name}`, () => {
       const { board, start } = parse(lv.rows);
-      const sol = solve(board, start, explore(board, start, 2_000_000)!)!;
+      const graph = explore(board, start, 2_000_000)!;
+      const sol = solve(board, start, graph)!;
       expect(sol.moves).toBe(lv.par);
       expect(lit(board, start.pots).some(Boolean)).toBe(false);
+      // 공짜 화분(한 방향 1~2번 밀면 들어가고 언제 넣어도 안 막혀 다른 화분과 안 얽힘) 없음. 3판까지는 규칙 배우는 판이라 둠
+      if (i >= 3) expect(hasFreePot(board, graph, sol.path)).toBe(false);
       // 화분 모두 그 판의 꽃 한 종(그 꽃이 도감에 열림)
       expect(speciesFor(i, start.pots.length)).toEqual(start.pots.map(() => lv.flower));
       // 칸 100개까지(상태 번호 규칙: 칸 번호 0~99)

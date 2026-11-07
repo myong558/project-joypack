@@ -1,5 +1,5 @@
-import { lit, parse, solved, step, type Board, type Dir, type State } from './rules.ts';
-import { explore, solve } from './solver.ts';
+import { DX, DY, lit, parse, solved, step, type Board, type Dir, type State } from './rules.ts';
+import { explore, solve, type Graph } from './solver.ts';
 
 /**
  * 무작위 온실 방 만들기. 판 만들기 도구(tools/levelgen.ts)와 오늘의 정원 판 만들기(tools/dailygen.ts)가 같이 쓴다.
@@ -128,10 +128,48 @@ function countDetours(board: Board, start: State, path: readonly Dir[]): number 
 }
 
 /**
- * 방 하나를 판으로 쓸 수 있는지 보고 어려움을 잰다. 처음부터 햇살 자리에 있는 화분이 있거나, 상태가 너무 많거나(limit),
- * 못 깨거나, 밀기 수가 범위 밖이면 null
+ * 공짜 화분: 가장 적은 이동 풀이에서 한 방향으로 1~2번만 밀려 햇살 자리에 들어가고, 그 자리에서 언제 밀어 넣어도 판이 막히지 않는 화분
+ * (닿기만 하면 그냥 밀면 끝나 다른 화분·순서와 얽히지 않음). 남는 어려움은 잘못 밀어 다시 하게 만드는 함정뿐이라 판에 넣지 않는다(v0.22.0, 23판 지적).
+ * 너무 일찍 넣으면 판을 못 깨게 되는 화분은 순서를 생각해야 해서 괜찮다
  */
-export function rate(rows: string[], limit: number, push: [number, number]): Candidate | null {
+export function hasFreePot(board: Board, graph: Graph, path: readonly Dir[]): boolean {
+  const { states, next, toGoal } = graph;
+  const start = states[0];
+  const n = start.pots.length;
+  const count = new Array<number>(n).fill(0);
+  const dirs = new Array<number>(n).fill(0);
+  let s = start;
+  for (const d of path) {
+    const r = step(board, s, d);
+    if (r.pushed >= 0) {
+      count[r.pushed]++;
+      dirs[r.pushed] |= 1 << d;
+    }
+    s = r.state;
+  }
+  for (let i = 0; i < n; i++) {
+    if (count[i] > 2 || (dirs[i] & (dirs[i] - 1)) !== 0) continue;
+    const d = (31 - Math.clz32(dirs[i])) as Dir;
+    const p0 = start.pots[i];
+    const stand = p0 - (DX[d] + DY[d] * board.w);
+    // 화분이 처음 자리에 있고 정원사가 밀 자리에 선, 깰 수 있는 상태 모두에서 밀어 넣어 봄: 한 번이라도 막히면 순서가 있는 화분
+    let free = true;
+    for (let k = 0; k < states.length && free; k++) {
+      if (states[k].player !== stand || toGoal[k] < 0 || !states[k].pots.includes(p0)) continue;
+      let j = k;
+      for (let c = 0; c < count[i] && j >= 0; c++) j = next[j * 4 + d];
+      if (j < 0 || toGoal[j] < 0) free = false;
+    }
+    if (free) return true;
+  }
+  return false;
+}
+
+/**
+ * 방 하나를 판으로 쓸 수 있는지 보고 어려움을 잰다. 처음부터 햇살 자리에 있는 화분이 있거나, 상태가 너무 많거나(limit),
+ * 못 깨거나, 밀기 수가 범위 밖이거나, 공짜 화분(hasFreePot)이 있으면 null(allowFree: 규칙 배우는 앞 판처럼 일부러 둘 때)
+ */
+export function rate(rows: string[], limit: number, push: [number, number], allowFree = false): Candidate | null {
   let board: Board;
   let start;
   try {
@@ -144,6 +182,7 @@ export function rate(rows: string[], limit: number, push: [number, number]): Can
   if (!graph) return null;
   const sol = solve(board, start, graph);
   if (!sol || sol.pushes < push[0] || sol.pushes > push[1]) return null;
+  if (!allowFree && hasFreePot(board, graph, sol.path)) return null;
   let dead = 0;
   for (let i = 0; i < graph.states.length; i++) if (graph.toGoal[i] < 0) dead++;
   const goals = graph.states.filter((st) => solved(board, st.pots)).length;
