@@ -385,6 +385,29 @@ h1 {
   font-size: 16px;
 }
 
+/* 모든 게임 좋아요 합계: 누를 수 없는 안내 글. 단추로 오해하지 않게 테두리·바탕·그림자·밑줄 없이 tagline 처럼 흐린 글자 한 줄 */
+.like-total {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  cursor: default;
+  user-select: none;
+}
+.like-total[hidden] {
+  display: none;
+}
+.like-total svg {
+  width: 13px;
+  height: 13px;
+  fill: currentColor;
+  stroke: none;
+  opacity: 0.8;
+}
+
 /* ---------- 배경에 떠다니는 조각: 로고 부품은 로고와 같은 색에 아래로 눌리는 버튼 그림자 ---------- */
 .bg-deco {
   --px: 0;
@@ -1935,6 +1958,10 @@ a.primary-btn {
     font-size: 18px;
   }
 
+  .like-total {
+    font-size: 15px;
+  }
+
   .games {
     grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
   }
@@ -1976,6 +2003,11 @@ a.primary-btn {
 
   .tagline {
     font-size: 14px;
+  }
+
+  .like-total {
+    margin-top: 4px;
+    font-size: 13px;
   }
 
   .games {
@@ -2092,7 +2124,8 @@ a.primary-btn {
   animation: letter-drop 620ms cubic-bezier(0.3, 1.6, 0.5, 1) calc(420ms + var(--i) * 90ms) both;
 }
 
-.intro .tagline {
+.intro .tagline,
+.intro .like-total {
   animation: fade-up 500ms ease-out 760ms both;
 }
 

@@ -345,7 +345,29 @@ function paintLikes(): void {
     card?.setAttribute('aria-label', card.getAttribute('aria-label')!.replace(/ · [^·]*$/, ` · ${likeLabel(id)}`));
   });
 }
-const loadLikes = () => void refreshLikeCounts().then(paintLikes);
+
+// 모든 게임 좋아요 합계: 제목 아래 tagline 다음 한 줄. 누를 수 없는 안내 글이라 단추처럼 보이지 않게 테두리·바탕·그림자 없이
+// tagline 과 같은 흐린 글자로만 둔다(styles.css .like-total). 화면에 보이는 게임만 더하고, 0 이면 줄을 숨긴다
+function likeTotalText(): string {
+  const n = live.reduce((sum, g) => sum + likeCount(g.id), 0);
+  return n ? t('likes.total', { n: n.toLocaleString(getLang() === 'ko' ? 'ko-KR' : 'en-US') }) : '';
+}
+function likeTotal(): string {
+  const text = likeTotalText();
+  return `<p class="like-total"${text ? '' : ' hidden'}>${HEART_SVG}<span>${esc(text)}</span></p>`;
+}
+function paintLikeTotal(): void {
+  const line = app.querySelector<HTMLElement>('.like-total');
+  if (!line) return;
+  const text = likeTotalText();
+  line.hidden = !text;
+  line.querySelector('span')!.textContent = text;
+}
+const loadLikes = () =>
+  void refreshLikeCounts().then(() => {
+    paintLikes();
+    paintLikeTotal();
+  });
 
 function gameCard(game: GameMeta): string {
   const name = game.name[getLang()];
@@ -555,6 +577,7 @@ function renderHome(force = true): void {
         }</div>
         <h1 aria-label="${esc(t('app.title'))}"><span class="hero-title" aria-hidden="true">${title}</span></h1>
         <p class="tagline">${t('app.tagline')}</p>
+        ${likeTotal()}
         ${wideQuery.matches ? installCard() : ''}
       </section>
       <div class="side">
