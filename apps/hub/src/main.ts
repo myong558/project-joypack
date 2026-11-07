@@ -348,20 +348,21 @@ function paintLikes(): void {
 
 // 모든 게임 좋아요 합계: 제목 아래 tagline 다음 한 줄. 누를 수 없는 안내 글이라 단추처럼 보이지 않게 테두리·바탕·그림자 없이
 // tagline 과 같은 흐린 글자로만 둔다(styles.css .like-total). 화면에 보이는 게임만 더하고, 0 이면 줄을 숨긴다
-function likeTotalText(): string {
+// "모든 게임 ♥ 3": 카드처럼 하트 바로 뒤에 숫자(하트가 "좋아요"를 대신함)
+function likeTotalCount(): string {
   const n = live.reduce((sum, g) => sum + likeCount(g.id), 0);
-  return n ? t('likes.total', { n: formatLikes(n) }) : ''; // 카드와 같이 999 · 1.2K · 12K
+  return n ? formatLikes(n) : ''; // 카드와 같이 999 · 1.2K · 12K
 }
 function likeTotal(): string {
-  const text = likeTotalText();
-  return `<p class="like-total"${text ? '' : ' hidden'}>${HEART_SVG}<span>${esc(text)}</span></p>`;
+  const n = likeTotalCount();
+  return `<p class="like-total"${n ? '' : ' hidden'}><span>${esc(t('likes.total'))}</span>${HEART_SVG}<b>${n}</b></p>`;
 }
 function paintLikeTotal(): void {
   const line = app.querySelector<HTMLElement>('.like-total');
   if (!line) return;
-  const text = likeTotalText();
-  line.hidden = !text;
-  line.querySelector('span')!.textContent = text;
+  const n = likeTotalCount();
+  line.hidden = !n;
+  line.querySelector('b')!.textContent = n;
 }
 const loadLikes = () =>
   void refreshLikeCounts().then(() => {

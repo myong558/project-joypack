@@ -41,6 +41,6 @@ describe('정원 24개', () => {
       let s = start;
       for (const c of SOLUTIONS[i]) s = step(board, s, 'URDL'.indexOf(c) as 0 | 1 | 2 | 3).state;
       expect(solved(board, s.pots)).toBe(true);
-    });
+    }, 30_000); // 판 탐색이 무거워 기본 5초를 넘는 PC 가 있음(23판 약 6초)
   });
 });

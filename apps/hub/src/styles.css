@@ -400,6 +400,11 @@ h1 {
 .like-total[hidden] {
   display: none;
 }
+/* "모든 게임 ♥ 3": 숫자는 카드처럼 하트에 붙이고, 글자와 같은 굵기·흐림 */
+.like-total b {
+  margin-left: -2px;
+  font-weight: inherit;
+}
 .like-total svg {
   width: 13px;
   height: 13px;
