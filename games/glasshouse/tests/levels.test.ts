@@ -5,6 +5,9 @@ import { hasFreePot } from '../src/game/roomgen';
 import { lit, parse, solved, step } from '../src/game/rules';
 import { SOLUTIONS } from '../src/game/solutions';
 import { explore, solve } from '../src/game/solver';
+import { humanScore, measure } from '../tools/difficulty';
+import { fastRate } from '../tools/fastrate';
+import { STATE_LIMIT } from '../tools/levelplan';
 
 /** 판마다: 풀리고, 기준 이동 수가 맞고, 처음엔 햇살 자리에 화분이 없고, 뒤로 갈수록 화분이 많다 */
 describe('정원 24개', () => {
@@ -22,6 +25,14 @@ describe('정원 24개', () => {
     expect(pots[14]).toBe(4);
     expect(pots[23]).toBe(5);
   });
+
+  // 판 만들기 설정(tools/levelplan.ts)이 지키는 것: 7판부터 체감 점수(tools/difficulty.ts)가 앞 판보다 높고, 모든 판이 상태 한도 안(테스트·풀이 보기가 감당)
+  it('7판부터 체감 점수가 오르고 상태 수가 한도 안이다', () => {
+    const rated = LEVELS.map((l) => fastRate(l.rows, STATE_LIMIT, [0, 999], true));
+    rated.forEach((c, i) => expect(c, `${i + 1}판 상태 한도`).not.toBeNull());
+    const human = LEVELS.map((l) => humanScore(measure(l.rows)!));
+    for (let i = 7; i < 24; i++) expect(human[i], `${i + 1}판 체감 점수`).toBeGreaterThan(human[i - 1]);
+  }, 300_000);
 
   LEVELS.forEach((lv, i) => {
     it(`${i + 1}. ${FLOWER[lv.flower].ko.name}`, () => {

@@ -1,7 +1,7 @@
 {
   "name": "glasshouse",
   "private": true,
-  "version": "0.22.0",
+  "version": "0.23.0",
   "author": "Myong Bum Soo",
   "license": "UNLICENSED",
   "type": "module",
@@ -14,6 +14,7 @@
     "levels": "node tools/levelgen.ts",
     "daily": "node tools/dailygen.ts",
     "picklevels": "node tools/picklevels.ts",
+    "levelmake": "node tools/levelmake.ts",
     "solutions": "node tools/solutions.ts"
   },
   "devDependencies": {

@@ -5,3 +5,6 @@ dev-dist/
 .DS_Store
 /screen-check/
 /site/
+
+# 온실정원 판 만들기 후보(tools/levelmake.ts)
+games/glasshouse/tools/out/
