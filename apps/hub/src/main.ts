@@ -350,7 +350,7 @@ function paintLikes(): void {
 // tagline 과 같은 흐린 글자로만 둔다(styles.css .like-total). 화면에 보이는 게임만 더하고, 0 이면 줄을 숨긴다
 function likeTotalText(): string {
   const n = live.reduce((sum, g) => sum + likeCount(g.id), 0);
-  return n ? t('likes.total', { n: n.toLocaleString(getLang() === 'ko' ? 'ko-KR' : 'en-US') }) : '';
+  return n ? t('likes.total', { n: formatLikes(n) }) : ''; // 카드와 같이 999 · 1.2K · 12K
 }
 function likeTotal(): string {
   const text = likeTotalText();
